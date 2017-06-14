@@ -102,19 +102,113 @@ contains
         class(errors), intent(in), optional, target :: err
 
         ! Parameters
+        real(dp), parameter :: zero = 0.0d0
+        real(dp), parameter :: p5 = 0.5d0
+        real(dp), parameter :: one = 1.0d0
+        real(dp), parameter :: two = 2.0d0
 
         ! Local Variables
         logical :: xcnvrg, fcnvrg
         integer(i32) :: i, m, n, neval, niter, flag, maxeval
         real(dp) :: a, alam, alam2, alamin, b, disc, f2, rhs1, rhs2, &
-            slope, temp, test, tmplam, alpha, tolx, lambdamin, f
+            slope, temp, test, tmplam, alpha, tolx, lambdamin, f, fo
 
         ! Initialization
         xcnvrg = .false.
         fcnvrg = .false.
         neval = 0
         niter = 0
-        
+        m = fcn%get_function_count()
+        n = fcn%get_variable_count()
+        tolx = two * epsilon(tolx)
+        if (present(fx)) fx = zero
+
+        ! Input Checking
+
+        ! Compute 1/2 F * F (* = dot product) if not provided
+        if (present(fo)) then
+            fo = fold
+        else
+            ! Evaluate the function, and compute the dot product
+            call fcn%fcn(xold, fvec)
+            fo = p5 * dot_product(fvec, fvec)
+            neval = neval + 1
+        end if
+
+        ! Compute the slope parameter
+        slope = dot_product(grad, dir)
+        if (slope >= zero) then
+            ! ERROR: The slope should not be pointing uphill - invalid direction
+        end if
+
+        ! Compute the minimum lambda value (length along the search direction)
+        test = zero
+        do i = 1, n
+            temp = abs(dir(i)) / max(abs(xold(i)), one)
+            if (temp > test) test = temp
+        end do
+        alamin = tolx / test
+        alam = one
+
+        ! Iteration Loop
+        do
+            ! Step along the specified direction by the amount ALAM
+            x = xold + alam * dir
+            call fcn%fcn(x, fvec)
+            f = p5 * dot_product(fvec, fvec)
+            neval = neval + 1
+            niter = niter + 1
+
+            ! Check the step
+            if (alam < alamin) then
+                ! The change in X between steps is sufficiently small to 
+                ! consider the iteration converged
+                x = xold
+                xcnvrg = .true.
+                exit
+            else if (f <= fo + alpha * alam * slope) then
+                ! The function has converged
+                fcnvrg = .true.
+                exit
+            else
+                ! Convergence has not yet occurred, continue backtracking
+                if (niter == 1) then
+                    ! Use the quadratic function approximation
+                    tmplam = -slope / (two * (f - fo - slope))
+                else
+                    ! Use the cubic function approximation
+                    rhs1 = f - fo - alam * slope
+                    rhs2 = f2 - fo - alam2 * slope
+                    a = (rhs1 / alam**2 - rhs2 / alam2**2) / (alam - alam2)
+                    b = (-alam2 * rhs1 / alam**2 + alam * rhs2 / alam2**2) / &
+                        (alam - alam2)
+                    if (a == zero) then
+                        tmplam = -slope / (two * b)
+                    else
+                        disc = b**2 - three * a * slope
+                        if (disc < zero) then
+                            tmplam = p5 * alam
+                        else if (b <= zero) then
+                            tmplam = (-b + sqrt(disc)) / (three * a)
+                        else
+                            tmplam = -slope / (b + sqrt(disc))
+                        end if
+                    end if
+                    if (tmplam > p5 * alam) tmplam = p5 * alam
+                end if
+            end if
+            
+            ! Set up parameters for the cubic model as we've already been 
+            ! through once with the quadratic model without success.
+            alam2 = alam
+            f2 = f2
+            alam = max(tmplam, lambdamin * alam)
+
+            ! Ensure we haven't performed too many function evaluations
+            if (neval >= this%m_maxEval) then
+                ! ERROR: Too many function evaluations
+            end if
+        end do
     end subroutine
 
 ! ------------------------------------------------------------------------------
