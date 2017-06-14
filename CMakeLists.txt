@@ -95,11 +95,16 @@ if (BUILD_SHARED_LIBS)
   # - Figure out how to deal with .mod files
 else()
   # Building a static library, simply add source code to this library
-  list(APPEND sources external/linalg/src/*.f90 external/linalg/src/BLAS/*.f
-    external/linalg/src/LAPACK/*.f external/linalg/src/QRUPDATE/*.f)
+  file(GLOB_RECURSE linalg_sources 
+    external/linalg/src/*.f90 
+    external/linalg/src/BLAS/*.f
+    external/linalg/src/LAPACK/*.f 
+    external/linalg/src/QRUPDATE/*.f)
+  list(APPEND sources ${linalg_sources})
   
   # Also include the stuff from FERROR
-  list(APPEND sources external/ferror/src/*.f90)
+  file(GLOB_RECURSE ferror_sources external/ferror/src/*.f90)
+  list(APPEND sources ${ferror_sources})
 endif()
 
 # If BUILD_SHARED_LIBS is defined, then a shared library (DLL) will be built;
