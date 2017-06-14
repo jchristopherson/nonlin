@@ -3,6 +3,14 @@ cmake_minimum_required(VERSION 2.6)
 enable_language(Fortran)
 project(nonlin)
 
+# TO DO:
+# Create link to linalg project, and then ensure CMAKE builds the linalg library
+# for use in this project - force use of a shared library?
+# Regardless, here's some info on how to accomplish:
+# http://foonathan.net/blog/2016/07/07/cmake-dependency-handling.html
+# https://softwareengineering.stackexchange.com/questions/114719/organizing-git-repositories-with-common-nested-sub-modules
+# http://diracprogram.org/doc/release-14/programmers/external_projects.html - looks to be a good reference
+
 # Specify output directories
 if (CMAKE_BUILD_TYPE MATCHES Debug)
   # Debug Build
