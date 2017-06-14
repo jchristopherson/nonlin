@@ -1,22 +1,12 @@
 ! nonlin_types.f90
 
 module nonlin_types
-    use, intrinsic :: iso_c_binding, only : c_int, c_double
+    use linalg_constants, only : dp, i32
     implicit none
     private
-    public :: dp
-    public :: i32
     public :: vecfcn
     public :: jacobianfcn
     public :: vecfcn_helper
-
-! ******************************************************************************
-! NUMERIC TYPE CONSTANTS
-! ------------------------------------------------------------------------------
-    !> @brief Defines a double-precision (64-bit) floating-point type.
-    integer, parameter :: dp = c_double
-    !> @brief Defines a 32-bit signed integer type.
-    integer, parameter :: i32 = c_int
 
 ! ******************************************************************************
 ! ERROR FLAGS
@@ -32,7 +22,7 @@ module nonlin_types
         !! @param[out] f An M-element array that, on output, contains the values
         !!  of the M functions.
         subroutine vecfcn(x, f)
-            import dp
+            use linalg_constants, only : dp
             real(dp), intent(in), dimension(:) :: x
             real(dp), intent(out), dimension(:) :: f
         end subroutine
@@ -43,7 +33,7 @@ module nonlin_types
         !! @param[in] x An N-element array containing the independent variables.
         !! @param[out] jac An M-by-N matrix where the Jacobian will be written.
         subroutine jacobianfcn(x, jac)
-            import dp
+            use linalg_constants, only : dp
             real(dp), intent(in), dimension(:) :: x
             real(dp), intent(out), dimension(:,:) :: jac
         end subroutine
