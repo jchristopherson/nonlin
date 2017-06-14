@@ -79,6 +79,29 @@ file(GLOB_RECURSE sources src/*.f90)
 # Define testing source files
 set(testing_sources ${sources})
 
+# Define necessary CMake variables, and define the dependency.
+if (BUILD_SHARED_LIBS)
+  set(ExternalProjectCMakeArgs
+    -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER}
+    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+    -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
+  add_external(linalg "")
+  add_dependencies(nonlin linalg)
+
+  # TO DO: 
+  # - Still link with ferror
+  # - Be sure to check if the libraries already exist.  If so, simply link
+  # - Figure out how to deal with .mod files
+else()
+  # Building a static library, simply add source code to this library
+  list(APPEND sources external/linalg/src/*.f90 external/linalg/src/BLAS/*.f
+    external/linalg/src/LAPACK/*.f external/linalg/src/QRUPDATE/*.f)
+  
+  # Also include the stuff from FERROR
+  list(APPEND sources external/ferror/src/*.f90)
+endif()
+
 # If BUILD_SHARED_LIBS is defined, then a shared library (DLL) will be built;
 # else, a static library will be built.
 add_library(nonlin ${sources})
