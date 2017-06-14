@@ -209,7 +209,7 @@ contains
 
         ! Initialization
         if (present(err)) err = 0
-        m = this%m_fcn
+        m = this%m_nfcn
         n = this%m_nvar
 
         ! Input Checking
