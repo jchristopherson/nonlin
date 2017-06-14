@@ -1,3 +1,6 @@
 [submodule "external/linalg"]
 	path = external/linalg
 	url = https://github.com/jchristopherson/linalg.git
+[submodule "external/ferror"]
+	path = external/ferror
+	url = https://github.com/jchristopherson/ferror.git
