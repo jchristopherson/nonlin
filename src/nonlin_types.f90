@@ -76,6 +76,10 @@ module nonlin_types
         !! supplied.  If not supplied, the Jacobian is computed via finite 
         !! differences.
         procedure, public :: jacobian => vfh_jac_fcn
+        !> @brief Gets the number of functions in this system.
+        procedure, public :: get_function_count => vfh_get_nfcn
+        !> @brief Gets the number of variables in this system.
+        procedure, public :: get_variable_count => vfh_get_nvar
     end type
 
 
@@ -292,6 +296,28 @@ contains
             end do
         end if
     end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Gets the number of functions in this system.
+    !!
+    !! @param[in] this THe vecfcn_helper object.
+    !! @return The function count.
+    pure function vfh_get_nfcn(this) result(n)
+        class(vecfcn_helper), intent(in) :: this
+        integer(i32) :: n
+        n = this%m_nfcn
+    end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Gets the number of variables in this system.
+    !!
+    !! @param[in] this The vecfcn_helper object.
+    !! @return The number of variables.
+    pure function vfh_get_nvar(this) result(n)
+        class(vecfcn_helper), intent(in) :: this
+        integer(i32) :: n
+        n = this%m_nvar
+    end function
 
 ! ------------------------------------------------------------------------------
 end module
