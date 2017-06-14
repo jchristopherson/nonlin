@@ -66,7 +66,7 @@ else (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
 # Specify source files
-file(GLOB_RECURSE sources src/*.f90 ferror/src/*.f90)
+file(GLOB_RECURSE sources src/*.f90)
 
 # Define testing source files
 set(testing_sources ${sources})
@@ -76,4 +76,4 @@ set(testing_sources ${sources})
 add_library(nonlin ${sources})
 
 # Build the test executable
-add_executable(nonlin_test ${testing_sources})
+# add_executable(nonlin_test ${testing_sources})

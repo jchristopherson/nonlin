@@ -52,12 +52,17 @@ module nonlin_types
 ! ******************************************************************************
 ! TYPES
 ! ------------------------------------------------------------------------------
-    !
+    !> @brief Defines a type capable of encapsulating a system of nonlinear 
+    !! equations of the form: F(X) = 0.
     type vecfcn_helper
         !> A pointer to the encapsulated vecfcn routine.
         procedure(vecfcn), pointer, nopass :: m_fcn => null()
         !> A pointer to the jacobian routine - null if no routine is supplied.
         procedure(jacobianfcn), pointer, nopass :: m_jac => null()
+        !> The number of functions in m_fcn
+        integer(i32) :: m_nfcn = 0
+        !> The number of variables in m_fcn
+        integer(i32) :: m_nvar = 0
     contains
         !> @brief Establishes a pointer to the routine containing the system of
         !!  equations to solve.
@@ -93,10 +98,15 @@ contains
     !! 
     !! @param[in,out] this The vecfcn_helper object.
     !! @param[in] fcn The function pointer.
-    subroutine vfh_set_fcn(this, fcn)
+    !! @param[in] nfcn The number of functions.
+    !! @param[in] nvar The number of variables.
+    subroutine vfh_set_fcn(this, fcn, nfcn, nvar)
         class(vecfcn_helper), intent(inout) :: this
         procedure(vecfcn), intent(in), pointer :: fcn
+        integer(i32), intent(in) :: nfcn, nvar
         this%m_fcn => fcn
+        this%m_nfcn = nfcn
+        this%m_nvar = nvar
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -172,13 +182,21 @@ contains
     !! @param[out] olwork An optional output used to determine workspace size.
     !!  If supplied, the routine determines the optimal size for @p work, and
     !!  returns without performing any actual calculations.
-    subroutine vfh_jac_fcn(this, x, jac, fv, work, olwork)
+    !! @param[out] err An optional integer output that can be used to determine
+    !!  error status.  If not used, and an error is encountered, the routine
+    !!  simply returns silently.  If used, the following error codes identify
+    !!  error status:
+    !!  - 0: No error has occurred.
+    !!  - n: A positive integer denoting the index of an invalid input.
+    !!  - -1: Indicates internal memory allocation failed.
+    subroutine vfh_jac_fcn(this, x, jac, fv, work, olwork, err)
         ! Arguments
         class(vecfcn_helper), intent(in) :: this
         real(dp), intent(inout), dimension(:) :: x
         real(dp), intent(out), dimension(:,:) :: jac
         real(dp), intent(in), dimension(:), optional, target :: fv
         real(dp), intent(out), dimension(:), optional, target :: work
+        integer(i32), intent(out), optional :: olwork, err
 
         ! Parameters
         real(dp), parameter :: zero = 0.0d0
@@ -188,6 +206,24 @@ contains
         real(dp) :: eps, epsmch, h, temp
         real(dp), pointer, dimension(:) :: fptr, f1ptr
         real(dp), allocatable, target, dimension(:) :: wrk
+
+        ! Initialization
+        if (present(err)) err = 0
+        m = this%m_fcn
+        n = this%m_nvar
+
+        ! Input Checking
+        flag = 0
+        if (size(x) /= n) then
+            flag = 2
+        else if (size(jac, 1) /= m .or. size(jac, 2) /= n) then
+            flag = 3
+        end if
+        if (flag /= 0) then
+            ! ERROR: Incorrectly sized input arrays
+            if (present(err)) err = flag
+            return
+        end if
 
         ! Process
         if (.not.this%is_fcn_defined()) return
@@ -202,8 +238,6 @@ contains
             call this%m_jac(x, jac)
         else
             ! Compute the Jacobian via finite differences
-            m = size(jac, 1)
-            n = size(jac, 2)
             if (present(fv)) then
                 lwork = m
             else
@@ -221,11 +255,15 @@ contains
             if (present(work)) then
                 if (size(work) < lwork) then
                     ! ERROR: Workspace is too small
+                    if (present(err)) err = 5
+                    return
                 end if
                 f1ptr => work(1:m)
                 if (present(fv)) then
                     if (size(fv) < m) then
                         ! ERROR: Function vector too small
+                        if (present(err)) err = 4
+                        return
                     end if
                     fptr => fv(1:m)
                 else
@@ -236,6 +274,8 @@ contains
                 allocate(wrk(lwork), stat = flag)
                 if (flag /= 0) then
                     ! ERROR: Memory issues
+                    if (present(err)) err = -1
+                    return
                 end if
                 f1ptr => wrk(1:m)
                 if (present(fv)) then
@@ -255,7 +295,7 @@ contains
                 temp = x(j)
                 h = eps * abs(temp)
                 if (h == zero) h = eps
-                x(j) = temp + has
+                x(j) = temp + h
                 call this%fcn(x, f1ptr)
                 x(j) = temp
                 jac(:,j) = (f1ptr - fptr) / h
