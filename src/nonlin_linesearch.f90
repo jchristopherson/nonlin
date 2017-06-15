@@ -64,7 +64,10 @@ module nonlin_linesearch
         !> @brief Sets a distance factor defining the minimum distance along the 
         !! search direction vector is practical.
         procedure, public :: set_distance_factor => ls_set_dist
-
+        !> @brief Utilizes an inexact, backtracking line search based on the
+        !! Armijo-Goldstein condition to find a point as far along the specified
+        !! direction vector that is usable for unconstrained minimization
+        !! problems.
         procedure, public :: search => ls_search
     end type
 
