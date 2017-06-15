@@ -19,7 +19,7 @@ module nonlin_solve
 ! TYPES
 ! ------------------------------------------------------------------------------
     !> A base class for various nonlinear equation solvers.
-    type equation_solver
+    type, abstract :: equation_solver
         private
         !> The maximum number of function evaluations allowed per solve.
         integer(i32) :: m_maxEval = 100
@@ -52,6 +52,14 @@ module nonlin_solve
         procedure, public :: set_gradient_tolerance => es_set_grad_tol
         !> @brief Solves the system of equations.
         procedure(nonlin_solver), deferred, public, pass :: solve
+    end type
+
+! ------------------------------------------------------------------------------
+    !>
+    type, extends(equation_solver) :: quasi_newton_solver
+    contains
+        !> @brief Solves the system of equations.
+        procedure, public :: solve => qns_solve
     end type
 
 ! ******************************************************************************
@@ -183,9 +191,20 @@ contains
     end subroutine
 
 ! ******************************************************************************
-! QUASI-NEWTON METHOD (BROYDEN'S METHOD)
+! QUASI_NEWTON_SOLVER MEMBERS
 ! ------------------------------------------------------------------------------
+    !
+    subroutine qns_solve(this, fcn, x, fvec, ib, err)
+        ! Arguments
+        class(quasi_newton_solver), intent(inout) :: this
+        class(vecfcn_helper), intent(in) :: fcn
+        real(dp), intent(inout), dimension(:) :: x
+        real(dp), intent(out), dimension(:) :: fvec
+        type(iteration_behavior), optional :: ib
+        class(errors), intent(in), optional, target :: err
 
+        !
+    end subroutine
 ! ------------------------------------------------------------------------------
 
 ! ------------------------------------------------------------------------------
