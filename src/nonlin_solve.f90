@@ -111,6 +111,8 @@ module nonlin_solve
         !!  solver.
         subroutine nonlin_solver(this, fcn, x, fvec, ib, err)
             use linalg_constants, only : dp, i32
+            use nonlin_types, only : vecfcn_helper, iteration_behavior
+            use ferror, only : errors
             import equation_solver
             class(equation_solver), intent(inout) :: this
             class(vecfcn_helper), intent(in) :: fcn
@@ -220,12 +222,13 @@ contains
     !> @brief Gets the line search module.
     !!
     !! @param[in] this The line_search_solver object.
-    !! @return The line_search object.
-    pure function lss_get_line_search(this) result(x)
+    !! @param[out] The line_search object.
+    subroutine lss_get_line_search(this, ls)
         class(line_search_solver), intent(in) :: this
-        class(line_search) :: x
-        x = this%m_lineSearch
-    end function
+        class(line_search), intent(out), allocatable :: ls
+        if (allocated(this%m_lineSearch)) &
+            allocate(ls, source = this%m_lineSearch)
+    end subroutine
 
 ! ----------------------
     !> @brief Sets the line search module.
@@ -236,7 +239,7 @@ contains
         class(line_search_solver), intent(inout) :: this
         class(line_search), intent(in) :: ls
         if (allocated(this%m_lineSearch)) deallocate(this%m_lineSearch)
-        allocate(this%m_lineSearch, src = ls)
+        allocate(this%m_lineSearch, source = ls)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -317,7 +320,8 @@ contains
         ! Local Variables
         logical :: restart, xcnvrg, fcnvrg, gcnvrg
         integer(i32) :: i, neqn, nvar, flag, lw1, lw2, lw3, neval, iter, maxeval
-        real(dp), allocatable, dimension(:) :: work, dx, df, fvold, xold, s
+        real(dp), allocatable, dimension(:) :: work, tau, dx, df, fvold, &
+            xold, s
         real(dp), allocatable, dimension(:,:) :: q, r, b
         real(dp) :: test, f, fold, alpha, temp, den, ftol, xtol, gtol, eps, &
             stpmax, x2
@@ -325,7 +329,7 @@ contains
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
         character(len = 128) :: errmsg
-        class(line_search) :: ls
+        class(line_search), allocatable :: ls
 
         ! Initialization
         restart = .true.
@@ -342,7 +346,7 @@ contains
         maxeval = this%get_max_fcn_evals()
         eps = epsilon(eps)
         if (present(ib)) then
-            ib%iter_count = niter
+            ib%iter_count = iter
             ib%fcn_count = neval
             ib%converge_on_fcn = fcnvrg
             ib%converge_on_chng = xcnvrg
@@ -355,7 +359,7 @@ contains
         end if
         if (.not.this%is_line_search_defined()) &
             call this%set_default_line_search()
-        ls = this%get_line_search()
+        call this%get_line_search(ls)
 
         ! Input Check
         if (.not.fcn%is_fcn_defined()) then
@@ -515,7 +519,7 @@ contains
                         test = zero
                         den = max(f, half * real(nvar, dp))
                         do i = 1, nvar
-                            temp = abs(dx(i)) * max(abs(xi(i)), one) / den
+                            temp = abs(dx(i)) * max(abs(x(i)), one) / den
                             test = max(test, temp)
                         end do
                         if (test < gtol) then
@@ -551,7 +555,7 @@ contains
 
         ! Report out iteration statistics
         if (present(ib)) then
-            ib%iter_count = niter
+            ib%iter_count = iter
             ib%fcn_count = neval
             ib%converge_on_fcn = fcnvrg
             ib%converge_on_chng = xcnvrg

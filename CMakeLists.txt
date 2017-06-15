@@ -108,8 +108,7 @@ endif()
 set(testing_sources ${sources})
 
 # Append any files in the tests directory
-file(GLOB_RECURSE tests tests/*.f90)
-list(APPEND testing_sources, ${tests})
+list(APPEND testing_sources tests/nonlin_test.f90)
 
 # If BUILD_SHARED_LIBS is defined, then a shared library (DLL) will be built;
 # else, a static library will be built.
