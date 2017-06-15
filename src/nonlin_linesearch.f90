@@ -184,6 +184,7 @@ contains
             slope, temp, test, tmplam, alpha, tolx, lambdamin, f, fo
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
+        character(len = 128) :: errmsg
 
         ! Initialization
         xcnvrg = .false.
@@ -204,11 +205,25 @@ contains
         end if
 
         ! Input Checking
+        flag = 0
         if (size(xold) /= n) then
+            flag = 3
         else if (size(grad) /= n) then
+            flag = 4
         else if (size(dir) /= n) then
+            flag = 5
         else if (size(x) /= n) then
+            flag = 6
         else if (size(fvec) /= m) then
+            flag = 7
+        end if
+        if (flag /= 0) then
+            ! One of the input arrays is not sized correctly
+            write(errmsg, '(AI0A)') "Input number ", flag, &
+                " is not sized correctly."
+            call errmgr%report_error("ls_search", trim(errmsg), &
+                LA_ARRAY_SIZE_ERROR)
+            return
         end if
 
         ! Compute 1/2 F * F (* = dot product) if not provided
