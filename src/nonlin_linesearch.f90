@@ -182,6 +182,8 @@ contains
         integer(i32) :: i, m, n, neval, niter, flag, maxeval
         real(dp) :: a, alam, alam2, alamin, b, disc, f2, rhs1, rhs2, &
             slope, temp, test, tmplam, alpha, tolx, lambdamin, f, fo
+        class(errors), pointer :: errmgr
+        type(errors), target :: deferr
 
         ! Initialization
         xcnvrg = .false.
@@ -193,9 +195,21 @@ contains
         tolx = two * epsilon(tolx)
         alpha = this%m_alpha
         lambdamin = this%m_factor
+        maxeval = this%m_maxEval
         if (present(fx)) fx = zero
+        if (present(err)) then
+            errmgr => err
+        else
+            errmgr => deferr
+        end if
 
         ! Input Checking
+        if (size(xold) /= n) then
+        else if (size(grad) /= n) then
+        else if (size(dir) /= n) then
+        else if (size(x) /= n) then
+        else if (size(fvec) /= m) then
+        end if
 
         ! Compute 1/2 F * F (* = dot product) if not provided
         if (present(fold)) then
@@ -277,7 +291,7 @@ contains
             alam = max(tmplam, lambdamin * alam)
 
             ! Ensure we haven't performed too many function evaluations
-            if (neval >= this%m_maxEval) then
+            if (neval >= maxeval) then
                 ! ERROR: Too many function evaluations
             end if
         end do
