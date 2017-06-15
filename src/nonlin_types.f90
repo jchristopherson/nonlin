@@ -10,6 +10,8 @@ module nonlin_types
     public :: NL_INVALID_INPUT_ERROR
     public :: NL_ARRAY_SIZE_ERROR
     public :: NL_OUT_OF_MEMORY_ERROR
+    public :: NL_INVALID_OPERATION_ERROR
+    public :: NL_CONVERGENCE_ERROR
 
 ! ******************************************************************************
 ! ERROR FLAGS
@@ -20,6 +22,10 @@ module nonlin_types
     integer, parameter :: NL_ARRAY_SIZE_ERROR = 202
     !> An error denoting that there is insufficient memory available.
     integer, parameter :: NL_OUT_OF_MEMORY_ERROR = 203
+    !> An error resulting from an invalid operation.
+    integer, parameter :: NL_INVALID_OPERATION_ERROR = 204
+    !> An error resulting from a lack of convergence.
+    integer, parameter :: NL_CONVERGENCE_ERROR = 205
 
 ! ******************************************************************************
 ! INTERFACES
