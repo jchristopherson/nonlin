@@ -56,7 +56,12 @@ module nonlin_solve
 
 ! ------------------------------------------------------------------------------
     !>
-    type, extends(equation_solver) :: quasi_newton_solver
+    type, abstract, extends(equation_solver) :: line_search_solver
+    end type
+
+! ------------------------------------------------------------------------------
+    !>
+    type, extends(line_search_solver) :: quasi_newton_solver
     contains
         !> @brief Solves the system of equations.
         procedure, public :: solve => qns_solve
@@ -189,6 +194,11 @@ contains
         real(dp), intent(in) :: x
         this%m_gtol = x
     end subroutine
+
+! ******************************************************************************
+!
+! ------------------------------------------------------------------------------
+
 
 ! ******************************************************************************
 ! QUASI_NEWTON_SOLVER MEMBERS
