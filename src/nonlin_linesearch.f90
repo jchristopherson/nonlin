@@ -1,5 +1,11 @@
 ! nonlin_linesearch.f90
 
+!> @brief \b nonlin_linesearch
+!!
+!! @par Purpose
+!! To provide line search routines capable of minimizing nondesireable 
+!! influences of the nonlinear equation solver model on the convergence of the
+!! iteration process.
 module nonlin_linesearch
     use linalg_constants, only : dp, i32
     use nonlin_types

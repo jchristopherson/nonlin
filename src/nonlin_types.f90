@@ -1,5 +1,10 @@
 ! nonlin_types.f90
 
+!> @brief \b nonlin_types
+!!
+!! @par Purpose
+!! To provide various types and constants useful in the solution of systems of
+!! nonlinear equations.
 module nonlin_types
     use linalg_constants, only : dp, i32
     implicit none
