@@ -76,9 +76,6 @@ endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 # Specify source files
 file(GLOB_RECURSE sources src/*.f90)
 
-# Define testing source files
-set(testing_sources ${sources})
-
 # Define necessary CMake variables, and define the dependency.
 if (BUILD_SHARED_LIBS)
   set(ExternalProjectCMakeArgs
@@ -107,9 +104,16 @@ else()
   list(APPEND sources ${ferror_sources})
 endif()
 
+# Define testing source files
+set(testing_sources ${sources})
+
+# Append any files in the tests directory
+file(GLOB_RECURSE tests tests/*.f90)
+list(APPEND testing_sources, ${tests})
+
 # If BUILD_SHARED_LIBS is defined, then a shared library (DLL) will be built;
 # else, a static library will be built.
 add_library(nonlin ${sources})
 
 # Build the test executable
-# add_executable(nonlin_test ${testing_sources})
+ add_executable(nonlin_test ${testing_sources})
