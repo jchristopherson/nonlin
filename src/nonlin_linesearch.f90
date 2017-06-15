@@ -52,6 +52,20 @@ module nonlin_linesearch
         !> @brief Sets the maximum number of function evaluations allowed during
         !! a single line search.
         procedure, public :: set_max_fcn_evals => ls_set_max_eval
+        !> @brief Gets the scaling of the product of the gradient and direction 
+        !! vectors.
+        procedure, public :: get_scaling_factor => ls_get_scale
+        !> @brief Sets the scaling of the product of the gradient and direction 
+        !! vectors.
+        procedure, public :: set_scaling_factor => ls_set_scale
+        !> @brief Gets a distance factor defining the minimum distance along the 
+        !! search direction vector is practical.
+        procedure, public :: get_distance_factor => ls_get_dist
+        !> @brief Sets a distance factor defining the minimum distance along the 
+        !! search direction vector is practical.
+        procedure, public :: set_distance_factor => ls_set_dist
+
+        procedure, public :: search => ls_search
     end type
 
 contains
@@ -82,12 +96,67 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
+    !> @brief Gets the scaling of the product of the gradient and direction 
+    !! vectors as part of the Armijo-Goldstein condition such that
+    !! F(X + LAMBDA * P) <= F(X) + LAMBDA * ALPHA * P**T * G, where P is the
+    !! search direction vector, G is the gradient vector, and LAMBDA is the
+    !! scaling factor.
+    !!
+    !! @param[in] this The line_search object.
+    !! @return The scaling factor.
+    pure function ls_get_scale(this) result(x)
+        class(line_search), intent(in) :: this
+        real(dp) :: x
+        x = this%m_alpha
+    end function
 
 ! --------------------
+    !> @brief Sets the scaling of the product of the gradient and direction 
+    !! vectors as part of the Armijo-Goldstein condition such that
+    !! F(X + LAMBDA * P) <= F(X) + LAMBDA * ALPHA * P**T * G, where P is the
+    !! search direction vector, G is the gradient vector, and LAMBDA is the
+    !! scaling factor.
+    !!
+    !! @param[in,out] this The line_search object.
+    !! @param[in] x The scaling factor.
+    subroutine ls_set_scale(this, x)
+        class(line_search), intent(inout) :: this
+        real(dp), intent(in) :: x
+        this%m_alpha = x
+    end subroutine
 
 ! ------------------------------------------------------------------------------
+    !> @brief Gets a distance factor defining the minimum distance along the 
+    !! search direction vector is practical.
+    !!
+    !! @param[in] this The line_search object.
+    !! @return The distance factor.  A value of 1 indicates the full length
+    !!  of the vector.
+    pure function ls_get_dist(this) result(x)
+        class(line_search), intent(in) :: this
+        real(dp) :: x
+        x = this%m_factor
+    end function
 
 ! --------------------
+    !> @brief Sets a distance factor defining the minimum distance along the 
+    !! search direction vector is practical.
+    !!
+    !! @param[in,out] this The line_search object.
+    !! @param[in] x The distance factor.  A value of 1 indicates the full length
+    !!  of the vector.  Notice, this value is restricted to lie in the set
+    !!  [0.1, 1.0)
+    subroutine ls_set_dist(this, x)
+        class(line_search), intent(inout) :: this
+        real(dp), intent(in) :: x
+        if (x <= 0.0d0) then
+            this%m_factor = 0.1d0
+        else if (x >= 1.0d0) then
+            this%m_factor = 0.99d0
+        else
+            this%m_factor = x
+        end if
+    end subroutine
 
 ! ------------------------------------------------------------------------------
     !
@@ -106,6 +175,7 @@ contains
         real(dp), parameter :: p5 = 0.5d0
         real(dp), parameter :: one = 1.0d0
         real(dp), parameter :: two = 2.0d0
+        real(dp), parameter :: three = 3.0d0
 
         ! Local Variables
         logical :: xcnvrg, fcnvrg
@@ -121,12 +191,14 @@ contains
         m = fcn%get_function_count()
         n = fcn%get_variable_count()
         tolx = two * epsilon(tolx)
+        alpha = this%m_alpha
+        lambdamin = this%m_factor
         if (present(fx)) fx = zero
 
         ! Input Checking
 
         ! Compute 1/2 F * F (* = dot product) if not provided
-        if (present(fo)) then
+        if (present(fold)) then
             fo = fold
         else
             ! Evaluate the function, and compute the dot product
