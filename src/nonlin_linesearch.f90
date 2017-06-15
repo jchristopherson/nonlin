@@ -2,7 +2,7 @@
 
 module nonlin_linesearch
     use linalg_constants, only : dp, i32
-    use nonlin_types, only : vecfcn_helper
+    use nonlin_types
     use ferror, only : errors
     implicit none
     private
@@ -222,7 +222,7 @@ contains
             write(errmsg, '(AI0A)') "Input number ", flag, &
                 " is not sized correctly."
             call errmgr%report_error("ls_search", trim(errmsg), &
-                LA_ARRAY_SIZE_ERROR)
+                NL_ARRAY_SIZE_ERROR)
             return
         end if
 
@@ -240,6 +240,10 @@ contains
         slope = dot_product(grad, dir)
         if (slope >= zero) then
             ! ERROR: The slope should not be pointing uphill - invalid direction
+            call errmgr%report_error("ls_search", "The search direction " // &
+                "vector appears to be pointing in an uphill direction - " // &
+                "away from a minimum.", NL_INVALID_OPERATION_ERROR)
+            return
         end if
 
         ! Compute the minimum lambda value (length along the search direction)
@@ -308,6 +312,11 @@ contains
             ! Ensure we haven't performed too many function evaluations
             if (neval >= maxeval) then
                 ! ERROR: Too many function evaluations
+                write(errmsg, '(AI0A)') "The line search failed to " // &
+                    "converge.  Function evaluations performed: ", neval, "."
+                call errmgr%report_error("ls_search", errmsg, &
+                    NL_CONVERGENCE_ERROR)
+                return
             end if
         end do
     end subroutine
