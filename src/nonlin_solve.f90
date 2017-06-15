@@ -285,6 +285,8 @@ contains
     !!  class is used internally to provide error handling.  Possible errors and
     !!  warning messages that may be encountered are as follows.
     !!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+    !!  - NL_INVALID_INPUT_ERROR: Occurs if the number of equations is different
+    !!      than the number of variables.
     !!  - NL_ARRAY_SIZE_ERROR: Occurs if any of the input arrays are not sized
     !!      correctly.
     !!  - NL_DIVERGENT_BEHAVIOR_ERROR: Occurs if the direction vector is
@@ -363,10 +365,16 @@ contains
                 NL_INVALID_OPERATION_ERROR)
             return
         end if
-        flag = 0
         if (nvar /= neqn) then
-            flag = 2
-        else if (size(x) /= nvar) then
+            ! ERROR: # of equations doesn't match # of variables
+            write(errmsg, '(AI0AI0A)') "The number of equations (", neqn, &
+                ") does not match the number of unknowns (", nvar, ")."
+            call errmgr%report_error("qns_solve", trim(errmsg), &
+                NL_INVALID_INPUT_ERROR)
+            return
+        end if
+        flag = 0
+        if (size(x) /= nvar) then
             flag = 3
         else if (size(fvec) /= neqn) then
             flag = 4
@@ -558,7 +566,7 @@ contains
                 NL_CONVERGENCE_ERROR)
         end if
     end subroutine
-    
+
 ! ------------------------------------------------------------------------------
 
 ! ------------------------------------------------------------------------------
