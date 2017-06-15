@@ -33,6 +33,7 @@ module nonlin_linesearch
     !! - [Wolfram](https://reference.wolfram.com/language/tutorial/UnconstrainedOptimizationLineSearchMethods.html)
     !! - [Numerical Recipes](http://numerical.recipes/)
     type line_search
+        private
         !> The maximum number of function evaluations allowed during a single
         !! line search.
         integer(i32) :: m_maxEval = 100
