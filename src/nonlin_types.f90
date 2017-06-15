@@ -12,6 +12,7 @@ module nonlin_types
     public :: vecfcn
     public :: jacobianfcn
     public :: vecfcn_helper
+    public :: iteration_behavior
     public :: NL_INVALID_INPUT_ERROR
     public :: NL_ARRAY_SIZE_ERROR
     public :: NL_OUT_OF_MEMORY_ERROR
@@ -105,6 +106,25 @@ module nonlin_types
         procedure, public :: get_variable_count => vfh_get_nvar
     end type
 
+! ------------------------------------------------------------------------------
+    !> @brief Defines a set of parameters that describe the behavior of the
+    !! iteration process.
+    type iteration_behavior
+        !> Specifies the number of iterations performed.
+        integer(i32) :: iter_count
+        !> Specifies the number of function evaluations performed.
+        integer(i32) :: fcn_count
+        !> Set to true if the solution converged as a result of a zero-valued
+        !! function; else, false.
+        logical :: converge_on_fcn
+        !> Set to true if the solution converged as a result of no appreciable
+        !! change in solution points between iterations; else, false.
+        logical :: converge_on_chng
+        !> Set to true if the solution appears to have settled on a stationary
+        !! point such that the gradient of the function is zero-valued; else,
+        !! false.
+        logical :: converge_on_zero_diff
+    end type
 
 contains
 ! ******************************************************************************

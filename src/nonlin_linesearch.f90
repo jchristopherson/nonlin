@@ -190,6 +190,8 @@ contains
     !! @param[out] fx The result of the operation: 
     !!  (1/2) * dot_product(@p fvec, @p fvec).  Remember @p fvec is evaluated at
     !!  @p x.
+    !! @param[out] ib An optional output, that if provided, allows the caller to
+    !!  obtain iteration performance statistics.
     !! @param[out] err An optional errors-based object that if provided can be
     !!  used to retrieve information relating to any errors encountered during
     !!  execution.  If not provided, a default implementation of the errors
@@ -202,7 +204,7 @@ contains
     !!      pointing in an apparent uphill direction.
     !!  - NL_CONVERGENCE_ERROR: Occurs if the line search cannot converge within
     !!      the allowed number of iterations.
-    subroutine ls_search(this, fcn, xold, grad, dir, x, fvec, fold, fx, err)
+    subroutine ls_search(this, fcn, xold, grad, dir, x, fvec, fold, fx, ib, err)
         ! Arguments
         class(line_search), intent(in) :: this
         class(vecfcn_helper), intent(in) :: fcn
@@ -210,6 +212,7 @@ contains
         real(dp), intent(out), dimension(:) :: x, fvec
         real(dp), intent(in), optional :: fold
         real(dp), intent(out), optional :: fx
+        type(iteration_behavior), optional :: ib
         class(errors), intent(in), optional, target :: err
 
         ! Parameters
@@ -240,6 +243,13 @@ contains
         lambdamin = this%m_factor
         maxeval = this%m_maxEval
         if (present(fx)) fx = zero
+        if (present(ib)) then
+            ib%iter_count = niter
+            ib%fcn_count = neval
+            ib%converge_on_fcn = fcnvrg
+            ib%converge_on_chng = xcnvrg
+            ib%converge_on_zero_diff = .false.
+        end if
         if (present(err)) then
             errmgr => err
         else
@@ -305,6 +315,7 @@ contains
         alam = one
 
         ! Iteration Loop
+        flag = 0 ! Used to check for convergence errors
         do
             ! Step along the specified direction by the amount ALAM
             x = xold + alam * dir
@@ -361,13 +372,27 @@ contains
             ! Ensure we haven't performed too many function evaluations
             if (neval >= maxeval) then
                 ! ERROR: Too many function evaluations
-                write(errmsg, '(AI0A)') "The line search failed to " // &
-                    "converge.  Function evaluations performed: ", neval, "."
-                call errmgr%report_error("ls_search", errmsg, &
-                    NL_CONVERGENCE_ERROR)
-                return
+                flag = 1
+                exit
             end if
         end do
+
+        ! Report out iteration statistics
+        if (present(ib)) then
+            ib%iter_count = niter
+            ib%fcn_count = neval
+            ib%converge_on_fcn = fcnvrg
+            ib%converge_on_chng = xcnvrg
+            ib%converge_on_zero_diff = .false.
+        end if
+
+        ! Check for convergence issues
+        if (flag /= 0) then
+            write(errmsg, '(AI0A)') "The line search failed to " // &
+                "converge.  Function evaluations performed: ", neval, "."
+            call errmgr%report_error("ls_search", errmsg, &
+                NL_CONVERGENCE_ERROR)
+        end if
     end subroutine
 
 ! ------------------------------------------------------------------------------
