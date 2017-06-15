@@ -159,7 +159,40 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !
+    !> @brief Utilizes an inexact, backtracking line search based on the
+    !! Armijo-Goldstein condition to find a point as far along the specified
+    !! direction vector that is usable for unconstrained minimization
+    !! problems.
+    !!
+    !! @param[in] this The line_search object.
+    !! @param[in] fcn A vecfcn_helper object containing the system of equations.
+    !! @param[in] xold An N-element array defining the initial point, where N
+    !!  is the number of variables.
+    !! @param[in] grad An N-element array defining the gradient of @p fcn
+    !!  evaluated at @p xold.
+    !! @param[in] dir An N-element array defining the search direction.
+    !! @param[out] x An N-element array where the updated solution point will
+    !!  be written.
+    !! @param[out] fvec An M-element array containing the M equation values
+    !!  evaluated at @p x, where M is the number of equations.
+    !! @param[in] fold An optional input that provides the value resulting from:
+    !!  1/2 * dot_product(fcn(xold), fcn(xold)).  If not provided, @p fcn is
+    !!  evalauted at @p xold, and the aforementioned relationship is computed.
+    !! @param[out] fx The result of the operation: 
+    !!  (1/2) * dot_product(@p fvec, @p fvec).  Remember @p fvec is evaluated at
+    !!  @p x.
+    !! @param[out] err An optional errors-based object that if provided can be
+    !!  used to retrieve information relating to any errors encountered during
+    !!  execution.  If not provided, a default implementation of the errors
+    !!  class is used internally to provide error handling.  Possible errors and
+    !!  warning messages that may be encountered are as follows.
+    !!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+    !!  - NL_ARRAY_SIZE_ERROR: Occurs if any of the input arrays are not sized
+    !!      correctly.
+    !!  - NL_DIVERGENT_BEHAVIOR_ERROR: Occurs if the direction vector is
+    !!      pointing in an apparent uphill direction.
+    !!  - NL_CONVERGENCE_ERROR: Occurs if the line search cannot converge within
+    !!      the allowed number of iterations.
     subroutine ls_search(this, fcn, xold, grad, dir, x, fvec, fold, fx, err)
         ! Arguments
         class(line_search), intent(in) :: this
@@ -191,7 +224,7 @@ contains
         fcnvrg = .false.
         neval = 0
         niter = 0
-        m = fcn%get_function_count()
+        m = fcn%get_equation_count()
         n = fcn%get_variable_count()
         tolx = two * epsilon(tolx)
         alpha = this%m_alpha
@@ -205,6 +238,13 @@ contains
         end if
 
         ! Input Checking
+        if (.not.fcn%is_fcn_defined()) then
+            ! ERROR: No function is defined
+            call errmgr%report_error("ls_search", &
+                "No function has been defined.", &
+                NL_INVALID_OPERATION_ERROR)
+            return
+        end if
         flag = 0
         if (size(xold) /= n) then
             flag = 3
@@ -242,7 +282,7 @@ contains
             ! ERROR: The slope should not be pointing uphill - invalid direction
             call errmgr%report_error("ls_search", "The search direction " // &
                 "vector appears to be pointing in an uphill direction - " // &
-                "away from a minimum.", NL_INVALID_OPERATION_ERROR)
+                "away from a minimum.", NL_DIVERGENT_BEHAVIOR_ERROR)
             return
         end if
 

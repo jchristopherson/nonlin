@@ -12,6 +12,7 @@ module nonlin_types
     public :: NL_OUT_OF_MEMORY_ERROR
     public :: NL_INVALID_OPERATION_ERROR
     public :: NL_CONVERGENCE_ERROR
+    public :: NL_DIVERGENT_BEHAVIOR_ERROR
 
 ! ******************************************************************************
 ! ERROR FLAGS
@@ -26,6 +27,8 @@ module nonlin_types
     integer, parameter :: NL_INVALID_OPERATION_ERROR = 204
     !> An error resulting from a lack of convergence.
     integer, parameter :: NL_CONVERGENCE_ERROR = 205
+    !> An error resulting from a divergent condition.
+    integer, parameter :: NL_DIVERGENT_BEHAVIOR_ERROR = 206
 
 ! ******************************************************************************
 ! INTERFACES
@@ -91,8 +94,8 @@ module nonlin_types
         !! supplied.  If not supplied, the Jacobian is computed via finite 
         !! differences.
         procedure, public :: jacobian => vfh_jac_fcn
-        !> @brief Gets the number of functions in this system.
-        procedure, public :: get_function_count => vfh_get_nfcn
+        !> @brief Gets the number of equations in this system.
+        procedure, public :: get_equation_count => vfh_get_nfcn
         !> @brief Gets the number of variables in this system.
         procedure, public :: get_variable_count => vfh_get_nvar
     end type
@@ -313,9 +316,9 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Gets the number of functions in this system.
+    !> @brief Gets the number of equations in this system.
     !!
-    !! @param[in] this THe vecfcn_helper object.
+    !! @param[in] this The vecfcn_helper object.
     !! @return The function count.
     pure function vfh_get_nfcn(this) result(n)
         class(vecfcn_helper), intent(in) :: this
