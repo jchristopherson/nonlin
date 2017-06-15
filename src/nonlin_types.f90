@@ -7,10 +7,19 @@ module nonlin_types
     public :: vecfcn
     public :: jacobianfcn
     public :: vecfcn_helper
+    public :: NL_INVALID_INPUT_ERROR
+    public :: NL_ARRAY_SIZE_ERROR
+    public :: NL_OUT_OF_MEMORY_ERROR
 
 ! ******************************************************************************
 ! ERROR FLAGS
 ! ------------------------------------------------------------------------------
+    !> An error flag denoting an invalid input.
+    integer, parameter :: NL_INVALID_INPUT_ERROR = 201
+    !> An error flag denoting an improperly sized array.
+    integer, parameter :: NL_ARRAY_SIZE_ERROR = 202
+    !> An error denoting that there is insufficient memory available.
+    integer, parameter :: NL_OUT_OF_MEMORY_ERROR = 203
 
 ! ******************************************************************************
 ! INTERFACES
