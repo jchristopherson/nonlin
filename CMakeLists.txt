@@ -108,7 +108,8 @@ endif()
 set(testing_sources ${sources})
 
 # Append any files in the tests directory
-list(APPEND testing_sources tests/nonlin_test.f90)
+list(APPEND testing_sources external/linalg/tests/test_core.f90
+  tests/nonlin_test.f90 tests/test_jacobian.f90)
 
 # If BUILD_SHARED_LIBS is defined, then a shared library (DLL) will be built;
 # else, a static library will be built.
