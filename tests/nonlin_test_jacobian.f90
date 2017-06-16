@@ -1,7 +1,7 @@
-! test_jacobian.f90
+! nonlin_test_jacobian.f90
 
 ! Tests the Jacobian calculation utilities.
-module test_jacobian
+module nonlin_test_jacobian
     use linalg_constants, only : dp, i32
     use nonlin_types
     use test_core
