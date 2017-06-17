@@ -397,9 +397,11 @@ contains
         else
             errmgr => deferr
         end if
-        if (.not.this%is_line_search_defined()) &
-            call this%set_default_line_search()
-        call this%get_line_search(ls)
+        if (this%get_use_line_search()) then
+            if (.not.this%is_line_search_defined()) &
+                call this%set_default_line_search()
+            call this%get_line_search(ls)
+        end if
 
         ! Input Check
         if (.not.fcn%is_fcn_defined()) then
@@ -540,10 +542,17 @@ contains
                 temp = dot_product(df(1:nvar), df(1:nvar))
                 if (temp > stpmax) df(1:nvar) = df(1:nvar) * (stpmax / temp)
 
-                ! Apply the line search
-                call ls%search(fcn, xold, dx, df(1:nvar), x, fvec, fold, f, &
-                    lib, errmgr)
-                neval = neval + lib%fcn_count
+                ! Apply the line search if needed
+                if (this%get_use_line_search()) then
+                    call ls%search(fcn, xold, dx, df(1:nvar), x, fvec, fold, &
+                        f, lib, errmgr)
+                    neval = neval + lib%fcn_count
+                else
+                    x = x + df(1:nvar)
+                    call fcn%fcn(x, fvec)
+                    f = half * dot_product(fvec, fvec)
+                    neval = neval + 1
+                end if
 
                 ! Test for convergence
                 fnorm = zero
