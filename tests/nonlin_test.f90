@@ -11,4 +11,5 @@ program main
 
     ! Tests
     call test_jacobian_1()
+    call test_quasinewton_1()
 end program
