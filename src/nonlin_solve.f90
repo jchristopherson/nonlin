@@ -80,7 +80,7 @@ module nonlin_solve
     end type
 
 ! ------------------------------------------------------------------------------
-    !>
+    !> @brief Defines a quasi-Newton type solver based upon Broyden's method.
     type, extends(line_search_solver) :: quasi_newton_solver
         !> The number of iterations that may pass between Jacobian calculation.
         integer(i32) :: m_jDelta = 5
