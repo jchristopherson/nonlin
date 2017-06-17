@@ -377,6 +377,7 @@ contains
                 exit
             end if
         end do
+        if (present(fx)) fx = f
 
         ! Report out iteration statistics
         if (present(ib)) then
