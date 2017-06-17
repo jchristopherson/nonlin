@@ -82,9 +82,17 @@ module nonlin_solve
 ! ------------------------------------------------------------------------------
     !>
     type, extends(line_search_solver) :: quasi_newton_solver
+        !> The number of iterations that may pass between Jacobian calculation.
+        integer(i32) :: m_jDelta = 5
     contains
         !> @brief Solves the system of equations.
         procedure, public :: solve => qns_solve
+        !> @brief Gets the number of iterations that may pass before forcing a 
+        !! recalculation of the Jacobian matrix.
+        procedure, public :: get_jacobian_interval => qns_get_jac_interval
+        !> @brief Sets the number of iterations that may pass before forcing a 
+        !! recalculation of the Jacobian matrix.
+        procedure, public :: set_jacobian_interval => qns_set_jac_interval
     end type
 
 ! ******************************************************************************
@@ -320,7 +328,8 @@ contains
 
         ! Local Variables
         logical :: restart, xcnvrg, fcnvrg, gcnvrg
-        integer(i32) :: i, neqn, nvar, flag, lw1, lw2, lw3, neval, iter, maxeval
+        integer(i32) :: i, neqn, nvar, flag, lw1, lw2, lw3, neval, iter, &
+            maxeval, jcount
         real(dp), allocatable, dimension(:) :: work, tau, dx, df, fvold, &
             xold, s
         real(dp), allocatable, dimension(:,:) :: q, r, b
@@ -452,6 +461,9 @@ contains
                     r = b ! Copy the Jacobian - we'll need it later
                     call qr_factor(r, tau, work)
                     call form_qr(r, tau, q, work)
+
+                    ! Reset the Jacobian iteration counter
+                    jcount = 0
                 else
                     ! Apply the rank 1 update to Q and R
                     df = fvec - fvold
@@ -470,6 +482,10 @@ contains
                     call rank1_update(alpha, s, dx, b)
                     call qr_rank1_update(q, r, s, dx, work)
                     ! FYI, both S and DX are modified by qr_rank1_update
+
+                    ! Increment the counter tracking how many iterations have
+                    ! passed since the last Jacobian recalculation
+                    jcount = jcount + 1
                 end if
 
                 ! Compute GRAD = B**T * F, store in DX
@@ -546,6 +562,9 @@ contains
                     end if
                 end if
 
+                ! See if we need to force a recalculation of the Jacobian
+                if (jcount >= this%m_jDelta) restart = .true.
+
                 ! Ensure we haven't made too many function evaluations
                 if (neval >= maxeval) then
                     flag = 1
@@ -573,6 +592,28 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
+    !> @brief Gets the number of iterations that may pass before forcing a 
+    !! recalculation of the Jacobian matrix.
+    !!
+    !! @param[in] this The quasi_newton_solver object.
+    !! @return The number of iterations.
+    pure function qns_get_jac_interval(this) result(n)
+        class(quasi_newton_solver), intent(in) :: this
+        integer(i32) :: n
+        n = this%m_jDelta
+    end function
+
+! --------------------
+    !> @brief Sets the number of iterations that may pass before forcing a 
+    !! recalculation of the Jacobian matrix.
+    !!
+    !! @param[in,out] this The quasi_newton_solver object.
+    !! @param[in] n The number of iterations.
+    subroutine qns_set_jac_interval(this, n)
+        class(quasi_newton_solver), intent(inout) :: this
+        integer(i32), intent(in) :: n
+        this%m_jDelta = n
+    end subroutine
 
 ! ------------------------------------------------------------------------------
 
