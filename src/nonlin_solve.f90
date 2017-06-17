@@ -502,7 +502,7 @@ contains
                 ! Test for convergence
                 fnorm = zero
                 do i = 1, neqn
-                    fnorm = max(abs(fvec(i)), test)
+                    fnorm = max(abs(fvec(i)), fnorm)
                 end do
                 if (fnorm < ftol) then
                     fcnvrg = .true.
@@ -538,7 +538,7 @@ contains
                     xnorm = zero
                     do i = 1, nvar
                         temp = abs(x(i) - xold(i)) / max(abs(x(i)), one)
-                        xnorm = max(temp, test)
+                        xnorm = max(temp, xnorm)
                     end do
                     if (xnorm < xtol) then
                         xcnvrg = .true.
