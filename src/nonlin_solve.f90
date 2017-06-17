@@ -656,5 +656,85 @@ contains
 
 ! ------------------------------------------------------------------------------
 
+
+
+
+! ******************************************************************************
+! GENERAL ROUTINES
+! ------------------------------------------------------------------------------
+    !
+    function test_convergence(x, xo, f, g, lg, xtol, ftol, gtol, cx, cf, cg) result(c)
+        ! Arguments
+        real(dp), intent(in), dimension(:) :: x, xo, f, g
+        real(dp), intent(in) :: xtol, ftol, gtol
+        logical, intent(in) :: lg
+        logical, intent(out) :: cx, cf, cg
+        logical :: c
+
+        ! Parameters
+        real(dp), parameter :: zero = 0.0d0
+        real(dp), parameter :: one = 1.0d0
+        real(dp), parameter :: half = 0.5d0
+
+        ! Local Variables
+        integer(i32) :: i, nvar, neqn
+        real(dp) :: test, dxmax, fc
+
+        ! Initialization
+        nvar = size(x)
+        neqn = size(f)
+        cx = .false.
+        cf = .false.
+        cg = .false.
+        c = .false.
+        fc = half * dot_product(f, f)
+
+        ! Test for convergence on residual
+        test = zero
+        do i = 1, neqn
+            test = max(abs(f(i)), test)
+        end do
+        if (test < ftol) then
+            cf = .true.
+            c = .true.
+            return
+        end if
+
+        ! Test the change in solution
+        dxmax = zero
+        do i = 1, nvar
+            test = abs(x(i) - xo(i)) / max(abs(x(i)), one)
+            dxmax = max(test, dxmax)
+        end do
+        if (dxmax < xtol) then
+            cx = .true.
+            c = .true.
+            return
+        end if
+
+        ! Test for spurious convergence (zero gradient)
+        if (lg) then
+            test = zero
+            den = max(fc, half * nvar)
+            do i = 1, nvar
+                dxmax = abs(g(i)) * max(abs(x(i)), one) / den
+                test = max(test, dxmax)
+            end do
+            if (test < gtol) then
+                cg = .true.
+                c = .true.
+                return
+            end if
+        end if
+    end function
+
+! ------------------------------------------------------------------------------
+
+! ------------------------------------------------------------------------------
+
+! ------------------------------------------------------------------------------
+
+! ------------------------------------------------------------------------------
+
 ! ------------------------------------------------------------------------------
 end module
