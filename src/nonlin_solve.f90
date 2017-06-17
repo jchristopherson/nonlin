@@ -66,6 +66,9 @@ module nonlin_solve
         private
         !> The line search module.
         class(line_search), allocatable :: m_lineSearch
+        !> Set to true if a line search should be used regardless of the status
+        !! of m_lineSearch
+        logical :: m_useLineSearch = .true.
     contains
         !> @brief Gets the line search module.
         procedure, public :: get_line_search => lss_get_line_search
@@ -77,11 +80,16 @@ module nonlin_solve
         !> @brief Tests to see if a line search module is defined.
         procedure, public :: is_line_search_defined => &
             lss_is_line_search_defined
+        !> @brief Gets a value determining if a line-search should be employed.
+        procedure, public :: get_use_line_search => lss_get_use_search
+        !> @brief Sets a value determining if a line-search should be employed.
+        procedure, public :: set_use_line_search => lss_set_use_search
     end type
 
 ! ------------------------------------------------------------------------------
     !> @brief Defines a quasi-Newton type solver based upon Broyden's method.
     type, extends(line_search_solver) :: quasi_newton_solver
+        private
         !> The number of iterations that may pass between Jacobian calculation.
         integer(i32) :: m_jDelta = 5
     contains
@@ -272,6 +280,28 @@ contains
         logical :: x
         x = allocated(this%m_lineSearch)
     end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Gets a value determining if a line-search should be employed.
+    !!
+    !! @param[in] this The line_search_solver object.
+    !! @return Returns true if a line search should be used; else, false.
+    pure function lss_get_use_search(this) result(x)
+        class(line_search_solver), intent(in) :: this
+        logical :: x
+        x = this%m_useLineSearch
+    end function
+
+! --------------------
+    !> @brief Sets a value determining if a line-search should be employed.
+    !!
+    !! @param[in,out] this The line_search_solver object.
+    !! @param[in] x Set to true if a line search should be used; else, false.
+    subroutine lss_set_use_search(this, x)
+        class(line_search_solver), intent(inout) :: this
+        logical, intent(in) :: x
+        this%m_useLineSearch = x
+    end subroutine
 
 ! ******************************************************************************
 ! QUASI_NEWTON_SOLVER MEMBERS
