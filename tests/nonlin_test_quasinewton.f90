@@ -50,7 +50,7 @@ contains
         jac => jac1
         call obj%set_fcn(fcn, 2, 2)
         call obj%set_jacobian(jac)
-        x = [1.0d0, 1.0d0]
+        x = [1.0d0, -1.0d0]
 
         ! Process
         call solver%solve(obj, x, f, ib)
