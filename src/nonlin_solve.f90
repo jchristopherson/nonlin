@@ -325,7 +325,7 @@ contains
             xold, s
         real(dp), allocatable, dimension(:,:) :: q, r, b
         real(dp) :: test, f, fold, alpha, temp, den, ftol, xtol, gtol, eps, &
-            stpmax, x2
+            stpmax, x2, fnorm, xnorm
         type(iteration_behavior) :: lib
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
@@ -500,11 +500,11 @@ contains
                 neval = neval + lib%fcn_count
 
                 ! Test for convergence
-                test = zero
+                fnorm = zero
                 do i = 1, neqn
-                    test = max(abs(fvec(i)), test)
+                    fnorm = max(abs(fvec(i)), test)
                 end do
-                if (test < ftol) then
+                if (fnorm < ftol) then
                     fcnvrg = .true.
                     exit
                 end if
@@ -535,12 +535,12 @@ contains
                     restart = .false.
 
                     ! Test for convergence based upon change in solution
-                    test = zero
+                    xnorm = zero
                     do i = 1, nvar
                         temp = abs(x(i) - xold(i)) / max(abs(x(i)), one)
-                        test = max(temp, test)
+                        xnorm = max(temp, test)
                     end do
-                    if (test < xtol) then
+                    if (xnorm < xtol) then
                         xcnvrg = .true.
                         exit
                     end if
