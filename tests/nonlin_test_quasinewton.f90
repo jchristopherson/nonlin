@@ -56,9 +56,9 @@ contains
         call solver%solve(obj, x, f, ib)
         print '(AF7.3AF7.3)', "Solution 1:", x(1), ", ", x(2)
         print '(AF7.3AF7.3)', "Residual 1:", f(1), ", ", f(2)
-        print '(AL)', "Converged on residual:", ib%converge_on_fcn
-        print '(AL)', "Converged on function change:", ib%converge_on_chng
-        print '(AL)', "Converge on zero gradient:", ib%converge_on_zero_diff
+        print '(AL)', "Converged on residual: ", ib%converge_on_fcn
+        print '(AL)', "Converged on function change: ", ib%converge_on_chng
+        print '(AL)', "Converge on zero gradient: ", ib%converge_on_zero_diff
         print '(AI0)', "Iterations: ", ib%iter_count
         print '(AI0)', "Function Evaluations: ", ib%fcn_count
     end subroutine
