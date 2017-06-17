@@ -31,7 +31,7 @@ module nonlin_solve
         !> The convergence criteria on function values.
         real(dp) :: m_fcnTol = 1.0d-8
         !> The convergence criteria on change in variable values.
-        real(dp) :: m_xtol = 1.0d-8
+        real(dp) :: m_xtol = 1.0d-12
         !> The convergence criteria for the slope of the gradient vector.
         real(dp) :: m_gtol = 1.0d-12
     contains
