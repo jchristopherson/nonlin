@@ -367,7 +367,7 @@ contains
             ! Set up parameters for the cubic model as we've already been 
             ! through once with the quadratic model without success.
             alam2 = alam
-            f2 = f2
+            f2 = f
             alam = max(tmplam, lambdamin * alam)
 
             ! Ensure we haven't performed too many function evaluations

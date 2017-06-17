@@ -456,7 +456,7 @@ contains
                     ! Apply the rank 1 update to Q and R
                     df = fvec - fvold
                     dx = x - xold
-                    x2 = dot_product(x, x)
+                    x2 = dot_product(dx, dx)
                     alpha = one / x2
 
                     ! Compute S = B * DX
