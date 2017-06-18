@@ -34,6 +34,8 @@ module nonlin_solve
         real(dp) :: m_xtol = 1.0d-12
         !> The convergence criteria for the slope of the gradient vector.
         real(dp) :: m_gtol = 1.0d-12
+        !> Set to true to print iteration status; else, false.
+        logical :: m_printStatus = .false.
     contains
         !> @brief Gets the maximum number of function evaluations allowed during
         !! a single solve.
@@ -55,6 +57,12 @@ module nonlin_solve
         !> @brief Sets the convergence on slope of the gradient vector 
         !! tolerance.
         procedure, public :: set_gradient_tolerance => es_set_grad_tol
+        !> @brief Gets a logical value determining if iteration status should be
+        !! printed.
+        procedure, public :: get_print_status => es_get_print_status
+        !> @brief Sets a logical value determining if iteration status should be
+        !! printed.
+        procedure, public :: set_print_status => es_set_print_status
         !> @brief Solves the system of equations.
         procedure(nonlin_solver), deferred, public, pass :: solve
     end type
@@ -233,6 +241,30 @@ contains
         this%m_gtol = x
     end subroutine
 
+! ------------------------------------------------------------------------------
+    !> @brief Gets a logical value determining if iteration status should be
+    !! printed.
+    !!
+    !! @param[in] this The equation_solver object.
+    !! @return True if the iteration status should be printed; else, false.
+    pure function es_get_print_status(this) result(x)
+        class(equation_solver), intent(in) :: this
+        logical :: x
+        x = this%m_printStatus
+    end function
+
+! --------------------
+    !> @brief Sets a logical value determining if iteration status should be
+    !! printed.
+    !!
+    !! @param[in,out] this The equation_solver object.
+    !! @param[in] x True if the iteration status should be printed; else, false.
+    subroutine es_set_print_status(this, x)
+        class(equation_solver), intent(inout) :: this
+        logical, intent(in) :: x
+        this%m_printStatus = x
+    end subroutine
+
 ! ******************************************************************************
 ! LINE_SEARCH_SOLVER MEMBERS
 ! ------------------------------------------------------------------------------
@@ -364,7 +396,7 @@ contains
             xold, s
         real(dp), allocatable, dimension(:,:) :: q, r, b
         real(dp) :: test, f, fold, alpha, temp, ftol, xtol, gtol, eps, &
-            stpmax, x2
+            stpmax, x2, xnorm, fnorm
         type(iteration_behavior) :: lib
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
@@ -559,10 +591,10 @@ contains
                 if (lib%converge_on_zero_diff .and. &
                         this%get_use_line_search()) then
                     call test_convergence(x, xold, fvec, dx, .true., xtol, &
-                        ftol, gtol, check, xcnvrg, fcnvrg, gcnvrg)
+                        ftol, gtol, check, xcnvrg, fcnvrg, gcnvrg, xnorm, fnorm)
                 else
                     call test_convergence(x, xold, fvec, dx, .false., xtol, &
-                        ftol, gtol, check, xcnvrg, fcnvrg, gcnvrg)
+                        ftol, gtol, check, xcnvrg, fcnvrg, gcnvrg, xnorm, fnorm)
                 end if
                 if (check) then
                     if (gcnvrg) then
@@ -577,6 +609,10 @@ contains
                     else
                         exit
                     end if
+                end if
+
+                ! Print status
+                if (this%get_print_status()) then
                 end if
 
                 ! See if we need to force a recalculation of the Jacobian
@@ -655,12 +691,17 @@ contains
     !! @param[out] cs True if convergence occurred due to change in variable.
     !! @param[out] cf True if convergence occurred due to residual.
     !! @param[out] cg True if convergence occured due to slope of the gradient.
-    subroutine test_convergence(x, xo, f, g, lg, xtol, ftol, gtol, c, cx, cf, cg)
+    !! @param[out] xnorm The largest magnitude component of the scaled change 
+    !!  in variable vector.
+    !! @param[out] fnorm The largest magnitude residual component
+    subroutine test_convergence(x, xo, f, g, lg, xtol, ftol, gtol, c, cx, cf, &
+            cg, xnorm, fnorm)
         ! Arguments
         real(dp), intent(in), dimension(:) :: x, xo, f, g
         real(dp), intent(in) :: xtol, ftol, gtol
         logical, intent(in) :: lg
         logical, intent(out) :: c, cx, cf, cg
+        real(dp), intent(out) :: xnorm, fnorm
 
         ! Parameters
         real(dp), parameter :: zero = 0.0d0
@@ -679,28 +720,26 @@ contains
         cg = .false.
         c = .false.
         fc = half * dot_product(f, f)
+        fnorm = zero
+        xnorm = zero
 
         ! Test for convergence on residual
-        test = zero
         do i = 1, neqn
-            test = max(abs(f(i)), test)
+            fnorm = max(abs(f(i)), fnorm)
         end do
-        if (test < ftol) then
+        if (fnorm < ftol) then
             cf = .true.
             c = .true.
-            return
         end if
 
         ! Test the change in solution
-        dxmax = zero
         do i = 1, nvar
             test = abs(x(i) - xo(i)) / max(abs(x(i)), one)
-            dxmax = max(test, dxmax)
+            xnorm = max(test, xnorm)
         end do
-        if (dxmax < xtol) then
+        if (xnorm < xtol) then
             cx = .true.
             c = .true.
-            return
         end if
 
         ! Test for gradient slope
@@ -714,12 +753,31 @@ contains
             if (test < gtol) then
                 cg = .true.
                 c = .true.
-                return
             end if
         end if
     end subroutine
 
 ! ------------------------------------------------------------------------------
+    !> @brief Prints the iteration status.
+    !!
+    !! @param[in] iter The iteration number.
+    !! @param[in] nfeval The number of function evaluations.
+    !! @param[in] njaceval The number of Jacobian evaluations.
+    !! @param[in] xnorm The change in variable value.
+    !! @param[in] fnorm The residual.
+    subroutine print_status(iter, nfeval, njaceval, xnorm, fnorm)
+        ! Arguments
+        integer(i32), intent(in) :: iter, nfeval, njaceval
+        real(dp), intent(in) :: xnorm, fnorm
+
+        ! Process
+        print *, ""
+        print '(AI0)', "Iteration: ", iter
+        print '(AI0)', "Function Evaluations: ", nfeval
+        if (njaceval > 0) print '(AI0)', "Jacobian Evaluations: ", njaceval
+        print '(AE8.3)', "Change in Variable: ", xnorm
+        print '(AE8.3)', "Residual: ", fnorm
+    end subroutine
 
 ! ------------------------------------------------------------------------------
 
