@@ -391,7 +391,7 @@ contains
         ! Local Variables
         logical :: restart, xcnvrg, fcnvrg, gcnvrg, check
         integer(i32) :: i, neqn, nvar, flag, lw1, lw2, lw3, neval, iter, &
-            maxeval, jcount
+            maxeval, jcount, njac
         real(dp), allocatable, dimension(:) :: work, tau, dx, df, fvold, &
             xold, s
         real(dp), allocatable, dimension(:,:) :: q, r, b
@@ -412,6 +412,7 @@ contains
         nvar = fcn%get_variable_count()
         neval = 0
         iter = 0
+        njac = 0
         ftol = this%get_fcn_tolerance()
         xtol = this%get_var_tolerance()
         gtol = this%get_gradient_tolerance()
@@ -420,6 +421,7 @@ contains
         if (present(ib)) then
             ib%iter_count = iter
             ib%fcn_count = neval
+            ib%jacobian_count = njac
             ib%converge_on_fcn = fcnvrg
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = gcnvrg
@@ -521,6 +523,7 @@ contains
                 if (restart) then
                     ! Compute the Jacobian
                     call fcn%jacobian(x, b, fvec, work)
+                    njac = njac + 1
 
                     ! Compute the QR factorization, and form Q & R
                     r = b ! Copy the Jacobian - we'll need it later
@@ -613,6 +616,7 @@ contains
 
                 ! Print status
                 if (this%get_print_status()) then
+                    call print_status(iter, neval, njac, xnorm, fnorm)
                 end if
 
                 ! See if we need to force a recalculation of the Jacobian
@@ -630,6 +634,7 @@ contains
         if (present(ib)) then
             ib%iter_count = iter
             ib%fcn_count = neval
+            ib%jacobian_count = njac
             ib%converge_on_fcn = fcnvrg
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = gcnvrg
