@@ -564,7 +564,7 @@ contains
                 fold = f
 
                 ! Solve the linear system: B * DX = -F for DX noting that
-                !! B = Q * R.  As such, form -Q**T * F, and store in DF
+                ! B = Q * R.  As such, form -Q**T * F, and store in DF
                 call mtx_mult(.true., -one, q, fvec, zero, df)
 
                 ! Now we have R * DX = -Q**T * F, and since R is upper 
