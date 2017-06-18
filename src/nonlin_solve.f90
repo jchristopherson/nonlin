@@ -611,6 +611,8 @@ contains
                     else
                         exit
                     end if
+                else
+                    restart = .false.
                 end if
 
                 ! Print status
@@ -747,6 +749,9 @@ contains
             cx = .true.
             c = .true.
         end if
+
+        ! It is safe to return at this point
+        if (c) return
 
         ! Test for gradient slope
         if (lg) then

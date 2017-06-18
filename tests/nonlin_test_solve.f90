@@ -68,6 +68,7 @@ contains
         call obj%set_jacobian(jac)
 
         !call solver%set_use_line_search(.false.)
+        call solver%set_print_status(.true.)
 
         ! Generate a set of random initial conditions
         call random_number(ic)
