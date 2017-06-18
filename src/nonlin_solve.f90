@@ -507,7 +507,6 @@ contains
             fcnvrg = .true.
         end if
 
-
         ! Process
         flag = 0 ! Used to check for convergence errors
         if (.not.fcnvrg) then
@@ -642,8 +641,10 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, '(AI0A)') "The algorithm failed to " // &
-                "converge.  Function evaluations performed: ", neval, "."
+            write(errmsg, '(AI0AE8.3AE8.3)') "The algorithm failed to " // &
+                "converge.  Function evaluations performed: ", neval, &
+                "." // new_line('c') // "Change in Variable: ", xnorm, &
+                new_line('c') // "Residual: ", fnorm
             call errmgr%report_error("qns_solve", errmsg, &
                 NL_CONVERGENCE_ERROR)
         end if
@@ -783,12 +784,6 @@ contains
         print '(AE8.3)', "Change in Variable: ", xnorm
         print '(AE8.3)', "Residual: ", fnorm
     end subroutine
-
-! ------------------------------------------------------------------------------
-
-! ------------------------------------------------------------------------------
-
-! ------------------------------------------------------------------------------
 
 ! ------------------------------------------------------------------------------
 end module
