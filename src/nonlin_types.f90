@@ -114,13 +114,15 @@ module nonlin_types
         integer(i32) :: iter_count
         !> Specifies the number of function evaluations performed.
         integer(i32) :: fcn_count
-        !> Set to true if the solution converged as a result of a zero-valued
+        !> Specifies the number of Jacobian evaluations performed.
+        integer(i32) :: jacobian_count
+        !> True if the solution converged as a result of a zero-valued
         !! function; else, false.
         logical :: converge_on_fcn
-        !> Set to true if the solution converged as a result of no appreciable
+        !> True if the solution converged as a result of no appreciable
         !! change in solution points between iterations; else, false.
         logical :: converge_on_chng
-        !> Set to true if the solution appears to have settled on a stationary
+        !> True if the solution appears to have settled on a stationary
         !! point such that the gradient of the function is zero-valued; else,
         !! false.
         logical :: converge_on_zero_diff
