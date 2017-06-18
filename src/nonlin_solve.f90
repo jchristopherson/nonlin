@@ -357,14 +357,14 @@ contains
         real(dp), parameter :: factor = 1.0d2
 
         ! Local Variables
-        logical :: restart, xcnvrg, fcnvrg, gcnvrg
+        logical :: restart, xcnvrg, fcnvrg, gcnvrg, check
         integer(i32) :: i, neqn, nvar, flag, lw1, lw2, lw3, neval, iter, &
             maxeval, jcount
         real(dp), allocatable, dimension(:) :: work, tau, dx, df, fvold, &
             xold, s
         real(dp), allocatable, dimension(:,:) :: q, r, b
-        real(dp) :: test, f, fold, alpha, temp, den, ftol, xtol, gtol, eps, &
-            stpmax, x2, fnorm, xnorm
+        real(dp) :: test, f, fold, alpha, temp, ftol, xtol, gtol, eps, &
+            stpmax, x2
         type(iteration_behavior) :: lib
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
@@ -473,6 +473,7 @@ contains
             fcnvrg = .true.
         end if
 
+
         ! Process
         flag = 0 ! Used to check for convergence errors
         if (.not.fcnvrg) then
@@ -555,48 +556,25 @@ contains
                 end if
 
                 ! Test for convergence
-                fnorm = zero
-                do i = 1, neqn
-                    fnorm = max(abs(fvec(i)), fnorm)
-                end do
-                if (fnorm < ftol) then
-                    fcnvrg = .true.
-                    exit
+                if (lib%converge_on_zero_diff .and. &
+                        this%get_use_line_search()) then
+                    call test_convergence(x, xold, fvec, dx, .true., xtol, &
+                        ftol, gtol, check, xcnvrg, fcnvrg, gcnvrg)
+                else
+                    call test_convergence(x, xold, fvec, dx, .false., xtol, &
+                        ftol, gtol, check, xcnvrg, fcnvrg, gcnvrg)
                 end if
-
-                ! Ensure we didn't come to rest on a stationary point
-                if (lib%converge_on_zero_diff) then
-                    if (restart) then
-                        ! We've already tried computing a new Jacobian, but
-                        ! that didn't help
-                        gcnvrg = .true.
-                        exit
-                    else
-                        test = zero
-                        den = max(f, half * real(nvar, dp))
-                        do i = 1, nvar
-                            temp = abs(dx(i)) * max(abs(x(i)), one) / den
-                            test = max(test, temp)
-                        end do
-                        if (test < gtol) then
-                            gcnvrg = .true.
+                if (check) then
+                    if (gcnvrg) then
+                        if (restart) then
+                            ! No joy, we've already tried computing a new 
+                            ! Jacobian
                             exit
                         else
+                            ! Try computing a new Jacobian
                             restart = .true.
                         end if
-                    end if
-                else
-                    ! No need to compute a new Jacobian
-                    restart = .false.
-
-                    ! Test for convergence based upon change in solution
-                    xnorm = zero
-                    do i = 1, nvar
-                        temp = abs(x(i) - xold(i)) / max(abs(x(i)), one)
-                        xnorm = max(temp, xnorm)
-                    end do
-                    if (xnorm < xtol) then
-                        xcnvrg = .true.
+                    else
                         exit
                     end if
                 end if
@@ -662,14 +640,27 @@ contains
 ! ******************************************************************************
 ! GENERAL ROUTINES
 ! ------------------------------------------------------------------------------
-    !
-    function test_convergence(x, xo, f, g, lg, xtol, ftol, gtol, cx, cf, cg) result(c)
+    !> @breif Tests for convergence.
+    !!
+    !! @param[in] x The current solution estimate.
+    !! @param[in] xo The previous solution estimate.
+    !! @param[in] f The current residual based upon @p x.
+    !! @param[in] g The current estimate of the gradient vector at @p x.
+    !! @param[in] lg Set to true if the gradient slope check should be 
+    !!  performed; else, false.
+    !! @param[in] xtol The tolerance on the change in variable.
+    !! @param[in] ftol The tolerance on the residual.
+    !! @param[in] gtol The tolerance on the slope of the gradient.
+    !! @param[out] c True if the solution converged.
+    !! @param[out] cs True if convergence occurred due to change in variable.
+    !! @param[out] cf True if convergence occurred due to residual.
+    !! @param[out] cg True if convergence occured due to slope of the gradient.
+    subroutine test_convergence(x, xo, f, g, lg, xtol, ftol, gtol, c, cx, cf, cg)
         ! Arguments
         real(dp), intent(in), dimension(:) :: x, xo, f, g
         real(dp), intent(in) :: xtol, ftol, gtol
         logical, intent(in) :: lg
-        logical, intent(out) :: cx, cf, cg
-        logical :: c
+        logical, intent(out) :: c, cx, cf, cg
 
         ! Parameters
         real(dp), parameter :: zero = 0.0d0
@@ -678,7 +669,7 @@ contains
 
         ! Local Variables
         integer(i32) :: i, nvar, neqn
-        real(dp) :: test, dxmax, fc
+        real(dp) :: test, dxmax, fc, den
 
         ! Initialization
         nvar = size(x)
@@ -712,7 +703,7 @@ contains
             return
         end if
 
-        ! Test for spurious convergence (zero gradient)
+        ! Test for gradient slope
         if (lg) then
             test = zero
             den = max(fc, half * nvar)
@@ -726,7 +717,7 @@ contains
                 return
             end if
         end if
-    end function
+    end subroutine
 
 ! ------------------------------------------------------------------------------
 
