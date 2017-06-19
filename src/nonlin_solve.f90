@@ -400,7 +400,7 @@ contains
         type(iteration_behavior) :: lib
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
-        character(len = 128) :: errmsg
+        character(len = 256) :: errmsg
         class(line_search), allocatable :: ls
 
         ! Initialization
@@ -548,7 +548,6 @@ contains
                     ! B' = B + ALPHA * S * DX**T
                     call rank1_update(alpha, s, dx, b)
                     call qr_rank1_update(q, r, s, dx, work)
-                    ! FYI, both S and DX are modified by qr_rank1_update
 
                     ! Increment the counter tracking how many iterations have
                     ! passed since the last Jacobian recalculation
@@ -612,16 +611,19 @@ contains
                         exit
                     end if
                 else
-                    restart = .false.
+                    ! No need to recompute the Jacobian unless forced by the
+                    ! user
+                    if (jcount >= this%m_jDelta) then
+                        restart = .true.
+                    else
+                        restart = .false.
+                    end if
                 end if
 
                 ! Print status
                 if (this%get_print_status()) then
                     call print_status(iter, neval, njac, xnorm, fnorm)
                 end if
-
-                ! See if we need to force a recalculation of the Jacobian
-                if (jcount >= this%m_jDelta) restart = .true.
 
                 ! Ensure we haven't made too many function evaluations
                 if (neval >= maxeval) then
