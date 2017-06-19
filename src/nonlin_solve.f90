@@ -538,16 +538,13 @@ contains
                     x2 = dot_product(dx, dx)
                     alpha = one / x2
 
-                    ! Compute S = B * DX
-                    s = matmul(b, dx)
-
-                    ! Compute S = ALPHA * (DF - S)
-                    s = alpha * (df - s)
+                    ! Compute S = ALPHA * (DF - B * DX)
+                    s = alpha * (df - matmul(b, dx))
 
                     ! Compute the new Q and R matrices for the rank1 update:
                     ! B' = B + ALPHA * S * DX**T
                     call rank1_update(alpha, s, dx, b)
-                    call qr_rank1_update(q, r, s, dx, work)
+                    call qr_rank1_update(q, r, s, dx, work) ! S & DX overwritten
 
                     ! Increment the counter tracking how many iterations have
                     ! passed since the last Jacobian recalculation
@@ -573,10 +570,13 @@ contains
                     df(1:nvar))
                 
                 ! Ensure the new solution estimate is heading in a sensible
-                ! direction
+                ! direction.  If not, it is likely time to update the Jacobian
                 temp = dot_product(dx, df(1:nvar))
                 if (temp >= zero) then
                     restart = .true.
+                    if (this%get_print_status()) then
+                        call print_status(iter, neval, njac, xnorm, fnorm)
+                    end if
                     cycle
                 end if
                 
@@ -607,27 +607,33 @@ contains
                     call test_convergence(x, xold, fvec, dx, .false., xtol, &
                         ftol, gtol, check, xcnvrg, fcnvrg, gcnvrg, xnorm, fnorm)
                 end if
-                if (check) then
+                if (.not.check) then
+                    ! The solution did not converge, figure out why
                     if (gcnvrg) then
+                        ! The slope of the gradient is sufficiently close to 
+                        ! zero to cause issue.
                         if (restart) then
-                            ! No joy, we've already tried computing a new 
-                            ! Jacobian
+                            ! We've already tried recalculating a new Jacobian
                             exit
                         else
                             ! Try computing a new Jacobian
                             restart = .true.
                         end if
                     else
-                        exit
+                        ! We have not converged, but we're not stuck with a 
+                        ! zero slope gradient vector either.  Go ahead and
+                        ! continue the iteration process without recomputing
+                        ! the Jacobian - unless the user dictates a 
+                        ! recaclulation.
+                        if (jcount >= this%m_jDelta) then
+                            restart = .true.
+                        else
+                            restart = .false.
+                        end if
                     end if
                 else
-                    ! No need to recompute the Jacobian unless forced by the
-                    ! user
-                    if (jcount >= this%m_jDelta) then
-                        restart = .true.
-                    else
-                        restart = .false.
-                    end if
+                    ! The solution has converged.  It's OK to exit
+                    exit
                 end if
 
                 ! Print status
@@ -659,7 +665,7 @@ contains
                 "converge.  Function evaluations performed: ", neval, &
                 "." // new_line('c') // "Change in Variable: ", xnorm, &
                 new_line('c') // "Residual: ", fnorm
-            call errmgr%report_error("qns_solve", errmsg, &
+            call errmgr%report_error("qns_solve", trim(errmsg), &
                 NL_CONVERGENCE_ERROR)
         end if
     end subroutine
@@ -707,7 +713,8 @@ contains
     !! @param[in] xtol The tolerance on the change in variable.
     !! @param[in] ftol The tolerance on the residual.
     !! @param[in] gtol The tolerance on the slope of the gradient.
-    !! @param[out] c True if the solution converged.
+    !! @param[out] c True if the solution converged on either the residual or
+    !!  change in variable.
     !! @param[out] cs True if convergence occurred due to change in variable.
     !! @param[out] cf True if convergence occurred due to residual.
     !! @param[out] cg True if convergence occured due to slope of the gradient.
@@ -747,9 +754,11 @@ contains
         do i = 1, neqn
             fnorm = max(abs(f(i)), fnorm)
         end do
+        print '(AE8.3AE8.3)', "FNORM: ", fnorm, ", FTOL: ", ftol
         if (fnorm < ftol) then
             cf = .true.
             c = .true.
+            return
         end if
 
         ! Test the change in solution
@@ -757,15 +766,14 @@ contains
             test = abs(x(i) - xo(i)) / max(abs(x(i)), one)
             xnorm = max(test, xnorm)
         end do
+        print '(AE8.3AE8.3)', "XNORM: ", xnorm, ", XTOL: ", xtol
         if (xnorm < xtol) then
             cx = .true.
             c = .true.
+            return
         end if
 
-        ! It is safe to return at this point
-        if (c) return
-
-        ! Test for gradient slope
+        ! Test for zero gradient slope - do not set convergence flag
         if (lg) then
             test = zero
             den = max(fc, half * nvar)
@@ -775,7 +783,6 @@ contains
             end do
             if (test < gtol) then
                 cg = .true.
-                c = .true.
             end if
         end if
     end subroutine
