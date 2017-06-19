@@ -572,16 +572,26 @@ contains
                 call solve_triangular_system(.true., .false., .true., r, &
                     df(1:nvar))
                 
-                ! Define the step length for the line search
-                temp = dot_product(df(1:nvar), df(1:nvar))
-                if (temp > stpmax) df(1:nvar) = df(1:nvar) * (stpmax / temp)
-
+                ! Ensure the new solution estimate is heading in a sensible
+                ! direction
+                temp = dot_product(dx, df(1:nvar))
+                if (temp >= zero) then
+                    restart = .true.
+                    cycle
+                end if
+                
                 ! Apply the line search if needed
                 if (this%get_use_line_search()) then
+                    ! Define the step length for the line search
+                    temp = dot_product(df(1:nvar), df(1:nvar))
+                    if (temp > stpmax) df(1:nvar) = df(1:nvar) * (stpmax / temp)
+
+                    ! Apply the line search
                     call ls%search(fcn, xold, dx, df(1:nvar), x, fvec, fold, &
                         f, lib, errmgr)
                     neval = neval + lib%fcn_count
                 else
+                    ! No line search - just update the solution estimate
                     x = x + df(1:nvar)
                     call fcn%fcn(x, fvec)
                     f = half * dot_product(fvec, fvec)
