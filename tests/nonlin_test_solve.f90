@@ -56,7 +56,7 @@ contains
         procedure(jacobianfcn), pointer :: jac
         type(quasi_newton_solver) :: solver
         type(iteration_behavior) :: ib
-        real(dp) :: x(2), f(2), ic(5, 2)
+        real(dp) :: x(2), f(2), ic(10, 2)
         integer(i32) :: i
         logical :: check
 
@@ -67,12 +67,8 @@ contains
         call obj%set_fcn(fcn, 2, 2)
         call obj%set_jacobian(jac)
 
-        !call solver%set_use_line_search(.false.)
-        call solver%set_print_status(.true.)
-
         ! Generate a set of initial conditions
-        ic = reshape([1.0d0, 2.0d0, 3.0d0, 4.0d0, 5.0d0, &
-            5.0d0, 4.0d0, 3.0d0, 2.0d0, 1.0d0], [5, 2])
+        call random_number(ic)
 
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
