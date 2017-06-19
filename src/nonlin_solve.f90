@@ -111,6 +111,14 @@ module nonlin_solve
         procedure, public :: set_jacobian_interval => qns_set_jac_interval
     end type
 
+! ------------------------------------------------------------------------------
+    !> @brief Defines a Newton solver.
+    type, extends(line_search_solver) :: newton_solver
+    contains
+        !> @brief Solves the system of equations.
+        procedure, public :: solve => ns_solve
+    end type
+
 ! ******************************************************************************
 ! INTERFACES
 ! ------------------------------------------------------------------------------
@@ -693,6 +701,26 @@ contains
         integer(i32), intent(in) :: n
         this%m_jDelta = n
     end subroutine
+
+! ******************************************************************************
+! NEWTON_SOLVER MEMBERS
+! ------------------------------------------------------------------------------
+    !
+    subroutine ns_solve(this, fcn, x, fvec, ib, err)
+        ! Arguments
+        class(newton_solver), intent(inout) :: this
+        class(vecfcn_helper), intent(in) :: fcn
+        real(dp), intent(inout), dimension(:) :: x
+        real(dp), intent(out), dimension(:) :: fvec
+        type(iteration_behavior), optional :: ib
+        class(errors), intent(in), optional, target :: err
+    end subroutine
+
+! ------------------------------------------------------------------------------
+
+! ------------------------------------------------------------------------------
+
+! ------------------------------------------------------------------------------
 
 ! ------------------------------------------------------------------------------
 
