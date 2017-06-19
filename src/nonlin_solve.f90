@@ -3,7 +3,7 @@
 !> @brief \b nonlin_solve
 !!
 !! @par Purpose
-!! To provide various routines capapble of solving systems of nonlinear 
+!! To provide various routines capapble of solving systems of nonlinear
 !! equations.
 module nonlin_solve
     use linalg_constants, only : dp, i32
@@ -11,7 +11,7 @@ module nonlin_solve
     use nonlin_linesearch, only : line_search
     use ferror, only : errors
     use linalg_factor, only : qr_factor, form_qr, qr_rank1_update
-    use linalg_core, only : rank1_update, mtx_mult
+    use linalg_core, only : rank1_update, mtx_mult, recip_mult_array
     use linalg_solve, only : solve_triangular_system
     implicit none
     private
@@ -51,10 +51,10 @@ module nonlin_solve
         procedure, public :: get_var_tolerance => es_get_var_tol
         !> @brief Sets the convergence on change in variable tolerance.
         procedure, public :: set_var_tolerance => es_set_var_tol
-        !> @brief Gets the convergence on slope of the gradient vector 
+        !> @brief Gets the convergence on slope of the gradient vector
         !! tolerance.
         procedure, public :: get_gradient_tolerance => es_get_grad_tol
-        !> @brief Sets the convergence on slope of the gradient vector 
+        !> @brief Sets the convergence on slope of the gradient vector
         !! tolerance.
         procedure, public :: set_gradient_tolerance => es_set_grad_tol
         !> @brief Gets a logical value determining if iteration status should be
@@ -82,7 +82,7 @@ module nonlin_solve
         procedure, public :: get_line_search => lss_get_line_search
         !> @brief Sets the line search module.
         procedure, public :: set_line_search => lss_set_line_search
-        !> @brief Establishes a default line_search object for the line search 
+        !> @brief Establishes a default line_search object for the line search
         !! module.
         procedure, public :: set_default_line_search => lss_set_default
         !> @brief Tests to see if a line search module is defined.
@@ -103,10 +103,10 @@ module nonlin_solve
     contains
         !> @brief Solves the system of equations.
         procedure, public :: solve => qns_solve
-        !> @brief Gets the number of iterations that may pass before forcing a 
+        !> @brief Gets the number of iterations that may pass before forcing a
         !! recalculation of the Jacobian matrix.
         procedure, public :: get_jacobian_interval => qns_get_jac_interval
-        !> @brief Sets the number of iterations that may pass before forcing a 
+        !> @brief Sets the number of iterations that may pass before forcing a
         !! recalculation of the Jacobian matrix.
         procedure, public :: set_jacobian_interval => qns_set_jac_interval
     end type
@@ -126,13 +126,13 @@ module nonlin_solve
         !! @param[out] fvec An M-element array that, on output, will contain
         !!  the values of each equation as evaluated at the variable values
         !!  given in @p x.
-        !! @param[out] ib An optional output, that if provided, allows the 
+        !! @param[out] ib An optional output, that if provided, allows the
         !!  caller to obtain iteration performance statistics.
         !! @param[out] err An optional errors-based object that if provided can
-        !!  be used to retrieve information relating to any errors encountered 
+        !!  be used to retrieve information relating to any errors encountered
         !!  during execution.  If not provided, a default implementation of the
         !!  errors class is used internally to provide error handling.  The
-        !!  possible error codes returned will likely vary from solver to 
+        !!  possible error codes returned will likely vary from solver to
         !!  solver.
         subroutine nonlin_solver(this, fcn, x, fvec, ib, err)
             use linalg_constants, only : dp, i32
@@ -292,7 +292,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Establishes a default line_search object for the line search 
+    !> @brief Establishes a default line_search object for the line search
     !! module.
     !!
     !! @param[in,out] this The line_search_solver object.
@@ -351,7 +351,7 @@ contains
     !! @param[out] fvec An M-element array that, on output, will contain
     !!  the values of each equation as evaluated at the variable values
     !!  given in @p x.
-    !! @param[out] ib An optional output, that if provided, allows the 
+    !! @param[out] ib An optional output, that if provided, allows the
     !!  caller to obtain iteration performance statistics.
     !! @param[out] err An optional errors-based object that if provided can be
     !!  used to retrieve information relating to any errors encountered during
@@ -367,7 +367,7 @@ contains
     !!      pointing in an apparent uphill direction.
     !!  - NL_CONVERGENCE_ERROR: Occurs if the line search cannot converge within
     !!      the allowed number of iterations.
-    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory 
+    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
     !!      available.
     !!
     !! @par See Also
@@ -395,7 +395,7 @@ contains
         real(dp), allocatable, dimension(:) :: work, tau, dx, df, fvold, &
             xold, s
         real(dp), allocatable, dimension(:,:) :: q, r, b
-        real(dp) :: test, f, fold, alpha, temp, ftol, xtol, gtol, eps, &
+        real(dp) :: test, f, fold, temp, ftol, xtol, gtol, eps, &
             stpmax, x2, xnorm, fnorm
         type(iteration_behavior) :: lib
         class(errors), pointer :: errmgr
@@ -536,14 +536,14 @@ contains
                     df = fvec - fvold
                     dx = x - xold
                     x2 = dot_product(dx, dx)
-                    alpha = one / x2
 
                     ! Compute S = ALPHA * (DF - B * DX)
-                    s = alpha * (df - matmul(b, dx))
+                    s = (df - matmul(b, dx))
+                    call recip_mult_array(x2, s)
 
                     ! Compute the new Q and R matrices for the rank1 update:
                     ! B' = B + ALPHA * S * DX**T
-                    call rank1_update(alpha, s, dx, b)
+                    call rank1_update(one, s, dx, b)
                     call qr_rank1_update(q, r, s, dx, work) ! S & DX overwritten
 
                     ! Increment the counter tracking how many iterations have
@@ -563,12 +563,12 @@ contains
                 ! B = Q * R.  As such, form -Q**T * F, and store in DF
                 call mtx_mult(.true., -one, q, fvec, zero, df)
 
-                ! Now we have R * DX = -Q**T * F, and since R is upper 
+                ! Now we have R * DX = -Q**T * F, and since R is upper
                 ! triangular, the solution is readily computed.  The solution
                 ! will be stored in the first NVAR elements of DF
                 call solve_triangular_system(.true., .false., .true., r, &
                     df(1:nvar))
-                
+
                 ! Ensure the new solution estimate is heading in a sensible
                 ! direction.  If not, it is likely time to update the Jacobian
                 temp = dot_product(dx, df(1:nvar))
@@ -579,7 +579,7 @@ contains
                     end if
                     cycle
                 end if
-                
+
                 ! Apply the line search if needed
                 if (this%get_use_line_search()) then
                     ! Define the step length for the line search
@@ -610,7 +610,7 @@ contains
                 if (.not.check) then
                     ! The solution did not converge, figure out why
                     if (gcnvrg) then
-                        ! The slope of the gradient is sufficiently close to 
+                        ! The slope of the gradient is sufficiently close to
                         ! zero to cause issue.
                         if (restart) then
                             ! We've already tried recalculating a new Jacobian
@@ -620,10 +620,10 @@ contains
                             restart = .true.
                         end if
                     else
-                        ! We have not converged, but we're not stuck with a 
+                        ! We have not converged, but we're not stuck with a
                         ! zero slope gradient vector either.  Go ahead and
                         ! continue the iteration process without recomputing
-                        ! the Jacobian - unless the user dictates a 
+                        ! the Jacobian - unless the user dictates a
                         ! recaclulation.
                         if (jcount >= this%m_jDelta) then
                             restart = .true.
@@ -671,7 +671,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Gets the number of iterations that may pass before forcing a 
+    !> @brief Gets the number of iterations that may pass before forcing a
     !! recalculation of the Jacobian matrix.
     !!
     !! @param[in] this The quasi_newton_solver object.
@@ -683,7 +683,7 @@ contains
     end function
 
 ! --------------------
-    !> @brief Sets the number of iterations that may pass before forcing a 
+    !> @brief Sets the number of iterations that may pass before forcing a
     !! recalculation of the Jacobian matrix.
     !!
     !! @param[in,out] this The quasi_newton_solver object.
@@ -708,7 +708,7 @@ contains
     !! @param[in] xo The previous solution estimate.
     !! @param[in] f The current residual based upon @p x.
     !! @param[in] g The current estimate of the gradient vector at @p x.
-    !! @param[in] lg Set to true if the gradient slope check should be 
+    !! @param[in] lg Set to true if the gradient slope check should be
     !!  performed; else, false.
     !! @param[in] xtol The tolerance on the change in variable.
     !! @param[in] ftol The tolerance on the residual.
@@ -718,7 +718,7 @@ contains
     !! @param[out] cs True if convergence occurred due to change in variable.
     !! @param[out] cf True if convergence occurred due to residual.
     !! @param[out] cg True if convergence occured due to slope of the gradient.
-    !! @param[out] xnorm The largest magnitude component of the scaled change 
+    !! @param[out] xnorm The largest magnitude component of the scaled change
     !!  in variable vector.
     !! @param[out] fnorm The largest magnitude residual component
     subroutine test_convergence(x, xo, f, g, lg, xtol, ftol, gtol, c, cx, cf, &
@@ -754,7 +754,6 @@ contains
         do i = 1, neqn
             fnorm = max(abs(f(i)), fnorm)
         end do
-        print '(AE8.3AE8.3)', "FNORM: ", fnorm, ", FTOL: ", ftol
         if (fnorm < ftol) then
             cf = .true.
             c = .true.
@@ -766,7 +765,6 @@ contains
             test = abs(x(i) - xo(i)) / max(abs(x(i)), one)
             xnorm = max(test, xnorm)
         end do
-        print '(AE8.3AE8.3)', "XNORM: ", xnorm, ", XTOL: ", xtol
         if (xnorm < xtol) then
             cx = .true.
             c = .true.
