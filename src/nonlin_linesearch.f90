@@ -18,9 +18,8 @@ module nonlin_linesearch
 ! TYPES
 ! ------------------------------------------------------------------------------
     !> @brief Defines a type capable of performing an inexact, backtracking line
-    !! search based on the Armijo-Goldstein condition to find a point as far 
-    !! along the specified direction vector that is usable for unconstrained
-    !! minimization problems.
+    !! search to find a point as far along the specified direction vector that 
+    !! is usable for unconstrained minimization problems.
     !!
     !! @par See Also
     !! - [Wikipedia](https://en.wikipedia.org/wiki/Backtracking_line_search)
@@ -38,11 +37,11 @@ module nonlin_linesearch
         !! line search.
         integer(i32) :: m_maxEval = 100
         !> Defines the scaling of the product of the gradient and direction 
-        !! vectors as part of the Armijo-Goldstein condition such that
-        !! F(X + LAMBDA * P) <= F(X) + LAMBDA * ALPHA * P**T * G, where P is the
-        !! search direction vector, G is the gradient vector, and LAMBDA is the
-        !! scaling factor.  The parameter must exist on the set (0, 1).  A value
-        !! of 1e-4 is typically a good starting point.
+        !! vectors such that F(X + LAMBDA * P) <= 
+        !! F(X) + LAMBDA * ALPHA * P**T * G, where P is the search direction 
+        !! vector, G is the gradient vector, and LAMBDA is the scaling factor.  
+        !! The parameter must exist on the set (0, 1).  A value of 1e-4 is 
+        !! typically a good starting point.
         real(dp) :: m_alpha = 1.0d-4
         !> Defines a minimum factor X used to determine a minimum value LAMBDA
         !! such that MIN(LAMBDA) = X * LAMBDA, where LAMBDA defines the distance
@@ -107,10 +106,9 @@ contains
 
 ! ------------------------------------------------------------------------------
     !> @brief Gets the scaling of the product of the gradient and direction 
-    !! vectors as part of the Armijo-Goldstein condition such that
-    !! F(X + LAMBDA * P) <= F(X) + LAMBDA * ALPHA * P**T * G, where P is the
-    !! search direction vector, G is the gradient vector, and LAMBDA is the
-    !! scaling factor.
+    !! vectors (ALPHA) such that F(X + LAMBDA * P) <= 
+    !! F(X) + LAMBDA * ALPHA * P**T * G, where P is the search direction vector,
+    !! G is the gradient vector, and LAMBDA is the scaling factor.
     !!
     !! @param[in] this The line_search object.
     !! @return The scaling factor.
@@ -121,11 +119,10 @@ contains
     end function
 
 ! --------------------
-    !> @brief Sets the scaling of the product of the gradient and direction 
-    !! vectors as part of the Armijo-Goldstein condition such that
-    !! F(X + LAMBDA * P) <= F(X) + LAMBDA * ALPHA * P**T * G, where P is the
-    !! search direction vector, G is the gradient vector, and LAMBDA is the
-    !! scaling factor.
+    !> @brief sets the scaling of the product of the gradient and direction 
+    !! vectors (ALPHA) such that F(X + LAMBDA * P) <= 
+    !! F(X) + LAMBDA * ALPHA * P**T * G, where P is the search direction vector,
+    !! G is the gradient vector, and LAMBDA is the scaling factor.
     !!
     !! @param[in,out] this The line_search object.
     !! @param[in] x The scaling factor.
@@ -169,10 +166,9 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Utilizes an inexact, backtracking line search based on the
-    !! Armijo-Goldstein condition to find a point as far along the specified
-    !! direction vector that is usable for unconstrained minimization
-    !! problems.
+    !> @brief Utilizes an inexact, backtracking line search to find a point as 
+    !! far along the specified direction vector that is usable for unconstrained
+    !! minimization problems.
     !!
     !! @param[in] this The line_search object.
     !! @param[in] fcn A vecfcn_helper object containing the system of equations.
