@@ -69,6 +69,7 @@ contains
 
         ! Generate a set of initial conditions
         call random_number(ic)
+        ic = 10.0d0 * ic
 
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
