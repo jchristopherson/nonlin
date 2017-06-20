@@ -19,6 +19,7 @@ module nonlin_types
     public :: NL_INVALID_OPERATION_ERROR
     public :: NL_CONVERGENCE_ERROR
     public :: NL_DIVERGENT_BEHAVIOR_ERROR
+    public :: NL_SPURIOUS_CONVERGENCE_ERROR
 
 ! ******************************************************************************
 ! ERROR FLAGS
@@ -35,6 +36,8 @@ module nonlin_types
     integer, parameter :: NL_CONVERGENCE_ERROR = 205
     !> An error resulting from a divergent condition.
     integer, parameter :: NL_DIVERGENT_BEHAVIOR_ERROR = 206
+    !> An error indicating a possible spurious convergence condition.
+    integer, parameter :: NL_SPURIOUS_CONVERGENCE_ERROR = 207
 
 ! ******************************************************************************
 ! INTERFACES
