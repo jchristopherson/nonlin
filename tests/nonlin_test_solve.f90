@@ -76,7 +76,7 @@ contains
         do i = 1, size(ic, 1)
             x = ic(i,:)
             call solver%solve(obj, x, f, ib)
-            if (.not.is_ans_1(x, 1.0d-5)) then
+            if (.not.is_ans_1(x, 1.0d-6)) then
                 check = .false.
                 print '(AI0)', "Quasi-Newton Solver Failed: Test 1-", i
                 print '(AF9.5AF9.5)', "Initial Condition: ", ic(i,1), ", ", &
@@ -128,7 +128,7 @@ contains
         do i = 1, size(ic, 1)
             x = ic(i,:)
             call solver%solve(obj, x, f, ib)
-            if (.not.is_ans_1(x, 1.0d-5)) then
+            if (.not.is_ans_1(x, 1.0d-6)) then
                 check = .false.
                 print '(AI0)', "Newton Solver Failed: Test 1-", i
                 print '(AF9.5AF9.5)', "Initial Condition: ", ic(i,1), ", ", &
