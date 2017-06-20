@@ -377,6 +377,8 @@ contains
     !!      the allowed number of iterations.
     !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
     !!      available.
+    !!  - NL_SPURIOUS_CONVERGENCE_ERROR: Occurs as a warning if the slope of the
+    !!      gradient vector becomes sufficiently close to zero.
     !!
     !! @par See Also
     !! - [Wikipedia](https://en.wikipedia.org/wiki/Broyden%27s_method)
@@ -620,7 +622,18 @@ contains
                         ! The slope of the gradient is sufficiently close to
                         ! zero to cause issue.
                         if (restart) then
-                            ! We've already tried recalculating a new Jacobian
+                            ! We've already tried recalculating a new Jacobian,
+                            ! issue a warning
+                            write(errmsg, '(AI0AE8.3AE8.3)') &
+                                "It appears the solution has settled to " // &
+                                "a point where the slope of the gradient " // &
+                                "is effectively zero.  " // new_line('c') // &
+                                "Function evaluations performed: ", neval, &
+                                "." // new_line('c') // &
+                                "Change in Variable: ", xnorm, &
+                                new_line('c') // "Residual: ", fnorm
+                            call report_warning("nqs_solve", trim(errmsg), &
+                                NL_SPURIOUS_CONVERGENCE_ERROR)
                             exit
                         else
                             ! Try computing a new Jacobian
@@ -704,7 +717,41 @@ contains
 ! ******************************************************************************
 ! NEWTON_SOLVER MEMBERS
 ! ------------------------------------------------------------------------------
-    !
+    !> @brief Applies Newton's method in conjunction with a backtracking type 
+    !! line search to solve N equations of N unknowns.
+    !!
+    !! @param[in,out] this The equation_solver-based object.
+    !! @param[in] fcn The vecfcn_helper object containing the equations to
+    !!  solve.
+    !! @param[in,out] x On input, an N-element array containing an initial
+    !!  estimate to the solution.  On output, the updated solution estimate.
+    !!  N is the number of variables.
+    !! @param[out] fvec An M-element array that, on output, will contain
+    !!  the values of each equation as evaluated at the variable values
+    !!  given in @p x.
+    !! @param[out] ib An optional output, that if provided, allows the
+    !!  caller to obtain iteration performance statistics.
+    !! @param[out] err An optional errors-based object that if provided can be
+    !!  used to retrieve information relating to any errors encountered during
+    !!  execution.  If not provided, a default implementation of the errors
+    !!  class is used internally to provide error handling.  Possible errors and
+    !!  warning messages that may be encountered are as follows.
+    !!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+    !!  - NL_INVALID_INPUT_ERROR: Occurs if the number of equations is different
+    !!      than the number of variables.
+    !!  - NL_ARRAY_SIZE_ERROR: Occurs if any of the input arrays are not sized
+    !!      correctly.
+    !!  - NL_DIVERGENT_BEHAVIOR_ERROR: Occurs if the direction vector is
+    !!      pointing in an apparent uphill direction.
+    !!  - NL_CONVERGENCE_ERROR: Occurs if the line search cannot converge within
+    !!      the allowed number of iterations.
+    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+    !!      available.
+    !!  - NL_SPURIOUS_CONVERGENCE_ERROR: Occurs as a warning if the slope of the
+    !!      gradient vector becomes sufficiently close to zero.
+    !!
+    !! @par See Also
+    !! - [Wikipedia](https://en.wikipedia.org/wiki/Newton%27s_method)
     subroutine ns_solve(this, fcn, x, fvec, ib, err)
         ! Arguments
         class(newton_solver), intent(inout) :: this
@@ -893,8 +940,16 @@ contains
                 else if (gcnvrg) then
                     ! The solution appears to have settled at a point where
                     ! the gradient has a zero slope
-
-                    ! TO DO: Inform the user
+                    write(errmsg, '(AI0AE8.3AE8.3)') &
+                        "It appears the solution has settled to " // &
+                        "a point where the slope of the gradient " // &
+                        "is effectively zero.  " // new_line('c') // &
+                        "Function evaluations performed: ", neval, &
+                        "." // new_line('c') // &
+                        "Change in Variable: ", xnorm, &
+                        new_line('c') // "Residual: ", fnorm
+                    call report_warning("ns_solve", trim(errmsg), &
+                        NL_SPURIOUS_CONVERGENCE_ERROR)
                 end if
 
                 ! Print status
