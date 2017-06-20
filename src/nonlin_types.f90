@@ -203,9 +203,10 @@ module nonlin_types
         !!  solver.
         subroutine nonlin_solver(this, fcn, x, fvec, ib, err)
             use linalg_constants, only : dp, i32
-            use nonlin_types, only : vecfcn_helper, iteration_behavior
             use ferror, only : errors
             import equation_solver
+            import vecfcn_helper
+            import iteration_behavior
             class(equation_solver), intent(inout) :: this
             class(vecfcn_helper), intent(in) :: fcn
             real(dp), intent(inout), dimension(:) :: x
