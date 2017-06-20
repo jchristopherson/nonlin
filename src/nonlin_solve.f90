@@ -15,59 +15,12 @@ module nonlin_solve
     use linalg_solve, only : solve_triangular_system, solve_lu
     implicit none
     private
-    public :: equation_solver
     public :: line_search_solver
     public :: quasi_newton_solver
     public :: newton_solver
-    public :: nonlin_solver
 
 ! ******************************************************************************
 ! TYPES
-! ------------------------------------------------------------------------------
-    !> @brief A base class for various nonlinear equation solvers.
-    type, abstract :: equation_solver
-        private
-        !> The maximum number of function evaluations allowed per solve.
-        integer(i32) :: m_maxEval = 100
-        !> The convergence criteria on function values.
-        real(dp) :: m_fcnTol = 1.0d-8
-        !> The convergence criteria on change in variable values.
-        real(dp) :: m_xtol = 1.0d-12
-        !> The convergence criteria for the slope of the gradient vector.
-        real(dp) :: m_gtol = 1.0d-12
-        !> Set to true to print iteration status; else, false.
-        logical :: m_printStatus = .false.
-    contains
-        !> @brief Gets the maximum number of function evaluations allowed during
-        !! a single solve.
-        procedure, public :: get_max_fcn_evals => es_get_max_eval
-        !> @brief Sets the maximum number of function evaluations allowed during
-        !! a single solve.
-        procedure, public :: set_max_fcn_evals => es_set_max_eval
-        !> @brief Gets the convergence on function value tolerance.
-        procedure, public :: get_fcn_tolerance => es_get_fcn_tol
-        !> @brief Sets the convergence on function value tolerance.
-        procedure, public :: set_fcn_tolerance => es_set_fcn_tol
-        !> @brief Gets the convergence on change in variable tolerance.
-        procedure, public :: get_var_tolerance => es_get_var_tol
-        !> @brief Sets the convergence on change in variable tolerance.
-        procedure, public :: set_var_tolerance => es_set_var_tol
-        !> @brief Gets the convergence on slope of the gradient vector
-        !! tolerance.
-        procedure, public :: get_gradient_tolerance => es_get_grad_tol
-        !> @brief Sets the convergence on slope of the gradient vector
-        !! tolerance.
-        procedure, public :: set_gradient_tolerance => es_set_grad_tol
-        !> @brief Gets a logical value determining if iteration status should be
-        !! printed.
-        procedure, public :: get_print_status => es_get_print_status
-        !> @brief Sets a logical value determining if iteration status should be
-        !! printed.
-        procedure, public :: set_print_status => es_set_print_status
-        !> @brief Solves the system of equations.
-        procedure(nonlin_solver), deferred, public, pass :: solve
-    end type
-
 ! ------------------------------------------------------------------------------
     !> @brief A class describing nonlinear solvers that use a line search
     !! algorithm to improve convergence behavior.
@@ -120,160 +73,9 @@ module nonlin_solve
         procedure, public :: solve => ns_solve
     end type
 
-! ******************************************************************************
-! INTERFACES
-! ------------------------------------------------------------------------------
-    interface
-        !> @brief Describes the interface of a nonlinear equation solver.
-        !!
-        !! @param[in,out] this The equation_solver-based object.
-        !! @param[in] fcn The vecfcn_helper object containing the equations to
-        !!  solve.
-        !! @param[in,out] x On input, an N-element array containing an initial
-        !!  estimate to the solution.  On output, the updated solution estimate.
-        !!  N is the number of variables.
-        !! @param[out] fvec An M-element array that, on output, will contain
-        !!  the values of each equation as evaluated at the variable values
-        !!  given in @p x.
-        !! @param[out] ib An optional output, that if provided, allows the
-        !!  caller to obtain iteration performance statistics.
-        !! @param[out] err An optional errors-based object that if provided can
-        !!  be used to retrieve information relating to any errors encountered
-        !!  during execution.  If not provided, a default implementation of the
-        !!  errors class is used internally to provide error handling.  The
-        !!  possible error codes returned will likely vary from solver to
-        !!  solver.
-        subroutine nonlin_solver(this, fcn, x, fvec, ib, err)
-            use linalg_constants, only : dp, i32
-            use nonlin_types, only : vecfcn_helper, iteration_behavior
-            use ferror, only : errors
-            import equation_solver
-            class(equation_solver), intent(inout) :: this
-            class(vecfcn_helper), intent(in) :: fcn
-            real(dp), intent(inout), dimension(:) :: x
-            real(dp), intent(out), dimension(:) :: fvec
-            type(iteration_behavior), optional :: ib
-            class(errors), intent(in), optional, target :: err
-        end subroutine
-    end interface
+ 
 
 contains
-! ******************************************************************************
-! EQUATION_SOLVER MEMBERS
-! ------------------------------------------------------------------------------
-    !> @brief Gets the maximum number of function evaluations allowed during a
-    !! single solve.
-    !!
-    !! @param[in] this The equation_solver object.
-    !! @return The maximum number of function evaluations.
-    pure function es_get_max_eval(this) result(n)
-        class(equation_solver), intent(in) :: this
-        integer(i32) :: n
-        n = this%m_maxEval
-    end function
-
-! --------------------
-    !> @brief Sets the maximum number of function evaluations allowed during a
-    !! single solve.
-    !!
-    !! @param[in,out] this The equation_solver object.
-    !! @param[in] n The maximum number of function evaluations.
-    subroutine es_set_max_eval(this, n)
-        class(equation_solver), intent(inout) :: this
-        integer(i32), intent(in) :: n
-        this%m_maxEval = n
-    end subroutine
-
-! ------------------------------------------------------------------------------
-    !> @brief Gets the convergence on function value tolerance.
-    !!
-    !! @param[in] this The equation_solver object.
-    !! @return The tolerance value.
-    pure function es_get_fcn_tol(this) result(x)
-        class(equation_solver), intent(in) :: this
-        real(dp) :: x
-        x = this%m_fcnTol
-    end function
-
-! --------------------
-    !> @brief Sets the convergence on function value tolerance.
-    !!
-    !! @param[in,out] this The equation_solver object.
-    !! @param[in] x The tolerance value.
-    subroutine es_set_fcn_tol(this, x)
-        class(equation_solver), intent(inout) :: this
-        real(dp), intent(in) :: x
-        this%m_fcnTol = x
-    end subroutine
-
-! ------------------------------------------------------------------------------
-    !> @brief Gets the convergence on change in variable tolerance.
-    !!
-    !! @param[in] this The equation_solver object.
-    !! @return The tolerance value.
-    pure function es_get_var_tol(this) result(x)
-        class(equation_solver), intent(in) :: this
-        real(dp) :: x
-        x = this%m_xtol
-    end function
-
-! --------------------
-    !> @brief Sets the convergence on change in variable tolerance.
-    !!
-    !! @param[in,out] this The equation_solver object.
-    !! @param[in] x The tolerance value.
-    subroutine es_set_var_tol(this, x)
-        class(equation_solver), intent(inout) :: this
-        real(dp), intent(in) :: x
-        this%m_xtol = x
-    end subroutine
-
-! ------------------------------------------------------------------------------
-    !> @brief Gets the convergence on slope of the gradient vector tolerance.
-    !!
-    !! @param[in] this The equation_solver object.
-    !! @return The tolerance value.
-    pure function es_get_grad_tol(this) result(x)
-        class(equation_solver), intent(in) :: this
-        real(dp) :: x
-        x = this%m_gtol
-    end function
-
-! --------------------
-    !> @brief Sets the convergence on slope of the gradient vector tolerance.
-    !!
-    !! @param[in] this The equation_solver object.
-    !! @return The tolerance value.
-    subroutine es_set_grad_tol(this, x)
-        class(equation_solver), intent(inout) :: this
-        real(dp), intent(in) :: x
-        this%m_gtol = x
-    end subroutine
-
-! ------------------------------------------------------------------------------
-    !> @brief Gets a logical value determining if iteration status should be
-    !! printed.
-    !!
-    !! @param[in] this The equation_solver object.
-    !! @return True if the iteration status should be printed; else, false.
-    pure function es_get_print_status(this) result(x)
-        class(equation_solver), intent(in) :: this
-        logical :: x
-        x = this%m_printStatus
-    end function
-
-! --------------------
-    !> @brief Sets a logical value determining if iteration status should be
-    !! printed.
-    !!
-    !! @param[in,out] this The equation_solver object.
-    !! @param[in] x True if the iteration status should be printed; else, false.
-    subroutine es_set_print_status(this, x)
-        class(equation_solver), intent(inout) :: this
-        logical, intent(in) :: x
-        this%m_printStatus = x
-    end subroutine
-
 ! ******************************************************************************
 ! LINE_SEARCH_SOLVER MEMBERS
 ! ------------------------------------------------------------------------------
