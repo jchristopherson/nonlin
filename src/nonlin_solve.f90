@@ -18,6 +18,7 @@ module nonlin_solve
     public :: equation_solver
     public :: line_search_solver
     public :: quasi_newton_solver
+    public :: newton_solver
     public :: nonlin_solver
 
 ! ******************************************************************************
