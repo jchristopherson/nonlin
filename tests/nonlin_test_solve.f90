@@ -7,6 +7,7 @@ module nonlin_test_solve
     implicit none
     private
     public :: test_quasinewton_1
+    public :: test_newton_1
 contains
 ! ------------------------------------------------------------------------------
     ! System of Equations #1:
@@ -101,6 +102,54 @@ contains
 ! ------------------------------------------------------------------------------
 
 ! ------------------------------------------------------------------------------
+    subroutine test_newton_1()
+        ! Local Variables
+        type(vecfcn_helper) :: obj
+        procedure(vecfcn), pointer :: fcn
+        procedure(jacobianfcn), pointer :: jac
+        type(newton_solver) :: solver
+        type(iteration_behavior) :: ib
+        real(dp) :: x(2), f(2), ic(10, 2)
+        integer(i32) :: i
+        logical :: check
+
+        ! Initialization
+        check = .true.
+        fcn => fcn1
+        jac => jac1
+        call obj%set_fcn(fcn, 2, 2)
+        call obj%set_jacobian(jac)
+
+        ! Generate a set of initial conditions
+        call random_number(ic)
+        ic = 10.0d0 * ic
+
+        ! Process - Cycle over each different initial condition set
+        do i = 1, size(ic, 1)
+            x = ic(i,:)
+            call solver%solve(obj, x, f, ib)
+            if (.not.is_ans_1(x, 1.0d-5)) then
+                check = .false.
+                print '(AI0)', "Newton Solver Failed: Test 1-", i
+                print '(AF9.5AF9.5)', "Initial Condition: ", ic(i,1), ", ", &
+                    ic(i,2)
+                print '(AF9.5AF9.5)', "Solution:", x(1), ", ", x(2)
+                print '(AF9.5AF9.5)', "Residual:", f(1), ", ", f(2)
+                print '(AL)', "Converged on residual: ", ib%converge_on_fcn
+                print '(AL)', "Converged on solution change: ", &
+                    ib%converge_on_chng
+                print '(AL)', "Converge on zero gradient: ", &
+                    ib%converge_on_zero_diff
+                print '(AI0)', "Iterations: ", ib%iter_count
+                print '(AI0)', "Function Evaluations: ", ib%fcn_count
+            end if
+        end do
+
+        ! Inform user of a succussful test
+        if (check) then
+            print '(A)', "Test Passed: Newton Test 1"
+        end if
+    end subroutine
 
 ! ------------------------------------------------------------------------------
 

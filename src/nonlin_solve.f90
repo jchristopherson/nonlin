@@ -633,8 +633,8 @@ contains
                                 "." // new_line('c') // &
                                 "Change in Variable: ", xnorm, &
                                 new_line('c') // "Residual: ", fnorm
-                            call report_warning("nqs_solve", trim(errmsg), &
-                                NL_SPURIOUS_CONVERGENCE_ERROR)
+                            call errmgr%report_warning("nqs_solve", &
+                                trim(errmsg), NL_SPURIOUS_CONVERGENCE_ERROR)
                             exit
                         else
                             ! Try computing a new Jacobian
@@ -949,7 +949,7 @@ contains
                         "." // new_line('c') // &
                         "Change in Variable: ", xnorm, &
                         new_line('c') // "Residual: ", fnorm
-                    call report_warning("ns_solve", trim(errmsg), &
+                    call errmgr%report_warning("ns_solve", trim(errmsg), &
                         NL_SPURIOUS_CONVERGENCE_ERROR)
                 end if
 
