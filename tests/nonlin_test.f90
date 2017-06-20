@@ -12,5 +12,7 @@ program main
     ! Tests
     call test_jacobian_1()
     call test_quasinewton_1()
+    call test_quasinewton_2()
     call test_newton_1()
+    call test_newton_2()
 end program
