@@ -17,6 +17,9 @@ module nonlin_least_squares
 ! ------------------------------------------------------------------------------
     !
     type, extends(equation_solver) :: least_squares_solver
+        private
+        !
+        real(dp) :: m_factor = 100.0d0
     contains
         !> @brief Solves the system of equations.
         procedure, public :: solve => lss_solve
@@ -36,7 +39,296 @@ contains
         type(iteration_behavior), optional :: ib
         class(errors), intent(in), optional, target :: err
 
+        ! Parameters
+        real(dp), parameter :: zero = 0.0d0
+        real(dp), parameter :: p0001 = 1.0d-4
+        real(dp), parameter :: p1 = 0.1d0
+        real(dp), parameter :: qtr = 0.25d0
+        real(dp), parameter :: half = 0.5d0
+        real(dp), parameter :: p75 = 0.75d0
+        real(dp), parameter :: one = 1.0d0
+        real(dp), parameter :: hndrd = 1.0d2
+
         ! Local Variables
+        logical :: xcnvrg, fcnvrg, gcnvrg
+        integer(i32) :: i, neqn, nvar, flag, neval, iter, j, l, maxeval, &
+            njac, lwork
+        integer(i32), allocatable, dimension(:) :: jpvt
+        real(dp) :: ftol, xtol, gtol, fac, eps, fnorm, par, xnorm, delta, &
+            sm, temp, gnorm, pnorm, fnorm1, actred, temp1, temp2, prered, &
+            dirder, ratio
+        real(dp), allocatable, dimension(:,:) :: jac
+        real(dp), allocatable, dimension(:) :: diag, qtf, wa1, wa2, wa3, wa4, w
+        class(errors), pointer :: errmgr
+        type(errors), target :: deferr
+        character(len = 256) :: errmsg
+
+        ! Initialization
+        xcnvrg = .false.
+        fcnvrg = .false.
+        gcnvrg = .false.
+        neqn = fcn%get_equation_count()
+        nvar = fcn%get_variable_count()
+        neval = 0
+        iter = 0
+        njac = 0
+        fac = this%m_factor
+        ftol = this%get_fcn_tolerance()
+        xtol = this%get_var_tolerance()
+        gtol = this%get_gradient_tolerance()
+        maxeval = this%get_max_fcn_evals()
+        eps = epsilon(eps)
+        if (present(ib)) then
+            ib%iter_count = iter
+            ib%fcn_count = neval
+            ib%jacobian_count = njac
+            ib%converge_on_fcn = fcnvrg
+            ib%converge_on_chng = xcnvrg
+            ib%converge_on_zero_diff = gcnvrg
+        end if
+        if (present(err)) then
+            errmgr => err
+        else
+            errmgr => deferr
+        end if
+
+        ! Input Check
+        if (.not.fcn%is_fcn_defined()) then
+            ! ERROR: No function is defined
+            call errmgr%report_error("lss_solve", &
+                "No function has been defined.", &
+                NL_INVALID_OPERATION_ERROR)
+            return
+        end if
+        if (nvar > neqn) then
+            ! ERROR: System is underdetermined
+            call errmgr%report_error("lss_solve", "The solver cannot " // &
+                "solve the underdetermined problem.  The number of " // &
+                "unknowns must not exceed the number of equations.", &
+                NL_INVALID_INPUT_ERROR)
+            return
+        end if
+        flag = 0
+        if (size(x) /= nvar) then
+            flag = 3
+        else if (size(fvec) /= neqn) then
+            flag = 4
+        end if
+        if (flag /= 0) then
+            ! One of the input arrays is not sized correctly
+            write(errmsg, '(AI0A)') "Input number ", flag, &
+                " is not sized correctly."
+            call errmgr%report_error("lss_solve", trim(errmsg), &
+                NL_ARRAY_SIZE_ERROR)
+            return
+        end if
+
+        ! Local Memory Allocation
+        allocate(jpvt(nvar), stat = flag)
+        if (flag == 0) allocate(jac(neqn, nvar), stat = flag)
+        if (flag == 0) allocate(diag(nvar), stat = flag)
+        if (flag == 0) allocate(qtf(nvar), stat = flag)
+        if (flag == 0) allocate(wa1(nvar), stat = flag)
+        if (flag == 0) allocate(wa2(nvar), stat = flag)
+        if (flag == 0) allocate(wa3(nvar), stat = flag)
+        if (flag == 0) allocate(wa4(neqn), stat = flag)
+        if (flag == 0) then
+            call fcn%jacobian(x, jac, fv = fvec, olwork = lwork)
+            allocate(w(lwork), stat = flag)
+        end if
+        if (flag /= 0) then
+            ! ERROR: Out of memory
+            call errmgr%report_error("qns_solve", &
+                "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
+            return
+        end if
+
+        ! Evaluate the function at the starting point, and calculate its norm
+        call fcn%fcn(x, fvec)
+        neval = 1
+        fnorm = norm2(fvec)
+
+        ! Process
+        par = zero
+        iter = 1
+        flag = 0
+        do
+            ! Evaluate the Jacobian
+            call fcn%jacobian(x, jac, fvec, w)
+            njac = njac + 1
+
+            ! Compute the QR factorization of the Jacobian
+            call lmfactor(jac, .true., jpvt, wa1, wa2, wa3)
+
+            ! On the first iteration, scale the problem according to the norms
+            ! of each of the columns of the initial Jacobian
+            if (iter == 1) then
+                do j = 1, nvar
+                    diag(j) = wa2(j)
+                    if (wa2(j) == zero) diag(j) = one
+                end do
+                wa3 = diag * x
+                xnorm = norm2(wa3)
+                delta = fac * xnorm
+                if (delta == zero) delta = fac
+            end if
+
+            ! Form Q**T * FVEC, and store the first N components in QTF
+            wa4 = fvec
+            do j = 1, nvar
+                if (jac(j,j) /= zero) then
+                    sm = zero
+                    do i = j, neqn
+                        sm = sm + jac(i,j) * wa4(i)
+                    end do
+                    temp = -sm / jac(j,j)
+                    wa4(j:neqn) = wa4(j:neqn) + jac(j:neqn,j) * temp
+                end if ! LINE 120
+                jac(j,j) = wa1(j)
+                qtf(j) = wa4(j)
+            end do
+
+            ! Compute the norm of the scaled gradient
+            gnorm = zero
+            if (fnorm /= zero) then
+                do j = 1, nvar
+                    l = jpvt(j)
+                    if (wa2(l) == zero) cycle
+                    sm = zero
+                    do i = 1, j
+                        sm = sm + jac(i,j) * (qtf(i) / fnorm)
+                    end do
+                    gnorm = max(gnorm, abs(sm / wa2(l)))
+                end do
+            end if ! LINE 170
+
+            ! Test for convergence of the gradient norm
+            if (gnorm <= gtol) then
+                gcnvrg = .true.
+                exit
+            end if
+
+            ! Rescale if necessary
+            do j = 1, nvar
+                diag(j) = max(diag(j), wa2(j))
+            end do
+
+            ! Inner Loop
+            do
+                ! Determine the Levenberg-Marquardt parameter
+                call lmpar(jac, jpvt, diag, qtf, delta, par, wa1, wa2, wa3, wa4)
+
+                ! Store the direction P, and X + P.  Calculate the norm of P
+                do j = 1, nvar
+                    wa1(j) = -wa1(j)
+                    wa2(j) = x(j) + wa1(j)
+                    wa3(j) = diag(j) * wa1(j)
+                end do
+                pnorm = norm2(wa3)
+
+                ! On the first iteration, adjust the initial step bounds
+                if (iter == 1) delta = min(delta, pnorm)
+
+                ! Evaluate the function at X + P, and calculate its norm
+                call fcn%fcn(wa2, wa4)
+                neval = neval + 1
+                fnorm1 = norm2(wa4)
+
+                ! Compute the scaled actual reduction
+                actred = -one
+                if (p1 * fnorm1 < fnorm) actred = one - (fnorm1 / fnorm)**2
+
+                ! Compute the scaled predicted reduction and the scaled
+                ! directional derivative
+                do j = 1, nvar
+                    wa3(j) = zero
+                    l = jpvt(j)
+                    temp = wa1(l)
+                    wa3(1:j) = wa3(1:j) + jac(1:j,j) * temp
+                end do
+                temp1 = norm2(wa3) / fnorm
+                temp2 = (sqrt(par) * pnorm) / fnorm
+                prered = temp1**2 + temp2**2 / half
+                dirder = -(temp1**2 + temp2**2)
+
+                ! Compute the ratio of the actual to the predicted reduction
+                ratio = zero
+                if (prered /= zero) ratio = actred / prered
+
+                ! Update the step bounds
+                if (ratio <= qtr) then
+                    if (actred >= zero) temp = half
+                    if (actred < zero) temp = half * dirder / &
+                        (dirder + half * actred)
+                    if (p1 * fnorm1 >= fnorm .or. temp < p1) temp = p1
+                    delta = temp * min(delta, pnorm / p1)
+                    par = par / temp
+                else
+                    if (par /= zero .and. ratio < p75) then
+                        ! NO ACTION REQUIRED
+                    else
+                        delta = pnorm / half
+                        par = half * par
+                    end if
+                end if ! LINE 240
+
+                ! Test for successful iteration
+                if (ratio >= p0001) then
+                    do j = 1, nvar
+                        x(j) = wa2(j)
+                        wa2(j) = diag(j) * x(j)
+                    end do
+                    fvec = wa4
+                    xnorm = norm2(wa2)
+                    fnorm = fnorm1
+                    iter = iter + 1
+                end if ! LINE 290
+
+                ! Tests for convergence
+                if (abs(actred) <= ftol .and. prered <= ftol .and. &
+                    half * ratio <= one) fcnvrg = .true.
+                if (delta <= xtol * xnorm) xcnvrg = .true.
+                if (fcnvrg .or. xcnvrg) exit
+
+                ! Tests for termination and stringent tolerances
+                if (neval >= maxeval) flag = NL_CONVERGENCE_ERROR
+                if (abs(actred) <= eps .and. prered <= eps .and. &
+                    half * ratio <= one) flag = NL_TOLERANCE_TOO_SMALL_ERROR
+                if (delta <= eps * xnorm) flag = NL_TOLERANCE_TOO_SMALL_ERROR
+                if (gnorm <= eps) flag = NL_TOLERANCE_TOO_SMALL_ERROR
+                if (flag /= 0) exit
+
+                if (ratio >= p0001) exit
+            end do ! End of the inner loop
+
+            ! Check for termination criteria
+            if (fcnvrg .or. xcnvrg .or. gcnvrg .or. flag /= 0) exit
+
+            ! Print the iteration status
+            if (this%get_print_status()) then
+                call print_status(iter, neval, njac, xnorm, fnorm)
+            end if
+        end do
+
+        ! Report out iteration statistics
+        if (present(ib)) then
+            ib%iter_count = iter
+            ib%fcn_count = neval
+            ib%jacobian_count = njac
+            ib%converge_on_fcn = fcnvrg
+            ib%converge_on_chng = xcnvrg
+            ib%converge_on_zero_diff = gcnvrg
+        end if
+
+        ! Check for convergence issues
+        if (flag /= 0) then
+            write(errmsg, '(AI0AE8.3AE8.3)') "The algorithm failed to " // &
+                "converge.  Function evaluations performed: ", neval, &
+                "." // new_line('c') // "Change in Variable: ", xnorm, &
+                new_line('c') // "Residual: ", fnorm
+            call errmgr%report_error("lss_solve", trim(errmsg), &
+                flag)
+        end if
     end subroutine
 
 ! ------------------------------------------------------------------------------

@@ -15,6 +15,7 @@ module nonlin_types
     public :: iteration_behavior
     public :: equation_solver
     public :: nonlin_solver
+    public :: print_status
     public :: NL_INVALID_INPUT_ERROR
     public :: NL_ARRAY_SIZE_ERROR
     public :: NL_OUT_OF_MEMORY_ERROR
@@ -22,6 +23,7 @@ module nonlin_types
     public :: NL_CONVERGENCE_ERROR
     public :: NL_DIVERGENT_BEHAVIOR_ERROR
     public :: NL_SPURIOUS_CONVERGENCE_ERROR
+    public :: NL_TOLERANCE_TOO_SMALL_ERROR
 
 ! ******************************************************************************
 ! ERROR FLAGS
@@ -40,6 +42,9 @@ module nonlin_types
     integer, parameter :: NL_DIVERGENT_BEHAVIOR_ERROR = 206
     !> An error indicating a possible spurious convergence condition.
     integer, parameter :: NL_SPURIOUS_CONVERGENCE_ERROR = 207
+    !> An error indicating the user-requested tolerance is too small to be
+    !! practical for the problem at hand.
+    integer, parameter :: NL_TOLERANCE_TOO_SMALL_ERROR = 208
 
 ! ******************************************************************************
 ! INTERFACES
@@ -567,6 +572,30 @@ contains
         class(equation_solver), intent(inout) :: this
         logical, intent(in) :: x
         this%m_printStatus = x
+    end subroutine
+
+! ******************************************************************************
+! MISC. ROUTINES
+! ------------------------------------------------------------------------------
+    !> @brief Prints the iteration status.
+    !!
+    !! @param[in] iter The iteration number.
+    !! @param[in] nfeval The number of function evaluations.
+    !! @param[in] njaceval The number of Jacobian evaluations.
+    !! @param[in] xnorm The change in variable value.
+    !! @param[in] fnorm The residual.
+    subroutine print_status(iter, nfeval, njaceval, xnorm, fnorm)
+        ! Arguments
+        integer(i32), intent(in) :: iter, nfeval, njaceval
+        real(dp), intent(in) :: xnorm, fnorm
+
+        ! Process
+        print *, ""
+        print '(AI0)', "Iteration: ", iter
+        print '(AI0)', "Function Evaluations: ", nfeval
+        if (njaceval > 0) print '(AI0)', "Jacobian Evaluations: ", njaceval
+        print '(AE8.3)', "Change in Variable: ", xnorm
+        print '(AE8.3)', "Residual: ", fnorm
     end subroutine
 
 ! ------------------------------------------------------------------------------

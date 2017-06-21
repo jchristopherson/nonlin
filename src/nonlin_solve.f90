@@ -887,26 +887,4 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Prints the iteration status.
-    !!
-    !! @param[in] iter The iteration number.
-    !! @param[in] nfeval The number of function evaluations.
-    !! @param[in] njaceval The number of Jacobian evaluations.
-    !! @param[in] xnorm The change in variable value.
-    !! @param[in] fnorm The residual.
-    subroutine print_status(iter, nfeval, njaceval, xnorm, fnorm)
-        ! Arguments
-        integer(i32), intent(in) :: iter, nfeval, njaceval
-        real(dp), intent(in) :: xnorm, fnorm
-
-        ! Process
-        print *, ""
-        print '(AI0)', "Iteration: ", iter
-        print '(AI0)', "Function Evaluations: ", nfeval
-        if (njaceval > 0) print '(AI0)', "Jacobian Evaluations: ", njaceval
-        print '(AE8.3)', "Change in Variable: ", xnorm
-        print '(AE8.3)', "Residual: ", fnorm
-    end subroutine
-
-! ------------------------------------------------------------------------------
 end module
