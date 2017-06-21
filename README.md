@@ -90,3 +90,6 @@ The example yields the following coefficients:
 - c4: 1.186614224
 
 These coefficients yield a maximum residual of 0.5064.
+
+The following graph illustrates the fit.
+![](images/Curve_Fit_Example_1.png?raw=true)
