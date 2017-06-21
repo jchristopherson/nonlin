@@ -15,4 +15,6 @@ program main
     call test_quasinewton_2()
     call test_newton_1()
     call test_newton_2()
+    call test_least_squares_1()
+    call test_least_squares_2()
 end program
