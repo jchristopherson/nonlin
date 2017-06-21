@@ -17,4 +17,5 @@ program main
     call test_newton_2()
     call test_least_squares_1()
     call test_least_squares_2()
+    call test_least_squares_3()
 end program
