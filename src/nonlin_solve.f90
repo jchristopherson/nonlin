@@ -159,7 +159,7 @@ contains
     !! @param[in,out] x On input, an N-element array containing an initial
     !!  estimate to the solution.  On output, the updated solution estimate.
     !!  N is the number of variables.
-    !! @param[out] fvec An M-element array that, on output, will contain
+    !! @param[out] fvec An N-element array that, on output, will contain
     !!  the values of each equation as evaluated at the variable values
     !!  given in @p x.
     !! @param[out] ib An optional output, that if provided, allows the
@@ -529,7 +529,7 @@ contains
     !! @param[in,out] x On input, an N-element array containing an initial
     !!  estimate to the solution.  On output, the updated solution estimate.
     !!  N is the number of variables.
-    !! @param[out] fvec An M-element array that, on output, will contain
+    !! @param[out] fvec An N-element array that, on output, will contain
     !!  the values of each equation as evaluated at the variable values
     !!  given in @p x.
     !! @param[out] ib An optional output, that if provided, allows the

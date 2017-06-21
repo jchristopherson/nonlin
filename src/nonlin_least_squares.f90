@@ -29,7 +29,43 @@ contains
 ! ******************************************************************************
 ! LEAST_SQUARES_SOLVER MEMBERS
 ! ------------------------------------------------------------------------------
-    !
+    !> @brief Applies the Levenberg-Marquardt method to solve the nonlinear
+    !! least-squares problem.
+    !!
+    !! @param[in,out] this The equation_solver-based object.
+    !! @param[in] fcn The vecfcn_helper object containing the equations to
+    !!  solve.
+    !! @param[in,out] x On input, an M-element array containing an initial
+    !!  estimate to the solution.  On output, the updated solution estimate.
+    !!  M is the number of variables.
+    !! @param[out] fvec An N-element array that, on output, will contain
+    !!  the values of each equation as evaluated at the variable values
+    !!  given in @p x.  N is the number of equations.
+    !! @param[out] ib An optional output, that if provided, allows the
+    !!  caller to obtain iteration performance statistics.
+    !! @param[out] err An optional errors-based object that if provided can be
+    !!  used to retrieve information relating to any errors encountered during
+    !!  execution.  If not provided, a default implementation of the errors
+    !!  class is used internally to provide error handling.  Possible errors and
+    !!  warning messages that may be encountered are as follows.
+    !!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+    !!  - NL_INVALID_INPUT_ERROR: Occurs if the number of equations is less than
+    !!      than the number of variables.
+    !!  - NL_ARRAY_SIZE_ERROR: Occurs if any of the input arrays are not sized
+    !!      correctly.
+    !!  - NL_CONVERGENCE_ERROR: Occurs if the line search cannot converge within
+    !!      the allowed number of iterations.
+    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+    !!      available.
+    !!  - NL_TOLERANCE_TOO_SMALL_ERROR: Occurs if the requested tolerance is
+    !!      to small to be practical for the problem at hand.
+    !!
+    !! @par Remarks
+    !! This routines is based upon the MINPACK routine LMDIF.
+    !!
+    !! @par See Also
+    !! - [Wikipedia](https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm)
+    !! - [MINPACK (Wikipedia)](https://en.wikipedia.org/wiki/MINPACK)
     subroutine lss_solve(this, fcn, x, fvec, ib, err)
         ! Arguments
         class(least_squares_solver), intent(inout) :: this
