@@ -15,12 +15,17 @@ module nonlin_least_squares
 ! ******************************************************************************
 ! TYPES
 ! ------------------------------------------------------------------------------
-    !
+    !> @brief Defines a Levenberg-Marquardt based solver for unconstrained 
+    !! least-squares problems.
     type, extends(equation_solver) :: least_squares_solver
         private
-        !
+        !> Initial step bounding factor
         real(dp) :: m_factor = 100.0d0
     contains
+        !> @brief Gets a factor used to scale the bounds on the initial step.
+        procedure, public :: get_step_scaling_factor
+        !> @brief Sets a factor used to scale the bounds on the initial step.
+        procedure, public :: set_step_scaling_factor
         !> @brief Solves the system of equations.
         procedure, public :: solve => lss_solve
     end type
@@ -29,10 +34,53 @@ contains
 ! ******************************************************************************
 ! LEAST_SQUARES_SOLVER MEMBERS
 ! ------------------------------------------------------------------------------
+    !> @brief Gets a factor used to scale the bounds on the initial step.
+    !!
+    !! @param[in] this The least_squares_solver object.
+    !! @return The factor.
+    !!
+    !! @par Remarks
+    !! This factor is used to set the bounds on the initial step such that the
+    !! initial step is bounded as the product of the factor with the Euclidean
+    !! norm of the vector resulting from multiplication of the diagonal
+    !! scaling matrix and the solution estimate.  If zero, the factor itself
+    !! is used.
+    pure function lss_get_factor(this) result(x)
+        class(least_squares_solver), intent(in) :: this
+        real(dp) :: x
+        x = this%m_factor
+    end function
+
+! --------------------
+    !> @brief Sets a factor used to scale the bounds on the initial step.
+    !!
+    !! @param[in] this The least_squares_solver object.
+    !! @param[in] x The factor.  Notice, the factor is limited to the interval
+    !!  [0.1, 100].
+    !!
+    !! @par Remarks
+    !! This factor is used to set the bounds on the initial step such that the
+    !! initial step is bounded as the product of the factor with the Euclidean
+    !! norm of the vector resulting from multiplication of the diagonal
+    !! scaling matrix and the solution estimate.  If zero, the factor itself
+    !! is used.
+    subroutine lss_set_factor(this, x)
+        class(least_squares_solver), intent(inout) :: this
+        real(dp), intent(in) :: x
+        if (x < 0.1d0) then
+            this%m_factor = 0.1d0
+        else if (x > 1.0d2) then
+            this%m_factor = 1.0d2
+        else
+            this%m_factor = x
+        end if
+    end subroutine
+
+! ------------------------------------------------------------------------------
     !> @brief Applies the Levenberg-Marquardt method to solve the nonlinear
     !! least-squares problem.
     !!
-    !! @param[in,out] this The equation_solver-based object.
+    !! @param[in,out] this The least_squares_solver object.
     !! @param[in] fcn The vecfcn_helper object containing the equations to
     !!  solve.
     !! @param[in,out] x On input, an M-element array containing an initial
