@@ -66,9 +66,7 @@ This example uses a least-squares approach to determine the coefficients of a po
 
     ! ...
 
-    ! Solver Code ...
-
-    ! Local Variables
+    ! Solver Code
     type(vecfcn_helper) :: obj
     procedure(vecfcn), pointer :: fcn
     type(least_squares_solver) :: solver
