@@ -23,9 +23,9 @@ module nonlin_least_squares
         real(dp) :: m_factor = 100.0d0
     contains
         !> @brief Gets a factor used to scale the bounds on the initial step.
-        procedure, public :: get_step_scaling_factor
+        procedure, public :: get_step_scaling_factor => lss_get_factor
         !> @brief Sets a factor used to scale the bounds on the initial step.
-        procedure, public :: set_step_scaling_factor
+        procedure, public :: set_step_scaling_factor => lss_set_factor
         !> @brief Solves the system of equations.
         procedure, public :: solve => lss_solve
     end type
