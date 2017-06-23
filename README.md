@@ -31,6 +31,7 @@ This example solves a set of two equations of two unknowns using a Quasi-Newton 
     call solver%solve(obj, x, f)
     
 ```
+The example yields the solution vector: x = [5.0, 3.0], with a maximum residual of 0.121e-9.  The solution converged in a total of 10 iterations, with 2 Jacobian evaluations, and 14 additional function evaluations.
 
 ## Example 2
 This example uses a least-squares approach to determine the coefficients of a polynomial that best fits a set of data.
