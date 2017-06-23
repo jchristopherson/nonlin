@@ -50,6 +50,16 @@ module nonlin_types
 ! INTERFACES
 ! ------------------------------------------------------------------------------
     interface
+        !> @brief Describes a function of one variable.
+        !!
+        !! @param[in] x The independent variable.
+        !! @return The value of the function at @p x.
+        function fcn1var(x) result(f)
+            use linalg_constants, only : dp
+            real(dp), intent(in) :: x
+            real(dp) :: f
+        end function
+
         !> @brief Describes an M-element vector-valued function of N-variables.
         !!
         !! @param[in] x An N-element array containing the independent variables.
