@@ -10,8 +10,10 @@ module nonlin_types
     implicit none
     private
     public :: vecfcn
+    public :: fcn1var
     public :: jacobianfcn
     public :: vecfcn_helper
+    public :: fcn1var_helper
     public :: iteration_behavior
     public :: equation_solver
     public :: nonlin_solver
@@ -137,6 +139,12 @@ module nonlin_types
     contains
         !> @brief Executes the routine containing the function to evaluate.
         procedure, public :: fcn => f1h_fcn
+        !> @brief Tests if the pointer to the function containing the equation
+        !! to solve has been assigned.
+        procedure, public :: is_fcn_defined => f1h_is_fcn_defined
+        !> @brief Establishes a pointer to the routine containing the equations
+        !! to solve.
+        procedure, public :: set_fcn => f1h_set_fcn
     end type
 
 ! ------------------------------------------------------------------------------
@@ -500,11 +508,29 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
+    !> @brief Tests if the pointer to the function containing the equation to 
+    !! solve has been assigned.
+    !!
+    !! @param[in] this The fcn1var_helper object.
+    !! @return Returns true if the pointer has been assigned; else, false.
+    pure function f1h_is_fcn_defined(this) result(x)
+        class(fcn1var_helper), intent(in) :: this
+        logical :: x
+        x = associated(this%m_fcn)
+    end function
 
 ! ------------------------------------------------------------------------------
-
-! ------------------------------------------------------------------------------
-
+    !> @brief Establishes a pointer to the routine containing the equations to 
+    !! solve.
+    !! 
+    !! @param[in,out] this The fcn1var_helper object.
+    !! @param[in] fcn The function pointer.
+    subroutine f1h_set_fcn(this, fcn)
+        class(fcn1var_helper), intent(inout) :: this
+        procedure(fcn1var), intent(in), pointer :: fcn
+        this%m_fcn => fcn
+    end subroutine
+    
 ! ******************************************************************************
 ! EQUATION_SOLVER MEMBERS
 ! ------------------------------------------------------------------------------
