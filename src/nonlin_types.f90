@@ -89,7 +89,8 @@ module nonlin_types
     !> @brief Defines a type capable of encapsulating a system of nonlinear 
     !! equations of the form: F(X) = 0.
     type vecfcn_helper
-        !> A pointer to the encapsulated vecfcn routine.
+        private
+        !> A pointer to the target vecfcn routine.
         procedure(vecfcn), pointer, nopass :: m_fcn => null()
         !> A pointer to the jacobian routine - null if no routine is supplied.
         procedure(jacobianfcn), pointer, nopass :: m_jac => null()
@@ -124,6 +125,18 @@ module nonlin_types
         procedure, public :: get_equation_count => vfh_get_nfcn
         !> @brief Gets the number of variables in this system.
         procedure, public :: get_variable_count => vfh_get_nvar
+    end type
+
+! ------------------------------------------------------------------------------
+    !> @brief Defines a type capable of encapsulating an equation of one 
+    !! variable of the form: f(x) = 0.
+    type fcn1var_helper
+        private
+        !> A pointer to the target fcn1var routine.
+        procedure(fcn1var), pointer, nopass :: m_fcn => null()
+    contains
+        !> @brief Executes the routine containing the function to evaluate.
+        procedure, public :: fcn => f1h_fcn
     end type
 
 ! ------------------------------------------------------------------------------
@@ -467,6 +480,30 @@ contains
         integer(i32) :: n
         n = this%m_nvar
     end function
+
+! ******************************************************************************
+! FCN1VAR_HELPER MEMBERS
+! ------------------------------------------------------------------------------
+    !> @brief Executes the routine containing the function to evaluate.
+    !!
+    !! @param[in] this The fcn1var_helper object.
+    !! @param[in] x The value of the independent variable at which the function
+    !!  should be evaluated.
+    !! @return The value of the function at @p x.
+    function f1h_fcn(this, x) result(f)
+        class(fcn1var_helper), intent(in) :: this
+        real(dp), intent(in) :: x
+        real(dp) :: f
+        if (associated(this%m_fcn)) then
+            f = this%m_fcn(x)
+        end if
+    end function
+
+! ------------------------------------------------------------------------------
+
+! ------------------------------------------------------------------------------
+
+! ------------------------------------------------------------------------------
 
 ! ******************************************************************************
 ! EQUATION_SOLVER MEMBERS
