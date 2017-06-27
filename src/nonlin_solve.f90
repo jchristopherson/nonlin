@@ -807,7 +807,7 @@ contains
     !! @param[in] fcn The fcn1var_helper object containing the equation
     !!  to solve.
     !! @param[in,out] x A parameter used to return the solution.  Notice, any
-    !!  input value will be ignored as this implementation relies upon the
+    !!  input value will be ignored as this routine relies upon the
     !!  search limits in @p lim to provide a starting point.
     !! @param[in] lim A value_pair object defining the search limits.
     !! @param[out] f An optional parameter used to return the function
@@ -870,6 +870,7 @@ contains
         ftol = this%get_fcn_tolerance()
         xtol = this%get_var_tolerance()
         maxeval = this%get_max_fcn_evals()
+        if (present(f)) f = zero
         if (present(ib)) then
             ib%iter_count = iter
             ib%fcn_count = neval
