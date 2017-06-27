@@ -828,6 +828,10 @@ contains
     !!      than the number of variables.
     !!  - NL_CONVERGENCE_ERROR: Occurs if the algorithm cannot converge within
     !!      the allowed number of iterations.
+    !!
+    !! @par See Also
+    !! - [Wikipedia](https://en.wikipedia.org/wiki/Brent%27s_method)
+    !! - [Numerical Recipes](http://numerical.recipes/)
     subroutine brent_solve(this, fcn, x, lim, f, ib, err)
         ! Arguments
         class(brent_solver), intent(inout) :: this
