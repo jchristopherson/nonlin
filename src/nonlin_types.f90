@@ -250,6 +250,8 @@ module nonlin_types
         !> @brief Sets a logical value determining if iteration status should be
         !! printed.
         procedure, public :: set_print_status => es1_set_print_status
+        !> @brief Solves the equation.
+        procedure(nonlin_solver_1var), deferred, public, pass :: solve
     end type
 
 ! ******************************************************************************
