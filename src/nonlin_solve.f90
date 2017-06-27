@@ -18,7 +18,7 @@ module nonlin_solve
     public :: line_search_solver
     public :: quasi_newton_solver
     public :: newton_solver
-    public :: brent_solve
+    public :: brent_solver
 
 ! ******************************************************************************
 ! TYPES
