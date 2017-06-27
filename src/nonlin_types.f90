@@ -16,7 +16,9 @@ module nonlin_types
     public :: fcn1var_helper
     public :: iteration_behavior
     public :: equation_solver
+    public :: equation_solver_1var
     public :: nonlin_solver
+    public :: nonlin_solver_1var
     public :: print_status
     public :: NL_INVALID_INPUT_ERROR
     public :: NL_ARRAY_SIZE_ERROR
@@ -170,7 +172,8 @@ module nonlin_types
     end type
 
 ! ------------------------------------------------------------------------------
-    !> @brief A base class for various nonlinear equation solvers.
+    !> @brief A base class for various solvers of nonlinear systems of 
+    !! equations.
     type, abstract :: equation_solver
         private
         !> The maximum number of function evaluations allowed per solve.
@@ -214,6 +217,41 @@ module nonlin_types
         procedure(nonlin_solver), deferred, public, pass :: solve
     end type
 
+! ------------------------------------------------------------------------------
+    !> @brief A base class for various solvers of equations of one variable.
+    type, abstract :: equation_solver_1var
+        private
+        !> The maximum number of function evaluations allowed per solve.
+        integer(i32) :: m_maxEval = 100
+        !> The convergence criteria on function value.
+        real(dp) :: m_fcnTol = 1.0d-8
+        !> The convergence criteria on change in variable value.
+        real(dp) :: m_xtol = 1.0d-12
+        !> Set to true to print iteration status; else, false.
+        logical :: m_printStatus = .false.
+    contains
+        !> @brief Gets the maximum number of function evaluations allowed during
+        !! a single solve.
+        procedure, public :: get_max_fcn_evals => es1_get_max_eval
+        !> @brief Sets the maximum number of function evaluations allowed during
+        !! a single solve.
+        procedure, public :: set_max_fcn_evals => es1_set_max_eval
+        !> @brief Gets the convergence on function value tolerance.
+        procedure, public :: get_fcn_tolerance => es1_get_fcn_tol
+        !> @brief Sets the convergence on function value tolerance.
+        procedure, public :: set_fcn_tolerance => es1_set_fcn_tol
+        !> @brief Gets the convergence on change in variable tolerance.
+        procedure, public :: get_var_tolerance => es1_get_var_tol
+        !> @brief Sets the convergence on change in variable tolerance.
+        procedure, public :: set_var_tolerance => es1_set_var_tol
+        !> @brief Gets a logical value determining if iteration status should be
+        !! printed.
+        procedure, public :: get_print_status => es1_get_print_status
+        !> @brief Sets a logical value determining if iteration status should be
+        !! printed.
+        procedure, public :: set_print_status => es1_set_print_status
+    end type
+
 ! ******************************************************************************
 ! ABSTRACT ROUTINE INTERFACES
 ! ------------------------------------------------------------------------------
@@ -247,6 +285,38 @@ module nonlin_types
             class(vecfcn_helper), intent(in) :: fcn
             real(dp), intent(inout), dimension(:) :: x
             real(dp), intent(out), dimension(:) :: fvec
+            type(iteration_behavior), optional :: ib
+            class(errors), intent(in), optional, target :: err
+        end subroutine
+
+        !> @brief Describes the interface of a solver for an equation of one
+        !! variable.
+        !!
+        !! @param[in,out] this The equation_solver_1var-based object.
+        !! @param[in] fcn The fcn1var_helper object containing the equation
+        !!  to solve.
+        !! @param[in,out] x On input the initial guess at the solution.  On
+        !!  output the updated solution estimate.
+        !! @param[out] f An optional parameter used to return the function
+        !!  residual as computed at @p x.
+        !! @param[out] ib An optional output, that if provided, allows the
+        !!  caller to obtain iteration performance statistics.
+        !! @param[out] err An optional errors-based object that if provided can
+        !!  be used to retrieve information relating to any errors encountered
+        !!  during execution.  If not provided, a default implementation of the
+        !!  errors class is used internally to provide error handling.  The
+        !!  possible error codes returned will likely vary from solver to
+        !!  solver.
+        subroutine nonlin_solver_1var(this, fcn, x, f, ib, err)
+            use linalg_constants, only : dp, i32
+            use ferror, only : errors
+            import equation_solver_1var
+            import fcn1var_helper
+            import iteration_behavior
+            class(equation_solver_1var), intent(inout) :: this
+            class(fcn1var_helper), intent(in) :: fcn
+            real(dp), intent(inout) :: x
+            real(dp), intent(out), optional :: f
             type(iteration_behavior), optional :: ib
             class(errors), intent(in), optional, target :: err
         end subroutine
@@ -646,6 +716,101 @@ contains
         logical, intent(in) :: x
         this%m_printStatus = x
     end subroutine
+
+! ******************************************************************************
+! EQUATION_SOLVER_1VAR MEMBERS
+! ------------------------------------------------------------------------------
+    !> @brief Gets the maximum number of function evaluations allowed during a
+    !! single solve.
+    !!
+    !! @param[in] this The equation_solver_1var object.
+    !! @return The maximum number of function evaluations.
+    pure function es1_get_max_eval(this) result(n)
+        class(equation_solver_1var), intent(in) :: this
+        integer(i32) :: n
+        n = this%m_maxEval
+    end function
+
+! --------------------
+    !> @brief Sets the maximum number of function evaluations allowed during a
+    !! single solve.
+    !!
+    !! @param[in,out] this The equation_solver_1var object.
+    !! @param[in] n The maximum number of function evaluations.
+    subroutine es1_set_max_eval(this, n)
+        class(equation_solver_1var), intent(inout) :: this
+        integer(i32), intent(in) :: n
+        this%m_maxEval = n
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Gets the convergence on function value tolerance.
+    !!
+    !! @param[in] this The equation_solver_1var object.
+    !! @return The tolerance value.
+    pure function es1_get_fcn_tol(this) result(x)
+        class(equation_solver_1var), intent(in) :: this
+        real(dp) :: x
+        x = this%m_fcnTol
+    end function
+
+! --------------------
+    !> @brief Sets the convergence on function value tolerance.
+    !!
+    !! @param[in,out] this The equation_solver_1var object.
+    !! @param[in] x The tolerance value.
+    subroutine es1_set_fcn_tol(this, x)
+        class(equation_solver_1var), intent(inout) :: this
+        real(dp), intent(in) :: x
+        this%m_fcnTol = x
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Gets the convergence on change in variable tolerance.
+    !!
+    !! @param[in] this The equation_solver_1var object.
+    !! @return The tolerance value.
+    pure function es1_get_var_tol(this) result(x)
+        class(equation_solver_1var), intent(in) :: this
+        real(dp) :: x
+        x = this%m_xtol
+    end function
+
+! --------------------
+    !> @brief Sets the convergence on change in variable tolerance.
+    !!
+    !! @param[in,out] this The equation_solver_1var object.
+    !! @param[in] x The tolerance value.
+    subroutine es1_set_var_tol(this, x)
+        class(equation_solver_1var), intent(inout) :: this
+        real(dp), intent(in) :: x
+        this%m_xtol = x
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Gets a logical value determining if iteration status should be
+    !! printed.
+    !!
+    !! @param[in] this The equation_solver_1var object.
+    !! @return True if the iteration status should be printed; else, false.
+    pure function es1_get_print_status(this) result(x)
+        class(equation_solver_1var), intent(in) :: this
+        logical :: x
+        x = this%m_printStatus
+    end function
+
+! --------------------
+    !> @brief Sets a logical value determining if iteration status should be
+    !! printed.
+    !!
+    !! @param[in,out] this The equation_solver_1var object.
+    !! @param[in] x True if the iteration status should be printed; else, false.
+    subroutine es1_set_print_status(this, x)
+        class(equation_solver_1var), intent(inout) :: this
+        logical, intent(in) :: x
+        this%m_printStatus = x
+    end subroutine
+
 
 ! ******************************************************************************
 ! MISC. ROUTINES

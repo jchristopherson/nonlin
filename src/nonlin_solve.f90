@@ -1,5 +1,9 @@
 ! nonlin_solve.f90
 
+! TO DO:
+! - 1 Variable Solvers:
+!   - http://people.sc.fsu.edu/~jburkardt/f_src/brent/brent.f90
+
 !> @brief \b nonlin_solve
 !!
 !! @par Purpose
