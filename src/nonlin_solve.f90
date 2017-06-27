@@ -22,6 +22,7 @@ module nonlin_solve
     public :: line_search_solver
     public :: quasi_newton_solver
     public :: newton_solver
+    public :: brent_solve
 
 ! ******************************************************************************
 ! TYPES
@@ -77,6 +78,14 @@ module nonlin_solve
         procedure, public :: solve => ns_solve
     end type
 
+! ------------------------------------------------------------------------------
+    !> @brief Defines a solver based upon Brent's method for solving an equation
+    !! of one variable without using derivatives.
+    type, extends(equation_solver_1var) :: brent_solver
+    contains
+        !> @brief Solves the equation.
+        procedure, public :: solve => brent_solve
+    end type
  
 
 contains
@@ -791,6 +800,57 @@ contains
             call errmgr%report_error("ns_solve", trim(errmsg), &
                 NL_CONVERGENCE_ERROR)
         end if
+    end subroutine
+
+! ******************************************************************************
+! BRENT_SOLVER MEMBERS
+! ------------------------------------------------------------------------------
+    !> 
+    subroutine brent_solve(this, fcn, x, f, ib, err)
+        ! Arguments
+        class(equation_solver_1var), intent(inout) :: this
+        class(fcn1var_helper), intent(in) :: fcn
+        real(dp), intent(inout) :: x
+        real(dp), intent(out), optional :: f
+        type(iteration_behavior), optional :: ib
+        class(errors), intent(in), optional, target :: err
+
+        ! Parameters
+        real(dp), parameter :: zero = 0.0d0
+        real(dp), parameter :: half = 0.5d0
+        real(dp), parameter :: one = 1.0d0
+        real(dp), parameter :: two = 2.0d0
+        real(dp), parameter :: three = 3.0d0
+
+        ! Local Variables
+        logical :: fcnvrg, xcnvrg
+        integer(i32) :: nfeval, maxfeval, flag, itr
+        real(dp) :: ftol, xtol, a, b, c, fa, fb, fc, p, q, r, s, xm, e, d, &
+            mn1, mn2, eps, tol1, temp
+        class(errors), pointer :: errmgr
+        type(errors), target :: deferr
+        character(len = 256) :: errmsg
+
+        ! Initialization
+        fcnvrg = .false.
+        xcnvrg = .false.
+        x = zero
+        
+        if (present(ib)) then
+            ib%iter_count = iter
+            ib%fcn_count = neval
+            ib%jacobian_count = 0
+            ib%converge_on_fcn = fcnvrg
+            ib%converge_on_chng = xcnvrg
+            ib%converge_on_zero_diff = .false.
+        end if
+        if (present(err)) then
+            errmgr => err
+        else
+            errmgr => deferr
+        end if
+        
+        !
     end subroutine
 
 ! ------------------------------------------------------------------------------
