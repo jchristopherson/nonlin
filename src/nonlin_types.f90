@@ -17,6 +17,7 @@ module nonlin_types
     public :: iteration_behavior
     public :: equation_solver
     public :: equation_solver_1var
+    public :: value_pair
     public :: nonlin_solver
     public :: nonlin_solver_1var
     public :: print_status
@@ -254,6 +255,15 @@ module nonlin_types
         procedure(nonlin_solver_1var), deferred, public, pass :: solve
     end type
 
+! ------------------------------------------------------------------------------
+    !> @brief Defines a pair of numeric values.
+    type value_pair
+        !> Value 1.
+        real(dp) :: x1
+        !> Value 2.
+        real(dp) :: x2
+    end type
+
 ! ******************************************************************************
 ! ABSTRACT ROUTINE INTERFACES
 ! ------------------------------------------------------------------------------
@@ -299,6 +309,7 @@ module nonlin_types
         !!  to solve.
         !! @param[in,out] x On input the initial guess at the solution.  On
         !!  output the updated solution estimate.
+        !! @param[in] lim A value_pair object defining the search limits.
         !! @param[out] f An optional parameter used to return the function
         !!  residual as computed at @p x.
         !! @param[out] ib An optional output, that if provided, allows the
@@ -309,15 +320,17 @@ module nonlin_types
         !!  errors class is used internally to provide error handling.  The
         !!  possible error codes returned will likely vary from solver to
         !!  solver.
-        subroutine nonlin_solver_1var(this, fcn, x, f, ib, err)
+        subroutine nonlin_solver_1var(this, fcn, x, lim, f, ib, err)
             use linalg_constants, only : dp, i32
             use ferror, only : errors
             import equation_solver_1var
             import fcn1var_helper
+            import value_pair
             import iteration_behavior
             class(equation_solver_1var), intent(inout) :: this
             class(fcn1var_helper), intent(in) :: fcn
             real(dp), intent(inout) :: x
+            type(value_pair), intent(in) :: lim
             real(dp), intent(out), optional :: f
             type(iteration_behavior), optional :: ib
             class(errors), intent(in), optional, target :: err
