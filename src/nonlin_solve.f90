@@ -832,6 +832,10 @@ contains
     !! @par See Also
     !! - [Wikipedia](https://en.wikipedia.org/wiki/Brent%27s_method)
     !! - [Numerical Recipes](http://numerical.recipes/)
+    !! - R.P. Brent, "Algorithms for Minimization without Derivatives,"
+    !!      Dover Publications, January 2002. ISBN 0-486-41998-3.
+    !!      Further information available 
+    !!      [here](https://maths-people.anu.edu.au/~brent/pub/pub011.html).
     subroutine brent_solve(this, fcn, x, lim, f, ib, err)
         ! Arguments
         class(brent_solver), intent(inout) :: this
