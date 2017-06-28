@@ -480,14 +480,14 @@ contains
         call obj%set_fcn(fcn)
 
         ! Define the search limits
-        limits%x1 = 3.5d0
-        limits%x2 = 8.0d0
+        limits%x1 = 1.5d0
+        limits%x2 = 5.0d0
 
         ! Compute the solution
         call solver%solve(obj, x, limits, f)
 
         ! The solution on this interval should be: pi
-        if (abs(x - pi) > tol .and. abs(x - 2.0d0 * pi) > tol) then
+        if (abs(x - pi) > tol) then
             check = .false.
             print '(AF8.5AF8.5)', &
                 "Test Failed: Brent's Method Test 1.  Expected: ", pi, &
