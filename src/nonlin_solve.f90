@@ -193,6 +193,7 @@ contains
     !!      gradient vector becomes sufficiently close to zero.
     !!
     !! @par See Also
+    !! - [Broyden's Paper](http://www.ams.org/journals/mcom/1965-19-092/S0025-5718-1965-0198670-6/S0025-5718-1965-0198670-6.pdf)
     !! - [Wikipedia](https://en.wikipedia.org/wiki/Broyden%27s_method)
     !! - [Numerical Recipes](http://numerical.recipes/)
     subroutine qns_solve(this, fcn, x, fvec, ib, err)
