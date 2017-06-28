@@ -11,6 +11,12 @@ project(nonlin)
 # https://softwareengineering.stackexchange.com/questions/114719/organizing-git-repositories-with-common-nested-sub-modules
 # http://diracprogram.org/doc/release-14/programmers/external_projects.html - looks to be a good reference
 
+# Define version information
+set(nonlin_VERSION_MAJOR 1)
+set(nonlin_VERSION_MINOR 0)
+set(nonlin_VERSION_PATCH 0)
+set(nonlin_VERSION_TWEAK 0)
+
 # Specify output directories
 if (CMAKE_BUILD_TYPE MATCHES Debug)
   # Debug Build
