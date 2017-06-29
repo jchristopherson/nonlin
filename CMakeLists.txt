@@ -15,47 +15,50 @@ project(nonlin)
 set(nonlin_VERSION_MAJOR 1)
 set(nonlin_VERSION_MINOR 0)
 set(nonlin_VERSION_PATCH 0)
-set(nonlin_VERSION_TWEAK 0)
 
 # Specify output directories
-if (CMAKE_BUILD_TYPE MATCHES Debug)
-  # Debug Build
-  if (BUILD_SHARED_LIBS)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
-    set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug/mod)
-  else()
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
-    set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug/mod)
-  endif ()
-elseif (CMAKE_BUILD_TYPE MATCHES Release)
-  # Release Build
-  if (BUILD_SHARED_LIBS)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Release)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Release)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Release)
-    set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Release/mod)
-  else()
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Release)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Release)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Release)
-    set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Release/mod)
-  endif ()
-else ()
-  # Default Condition
-  if (BUILD_SHARED_LIBS)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
-    set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug/mod)
-  else()
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
-    set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug/mod)
+option(USE_PROJECT_OUTPUT_DIRS "Use a local bin and lib directory for output" OFF)
+if (USE_PROJECT_OUTPUT_DIRS)
+  message(STATUS "Using project-specific output directories")
+  if (CMAKE_BUILD_TYPE MATCHES Debug)
+    # Debug Build
+    if (BUILD_SHARED_LIBS)
+      set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
+      set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
+      set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
+      set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug/mod)
+    else()
+      set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
+      set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
+      set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
+      set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug/mod)
+    endif ()
+  elseif (CMAKE_BUILD_TYPE MATCHES Release)
+    # Release Build
+    if (BUILD_SHARED_LIBS)
+      set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Release)
+      set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Release)
+      set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Release)
+      set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Release/mod)
+    else()
+      set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Release)
+      set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Release)
+      set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Release)
+      set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Release/mod)
+    endif ()
+  else ()
+    # Default Condition
+    if (BUILD_SHARED_LIBS)
+      set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
+      set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
+      set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
+      set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug/mod)
+    else()
+      set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
+      set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
+      set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
+      set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug/mod)
+    endif ()
   endif ()
 endif ()
 
@@ -85,29 +88,25 @@ file(GLOB_RECURSE sources src/*.f90)
 # Define necessary CMake variables, and define the dependency.
 if (BUILD_SHARED_LIBS)
   set(ExternalProjectCMakeArgs
-    -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER}
-    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-    -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
-  add_external(linalg "")
-  add_dependencies(nonlin linalg)
-
-  # TO DO: 
-  # - Still link with ferror
-  # - Be sure to check if the libraries already exist.  If so, simply link
-  # - Figure out how to deal with .mod files
+      -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
+      -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+      -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+      -CMAKE_Fortran_MODULE_DIRECTORY=${CMAKE_Fortran_MODULE_DIRECTORY}
+      -DCMAKE_INSTALL_PREFIX=${CMAKE_SOURCE_DIR}/external
+      -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER}
+      -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+      -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
+  add_subdirectory(external/linalg)
 else()
   # Building a static library, simply add source code to this library
   file(GLOB_RECURSE linalg_sources 
     external/linalg/src/*.f90 
-    external/linalg/src/BLAS/*.f
-    external/linalg/src/LAPACK/*.f 
-    external/linalg/src/QRUPDATE/*.f)
+    external/linalg/LAPACK/BLAS/src/*.f
+    external/linalg/LAPACK/src/*.f 
+    external/linalg/src/QRUPDATE/*.f
+    external/linalg/ferror/src/*.f90)
   list(APPEND sources ${linalg_sources})
-  
-  # Also include the stuff from FERROR
-  file(GLOB_RECURSE ferror_sources external/ferror/src/*.f90)
-  list(APPEND sources ${ferror_sources})
 endif()
 
 # Define testing source files
@@ -121,6 +120,12 @@ list(APPEND testing_sources external/linalg/tests/test_core.f90
 # If BUILD_SHARED_LIBS is defined, then a shared library (DLL) will be built;
 # else, a static library will be built.
 add_library(nonlin ${sources})
+if (BUILD_SHARED_LIBS)
+  target_link_libraries(nonlin linalg)
+endif ()
 
 # Build the test executable
- add_executable(nonlin_test ${testing_sources})
+add_executable(nonlin_test ${testing_sources})
+if (BUILD_SHARED_LIBS)
+  target_link_libraries(nonlin_test linalg)
+endif()
