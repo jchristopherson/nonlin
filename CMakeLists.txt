@@ -16,10 +16,9 @@ set(nonlin_VERSION_MAJOR 1)
 set(nonlin_VERSION_MINOR 0)
 set(nonlin_VERSION_PATCH 0)
 
-# Specify output directories
-option(USE_PROJECT_OUTPUT_DIRS "Use a local bin and lib directory for output" OFF)
-if (USE_PROJECT_OUTPUT_DIRS)
-  message(STATUS "Using project-specific output directories")
+# Define output directories, if undefined
+if (NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+  message(STATUS "Library output directories undefined.  Using default directories.")
   if (CMAKE_BUILD_TYPE MATCHES Debug)
     # Debug Build
     if (BUILD_SHARED_LIBS)
