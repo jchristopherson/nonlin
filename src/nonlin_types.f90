@@ -6,6 +6,7 @@
 !! To provide various types and constants useful in the solution of systems of
 !! nonlinear equations.
 module nonlin_types
+    use, intrinsic :: iso_c_binding, only : c_bool
     use linalg_constants, only : dp, i32
     implicit none
     private
@@ -153,7 +154,7 @@ module nonlin_types
 ! ------------------------------------------------------------------------------
     !> @brief Defines a set of parameters that describe the behavior of the
     !! iteration process.
-    type iteration_behavior
+    type, bind(c) :: iteration_behavior
         !> Specifies the number of iterations performed.
         integer(i32) :: iter_count
         !> Specifies the number of function evaluations performed.
@@ -162,14 +163,14 @@ module nonlin_types
         integer(i32) :: jacobian_count
         !> True if the solution converged as a result of a zero-valued
         !! function; else, false.
-        logical :: converge_on_fcn
+        logical(c_bool) :: converge_on_fcn
         !> True if the solution converged as a result of no appreciable
         !! change in solution points between iterations; else, false.
-        logical :: converge_on_chng
+        logical(c_bool) :: converge_on_chng
         !> True if the solution appears to have settled on a stationary
         !! point such that the gradient of the function is zero-valued; else,
         !! false.
-        logical :: converge_on_zero_diff
+        logical(c_bool) :: converge_on_zero_diff
     end type
 
 ! ------------------------------------------------------------------------------
@@ -257,7 +258,7 @@ module nonlin_types
 
 ! ------------------------------------------------------------------------------
     !> @brief Defines a pair of numeric values.
-    type value_pair
+    type, bind(c) :: value_pair
         !> Value 1.
         real(dp) :: x1
         !> Value 2.
