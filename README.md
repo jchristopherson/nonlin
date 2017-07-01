@@ -92,3 +92,112 @@ These coefficients yield a maximum residual of 0.5064.
 
 The following graph illustrates the fit.
 ![](images/Curve_Fit_Example_1.png?raw=true)
+
+## C Example 1
+This example illustrates the C equivalent to Example 1 from above.
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include "include/nonlin.h"
+
+void testfcn(int neqn, int nvar, const double *x, double *f);
+
+int main() {
+    // Local Variables
+    solver_control tol;
+    line_search_control ls;
+    iteration_behavior ib;
+    double x[2], f[2];
+
+    // Initialization
+    tol.max_evals = 500;
+    tol.fcn_tolerance = 1.0e-8;
+    tol.var_tolerances = 1.0e-12;
+    tol.grad_tolerances = 1.0e-12;
+    tol.print_status = true;
+    ls.max_evals = 100;
+    ls.alpha = 1.0e-4;
+    ls.factor = 0.1;
+    x[0] = 1.0;
+    x[1] = 1.0;
+
+    // Compute the solution using a Quasi-Newton method
+    solve_quasi_newton(testfcn, NULL, 2, x, f, &tol, &ls, &ib, NULL);
+
+    // Display the results
+    printf("\nRESULTS:\nX = (%f, %f)\nF = (%e, %e)\n", x[0], x[1], f[0], f[1]);
+    printf("Iterations: %i\nFunction Evaluations: %i\nJacobian Evaluations: %i\n",
+           ib.iter_count, ib.fcn_count, ib.jacobian_count);
+
+    // End
+    return 0;
+}
+
+
+void testfcn(int neqn, int nvar, const double *x, double *f) {
+    f[0] = x[0] * x[0] + x[1] * x[1] - 34.0;
+    f[1] = x[0] * x[0] - 2.0 * x[1] * x[1] - 7.0;
+}
+```
+The output of the above is as follows:
+
+Iteration: 1
+Function Evaluations: 3
+Jacobian Evaluations: 1
+Change in Variable: .545E+00
+Residual: .272E+02
+
+Iteration: 2
+Function Evaluations: 5
+Jacobian Evaluations: 1
+Change in Variable: .327E+00
+Residual: .196E+02
+
+Iteration: 3
+Function Evaluations: 6
+Jacobian Evaluations: 1
+Change in Variable: .473E+00
+Residual: .128E+02
+
+Iteration: 4
+Function Evaluations: 7
+Jacobian Evaluations: 1
+Change in Variable: .378E+00
+Residual: .377E+01
+
+Iteration: 5
+Function Evaluations: 9
+Jacobian Evaluations: 1
+Change in Variable: .768E-01
+Residual: .157E+01
+
+Iteration: 6
+Function Evaluations: 10
+Jacobian Evaluations: 1
+Change in Variable: .253E-01
+Residual: .689E+00
+
+Iteration: 7
+Function Evaluations: 11
+Jacobian Evaluations: 2
+Change in Variable: .136E-01
+Residual: .288E-02
+
+Iteration: 8
+Function Evaluations: 12
+Jacobian Evaluations: 2
+Change in Variable: .927E-04
+Residual: .324E-04
+
+Iteration: 9
+Function Evaluations: 13
+Jacobian Evaluations: 2
+Change in Variable: .791E-06
+Residual: .406E-07
+
+RESULTS:
+X = (5.000000, 3.000000)
+F = (6.038903e-011, 1.206786e-010)
+Iterations: 10
+Function Evaluations: 14
+Jacobian Evaluations: 2
