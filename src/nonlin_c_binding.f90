@@ -10,6 +10,7 @@ module nonlin_c_binding
     use nonlin_types
     use nonlin_linesearch
     use nonlin_solve
+    use nonlin_least_squares
     use ferror, only : errors
     implicit none
 
@@ -643,6 +644,83 @@ contains
             ! Do not use a line search
             call solver%set_use_line_search(.false.)
         end if
+
+        ! Process
+        if (c_associated(err)) then
+            call c_f_pointer(err, eptr)
+            call solver%solve(obj, x, fvec, ib, eptr)
+        else
+            call solver%solve(obj, x, fvec, ib)
+        end if
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Applies the Levenberg-Marquardt method to solve the nonlinear
+    !! least-squares problem.
+    !!
+    !! @param[in] fcn A pointer to the routine containing the system of
+    !!  equations to solve.
+    !! @param[in] jac A pointer to a routine used to compute the Jacobian of
+    !!  the system of equations.  To let the program compute the Jacobian
+    !!  numerically, simply pass NULL.
+    !! @param[in] neqn The number of equations.
+    !! @param[in] nvar The number of unknowns.  This must be less than or equal
+    !!  to @p neqn.
+    !! @param[in,out] x On input, an N-element array containing an initial
+    !!  estimate to the solution.  On output, the updated solution estimate.
+    !!  N is the number of variables.
+    !! @param[out] fvec An N-element array that, on output, will contain
+    !!  the values of each equation as evaluated at the variable values
+    !!  given in @p x.
+    !! @param[in] tol A solver_control object defining the solver control
+    !!  parameters.
+    !! @param[out] ib On output, an iteration_behavior object containing the
+    !!  iteration performance statistics.
+    !! @param[in] err A pointer to the C error handler object.  If no error
+    !!  handling is desired, simply pass NULL, and errors will be dealt with
+    !!  by the default internal error handler.  Possible errors that may be
+    !!  encountered are as follows.
+    !!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+    !!  - NL_INVALID_INPUT_ERROR: Occurs if the number of equations is less than
+    !!      than the number of variables.
+    !!  - NL_ARRAY_SIZE_ERROR: Occurs if any of the input arrays are not sized
+    !!      correctly.
+    !!  - NL_CONVERGENCE_ERROR: Occurs if the line search cannot converge within
+    !!      the allowed number of iterations.
+    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+    !!      available.
+    !!  - NL_TOLERANCE_TOO_SMALL_ERROR: Occurs if the requested tolerance is
+    !!      to small to be practical for the problem at hand.
+    subroutine levmarq_c(fcn, jac, neqn, nvar, x, fvec, tol, ib, err) &
+            bind(C, name = "solve_nl_least_squares")
+        ! Arguments
+        type(c_funptr), intent(in), value :: fcn, jac
+        integer(i32), intent(in), value :: neqn, nvar
+        real(dp), intent(inout) :: x(nvar)
+        real(dp), intent(out) :: fvec(neqn)
+        type(solver_control), intent(in) :: tol
+        type(iteration_behavior), intent(out) :: ib
+        type(c_ptr), intent(in), value :: err
+
+        ! Local Variables
+        procedure(cvecfcn), pointer :: fptr
+        procedure(cjacobianfcn), pointer :: jptr
+        type(errors), pointer :: eptr
+        type(least_squares_solver) :: solver
+        type(cvecfcn_helper) :: obj
+
+        ! Initialization
+        call c_f_procpointer(fcn, fptr)
+        call obj%set_cfcn(fptr, neqn, nvar)
+        if (c_associated(jac)) then
+            call c_f_procpointer(jac, jptr)
+            call obj%set_cjacobian(jptr)
+        end if
+        call solver%set_max_fcn_evals(tol%max_evals)
+        call solver%set_fcn_tolerance(tol%fcn_tolerance)
+        call solver%set_var_tolerance(tol%var_tolerance)
+        call solver%set_gradient_tolerance(tol%grad_tolerance)
+        call solver%set_print_status(logical(tol%print_status))
 
         ! Process
         if (c_associated(err)) then

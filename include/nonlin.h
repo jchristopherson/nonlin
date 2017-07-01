@@ -15,10 +15,10 @@ typedef double (*fcn1var)(double x);
 
 /** @brief Describes an M-element vector-valued function of N-variables.
  *
- * @param[in] neqn The number of equations.
- * @param[in] nvar The number of variables.
- * @param[in] x An NVAR-element array containing the independent variables.
- * @param[out] f An NEQN-element array that, on output, contains the values
+ * @param neqn The number of equations.
+ * @param nvar The number of variables.
+ * @param x An NVAR-element array containing the independent variables.
+ * @param f An NEQN-element array that, on output, contains the values
  *  of the M functions.
  */
 typedef void (*vecfcn)(int neqn, int nvar, const double *x, double *f);
@@ -26,10 +26,10 @@ typedef void (*vecfcn)(int neqn, int nvar, const double *x, double *f);
 /** @brief Describes a routine capable of computing the Jacobian matrix
  * of M functions of N unknowns.
  *
- * @param[in] neqn The number of equations.
- * @param[in] nvar The number of variables.
- * @param[in] x An NVAR-element array containing the independent variables.
- * @param[out] jac An NEQN-by-NVAR matrix where the Jacobian will be written.
+ * @param neqn The number of equations.
+ * @param nvar The number of variables.
+ * @param x An NVAR-element array containing the independent variables.
+ * @param jac An NEQN-by-NVAR matrix where the Jacobian will be written.
  */
 typedef void (*jacobianfcn)(int neqn, int nvar, const double *x, double *jac);
 
@@ -111,15 +111,15 @@ extern "C" {
 
 /** @brief Solves an equation of one variable using Brent's method.
  *
- * @param[in] fcn A pointer to the routine containing the function to solve.
- * @param[in] lim A value_pair object defining the search limits.
- * @param[out] x On output, the solution.
- * @param[out] f On output, the residual as computed at @p x.
- * @param[in] tol A solver_control object defining the solver control
+ * @param fcn A pointer to the routine containing the function to solve.
+ * @param lim A value_pair object defining the search limits.
+ * @param x On output, the solution.
+ * @param f On output, the residual as computed at @p x.
+ * @param tol A solver_control object defining the solver control
  *  parameters.
- * @param[out] ib On output, an iteration_behavior object containing the
+ * @param ib On output, an iteration_behavior object containing the
  *  iteration performance statistics.
- * @param[in] err A pointer to the C error handler object.  If no error
+ * @param err A pointer to the C error handler object.  If no error
  *  handling is desired, simply pass NULL, and errors will be dealt with
  *  by the default internal error handler.  Possible errors that may be
  *  encountered are as follows.
@@ -137,26 +137,26 @@ void solve_brent(fcn1var fcn, value_pair lim, double *x, double *f,
  * conjunction with a backtracking type line search to solve N equations
  * of N unknowns.
  *
- * @param[in] fcn A pointer to the routine containing the system of
+ * @param fcn A pointer to the routine containing the system of
  *  equations to solve.
- * @param[in] jac A pointer to a routine used to compute the Jacobian of
+ * @param jac A pointer to a routine used to compute the Jacobian of
  *  the system of equations.  To let the program compute the Jacobian
  *  numerically, simply pass NULL.
- * @param[in] n The number of equations, and the number of unknowns.
- * @param[in,out] x On input, an N-element array containing an initial
+ * @param n The number of equations, and the number of unknowns.
+ * @param x On input, an N-element array containing an initial
  *  estimate to the solution.  On output, the updated solution estimate.
  *  N is the number of variables.
- * @param[out] fvec An N-element array that, on output, will contain
+ * @param fvec An N-element array that, on output, will contain
  *  the values of each equation as evaluated at the variable values
  *  given in @p x.
- * @param[in] tol A solver_control object defining the solver control
+ * @param tol A solver_control object defining the solver control
  *  parameters.
- * @param[in] lsearch A pointer to a line_search_control object defining
+ * @param lsearch A pointer to a line_search_control object defining
  *  the line search control parameters.  If no line search is desired,
  *  simply pass NULL.
- * @param[out] ib On output, an iteration_behavior object containing the
+ * @param ib On output, an iteration_behavior object containing the
  *  iteration performance statistics.
- * @param[in] err A pointer to the C error handler object.  If no error
+ * @param err A pointer to the C error handler object.  If no error
  *  handling is desired, simply pass NULL, and errors will be dealt with
  *  by the default internal error handler.  Possible errors that may be
  *  encountered are as follows.
@@ -182,26 +182,26 @@ void solve_quasi_newton(vecfcn fcn, jacobianfcn jac, int n, double *x,
 /** @brief Applies Newton's method in conjunction with a backtracking type 
  * line search to solve N equations of N unknowns.
  *
- * @param[in] fcn A pointer to the routine containing the system of
+ * @param fcn A pointer to the routine containing the system of
  *  equations to solve.
- * @param[in] jac A pointer to a routine used to compute the Jacobian of
+ * @param jac A pointer to a routine used to compute the Jacobian of
  *  the system of equations.  To let the program compute the Jacobian
  *  numerically, simply pass NULL.
- * @param[in] n The number of equations, and the number of unknowns.
- * @param[in,out] x On input, an N-element array containing an initial
+ * @param n The number of equations, and the number of unknowns.
+ * @param x On input, an N-element array containing an initial
  *  estimate to the solution.  On output, the updated solution estimate.
  *  N is the number of variables.
- * @param[out] fvec An N-element array that, on output, will contain
+ * @param fvec An N-element array that, on output, will contain
  *  the values of each equation as evaluated at the variable values
  *  given in @p x.
- * @param[in] tol A solver_control object defining the solver control
+ * @param tol A solver_control object defining the solver control
  *  parameters.
- * @param[in] lsearch A pointer to a line_search_control object defining
+ * @param lsearch A pointer to a line_search_control object defining
  *  the line search control parameters.  If no line search is desired,
  *  simply pass NULL.
- * @param[out] ib On output, an iteration_behavior object containing the
+ * @param ib On output, an iteration_behavior object containing the
  *  iteration performance statistics.
- * @param[in] err A pointer to the C error handler object.  If no error
+ * @param err A pointer to the C error handler object.  If no error
  *  handling is desired, simply pass NULL, and errors will be dealt with
  *  by the default internal error handler.  Possible errors that may be
  *  encountered are as follows.
@@ -222,6 +222,47 @@ void solve_quasi_newton(vecfcn fcn, jacobianfcn jac, int n, double *x,
 void solve_newton(vecfcn fcn, jacobianfcn jac, int n, double *x, double *fvec,
                   const solver_control *tol, line_search_control *lsearch,
                   iteration_behavior *ib, errorhandler err);
+
+/** @brief Applies the Levenberg-Marquardt method to solve the nonlinear
+ * least-squares problem.
+ *
+ * @param fcn A pointer to the routine containing the system of
+ *  equations to solve.
+ * @param jac A pointer to a routine used to compute the Jacobian of
+ *  the system of equations.  To let the program compute the Jacobian
+ *  numerically, simply pass NULL.
+ * @param neqn The number of equations.
+ * @param nvar The number of unknowns.  This must be less than or equal
+ *  to @p neqn.
+ * @param x On input, an N-element array containing an initial
+ *  estimate to the solution.  On output, the updated solution estimate.
+ *  N is the number of variables.
+ * @param fvec An N-element array that, on output, will contain
+ *  the values of each equation as evaluated at the variable values
+ *  given in @p x.
+ * @param tol A solver_control object defining the solver control
+ *  parameters.
+ * @param ib On output, an iteration_behavior object containing the
+ *  iteration performance statistics.
+ * @param err A pointer to the C error handler object.  If no error
+ *  handling is desired, simply pass NULL, and errors will be dealt with
+ *  by the default internal error handler.  Possible errors that may be
+ *  encountered are as follows.
+ *  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+ *  - NL_INVALID_INPUT_ERROR: Occurs if the number of equations is less than
+ *      than the number of variables.
+ *  - NL_ARRAY_SIZE_ERROR: Occurs if any of the input arrays are not sized
+ *      correctly.
+ *  - NL_CONVERGENCE_ERROR: Occurs if the line search cannot converge within
+ *      the allowed number of iterations.
+ *  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+ *      available.
+ *  - NL_TOLERANCE_TOO_SMALL_ERROR: Occurs if the requested tolerance is
+ *      to small to be practical for the problem at hand.
+ */
+void solve_nl_least_squares(vecfcn fcn, jacobianfcn jac, int neqn, int nvar,
+                            double *x, double *fvec, const solver_control *tol,
+                            iteration_behavior *ib, errorhandler err);
 
 #ifdef __cplusplus
 }
