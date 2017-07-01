@@ -35,11 +35,11 @@ module nonlin_c_binding
     type, bind(c) :: line_search_control
         !> The maximum number of function evaluations allowed per search.
         integer(i32) :: max_evals
-        !> Defines the scaling of the product of the gradient and direction 
-        !! vectors such that F(X + LAMBDA * P) <= 
-        !! F(X) + LAMBDA * ALPHA * P**T * G, where P is the search direction 
-        !! vector, G is the gradient vector, and LAMBDA is the scaling factor.  
-        !! The parameter must exist on the set (0, 1).  A value of 1e-4 is 
+        !> Defines the scaling of the product of the gradient and direction
+        !! vectors such that F(X + LAMBDA * P) <=
+        !! F(X) + LAMBDA * ALPHA * P**T * G, where P is the search direction
+        !! vector, G is the gradient vector, and LAMBDA is the scaling factor.
+        !! The parameter must exist on the set (0, 1).  A value of 1e-4 is
         !! typically a good starting point.
         real(dp) :: alpha
         !> Defines a minimum factor X used to determine a minimum value LAMBDA
@@ -110,7 +110,7 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Tests if the pointer to the function containing the equation to 
+    !> @brief Tests if the pointer to the function containing the equation to
     !! solve has been assigned.
     !!
     !! @param[in] this The cfcn1var_helper object.
@@ -122,9 +122,9 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Establishes a pointer to the routine containing the equations to 
+    !> @brief Establishes a pointer to the routine containing the equations to
     !! solve.
-    !! 
+    !!
     !! @param[in,out] this The cfcn1var_helper object.
     !! @param[in] fcn The function pointer.
     subroutine cf1h_set_fcn(this, fcn)
@@ -144,7 +144,7 @@ contains
     !! @param[out] f On output, the residual as computed at @p x.
     !! @param[in] tol A solver_control object defining the solver control
     !!  parameters.
-    !! @param[out] ib On output, an iteration_behavior object containing the 
+    !! @param[out] ib On output, an iteration_behavior object containing the
     !!  iteration performance statistics.
     !! @param[in] err A pointer to the C error handler object.  If no error
     !!  handling is desired, simply pass NULL, and errors will be dealt with
@@ -193,10 +193,10 @@ contains
     !! conjunction with a backtracking type line search to solve N equations
     !! of N unknowns.
     !!
-    !! @param[in] fcn A pointer to the routine containing the system of 
+    !! @param[in] fcn A pointer to the routine containing the system of
     !!  equations to solve.
     !! @param[in] jac A pointer to a routine used to compute the Jacobian of
-    !!  the system of equations.  To let the program compute the Jacobian 
+    !!  the system of equations.  To let the program compute the Jacobian
     !!  numerically, simply pass NULL.
     !! @param[in] n The number of equations, and the number of unknowns.
     !! @param[in,out] x On input, an N-element array containing an initial
@@ -208,9 +208,9 @@ contains
     !! @param[in] tol A solver_control object defining the solver control
     !!  parameters.
     !! @param[in] lsearch A pointer to a line_search_control object defining
-    !!  the line search control parameters.  If no line search is desired, 
+    !!  the line search control parameters.  If no line search is desired,
     !!  simply pass NULL.
-    !! @param[out] ib On output, an iteration_behavior object containing the 
+    !! @param[out] ib On output, an iteration_behavior object containing the
     !!  iteration performance statistics.
     !! @param[in] err A pointer to the C error handler object.  If no error
     !!  handling is desired, simply pass NULL, and errors will be dealt with
@@ -229,14 +229,15 @@ contains
     !!      available.
     !!  - NL_SPURIOUS_CONVERGENCE_ERROR: Occurs as a warning if the slope of the
     !!      gradient vector becomes sufficiently close to zero.
-    subroutine quasi_newton_c(fcn, jac, n, x, fvec, tol, lsearch, ib, err)
+    subroutine quasi_newton_c(fcn, jac, n, x, fvec, tol, lsearch, ib, err) &
+            bind(C, name = "solve_quasi_newton")
         ! Arguments
         type(c_funptr), intent(in), value :: fcn, jac
         integer(i32), intent(in), value :: n
         real(dp), intent(inout) :: x(n)
         real(dp), intent(out) :: fvec(n)
         type(solver_control), intent(in) :: tol
-        type(line_search_control), intent(in), pointer :: lsearch
+        type(c_ptr), intent(in), value :: lsearch
         type(iteration_behavior), intent(out) :: ib
         type(c_ptr), intent(in), value :: err
 
@@ -246,7 +247,8 @@ contains
         type(errors), pointer :: eptr
         type(quasi_newton_solver) :: solver
         type(vecfcn_helper) :: obj
-        class(line_search), allocatable :: ls
+        type(line_search) :: ls
+        type(line_search_control), pointer :: lsc
 
         ! Initialization
         call c_f_procpointer(fcn, fptr)
@@ -260,13 +262,14 @@ contains
         call solver%set_var_tolerance(tol%var_tolerance)
         call solver%set_gradient_tolerance(tol%grad_tolerance)
         call solver%set_print_status(logical(tol%print_status))
-        if (associated(lsearch)) then
+        if (c_associated(lsearch)) then
             ! Use a line search
-            call solver%get_line_search(ls)
-            call ls%set_max_fcn_evals(lsearch%max_evals)
-            call ls%set_scaling_factor(lsearch%alpha)
-            call ls%set_distance_factor(lsearch%factor)
+            call c_f_pointer(lsearch, lsc)
+            call ls%set_max_fcn_evals(lsc%max_evals)
+            call ls%set_scaling_factor(lsc%alpha)
+            call ls%set_distance_factor(lsc%factor)
             call solver%set_use_line_search(.true.)
+            call solver%set_line_search(ls)
         else
             ! Do not use a line search
             call solver%set_use_line_search(.false.)

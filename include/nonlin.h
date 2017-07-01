@@ -3,7 +3,32 @@
 #define NONLIN_H_DEFINED
 
 #include <stdbool.h>
-#include "ferror/include/ferror.h"
+#include "external/linalg/ferror/include/ferror.h"
+
+/** @brief Defines the signature of a function of one variable.
+ *
+ * @param x The independent variable.
+ *
+ * @return The value of the function at @p x.
+ */
+typedef double (*fcn1var)(double x);
+
+/** @brief Describes an M-element vector-valued function of N-variables.
+ *
+ * @param[in] x An N-element array containing the independent variables.
+ * @param[out] f An M-element array that, on output, contains the values
+ *  of the M functions.
+ */
+typedef void (*vecfcn)(const double *x, double *f);
+
+/** @brief Describes a routine capable of computing the Jacobian matrix
+ * of M functions of N unknowns.
+ *
+ * @param[in] x An N-element array containing the independent variables.
+ * @param[out] jac An M-by-N matrix where the Jacobian will be written.
+ */
+typedef void (*jacobianfcn)(const double *x, double *jac);
+
 
 /** @brief Defines a set of solver control information. */
 typedef struct {
@@ -23,11 +48,11 @@ typedef struct {
 typedef struct {
     /** @brief The maximum number of function evaluations allowed per search. */
     int max_evals;
-    /** @brief Defines the scaling of the product of the gradient and direction 
-     * vectors such that F(X + LAMBDA * P) <= 
-     * F(X) + LAMBDA * ALPHA * P**T * G, where P is the search direction 
-     * vector, G is the gradient vector, and LAMBDA is the scaling factor.  
-     * The parameter must exist on the set (0, 1).  A value of 1e-4 is 
+    /** @brief Defines the scaling of the product of the gradient and direction
+     * vectors such that F(X + LAMBDA * P) <=
+     * F(X) + LAMBDA * ALPHA * P**T * G, where P is the search direction
+     * vector, G is the gradient vector, and LAMBDA is the scaling factor.
+     * The parameter must exist on the set (0, 1).  A value of 1e-4 is
      * typically a good starting point.
      */
     double alpha;
@@ -61,47 +86,22 @@ typedef struct {
     /** @brief Specifies the number of Jacobian evaluations performed. */
     int jacobian_count;
     /** @brief True if the solution converged as a result of a zero-valued
-     * function; else, false. 
+     * function; else, false.
      */
     bool converge_on_fcn;
     /** @brief True if the solution converged as a result of no appreciable
-     * change in solution points between iterations; else, false. 
+     * change in solution points between iterations; else, false.
      */
     bool converg_on_chng;
     /** @brief True if the solution appears to have settled on a stationary
      * point such that the gradient of the function is zero-valued; else,
-     * false. 
+     * false.
      */
     bool converge_on_zero_diff;
 } iteration_behavior;
 
 
-
-/** @brief Defines the signature of a function of one variable.
- *
- * @param x The independent variable.
- *
- * @return The value of the function at @p x.
- */
-typedef double (*fcn1var)(double x);
-
-/** @brief Describes an M-element vector-valued function of N-variables.
- *
- * @param[in] x An N-element array containing the independent variables.
- * @param[out] f An M-element array that, on output, contains the values
- *  of the M functions.
- */
-typedef void (*vecfcn)(const double *x, double *f);
-
-/** @brief Describes a routine capable of computing the Jacobian matrix
- * of M functions of N unknowns.
- *
- * @param[in] x An N-element array containing the independent variables.
- * @param[out] jac An M-by-N matrix where the Jacobian will be written.
- */
-typedef void (*jacobianfcn)(const double *x, double *jac);
-
-#ifndef __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -113,7 +113,7 @@ extern "C" {
  * @param[out] f On output, the residual as computed at @p x.
  * @param[in] tol A solver_control object defining the solver control
  *  parameters.
- * @param[out] ib On output, an iteration_behavior object containing the 
+ * @param[out] ib On output, an iteration_behavior object containing the
  *  iteration performance statistics.
  * @param[in] err A pointer to the C error handler object.  If no error
  *  handling is desired, simply pass NULL, and errors will be dealt with
@@ -133,10 +133,10 @@ void solve_brent(fcn1var fcn, value_pair lim, double *x, double *f,
  * conjunction with a backtracking type line search to solve N equations
  * of N unknowns.
  *
- * @param[in] fcn A pointer to the routine containing the system of 
+ * @param[in] fcn A pointer to the routine containing the system of
  *  equations to solve.
  * @param[in] jac A pointer to a routine used to compute the Jacobian of
- *  the system of equations.  To let the program compute the Jacobian 
+ *  the system of equations.  To let the program compute the Jacobian
  *  numerically, simply pass NULL.
  * @param[in] n The number of equations, and the number of unknowns.
  * @param[in,out] x On input, an N-element array containing an initial
@@ -148,9 +148,9 @@ void solve_brent(fcn1var fcn, value_pair lim, double *x, double *f,
  * @param[in] tol A solver_control object defining the solver control
  *  parameters.
  * @param[in] lsearch A pointer to a line_search_control object defining
- *  the line search control parameters.  If no line search is desired, 
+ *  the line search control parameters.  If no line search is desired,
  *  simply pass NULL.
- * @param[out] ib On output, an iteration_behavior object containing the 
+ * @param[out] ib On output, an iteration_behavior object containing the
  *  iteration performance statistics.
  * @param[in] err A pointer to the C error handler object.  If no error
  *  handling is desired, simply pass NULL, and errors will be dealt with
@@ -175,7 +175,7 @@ void solve_quasi_newton(vecfcn fcn, jacobianfcn jac, int n, double *x,
                         line_search_control *lsearch,
                         iteration_behavior *ib, errorhandler err);
 
-#ifndef __cplusplus
+#ifdef __cplusplus
 }
 #endif
 #endif // NONLIN_H_DEFINED
