@@ -202,3 +202,85 @@ Iterations: 10
 Function Evaluations: 14
 Jacobian Evaluations: 2
 ```
+
+## C Example 2
+This example is the same as example 1, but uses Newton's method without any line-search.
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include "include/nonlin.h"
+
+void testfcn(int neqn, int nvar, const double *x, double *f);
+
+int main() {
+    // Local Variables
+    solver_control tol;
+    iteration_behavior ib;
+    double x[2], f[2];
+
+    // Initialization
+    tol.max_evals = 500;
+    tol.fcn_tolerance = 1.0e-8;
+    tol.var_tolerances = 1.0e-12;
+    tol.grad_tolerances = 1.0e-12;
+    tol.print_status = true;
+    x[0] = 1.0;
+    x[1] = 1.0;
+
+    // Compute the solution using a Quasi-Newton method
+    solve_newton(testfcn, NULL, 2, x, f, &tol, NULL, &ib, NULL);
+
+    // Display the results
+    printf("\nRESULTS:\nX = (%f, %f)\nF = (%e, %e)\n", x[0], x[1], f[0], f[1]);
+    printf("Iterations: %i\nFunction Evaluations: %i\nJacobian Evaluations: %i\n",
+           ib.iter_count, ib.fcn_count, ib.jacobian_count);
+
+    // End
+    return 0;
+}
+
+
+void testfcn(int neqn, int nvar, const double *x, double *f) {
+    f[0] = x[0] * x[0] + x[1] * x[1] - 34.0;
+    f[1] = x[0] * x[0] - 2.0 * x[1] * x[1] - 7.0;
+}
+```
+The output of the above is as follows:
+```text
+Iteration: 1
+Function Evaluations: 2
+Jacobian Evaluations: 1
+Change in Variable: 0.923E+00
+Residual: 0.160E+03
+
+Iteration: 2
+Function Evaluations: 3
+Jacobian Evaluations: 2
+Change in Variable: 0.742E+00
+Residual: 0.332E+02
+
+Iteration: 3
+Function Evaluations: 4
+Jacobian Evaluations: 3
+Change in Variable: 0.380E+00
+Residual: 0.437E+01
+
+Iteration: 4
+Function Evaluations: 5
+Jacobian Evaluations: 4
+Change in Variable: 0.779E-01
+Residual: 0.153E+00
+
+Iteration: 5
+Function Evaluations: 6
+Jacobian Evaluations: 5
+Change in Variable: 0.304E-02
+Residual: 0.232E-03
+
+RESULTS:
+X = (5.000000, 3.000000)
+F = (5.390746e-010, 5.390710e-010)
+Iterations: 6
+Function Evaluations: 7
+Jacobian Evaluations: 6
+```
