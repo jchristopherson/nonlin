@@ -57,7 +57,90 @@ module nonlin_c_binding
 ! ------------------------------------------------------------------------------
 
 ! ------------------------------------------------------------------------------
+
+! ******************************************************************************
+! INTERFACES
+! ------------------------------------------------------------------------------
+interface
+    !> @brief The C-friendly interface to fcn1var.
+    !!
+    !! @param[in] x The independent variable.
+    !!
+    !! @return The value of the function @p x.
+    function cfcn1var(x) result(f)
+        ! This is required as opposed to fcn1var in order to allow the C
+        ! input to be passed by value, not as a pointer.
+        use linalg_constants, only : dp
+        real(dp), intent(in), value :: x
+        real(dp) :: f
+    end function
+end interface
+
+! ******************************************************************************
+! TYPES
+! ------------------------------------------------------------------------------
+    !> @brief A container allowing the use of cfcn1var in the solver codes.
+    type, extends(fcn1var_helper) :: cfcn1var_helper
+        private
+        !> A pointer to the target cfcn1var routine.
+        procedure(cfcn1var), pointer, nopass :: m_cfcn => null()
+    contains
+        !> @brief Executes the routine containing the function to evaluate.
+        procedure, public :: fcn => cf1h_fcn
+        !> @brief Tests if the pointer to the function containing the equation
+        !! to solve has been assigned.
+        procedure, public :: is_fcn_defined => cf1h_is_fcn_defined
+        !> @brief Establishes a pointer to the routine containing the equations
+        !! to solve.
+        procedure, public :: set_cfcn => cf1h_set_fcn
+    end type
+
+
 contains
+! ******************************************************************************
+! CFCN1VAR_HELPER MEMBERS
+! ------------------------------------------------------------------------------
+    !> @brief Executes the routine containing the function to evaluate.
+    !!
+    !! @param[in] this The cfcn1var_helper object.
+    !! @param[in] x The value of the independent variable at which the function
+    !!  should be evaluated.
+    !! @return The value of the function at @p x.
+    function cf1h_fcn(this, x) result(f)
+        class(cfcn1var_helper), intent(in) :: this
+        real(dp), intent(in) :: x
+        real(dp) :: f
+        if (associated(this%m_cfcn)) then
+            f = this%m_cfcn(x)
+        end if
+    end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Tests if the pointer to the function containing the equation to 
+    !! solve has been assigned.
+    !!
+    !! @param[in] this The cfcn1var_helper object.
+    !! @return Returns true if the pointer has been assigned; else, false.
+    pure function cf1h_is_fcn_defined(this) result(x)
+        class(cfcn1var_helper), intent(in) :: this
+        logical :: x
+        x = associated(this%m_cfcn)
+    end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Establishes a pointer to the routine containing the equations to 
+    !! solve.
+    !! 
+    !! @param[in,out] this The cfcn1var_helper object.
+    !! @param[in] fcn The function pointer.
+    subroutine cf1h_set_fcn(this, fcn)
+        class(cfcn1var_helper), intent(inout) :: this
+        procedure(cfcn1var), intent(in), pointer :: fcn
+        this%m_cfcn => fcn
+    end subroutine
+
+! ******************************************************************************
+! SOLVER ROUTINES
 ! ------------------------------------------------------------------------------
     !> @brief Solves an equation of one variable using Brent's method.
     !!
@@ -89,10 +172,10 @@ contains
         type(c_ptr), intent(in), value :: err
 
         ! Local Variables
-        procedure(fcn1var), pointer :: fptr
+        procedure(cfcn1var), pointer :: fptr
         type(errors), pointer :: eptr
         type(brent_solver) :: solver
-        type(fcn1var_helper) :: obj
+        type(cfcn1var_helper) :: obj
 
         ! Initialization
         call c_f_procpointer(fcn, fptr)
@@ -100,7 +183,7 @@ contains
         call solver%set_fcn_tolerance(tol%fcn_tolerance)
         call solver%set_var_tolerance(tol%var_tolerance)
         call solver%set_print_status(logical(tol%print_status))
-        call obj%set_fcn(fptr)
+        call obj%set_cfcn(fptr)
 
         ! Process
         if (c_associated(err)) then
