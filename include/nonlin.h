@@ -15,11 +15,13 @@ typedef double (*fcn1var)(double x);
 
 /** @brief Describes an M-element vector-valued function of N-variables.
  *
+ * @param[in] neqn The number of equations.
+ * @param[in] nvar The number of variables.
  * @param[in] x An N-element array containing the independent variables.
  * @param[out] f An M-element array that, on output, contains the values
  *  of the M functions.
  */
-typedef void (*vecfcn)(const double *x, double *f);
+typedef void (*vecfcn)(int neqn, int nvar, const double *x, double *f);
 
 /** @brief Describes a routine capable of computing the Jacobian matrix
  * of M functions of N unknowns.

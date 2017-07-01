@@ -13,6 +13,38 @@ module nonlin_c_binding
     use ferror, only : errors
     implicit none
 
+
+! ******************************************************************************
+! INTERFACES
+! ------------------------------------------------------------------------------
+interface
+    !> @brief The C-friendly interface to fcn1var.
+    !!
+    !! @param[in] x The independent variable.
+    !!
+    !! @return The value of the function @p x.
+    function cfcn1var(x) result(f)
+        ! This is required as opposed to fcn1var in order to allow the C
+        ! input to be passed by value, not as a pointer.
+        use linalg_constants, only : dp
+        real(dp), intent(in), value :: x
+        real(dp) :: f
+    end function
+
+    !> @brief The C-friendly interface to vecfcn.
+    !!
+    !! @param[in] neqn The number of equations.
+    !! @param[in] nvar The number of variables.
+    !! @param[in] x The NVAR-element array containing the indendent variables.
+    !! @param[out] f The NEQN-element array containing the function values.
+    subroutine cvecfcn(neqn, nvar, x, f)
+        use linalg_constants, only : dp, i32
+        integer(i32), intent(in) :: neqn, nvar
+        real(dp), intent(in) :: x(nvar)
+        real(dp), intent(out) :: f(neqn)
+    end subroutine
+end interface
+
 ! ******************************************************************************
 ! TYPES
 ! ------------------------------------------------------------------------------
@@ -52,26 +84,6 @@ module nonlin_c_binding
         real(dp) :: factor
     end type
 
-! ******************************************************************************
-! INTERFACES
-! ------------------------------------------------------------------------------
-interface
-    !> @brief The C-friendly interface to fcn1var.
-    !!
-    !! @param[in] x The independent variable.
-    !!
-    !! @return The value of the function @p x.
-    function cfcn1var(x) result(f)
-        ! This is required as opposed to fcn1var in order to allow the C
-        ! input to be passed by value, not as a pointer.
-        use linalg_constants, only : dp
-        real(dp), intent(in), value :: x
-        real(dp) :: f
-    end function
-end interface
-
-! ******************************************************************************
-! TYPES
 ! ------------------------------------------------------------------------------
     !> @brief A container allowing the use of cfcn1var in the solver codes.
     type, extends(fcn1var_helper) :: cfcn1var_helper
@@ -89,6 +101,38 @@ end interface
         procedure, public :: set_cfcn => cf1h_set_fcn
     end type
 
+! ------------------------------------------------------------------------------
+    !> @brief A container allowing the use of cvecfcn in the solver codes.
+    type, extends(vecfcn_helper) :: cvecfcn_helper
+        private
+        !> A pointer to the target cvecfcn routine.
+        procedure(cvecfcn), pointer, nopass :: m_cfcn => null()
+    contains
+        !> @brief Establishes a pointer to the routine containing the system of
+        !!  equations to solve.
+        procedure, public :: set_cfcn => cvfh_set_fcn
+        ! !> @brief Establishes a pointer to the routine for computing the 
+        ! !! Jacobian matrix of the system of equations.  If no routine is 
+        ! !! defined, the Jacobian matrix will be computed numerically (this is 
+        ! !! the default state).
+        ! procedure, public :: set_jacobian => vfh_set_jac
+
+        !> @brief Tests if the pointer to the subroutine containing the system
+        !! of equations to solve has been assigned.
+        procedure, public :: is_fcn_defined => cvfh_is_fcn_defined
+        ! !> @brief Tests if the pointer to the subroutine containing the system
+        ! !! of equations to solve has been assigned.
+        ! procedure, public :: is_jacobian_defined => vfh_is_jac_defined
+
+        !> @brief Executes the routine containing the system of equations to
+        !! solve.  No action is taken if the pointer to the subroutine has not 
+        !! been defined.
+        procedure, public :: fcn => cvfh_fcn
+        ! !> @brief Executes the routine containing the Jacobian matrix if 
+        ! !! supplied.  If not supplied, the Jacobian is computed via finite 
+        ! !! differences.
+        ! procedure, public :: jacobian => vfh_jac_fcn
+    end type
 
 contains
 ! ******************************************************************************
@@ -132,6 +176,64 @@ contains
         procedure(cfcn1var), intent(in), pointer :: fcn
         this%m_cfcn => fcn
     end subroutine
+
+! ******************************************************************************
+! CVECFCN_HELPER MEMBERS
+! ------------------------------------------------------------------------------
+    !> @brief Establishes a pointer to the routine containing the system of
+    !!  equations to solve.
+    !! 
+    !! @param[in,out] this The cvecfcn_helper object.
+    !! @param[in] fcn The function pointer.
+    !! @param[in] nfcn The number of functions.
+    !! @param[in] nvar The number of variables.
+    subroutine cvfh_set_fcn(this, fcn, nfcn, nvar)
+        class(cvecfcn_helper), intent(inout) :: this
+        procedure(cvecfcn), intent(in), pointer :: fcn
+        integer(i32), intent(in) :: nfcn, nvar
+        procedure(vecfcn), pointer :: nptr
+        nptr => null()
+        call this%set_fcn(nptr, nfcn, nvar)
+        this%m_cfcn => fcn
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Tests if the pointer to the subroutine containing the system of
+    !! equations to solve has been assigned.
+    !!
+    !! @param[in] this The cvecfcn_helper object.
+    !! @return Returns true if the pointer has been assigned; else, false.
+    pure function cvfh_is_fcn_defined(this) result(x)
+        class(cvecfcn_helper), intent(in) :: this
+        logical :: x
+        x = associated(this%m_cfcn)
+    end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Executes the routine containing the system of equations to solve.
+    !! No action is taken if the pointer to the subroutine has not been defined.
+    !!
+    !! @param[in] this The cvecfcn_helper object.
+    !! @param[in] x An N-element array containing the independent variables.
+    !! @param[out] f An M-element array that, on output, contains the values
+    !!  of the M functions.
+    subroutine cvfh_fcn(this, x, f)
+        class(cvecfcn_helper), intent(in) :: this
+        real(dp), intent(in), dimension(:) :: x
+        real(dp), intent(out), dimension(:) :: f
+        integer(i32) :: neqn, nvar
+        neqn = this%get_equation_count()
+        nvar = this%get_variable_count()
+        if (this%is_fcn_defined()) then
+            call this%m_cfcn(neqn, nvar, x, f)
+        end if
+    end subroutine
+
+! ------------------------------------------------------------------------------
+
+! ------------------------------------------------------------------------------
+
+! ------------------------------------------------------------------------------
 
 ! ******************************************************************************
 ! SOLVER ROUTINES
@@ -242,17 +344,17 @@ contains
         type(c_ptr), intent(in), value :: err
 
         ! Local Variables
-        procedure(vecfcn), pointer :: fptr
+        procedure(cvecfcn), pointer :: fptr
         procedure(jacobianfcn), pointer :: jptr
         type(errors), pointer :: eptr
         type(quasi_newton_solver) :: solver
-        type(vecfcn_helper) :: obj
+        type(cvecfcn_helper) :: obj
         type(line_search) :: ls
         type(line_search_control), pointer :: lsc
 
         ! Initialization
         call c_f_procpointer(fcn, fptr)
-        call obj%set_fcn(fptr, n, n)
+        call obj%set_cfcn(fptr, n, n)
         if (c_associated(jac)) then
             call c_f_procpointer(jac, jptr)
             call obj%set_jacobian(jptr)
