@@ -17,8 +17,8 @@ typedef double (*fcn1var)(double x);
  *
  * @param[in] neqn The number of equations.
  * @param[in] nvar The number of variables.
- * @param[in] x An N-element array containing the independent variables.
- * @param[out] f An M-element array that, on output, contains the values
+ * @param[in] x An NVAR-element array containing the independent variables.
+ * @param[out] f An NEQN-element array that, on output, contains the values
  *  of the M functions.
  */
 typedef void (*vecfcn)(int neqn, int nvar, const double *x, double *f);
@@ -26,10 +26,12 @@ typedef void (*vecfcn)(int neqn, int nvar, const double *x, double *f);
 /** @brief Describes a routine capable of computing the Jacobian matrix
  * of M functions of N unknowns.
  *
- * @param[in] x An N-element array containing the independent variables.
- * @param[out] jac An M-by-N matrix where the Jacobian will be written.
+ * @param[in] neqn The number of equations.
+ * @param[in] nvar The number of variables.
+ * @param[in] x An NVAR-element array containing the independent variables.
+ * @param[out] jac An NEQN-by-NVAR matrix where the Jacobian will be written.
  */
-typedef void (*jacobianfcn)(const double *x, double *jac);
+typedef void (*jacobianfcn)(int neqn, int nvar, const double *x, double *jac);
 
 
 /** @brief Defines a set of solver control information. */
@@ -176,6 +178,50 @@ void solve_quasi_newton(vecfcn fcn, jacobianfcn jac, int n, double *x,
                         double *fvec, const solver_control *tol,
                         line_search_control *lsearch,
                         iteration_behavior *ib, errorhandler err);
+
+/** @brief Applies Newton's method in conjunction with a backtracking type 
+ * line search to solve N equations of N unknowns.
+ *
+ * @param[in] fcn A pointer to the routine containing the system of
+ *  equations to solve.
+ * @param[in] jac A pointer to a routine used to compute the Jacobian of
+ *  the system of equations.  To let the program compute the Jacobian
+ *  numerically, simply pass NULL.
+ * @param[in] n The number of equations, and the number of unknowns.
+ * @param[in,out] x On input, an N-element array containing an initial
+ *  estimate to the solution.  On output, the updated solution estimate.
+ *  N is the number of variables.
+ * @param[out] fvec An N-element array that, on output, will contain
+ *  the values of each equation as evaluated at the variable values
+ *  given in @p x.
+ * @param[in] tol A solver_control object defining the solver control
+ *  parameters.
+ * @param[in] lsearch A pointer to a line_search_control object defining
+ *  the line search control parameters.  If no line search is desired,
+ *  simply pass NULL.
+ * @param[out] ib On output, an iteration_behavior object containing the
+ *  iteration performance statistics.
+ * @param[in] err A pointer to the C error handler object.  If no error
+ *  handling is desired, simply pass NULL, and errors will be dealt with
+ *  by the default internal error handler.  Possible errors that may be
+ *  encountered are as follows.
+ *  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+ *  - NL_INVALID_INPUT_ERROR: Occurs if the number of equations is different
+ *      than the number of variables.
+ *  - NL_ARRAY_SIZE_ERROR: Occurs if any of the input arrays are not sized
+ *      correctly.
+ *  - NL_DIVERGENT_BEHAVIOR_ERROR: Occurs if the direction vector is
+ *      pointing in an apparent uphill direction.
+ *  - NL_CONVERGENCE_ERROR: Occurs if the line search cannot converge within
+ *      the allowed number of iterations.
+ *  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+ *      available.
+ *  - NL_SPURIOUS_CONVERGENCE_ERROR: Occurs as a warning if the slope of the
+ *      gradient vector becomes sufficiently close to zero.
+ */
+void solve_newton(vecfcn fcn, jacobianfcn jac, int n, double *x, double *fvec,
+                  const solver_control *tol, line_search_control *lsearch,
+                  iteration_behavior *ib, errorhandler err);
 
 #ifdef __cplusplus
 }
