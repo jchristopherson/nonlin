@@ -848,8 +848,8 @@ contains
         print '(AI0)', "Iteration: ", iter
         print '(AI0)', "Function Evaluations: ", nfeval
         if (njaceval > 0) print '(AI0)', "Jacobian Evaluations: ", njaceval
-        print '(AE8.3)', "Change in Variable: ", xnorm
-        print '(AE8.3)', "Residual: ", fnorm
+        print '(AE9.3)', "Change in Variable: ", xnorm
+        print '(AE9.3)', "Residual: ", fnorm
     end subroutine
 
 ! ------------------------------------------------------------------------------
