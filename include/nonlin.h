@@ -5,6 +5,24 @@
 #include <stdbool.h>
 #include "external/linalg/ferror/include/ferror.h"
 
+/** An error flag denoting an invalid input. */
+#define NL_INVALID_INPUT_ERROR = 201
+/** An error flag denoting an improperly sized array. */
+#define NL_ARRAY_SIZE_ERROR = 202
+/** An error denoting that there is insufficient memory available. */
+#define NL_OUT_OF_MEMORY_ERROR = 203
+/** An error resulting from an invalid operation. */
+#define NL_INVALID_OPERATION_ERROR = 204
+/** An error resulting from a lack of convergence. */
+#define NL_CONVERGENCE_ERROR = 205
+/** An error resulting from a divergent condition. */
+#define NL_DIVERGENT_BEHAVIOR_ERROR = 206
+/** An error indicating a possible spurious convergence condition. */
+#define NL_SPURIOUS_CONVERGENCE_ERROR = 207
+/** An error indicating the user-requested tolerance is too small to be
+ * practical for the problem at hand. */
+#define NL_TOLERANCE_TOO_SMALL_ERROR = 208
+
 /** @brief Defines the signature of a function of one variable.
  *
  * @param x The independent variable.
