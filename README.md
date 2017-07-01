@@ -140,7 +140,7 @@ void testfcn(int neqn, int nvar, const double *x, double *f) {
 }
 ```
 The output of the above is as follows:
-
+```text
 Iteration: 1
 Function Evaluations: 3
 Jacobian Evaluations: 1
@@ -201,3 +201,4 @@ F = (6.038903e-011, 1.206786e-010)
 Iterations: 10
 Function Evaluations: 14
 Jacobian Evaluations: 2
+```
