@@ -52,12 +52,6 @@ module nonlin_c_binding
         real(dp) :: factor
     end type
 
-! ------------------------------------------------------------------------------
-
-! ------------------------------------------------------------------------------
-
-! ------------------------------------------------------------------------------
-
 ! ******************************************************************************
 ! INTERFACES
 ! ------------------------------------------------------------------------------
@@ -167,7 +161,7 @@ contains
         type(c_funptr), intent(in), value :: fcn
         type(value_pair), intent(in), value :: lim
         real(dp), intent(out) :: x, f
-        type(solver_control), intent(in), value :: tol
+        type(solver_control), intent(in) :: tol
         type(iteration_behavior), intent(out) :: ib
         type(c_ptr), intent(in), value :: err
 
@@ -195,6 +189,58 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
+    !
+    subroutine quasi_newton_c(fcn, jac, n, x, fvec, tol, lsearch, ib, err)
+        ! Arguments
+        type(c_funptr), intent(in), value :: fcn, jac
+        integer(i32), intent(in), value :: n
+        real(dp), intent(inout) :: x(n)
+        real(dp), intent(out) :: fvec(n)
+        type(solver_control), intent(in) :: tol
+        type(line_search_control), intent(in), pointer :: lsearch
+        type(iteration_behavior), intent(out) :: ib
+        type(c_ptr), intent(in), value :: err
+
+        ! Local Variables
+        procedure(vecfcn), pointer :: fptr
+        procedure(jacobianfcn), pointer :: jptr
+        type(errors), pointer :: eptr
+        type(quasi_newton_solver) :: solver
+        type(vecfcn_helper) :: obj
+        class(line_search), allocatable :: ls
+
+        ! Initialization
+        call c_f_procpointer(fcn, fptr)
+        call obj%set_fcn(fptr, n, n)
+        if (c_associated(jac)) then
+            call c_f_procpointer(jac, jptr)
+            call obj%set_jacobian(jptr)
+        end if
+        call solver%set_max_fcn_evals(tol%max_evals)
+        call solver%set_fcn_tolerance(tol%fcn_tolerance)
+        call solver%set_var_tolerance(tol%var_tolerance)
+        call solver%set_gradient_tolerance(tol%grad_tolerance)
+        call solver%set_print_status(logical(tol%print_status))
+        if (associated(lsearch)) then
+            ! Use a line search
+            call solver%get_line_search(ls)
+            call ls%set_max_fcn_evals(lsearch%max_evals)
+            call ls%set_scaling_factor(lsearch%alpha)
+            call ls%set_distance_factor(lsearch%factor)
+            call solver%set_use_line_search(.true.)
+        else
+            ! Do not use a line search
+            call solver%set_use_line_search(.false.)
+        end if
+
+        ! Process
+        if (c_associated(err)) then
+            call c_f_pointer(err, eptr)
+            call solver%solve(obj, x, fvec, ib, eptr)
+        else
+            call solver%solve(obj, x, fvec, ib)
+        end if
+    end subroutine
 
 ! ------------------------------------------------------------------------------
 

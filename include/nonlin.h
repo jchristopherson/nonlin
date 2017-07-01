@@ -126,7 +126,7 @@ extern "C" {
  *      the allowed number of iterations.
  */
 void solve_brent(fcn1var fcn, value_pair lim, double *x, double *f,
-                 solver_control tol, iteration_behavior *ib,
+                 const solver_control *tol, iteration_behavior *ib,
                  errorhandler err);
 
 #ifndef __cplusplus
