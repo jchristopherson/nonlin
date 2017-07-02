@@ -91,7 +91,7 @@ contains
     !> @brief Gets the line search module.
     !!
     !! @param[in] this The line_search_solver object.
-    !! @param[out] The line_search object.
+    !! @param[out] ls The line_search object.
     subroutine lss_get_line_search(this, ls)
         class(line_search_solver), intent(in) :: this
         class(line_search), intent(out), allocatable :: ls
@@ -191,6 +191,52 @@ contains
     !!      available.
     !!  - NL_SPURIOUS_CONVERGENCE_ERROR: Occurs as a warning if the slope of the
     !!      gradient vector becomes sufficiently close to zero.
+    !!
+    !! @par Usage
+    !! The following code provides an example of how to solve a system of N
+    !! equations of N unknonwns using this Quasi-Newton method.
+    !! @code{.f90}
+    !! ! System of Equations #1:
+    !! !
+    !! ! x**2 + y**2 = 34
+    !! ! x**2 - 2 * y**2 = 7
+    !! !
+    !! ! Solution:
+    !! ! x = +/-5
+    !! ! y = +/-3
+    !! subroutine fcn1(x, f)
+    !!     real(dp), intent(in), dimension(:) :: x
+    !!     real(dp), intent(out), dimension(:) :: f
+    !!     f(1) = x(1)**2 + x(2)**2 - 34.0d0
+    !!     f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
+    !! end subroutine
+    !!
+    !! program main
+    !!     use linalg_constants, only : dp
+    !!     use nonlin_types, only : vecfcn, vecfcn_helper
+    !!     use nonlin_solve, only : quasi_newton_solver
+    !!
+    !!     type(vecfcn_helper) :: obj
+    !!     procedure(vecfcn), pointer :: fcn
+    !!     type(quasi_newton_solver) :: solver
+    !!     real(dp) :: x(2), f(2)
+    !!
+    !!     ! Set the initial conditions to [1, 1]
+    !!     x = 1.0d0
+    !!
+    !!     ! Solve the system of equations.  The solution overwrites X
+    !!     call solver%solve(obj, x, f)
+    !!
+    !!     ! Print the output and the residual:
+    !!     print '(AF5.3AF5.3A)', "The solution: (", x(1), ", ", x(2), ")"
+    !!     print '(AE8.3AE8.3A)', "The residual: (", f(1), ", ", f(2), ")"
+    !! end program
+    !! @endcode
+    !! The above program returns the following results.
+    !! @code{.txt}
+    !! The solution: (5.000, 3.000)
+    !! The residual: (.604E-10, .121E-09)
+    !! @endcode
     !!
     !! @par See Also
     !! - [Broyden's Paper](http://www.ams.org/journals/mcom/1965-19-092/S0025-5718-1965-0198670-6/S0025-5718-1965-0198670-6.pdf)
@@ -562,6 +608,52 @@ contains
     !!      available.
     !!  - NL_SPURIOUS_CONVERGENCE_ERROR: Occurs as a warning if the slope of the
     !!      gradient vector becomes sufficiently close to zero.
+    !!
+    !! @par Usage
+    !! The following code provides an example of how to solve a system of N
+    !! equations of N unknonwns using Newton's method.
+    !! @code{.f90}
+    !! ! System of Equations #1:
+    !! !
+    !! ! x**2 + y**2 = 34
+    !! ! x**2 - 2 * y**2 = 7
+    !! !
+    !! ! Solution:
+    !! ! x = +/-5
+    !! ! y = +/-3
+    !! subroutine fcn1(x, f)
+    !!     real(dp), intent(in), dimension(:) :: x
+    !!     real(dp), intent(out), dimension(:) :: f
+    !!     f(1) = x(1)**2 + x(2)**2 - 34.0d0
+    !!     f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
+    !! end subroutine
+    !!
+    !! program main
+    !!     use linalg_constants, only : dp
+    !!     use nonlin_types, only : vecfcn, vecfcn_helper
+    !!     use nonlin_solve, only : newton_solver
+    !!
+    !!     type(vecfcn_helper) :: obj
+    !!     procedure(vecfcn), pointer :: fcn
+    !!     type(newton_solver) :: solver
+    !!     real(dp) :: x(2), f(2)
+    !!
+    !!     ! Set the initial conditions to [1, 1]
+    !!     x = 1.0d0
+    !!
+    !!     ! Solve the system of equations.  The solution overwrites X
+    !!     call solver%solve(obj, x, f)
+    !!
+    !!     ! Print the output and the residual:
+    !!     print '(AF5.3AF5.3A)', "The solution: (", x(1), ", ", x(2), ")"
+    !!     print '(AE8.3AE8.3A)', "The residual: (", f(1), ", ", f(2), ")"
+    !! end program
+    !! @endcode
+    !! The above program returns the following results.
+    !! @code{.txt}
+    !! The solution: (5.000, 3.000)
+    !! The residual: (.000E+00, .000E+00)
+    !! @endcode
     !!
     !! @par See Also
     !! - [Wikipedia](https://en.wikipedia.org/wiki/Newton%27s_method)
@@ -1044,7 +1136,7 @@ contains
 ! ******************************************************************************
 ! GENERAL ROUTINES
 ! ------------------------------------------------------------------------------
-    !> @breif Tests for convergence.
+    !> @brief Tests for convergence.
     !!
     !! @param[in] x The current solution estimate.
     !! @param[in] xo The previous solution estimate.

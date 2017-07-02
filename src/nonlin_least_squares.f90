@@ -111,6 +111,52 @@ contains
     !! @par Remarks
     !! This routines is based upon the MINPACK routine LMDIF.
     !!
+    !! @par Usage
+    !! The following code provides an example of how to solve a system of N
+    !! equations of N unknonwns using the Levenberg-Marquardt method.
+    !! @code{.f90}
+    !! ! System of Equations #1:
+    !! !
+    !! ! x**2 + y**2 = 34
+    !! ! x**2 - 2 * y**2 = 7
+    !! !
+    !! ! Solution:
+    !! ! x = +/-5
+    !! ! y = +/-3
+    !! subroutine fcn1(x, f)
+    !!     real(dp), intent(in), dimension(:) :: x
+    !!     real(dp), intent(out), dimension(:) :: f
+    !!     f(1) = x(1)**2 + x(2)**2 - 34.0d0
+    !!     f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
+    !! end subroutine
+    !!
+    !! program main
+    !!     use linalg_constants, only : dp
+    !!     use nonlin_types, only : vecfcn, vecfcn_helper
+    !!     use nonlin_least_squares, only : least_squares_solver
+    !!
+    !!     type(vecfcn_helper) :: obj
+    !!     procedure(vecfcn), pointer :: fcn
+    !!     type(least_squares_solver) :: solver
+    !!     real(dp) :: x(2), f(2)
+    !!
+    !!     ! Set the initial conditions to [1, 1]
+    !!     x = 1.0d0
+    !!
+    !!     ! Solve the system of equations.  The solution overwrites X
+    !!     call solver%solve(obj, x, f)
+    !!
+    !!     ! Print the output and the residual:
+    !!     print '(AF5.3AF5.3A)', "The solution: (", x(1), ", ", x(2), ")"
+    !!     print '(AE8.3AE8.3A)', "The residual: (", f(1), ", ", f(2), ")"
+    !! end program
+    !! @endcode
+    !! The above program returns the following results.
+    !! @code{.txt}
+    !! The solution: (5.000, 3.000)
+    !! The residual: (.000E+00, .000E+00)
+    !! @endcode
+    !!
     !! @par See Also
     !! - [Wikipedia](https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm)
     !! - [MINPACK (Wikipedia)](https://en.wikipedia.org/wiki/MINPACK)
