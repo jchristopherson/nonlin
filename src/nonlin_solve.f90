@@ -921,7 +921,8 @@ contains
     !! @par Usage
     !! The following code provides an example of how to solve an equation of
     !! one variable using Brent's method.
-    !! ! f(x) = sin(x) / x, SOLUTION: x = n * pi for n = 0, 1, 2, 3, ...
+    !! @code{.f90}
+    !! ! f(x) = sin(x) / x, SOLUTION: x = n * pi for n = 1, 2, 3, ...
     !! function fcn1(x) result(f)
     !!     real(dp), intent(in) :: x
     !!     real(dp) :: f
@@ -1161,16 +1162,6 @@ contains
         end if
     end subroutine
 
-! ------------------------------------------------------------------------------
-
-! ------------------------------------------------------------------------------
-
-! ------------------------------------------------------------------------------
-
-! ------------------------------------------------------------------------------
-
-
-
 
 ! ******************************************************************************
 ! GENERAL ROUTINES
@@ -1188,7 +1179,7 @@ contains
     !! @param[in] gtol The tolerance on the slope of the gradient.
     !! @param[out] c True if the solution converged on either the residual or
     !!  change in variable.
-    !! @param[out] cs True if convergence occurred due to change in variable.
+    !! @param[out] cx True if convergence occurred due to change in variable.
     !! @param[out] cf True if convergence occurred due to residual.
     !! @param[out] cg True if convergence occured due to slope of the gradient.
     !! @param[out] xnorm The largest magnitude component of the scaled change
