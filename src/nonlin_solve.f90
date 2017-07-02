@@ -918,6 +918,45 @@ contains
     !!  - NL_CONVERGENCE_ERROR: Occurs if the algorithm cannot converge within
     !!      the allowed number of iterations.
     !!
+    !! @par Usage
+    !! The following code provides an example of how to solve an equation of
+    !! one variable using Brent's method.
+    !! ! f(x) = sin(x) / x, SOLUTION: x = n * pi for n = 0, 1, 2, 3, ...
+    !! function fcn1(x) result(f)
+    !!     real(dp), intent(in) :: x
+    !!     real(dp) :: f
+    !!     f = sin(x) / x
+    !! end function
+    !!
+    !! program main
+    !!     use linalg_constants, only : dp
+    !!     use nonlin_types, only : fcn1var, fcn1var_helper, value_pair
+    !!     use nonlin_solve, only : brent_solver
+    !!
+    !!     type(fcn1var_helper) :: obj
+    !!     procedure(fcn1var), pointer :: fcn
+    !!     type(brent_solver) :: solver
+    !!     real(dp) :: x, f
+    !!     type(value_pair) :: limits
+    !!
+    !!     ! Define the solution limits
+    !!     lmiits%x1 = 1.5d0
+    !!     limits%x2 = 5.0d0
+    !!
+    !!     ! Solve the equation
+    !!     call solver%solve(obj, x, limits, f)
+    !!
+    !!     ! Print the output and the residual:
+    !!     print '(AF5.3)', "The solution: ", x
+    !!     print '(AE9.3)', "The residual: ", f
+    !! end program
+    !! @endcode
+    !! The above program returns the following results.
+    !! @code{.txt}
+    !! The solution: 3.142
+    !! The residual: -.751E-11
+    !! @endcode
+    !!
     !! @par See Also
     !! - [Wikipedia](https://en.wikipedia.org/wiki/Brent%27s_method)
     !! - [Numerical Recipes](http://numerical.recipes/)
