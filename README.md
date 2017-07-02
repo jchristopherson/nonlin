@@ -284,3 +284,5 @@ Iterations: 6
 Function Evaluations: 7
 Jacobian Evaluations: 6
 ```
+## Documentation
+Documentation can be found [here](doc/refman.pdf)
