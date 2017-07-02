@@ -227,7 +227,7 @@ int main() {
     x[0] = 1.0;
     x[1] = 1.0;
 
-    // Compute the solution using a Quasi-Newton method
+    // Compute the solution using Newton's method
     solve_newton(testfcn, NULL, 2, x, f, &tol, NULL, &ib, NULL);
 
     // Display the results
