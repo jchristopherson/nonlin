@@ -36,11 +36,11 @@ interface
     !!
     !! @param[in] neqn The number of equations.
     !! @param[in] nvar The number of variables.
-    !! @param[in] x The NVAR-element array containing the indendent variables.
+    !! @param[in] x The NVAR-element array containing the independent variables.
     !! @param[out] f The NEQN-element array containing the function values.
     subroutine cvecfcn(neqn, nvar, x, f)
         use linalg_constants, only : dp, i32
-        integer(i32), intent(in) :: neqn, nvar
+        integer(i32), intent(in), value :: neqn, nvar
         real(dp), intent(in) :: x(nvar)
         real(dp), intent(out) :: f(neqn)
     end subroutine
@@ -49,11 +49,11 @@ interface
     !!
     !! @param[in] neqn The number of equations.
     !! @param[in] nvar The number of variables.
-    !! @param[in] x The NVAR-element array containing the indendent variables.
+    !! @param[in] x The NVAR-element array containing the independent variables.
     !! @param[out] jac An NEQN-byNVAR matrix where the Jacobian will be written.
     subroutine cjacobianfcn(neqn, nvar, x, jac)
         use linalg_constants, only : dp, i32
-        integer(i32), intent(in) :: neqn, nvar
+        integer(i32), intent(in), value :: neqn, nvar
         real(dp), intent(in) :: x(nvar)
         real(dp), intent(out) :: jac(neqn, nvar)
     end subroutine
@@ -127,9 +127,9 @@ end interface
         !> @brief Establishes a pointer to the routine containing the system of
         !!  equations to solve.
         procedure, public :: set_cfcn => cvfh_set_fcn
-        !> @brief Establishes a pointer to the routine for computing the 
-        !! Jacobian matrix of the system of equations.  If no routine is 
-        !! defined, the Jacobian matrix will be computed numerically (this is 
+        !> @brief Establishes a pointer to the routine for computing the
+        !! Jacobian matrix of the system of equations.  If no routine is
+        !! defined, the Jacobian matrix will be computed numerically (this is
         !! the default state).
         procedure, public :: set_cjacobian => cvfh_set_jac
         !> @brief Tests if the pointer to the subroutine containing the system
@@ -139,11 +139,11 @@ end interface
         !! of equations to solve has been assigned.
         procedure, public :: is_jacobian_defined => cvfh_is_jac_defined
         !> @brief Executes the routine containing the system of equations to
-        !! solve.  No action is taken if the pointer to the subroutine has not 
+        !! solve.  No action is taken if the pointer to the subroutine has not
         !! been defined.
         procedure, public :: fcn => cvfh_fcn
-        !> @brief Executes the routine containing the Jacobian matrix if 
-        !! supplied.  If not supplied, the Jacobian is computed via finite 
+        !> @brief Executes the routine containing the Jacobian matrix if
+        !! supplied.  If not supplied, the Jacobian is computed via finite
         !! differences.
         procedure, public :: jacobian => cvfh_jac_fcn
     end type
@@ -196,7 +196,7 @@ contains
 ! ------------------------------------------------------------------------------
     !> @brief Establishes a pointer to the routine containing the system of
     !!  equations to solve.
-    !! 
+    !!
     !! @param[in,out] this The cvecfcn_helper object.
     !! @param[in] fcn The function pointer.
     !! @param[in] nfcn The number of functions.
@@ -257,7 +257,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Tests if the pointer to the subroutine containing the system of 
+    !> @brief Tests if the pointer to the subroutine containing the system of
     !! equations to solve has been assigned.
     !!
     !! @param[in] this The vecfcn_helper object.
@@ -273,7 +273,7 @@ contains
     !! If not supplied, the Jacobian is computed via finite differences.
     !!
     !! @param[in] this The vecfcn_helper object.
-    !! @param[in] x An N-element array containing the independent variabls 
+    !! @param[in] x An N-element array containing the independent variabls
     !!  defining the point about which the derivatives will be calculated.
     !! @param[out] jac An M-by-N matrix where, on output, the Jacobian will
     !!  be written.
@@ -560,7 +560,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Applies Newton's method in conjunction with a backtracking 
+    !> @brief Applies Newton's method in conjunction with a backtracking
     !! type line search to solve N equations of N unknowns.
     !!
     !! @param[in] fcn A pointer to the routine containing the system of
