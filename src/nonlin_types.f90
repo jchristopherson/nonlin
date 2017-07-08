@@ -20,6 +20,7 @@ module nonlin_types
     public :: iteration_behavior
     public :: equation_solver
     public :: equation_solver_1var
+    public :: optimize_equation
     public :: value_pair
     public :: nonlin_solver
     public :: nonlin_solver_1var
@@ -291,6 +292,30 @@ module nonlin_types
         real(dp) :: x1
         !> Value 2.
         real(dp) :: x2
+    end type
+
+! ------------------------------------------------------------------------------
+    !> @brief A base class for optimization of an equation of multiple 
+    !! variables.
+    type, abstract :: optimize_equation
+        private
+        !> The maximum number of function evaluations allowed.
+        integer(i32) :: m_maxEval = 100
+        !> The error tolerance used to determine convergence.
+        real(dp) :: m_tol = 1.0d-8
+        !> Set to true to print iteration status; else, false.
+        logical :: m_printStatus = .false.
+    contains
+        !> @brief Gets the maximum number of function evaluations allowed.
+        procedure, public :: get_max_fcn_evals => oe_get_max_eval
+        !> @brief Sets the maximum number of function evaluations allowed.
+        procedure, public :: set_max_fcn_evals => oe_set_max_eval
+        !> @brief Gets a logical value determining if iteration status should be
+        !! printed.
+        procedure, public :: get_print_status => oe_get_print_status
+        !> @brief Sets a logical value determining if iteration status should be
+        !! printed.
+        procedure, public :: set_print_status => oe_set_print_status
     end type
 
 ! ******************************************************************************
@@ -897,6 +922,54 @@ contains
         this%m_printStatus = x
     end subroutine
 
+! ******************************************************************************
+! OPTIMIZE_EQUATIONS MEMBERS
+! ------------------------------------------------------------------------------
+    !> @brief Gets the maximum number of function evaluations allowed.
+    !!
+    !! @param[in] this The optimize_equation object.
+    !! @return The maximum number of function evaluations.
+    pure function oe_get_max_eval(this) result(n)
+        class(optimize_equation), intent(in) :: this
+        integer(i32) :: n
+        n = this%m_maxEval
+    end function
+
+! --------------------
+    !> @brief Sets the maximum number of function evaluations allowed.
+    !!
+    !! @param[in,out] this The optimize_equation object.
+    !! @param[in] n The maximum number of function evaluations.
+    subroutine oe_set_max_eval(this, n)
+        class(optimize_equation), intent(inout) :: this
+        integer(i32), intent(in) :: n
+        this%m_maxEval = n
+    end subroutine
+
+
+! ------------------------------------------------------------------------------
+    !> @brief Gets a logical value determining if iteration status should be
+    !! printed.
+    !!
+    !! @param[in] this The optimize_equation object.
+    !! @return True if the iteration status should be printed; else, false.
+    pure function oe_get_print_status(this) result(x)
+        class(optimize_equation), intent(in) :: this
+        logical :: x
+        x = this%m_printStatus
+    end function
+
+! --------------------
+    !> @brief Sets a logical value determining if iteration status should be
+    !! printed.
+    !!
+    !! @param[in,out] this The optimize_equation object.
+    !! @param[in] x True if the iteration status should be printed; else, false.
+    subroutine oe_set_print_status(this, x)
+        class(optimize_equation), intent(inout) :: this
+        logical, intent(in) :: x
+        this%m_printStatus = x
+    end subroutine
 
 ! ******************************************************************************
 ! MISC. ROUTINES
