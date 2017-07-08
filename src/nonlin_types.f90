@@ -24,6 +24,7 @@ module nonlin_types
     public :: value_pair
     public :: nonlin_solver
     public :: nonlin_solver_1var
+    public :: nonlin_optimize
     public :: print_status
     public :: NL_INVALID_INPUT_ERROR
     public :: NL_ARRAY_SIZE_ERROR
@@ -310,12 +311,18 @@ module nonlin_types
         procedure, public :: get_max_fcn_evals => oe_get_max_eval
         !> @brief Sets the maximum number of function evaluations allowed.
         procedure, public :: set_max_fcn_evals => oe_set_max_eval
+        !> @brief Gets the tolerance on convergence.
+        procedure, public :: get_tolerance => oe_get_tol
+        !> @brief Sets the tolerance on convergence.
+        procedure, public :: set_tolerance => oe_set_tol
         !> @brief Gets a logical value determining if iteration status should be
         !! printed.
         procedure, public :: get_print_status => oe_get_print_status
         !> @brief Sets a logical value determining if iteration status should be
         !! printed.
         procedure, public :: set_print_status => oe_set_print_status
+        !> @brief Optimizes the equation.
+        procedure(nonlin_optimize), deferred, public, pass :: optimize
     end type
 
 ! ******************************************************************************
@@ -389,6 +396,36 @@ module nonlin_types
             type(iteration_behavior), optional :: ib
             class(errors), intent(in), optional, target :: err
         end subroutine
+
+        !> @brief Describes the interface of a routine for optimizing an 
+        !! equation of N variables.
+        !!
+        !! @param[in,out] this The optimize_equation-based object.
+        !! @param[in] fcn The fcnnvar_helper object containing the equation to
+        !!  optimize.
+        !! @param[in,out] x On input, the initial guess at the optimal point. 
+        !!  On output, the updated optimal point estimate.
+        !! @param[out] ib An optional output, that if provided, allows the
+        !!  caller to obtain iteration performance statistics.
+        !! @param[out] err An optional errors-based object that if provided can
+        !!  be used to retrieve information relating to any errors encountered
+        !!  during execution.  If not provided, a default implementation of the
+        !!  errors class is used internally to provide error handling.  The
+        !!  possible error codes returned will likely vary from solver to
+        !!  solver.
+        subroutine nonlin_optimize(this, fcn, x, ib, err)
+            use linalg_constants, only : dp, i32
+            use ferror, only : errors
+            import optimize_equation
+            import fcnnvar_helper
+            import iteration_behavior
+            class(optimize_equation), intent(inout) :: this
+            class(fcnnvar_helper), intent(in) :: fcn
+            real(dp), intent(inout), dimension(:) :: x
+            type(iteration_behavior), optional :: ib
+            class(errors), intent(in), optional, target :: err
+        end subroutine
+
     end interface
 
 
@@ -946,6 +983,27 @@ contains
         this%m_maxEval = n
     end subroutine
 
+! ------------------------------------------------------------------------------
+    !> @brief Gets the tolerance on convergence.
+    !!
+    !! @param[in] this The optimize_equation object.
+    !! @return The convergence tolerance.
+    pure function oe_get_tol(this) result(x)
+        class(optimize_equation), intent(in) :: this
+        real(dp) :: x
+        x = this%m_tol
+    end function
+
+! --------------------
+    !> @brief Sets the tolerance on convergence.
+    !!
+    !! @param[in,out] this The optimize_equation object.
+    !! @param[in] x The convergence tolerance.
+    subroutine oe_set_tol(this, x)
+        class(optimize_equation), intent(inout) :: this
+        real(dp), intent(in) :: x
+        this%m_tol = x
+    end subroutine
 
 ! ------------------------------------------------------------------------------
     !> @brief Gets a logical value determining if iteration status should be
