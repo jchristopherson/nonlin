@@ -12,9 +12,11 @@ module nonlin_types
     private
     public :: vecfcn
     public :: fcn1var
+    public :: fcnnvar
     public :: jacobianfcn
     public :: vecfcn_helper
     public :: fcn1var_helper
+    public :: fcnnvar_helper
     public :: iteration_behavior
     public :: equation_solver
     public :: equation_solver_1var
@@ -87,6 +89,16 @@ module nonlin_types
             real(dp), intent(in), dimension(:) :: x
             real(dp), intent(out), dimension(:,:) :: jac
         end subroutine
+
+        !> @brief Describes a function of N variables.
+        !!
+        !! @param[in] x An N-element array containing the independent variables.
+        !! @return The value of the function at @p x.
+        function fcnnvar(x) result(f)
+            use linalg_constants, only : dp
+            real(dp), intent(in), dimension(:) :: x
+            real(dp) :: f
+        end function
     end interface
 
 ! ******************************************************************************
@@ -149,6 +161,22 @@ module nonlin_types
         !> @brief Establishes a pointer to the routine containing the equations
         !! to solve.
         procedure, public :: set_fcn => f1h_set_fcn
+    end type
+
+! ------------------------------------------------------------------------------
+    !> @brief Defines a type capable of encapsulating an equation of N 
+    !! variables.
+    type fcnnvar_helper
+        private
+        !> A pointer to the target fcnnvar routine.
+        procedure(fcnnvar), pointer, nopass :: m_fcn => null()
+    contains
+        !> @brief Executes the routine containing the function to evaluate.
+        procedure, public :: fcn => fnh_fcn
+        !> @brief Tests if the pointer to the function has been assigned.
+        procedure, public :: is_fcn_defined => fnh_is_fcn_defined
+        !> @brief Establishes a pointer to the routine containing the function.
+        procedure, public :: set_fcn => fnh_set_fcn
     end type
 
 ! ------------------------------------------------------------------------------
@@ -614,6 +642,48 @@ contains
     subroutine f1h_set_fcn(this, fcn)
         class(fcn1var_helper), intent(inout) :: this
         procedure(fcn1var), intent(in), pointer :: fcn
+        this%m_fcn => fcn
+    end subroutine
+
+! ******************************************************************************
+! FCNNVAR_HELPER MEMBERS
+! ------------------------------------------------------------------------------
+    !> @brief Executes the routine containing the function to evaluate.
+    !!
+    !! @param[in] this The fcnnvar_helper object.
+    !! @param[in] x The value of the independent variable at which the function
+    !!  should be evaluated.
+    !! @return The value of the function at @p x.
+    function fnh_fcn(this, x) result(f)
+        class(fcnnvar_helper), intent(in) :: this
+        real(dp), intent(in), dimension(:) :: x
+        real(dp) :: f
+        if (associated(this%m_fcn)) then
+            f = this%m_fcn(x)
+        end if
+    end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Tests if the pointer to the function containing the equation to 
+    !! solve has been assigned.
+    !!
+    !! @param[in] this The fcnnvar_helper object.
+    !! @return Returns true if the pointer has been assigned; else, false.
+    pure function fnh_is_fcn_defined(this) result(x)
+        class(fcnnvar_helper), intent(in) :: this
+        logical :: x
+        x = associated(this%m_fcn)
+    end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Establishes a pointer to the routine containing the equations to 
+    !! solve.
+    !! 
+    !! @param[in,out] this The fcnnvar_helper object.
+    !! @param[in] fcn The function pointer.
+    subroutine fnh_set_fcn(this, fcn)
+        class(fcnnvar_helper), intent(inout) :: this
+        procedure(fcnnvar), intent(in), pointer :: fcn
         this%m_fcn => fcn
     end subroutine
     
