@@ -20,4 +20,5 @@ program main
     call test_least_squares_2()
     call test_least_squares_3()
     call test_brent_1()
+    call test_poly_fit()
 end program

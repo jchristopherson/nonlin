@@ -1,0 +1,7 @@
+
+***** ERROR *****
+Function: solve_least_squares_vec
+Error Flag: 102
+Message:
+Input 2 is not sized correctly.
+

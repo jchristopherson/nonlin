@@ -180,11 +180,8 @@ contains
         real(dp), parameter :: one = 1.0d0
 
         ! Local Variables
-        integer(i32):: j, n, ncols, flag, lwork, lwork_all
+        integer(i32):: j, n, ncols, flag
         real(dp), pointer, dimension(:,:) :: a
-        real(dp), pointer, dimension(:) :: w
-        real(dp), allocatable, target, dimension(:) :: work
-        real(dp), dimension(1,1) :: temp
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
 
@@ -211,26 +208,20 @@ contains
             return
         end if
 
-        ! Ensure the polynomial object is initialized and sized appropriately
-        if (this%order() /= order) then
-            call this%initialize(order, errmgr)
-            if (errmgr%has_error_occurred()) return
-        end if
-
-        ! Determine workspace requirements
-        call solve_least_squares(temp, y, olwork = lwork)
-        lwork_all = lwork + n * ncols
-
         ! Local Memory Allocation
-        allocate(work(lwork_all), stat = flag)
+        allocate(a(n,ncols), stat = flag)
         if (flag /= 0) then
             ! ERROR: Out of memory
             call errmgr%report_error("polynomial_fit", &
                 "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
             return
         end if
-        a(1:n,1:ncols) => work(1:n*ncols)
-        w => work(n*ncols+1:lwork_all)
+
+        ! Ensure the polynomial object is initialized and sized appropriately
+        if (this%order() /= order) then
+            call this%initialize(order, errmgr)
+            if (errmgr%has_error_occurred()) return
+        end if
 
         ! Populate A
         do j = 1, n
@@ -242,7 +233,7 @@ contains
         end do
 
         ! Solve: A * coeffs = y
-        call solve_least_squares(a, y, work = w, err = errmgr)
+        call solve_least_squares(a, y, err = errmgr)
         if (errmgr%has_error_occurred()) return
 
         ! Extract the coefficients from the first order+1 elements of Y
@@ -280,11 +271,8 @@ contains
         real(dp), parameter :: zero = 0.0d0
 
         ! Local Variables
-        integer(i32):: j, n, ncols, flag, lwork, lwork_all
+        integer(i32):: j, n, ncols, flag
         real(dp), pointer, dimension(:,:) :: a
-        real(dp), pointer, dimension(:) :: w
-        real(dp), allocatable, target, dimension(:) :: work
-        real(dp), dimension(1,1) :: temp
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
 
@@ -311,26 +299,20 @@ contains
             return
         end if
 
-        ! Ensure the polynomial object is initialized and sized appropriately
-        if (this%order() /= order) then
-            call this%initialize(order, errmgr)
-            if (errmgr%has_error_occurred()) return
-        end if
-
-        ! Determine workspace requirements
-        call solve_least_squares(temp, y, olwork = lwork)
-        lwork_all = lwork + n * ncols
-
         ! Local Memory Allocation
-        allocate(work(lwork_all), stat = flag)
+        allocate(a(n,ncols), stat = flag)
         if (flag /= 0) then
             ! ERROR: Out of memory
             call errmgr%report_error("polynomial_fit_thru_zero", &
                 "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
             return
         end if
-        a(1:n,1:ncols) => work(1:n*ncols)
-        w => work(n*ncols+1:lwork_all)
+
+        ! Ensure the polynomial object is initialized and sized appropriately
+        if (this%order() /= order) then
+            call this%initialize(order, errmgr)
+            if (errmgr%has_error_occurred()) return
+        end if
 
         ! Populate A
         a(:,1) = x
@@ -339,7 +321,7 @@ contains
         end do
 
         ! Solve: A * coeffs = y
-        call solve_least_squares(a, y, work = w, err = errmgr)
+        call solve_least_squares(a, y, err = errmgr)
         if (errmgr%has_error_occurred()) return
 
         ! Extract the coefficients from the first order+1 elements of Y
