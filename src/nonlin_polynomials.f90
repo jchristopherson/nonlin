@@ -13,6 +13,7 @@
 module nonlin_polynomials
     use linalg_constants, only : dp, i32
     use linalg_eigen, only : eigen
+    use linalg_solve, only : solve_least_squares
     use ferror, only : errors
     use nonlin_types, only : NL_INVALID_INPUT_ERROR, NL_ARRAY_SIZE_ERROR, &
         NL_OUT_OF_MEMORY_ERROR
@@ -183,7 +184,7 @@ contains
         real(dp), pointer, dimension(:,:) :: a
         real(dp), pointer, dimension(:) :: w
         real(dp), allocatable, target, dimension(:) :: work
-        real(dp), dimension(1) :: temp
+        real(dp), dimension(1,1) :: temp
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
 
@@ -217,8 +218,7 @@ contains
         end if
 
         ! Determine workspace requirements
-        call DGELS('N', n, ncols, 1, temp, n, y, n, temp, -1, flag)
-        lwork = int(temp(1), i32)
+        call solve_least_squares(temp, y, olwork = lwork)
         lwork_all = lwork + n * ncols
 
         ! Local Memory Allocation
@@ -242,7 +242,8 @@ contains
         end do
 
         ! Solve: A * coeffs = y
-        call DGELS('N', n, ncols, 1, a, n, y, n, w, lwork, flag)
+        call solve_least_squares(a, y, work = w, err = errmgr)
+        if (errmgr%has_error_occurred()) return
 
         ! Extract the coefficients from the first order+1 elements of Y
         this%m_coeffs = y(1:ncols)
@@ -283,7 +284,7 @@ contains
         real(dp), pointer, dimension(:,:) :: a
         real(dp), pointer, dimension(:) :: w
         real(dp), allocatable, target, dimension(:) :: work
-        real(dp), dimension(1) :: temp
+        real(dp), dimension(1,1) :: temp
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
 
@@ -317,8 +318,7 @@ contains
         end if
 
         ! Determine workspace requirements
-        call DGELS('N', n, ncols, 1, temp, n, y, n, temp, -1, flag)
-        lwork = int(temp(1), i32)
+        call solve_least_squares(temp, y, olwork = lwork)
         lwork_all = lwork + n * ncols
 
         ! Local Memory Allocation
@@ -339,7 +339,8 @@ contains
         end do
 
         ! Solve: A * coeffs = y
-        call DGELS('N', n, ncols, 1, a, n, y, n, w, lwork, flag)
+        call solve_least_squares(a, y, work = w, err = errmgr)
+        if (errmgr%has_error_occurred()) return
 
         ! Extract the coefficients from the first order+1 elements of Y
         this%m_coeffs(1) = zero
