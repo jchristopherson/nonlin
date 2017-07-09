@@ -359,7 +359,7 @@ module nonlin_types
             real(dp), intent(inout), dimension(:) :: x
             real(dp), intent(out), dimension(:) :: fvec
             type(iteration_behavior), optional :: ib
-            class(errors), intent(in), optional, target :: err
+            class(errors), intent(inout), optional, target :: err
         end subroutine
 
         !> @brief Describes the interface of a solver for an equation of one
@@ -394,7 +394,7 @@ module nonlin_types
             type(value_pair), intent(in) :: lim
             real(dp), intent(out), optional :: f
             type(iteration_behavior), optional :: ib
-            class(errors), intent(in), optional, target :: err
+            class(errors), intent(inout), optional, target :: err
         end subroutine
 
         !> @brief Describes the interface of a routine for optimizing an 
@@ -423,7 +423,7 @@ module nonlin_types
             class(fcnnvar_helper), intent(in) :: fcn
             real(dp), intent(inout), dimension(:) :: x
             type(iteration_behavior), optional :: ib
-            class(errors), intent(in), optional, target :: err
+            class(errors), intent(inout), optional, target :: err
         end subroutine
 
     end interface

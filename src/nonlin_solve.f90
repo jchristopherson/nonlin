@@ -249,7 +249,7 @@ contains
         real(dp), intent(inout), dimension(:) :: x
         real(dp), intent(out), dimension(:) :: fvec
         type(iteration_behavior), optional :: ib
-        class(errors), intent(in), optional, target :: err
+        class(errors), intent(inout), optional, target :: err
 
         ! Parameters
         real(dp), parameter :: zero = 0.0d0
@@ -664,7 +664,7 @@ contains
         real(dp), intent(inout), dimension(:) :: x
         real(dp), intent(out), dimension(:) :: fvec
         type(iteration_behavior), optional :: ib
-        class(errors), intent(in), optional, target :: err
+        class(errors), intent(inout), optional, target :: err
 
         ! Parameters
         real(dp), parameter :: zero = 0.0d0
@@ -973,7 +973,7 @@ contains
         type(value_pair), intent(in) :: lim
         real(dp), intent(out), optional :: f
         type(iteration_behavior), optional :: ib
-        class(errors), intent(in), optional, target :: err
+        class(errors), intent(inout), optional, target :: err
 
         ! Parameters
         real(dp), parameter :: zero = 0.0d0
