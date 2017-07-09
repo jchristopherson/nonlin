@@ -93,7 +93,7 @@ contains
         ! Arguments
         class(polynomial), intent(inout) :: this
         integer(i32), intent(in) :: order
-        class(errors), intent(in), optional, target :: err
+        class(errors), intent(inout), optional, target :: err
 
         ! Parameters
         real(dp), parameter :: zero = 0.0d0
@@ -173,7 +173,7 @@ contains
         real(dp), intent(in), dimension(:) :: x
         real(dp), intent(inout), dimension(:) :: y
         integer(i32), intent(in) :: order
-        class(errors), intent(in), optional, target :: err
+        class(errors), intent(inout), optional, target :: err
 
         ! Parameters
         real(dp), parameter :: one = 1.0d0
@@ -273,7 +273,7 @@ contains
         real(dp), intent(in), dimension(:) :: x
         real(dp), intent(inout), dimension(:) :: y
         integer(i32), intent(in) :: order
-        class(errors), intent(in), optional, target :: err
+        class(errors), intent(inout), optional, target :: err
 
         ! Parameters
         real(dp), parameter :: zero = 0.0d0
@@ -469,7 +469,7 @@ contains
         ! Arguments
         class(polynomial), intent(in) :: this
         complex(dp), dimension(this%order()) :: z
-        class(errors), intent(in), optional, target :: err
+        class(errors), intent(inout), optional, target :: err
 
         ! Local Variables
         integer(i32) :: n
@@ -510,7 +510,7 @@ contains
         ! Arguments
         class(polynomial), intent(in) :: this
         integer(i32), intent(in) :: ind
-        class(errors), intent(in), optional, target :: err
+        class(errors), intent(inout), optional, target :: err
         real(dp) :: c
 
         ! Local Variables
@@ -580,7 +580,7 @@ contains
         class(polynomial), intent(inout) :: this
         integer(i32), intent(in) :: ind
         real(dp), intent(in) :: c
-        class(errors), intent(in), optional, target :: err
+        class(errors), intent(inout), optional, target :: err
 
         ! Local Variables
         class(errors), pointer :: errmgr
