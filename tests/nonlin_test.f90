@@ -5,6 +5,7 @@ program main
     ! Imported Modules
     use nonlin_test_jacobian
     use nonlin_test_solve
+    use nonlin_test_poly
 
     ! Introduce the testing application
     print '(A)', "Hello from the NONLIN test application."
