@@ -13,7 +13,8 @@ contains
     subroutine test_poly_fit()
         ! Local Variables
         integer(i32) :: i
-        real(dp), dimension(21) :: xp, yp
+        real(dp), dimension(21) :: xp, yp, yf, yc, err
+        real(dp) :: res
         type(polynomial) :: p
 
         ! Data to fit
@@ -26,15 +27,24 @@ contains
             3.412756702d0, 4.406137221d0, 4.567156645d0, 4.999550779d0, &
             5.652854194d0, 6.784320119d0, 8.307936836d0, 8.395126494d0, &
             10.30252404d0]
+
+        ! Create a copy of yp as it will be overwritten in the fit command
+        yc = yp
         
         ! Fit the polynomial
         call p%fit(xp, yp, 3)
 
+        ! Evaluate the polynomial at xp, and then determine the residual
+        yf = p%evaluate(xp)
+        err = abs(yf - yc)
+        res = maxval(err)
+
         ! Print out the coefficients
-        print '(A)', "Polynomial Coefficients"
+        print '(A)', "Polynomial Coefficients (c0 + c1*x + c2*x**2 + c3*x**3):"
         do i = 1, 4
-            print *, p%get(i)
+            print '(AI0AF12.9)', "c", i - 1, " = ", p%get(i)
         end do
+        print '(AE9.4)', "Residual: ", res
     end subroutine
 
 ! ------------------------------------------------------------------------------
