@@ -37,7 +37,7 @@ The example yields the solution vector: x = [5.0, 3.0], with a maximum residual 
 This example uses a least-squares approach to determine the coefficients of a polynomial that best fits a set of data.
 
 ```fortran
-    ! The function containing the data to fit
+    ! The routine containing the data to fit
     subroutine lsfcn1(x, f)
         ! Arguments
         real(dp), intent(in), dimension(:) :: x  ! Contains the coefficients

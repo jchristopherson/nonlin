@@ -48,6 +48,12 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
+    ! Tests the polynomial root finding capabilities.
+    subroutine test_poly_roots()
+        ! Local Variables
+
+        ! Define the polynomial
+    end subroutine
 
 ! ------------------------------------------------------------------------------
 
