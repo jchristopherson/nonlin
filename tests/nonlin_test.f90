@@ -22,4 +22,5 @@ program main
     call test_brent_1()
     call test_poly_fit()
     call test_poly_roots()
+    call test_poly_add()
 end program
