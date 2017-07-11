@@ -23,4 +23,5 @@ program main
     call test_poly_fit()
     call test_poly_roots()
     call test_poly_add()
+    call test_poly_subtract()
 end program

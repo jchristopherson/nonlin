@@ -88,7 +88,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !
+    ! Tests the polynomial addition routine
     subroutine test_poly_add()
         ! Parameters
         integer(i32), parameter :: order1 = 10
@@ -145,6 +145,64 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
+    ! Tests the polynomial subtraction routine
+    subroutine test_poly_subtract()
+        ! Parameters
+        integer(i32), parameter :: order1 = 10
+        integer(i32), parameter :: order2 = 20
+        real(dp), parameter :: tol = 1.0d-8
+
+        ! Local Variables
+        integer(i32) :: i
+        type(polynomial) :: p1, p2, p3
+        real(dp), dimension(order1+1) :: c1
+        real(dp), dimension(order2+1) :: c2
+        real(dp), allocatable, dimension(:) :: p
+        logical :: check
+
+        ! Define the polynomials
+        call random_number(c1)
+        call random_number(c2)
+        call p1%initialize(order1)
+        call p2%initialize(order2)
+        do i = 1, size(c1)
+            call p1%set(i, c1(i))
+        end do
+        do i = 1, size(c2)
+            call p2%set(i, c2(i))
+        end do
+
+        ! Subtract the two polynomials
+        p3 = p1 - p2
+        p = p3%get_all()
+
+        ! Compute the actual solution, and compare
+        check = .true.
+        if (size(c1) > size(c2)) then
+            ! Use C1 to store the solution
+            do i = 1, size(c2)
+                c1(i) = c1(i) - c2(i)
+            end do
+            if (.not.is_mtx_equal(p, c1, tol)) then
+                check = .false.
+                print '(A)', "Test Failed: Polynomial Subtraction Test 1"
+            end if
+        else
+            ! Use C2 to store the solution
+            do i = 1, size(c1)
+                c2(i) = c1(i) - c2(i)
+            end do
+            do i = size(c1) + 1, size(c2)
+                c2(i) = -c2(i)
+            end do
+            if (.not.is_mtx_equal(p, c2, tol)) then
+                check = .false.
+                print '(A)', "Test Failed: Polynomial Subtraction Test 1"
+            end if
+        end if
+
+        if (check) print '(A)', "Test Passed: Polynomial Subtraction Test 1"
+    end subroutine
 
 ! ------------------------------------------------------------------------------
 end module
