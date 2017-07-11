@@ -405,6 +405,8 @@ module nonlin_types
         !!  optimize.
         !! @param[in,out] x On input, the initial guess at the optimal point. 
         !!  On output, the updated optimal point estimate.
+        !! @param[out] fout An optional output, that if provided, returns the
+        !!  value of the function at @p x.
         !! @param[out] ib An optional output, that if provided, allows the
         !!  caller to obtain iteration performance statistics.
         !! @param[out] err An optional errors-based object that if provided can
@@ -413,7 +415,7 @@ module nonlin_types
         !!  errors class is used internally to provide error handling.  The
         !!  possible error codes returned will likely vary from solver to
         !!  solver.
-        subroutine nonlin_optimize(this, fcn, x, ib, err)
+        subroutine nonlin_optimize(this, fcn, x, fout, ib, err)
             use linalg_constants, only : dp, i32
             use ferror, only : errors
             import optimize_equation
@@ -422,6 +424,7 @@ module nonlin_types
             class(optimize_equation), intent(inout) :: this
             class(fcnnvar_helper), intent(in) :: fcn
             real(dp), intent(inout), dimension(:) :: x
+            real(dp), intent(out), optional :: fout
             type(iteration_behavior), optional :: ib
             class(errors), intent(inout), optional, target :: err
         end subroutine
