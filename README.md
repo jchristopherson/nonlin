@@ -5,8 +5,6 @@ A library that provides routines to compute the solutions to systems of nonlinea
 This example solves a set of two equations of two unknowns using a Quasi-Newton type solver.  In this example, the solver is left to compute the derivatives numerically.
 
 ```fortran
-! Example program illustrating the solution to a system of 2 equations with
-! 2 unknowns.
 program example
     use linalg_constants, only : dp, i32
     use nonlin_types, only : vecfcn_helper, vecfcn
