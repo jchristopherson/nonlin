@@ -750,10 +750,13 @@ contains
     !! 
     !! @param[in,out] this The fcnnvar_helper object.
     !! @param[in] fcn The function pointer.
-    subroutine fnh_set_fcn(this, fcn)
+    !! @param[in] nvar The number of variables in the function.
+    subroutine fnh_set_fcn(this, fcn, nvar)
         class(fcnnvar_helper), intent(inout) :: this
         procedure(fcnnvar), intent(in), pointer :: fcn
+        integer(i32), intent(in) :: nvar
         this%m_fcn => fcn
+        this%m_nvar = nvar
     end subroutine
 
 ! ------------------------------------------------------------------------------
