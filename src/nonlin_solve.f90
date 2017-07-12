@@ -196,21 +196,6 @@ contains
     !! The following code provides an example of how to solve a system of N
     !! equations of N unknonwns using this Quasi-Newton method.
     !! @code{.f90}
-    !! ! System of Equations #1:
-    !! !
-    !! ! x**2 + y**2 = 34
-    !! ! x**2 - 2 * y**2 = 7
-    !! !
-    !! ! Solution:
-    !! ! x = +/-5
-    !! ! y = +/-3
-    !! subroutine fcn1(x, f)
-    !!     real(dp), intent(in), dimension(:) :: x
-    !!     real(dp), intent(out), dimension(:) :: f
-    !!     f(1) = x(1)**2 + x(2)**2 - 34.0d0
-    !!     f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
-    !! end subroutine
-    !!
     !! program main
     !!     use linalg_constants, only : dp
     !!     use nonlin_types, only : vecfcn, vecfcn_helper
@@ -230,6 +215,21 @@ contains
     !!     ! Print the output and the residual:
     !!     print '(AF5.3AF5.3A)', "The solution: (", x(1), ", ", x(2), ")"
     !!     print '(AE8.3AE8.3A)', "The residual: (", f(1), ", ", f(2), ")"
+    !! contains
+    !!     ! System of Equations:
+    !!     !
+    !!     ! x**2 + y**2 = 34
+    !!     ! x**2 - 2 * y**2 = 7
+    !!     !
+    !!     ! Solution:
+    !!     ! x = +/-5
+    !!     ! y = +/-3
+    !!     subroutine fcn1(x, f)
+    !!         real(dp), intent(in), dimension(:) :: x
+    !!         real(dp), intent(out), dimension(:) :: f
+    !!         f(1) = x(1)**2 + x(2)**2 - 34.0d0
+    !!         f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
+    !!     end subroutine
     !! end program
     !! @endcode
     !! The above program returns the following results.
@@ -613,21 +613,6 @@ contains
     !! The following code provides an example of how to solve a system of N
     !! equations of N unknonwns using Newton's method.
     !! @code{.f90}
-    !! ! System of Equations #1:
-    !! !
-    !! ! x**2 + y**2 = 34
-    !! ! x**2 - 2 * y**2 = 7
-    !! !
-    !! ! Solution:
-    !! ! x = +/-5
-    !! ! y = +/-3
-    !! subroutine fcn1(x, f)
-    !!     real(dp), intent(in), dimension(:) :: x
-    !!     real(dp), intent(out), dimension(:) :: f
-    !!     f(1) = x(1)**2 + x(2)**2 - 34.0d0
-    !!     f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
-    !! end subroutine
-    !!
     !! program main
     !!     use linalg_constants, only : dp
     !!     use nonlin_types, only : vecfcn, vecfcn_helper
@@ -647,6 +632,21 @@ contains
     !!     ! Print the output and the residual:
     !!     print '(AF5.3AF5.3A)', "The solution: (", x(1), ", ", x(2), ")"
     !!     print '(AE8.3AE8.3A)', "The residual: (", f(1), ", ", f(2), ")"
+    !! contains
+    !!     ! System of Equations:
+    !!     !
+    !!     ! x**2 + y**2 = 34
+    !!     ! x**2 - 2 * y**2 = 7
+    !!     !
+    !!     ! Solution:
+    !!     ! x = +/-5
+    !!     ! y = +/-3
+    !!     subroutine fcn1(x, f)
+    !!         real(dp), intent(in), dimension(:) :: x
+    !!         real(dp), intent(out), dimension(:) :: f
+    !!         f(1) = x(1)**2 + x(2)**2 - 34.0d0
+    !!         f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
+    !!     end subroutine
     !! end program
     !! @endcode
     !! The above program returns the following results.
@@ -922,13 +922,6 @@ contains
     !! The following code provides an example of how to solve an equation of
     !! one variable using Brent's method.
     !! @code{.f90}
-    !! ! f(x) = sin(x) / x, SOLUTION: x = n * pi for n = 1, 2, 3, ...
-    !! function fcn1(x) result(f)
-    !!     real(dp), intent(in) :: x
-    !!     real(dp) :: f
-    !!     f = sin(x) / x
-    !! end function
-    !!
     !! program main
     !!     use linalg_constants, only : dp
     !!     use nonlin_types, only : fcn1var, fcn1var_helper, value_pair
@@ -950,6 +943,13 @@ contains
     !!     ! Print the output and the residual:
     !!     print '(AF5.3)', "The solution: ", x
     !!     print '(AE9.3)', "The residual: ", f
+    !! contains
+    !!     ! f(x) = sin(x) / x, SOLUTION: x = n * pi for n = 1, 2, 3, ...
+    !!     function fcn1(x) result(f)
+    !!         real(dp), intent(in) :: x
+    !!         real(dp) :: f
+    !!         f = sin(x) / x
+    !!     end function
     !! end program
     !! @endcode
     !! The above program returns the following results.
