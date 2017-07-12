@@ -10,7 +10,8 @@ module nonlin_optimize
     use linalg_constants, only : dp, i32 
     use ferror, only : errors
     use nonlin_types, only : fcnnvar_helper, optimize_equation, &
-        iteration_behavior, NL_OUT_OF_MEMORY_ERROR, NL_CONVERGENCE_ERROR
+        iteration_behavior, NL_OUT_OF_MEMORY_ERROR, NL_CONVERGENCE_ERROR, &
+        NL_INVALID_INPUT_ERROR
     implicit none
 
 ! ******************************************************************************
@@ -21,6 +22,9 @@ module nonlin_optimize
         private
         !> The simplex vertices.
         real(dp), allocatable, dimension(:,:) :: m_simplex
+        !> A scaling parameter used to define the size of the simplex in each
+        !! coordinate direction.
+        real(dp) :: m_initSize = 1.0d0
     contains
         !> @brief Optimizes the equation.
         procedure, public :: solve => nm_solve
@@ -35,7 +39,29 @@ contains
 ! ******************************************************************************
 ! NELDER_MEAD MEMBERS
 ! ------------------------------------------------------------------------------
-    !
+    !> @brief Utilizes the Nelder-Mead simplex method for finding a minimum
+    !! value of the specified function.
+    !!
+    !! @param[in,out] this The nelder_mead object.
+    !! @param[in] fcn The fcnnvar_helper object containing the equation to
+    !!  optimize.
+    !! @param[in,out] x On input, the initial guess at the optimal point. 
+    !!  On output, the updated optimal point estimate.
+    !! @param[out] fout An optional output, that if provided, returns the
+    !!  value of the function at @p x.
+    !! @param[out] ib An optional output, that if provided, allows the
+    !!  caller to obtain iteration performance statistics.
+    !! @param[out] err An optional errors-based object that if provided can be
+    !!  used to retrieve information relating to any errors encountered during
+    !!  execution.  If not provided, a default implementation of the errors
+    !!  class is used internally to provide error handling.  Possible errors and
+    !!  warning messages that may be encountered are as follows.
+    !!  - NL_INVALID_INPUT_ERROR: Occurs if @p x is not appropriately sized for
+    !!      the problem as defined in @p fcn.
+    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory 
+    !!      available.
+    !!  - NL_CONVERGENCE_ERROR: Occurs if the algorithm cannot converge within
+    !!      the allowed number of iterations.
     subroutine nm_solve(this, fcn, x, fout, ib, err)
         ! Arguments
         class(nelder_mead), intent(inout) :: this
@@ -61,7 +87,7 @@ contains
         character(len = 256) :: errmsg
 
         ! Initialization
-        ndim = size(x)
+        ndim = fcn%get_variable_count()
         npts = ndim + 1
         buildSimplex = .true.
         maxeval = this%get_max_fcn_evals()
@@ -85,6 +111,14 @@ contains
         end if
 
         ! Input Check
+        if (size(x) /= ndim) then
+            write(errmsg, '(AI0AI0A)') &
+                "It was expected to receive a coordinate vector of length ", &
+                ndim, " , but a vector of length ", size(x), " was received."
+            call errmgr%report_error("nm_solve", trim(errmsg), &
+                NL_INVALID_INPUT_ERROR)
+            return
+        end if
 
         ! Ensure that if an initial simplex was defined, that it is 
         ! appropriately sized.  If not, simply create a new simplex of the
@@ -109,14 +143,17 @@ contains
         if (buildSimplex .and. flag == 0) allocate(this%m_simplex(npts, ndim))
         if (flag /= 0) then
             ! ERROR: Out of memory
-            call errmgr%report_error("nm_optimize", &
+            call errmgr%report_error("nm_solve", &
                 "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
             return
         end if
 
         ! Define the initial simplex, if needed
         if (buildSimplex) then
-            ! TO DO: Build the initial estimate of the simplex geometry
+            this%m_simplex(1,:) = x
+            do i = 2, npts
+                this%m_simplex(i,:) = x + this%m_initSize
+            end do
         end if
 
         ! Evaluate the function at each vertex of the simplex
@@ -238,7 +275,7 @@ contains
                 "performed: ", neval, new_line('c') // &
                 "Convergence Value: ", rtol, new_line('c') // &
                 "Convergence Criteria: ", ftol
-            call errmgr%report_error("nm_optimize", trim(errmsg), &
+            call errmgr%report_error("nm_solve", trim(errmsg), &
                 NL_CONVERGENCE_ERROR)
         end if
     end subroutine

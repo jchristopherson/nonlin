@@ -172,6 +172,8 @@ module nonlin_types
         private
         !> A pointer to the target fcnnvar routine.
         procedure(fcnnvar), pointer, nopass :: m_fcn => null()
+        !> The number of variables in m_fcn
+        integer(i32) :: m_nvar = 0
     contains
         !> @brief Executes the routine containing the function to evaluate.
         procedure, public :: fcn => fnh_fcn
@@ -179,6 +181,8 @@ module nonlin_types
         procedure, public :: is_fcn_defined => fnh_is_fcn_defined
         !> @brief Establishes a pointer to the routine containing the function.
         procedure, public :: set_fcn => fnh_set_fcn
+        !> @brief Gets the number of variables in this system.
+        procedure, public :: get_variable_count => fnh_get_nvar
     end type
 
 ! ------------------------------------------------------------------------------
@@ -751,7 +755,18 @@ contains
         procedure(fcnnvar), intent(in), pointer :: fcn
         this%m_fcn => fcn
     end subroutine
-    
+
+! ------------------------------------------------------------------------------
+    !> @brief Gets the number of variables in this system.
+    !!
+    !! @param[in] this The fcnnvar_helper object.
+    !! @return The number of variables.
+    pure function fnh_get_nvar(this) result(n)
+        class(fcnnvar_helper), intent(in) :: this
+        integer(i32) :: n
+        n = this%m_nvar
+    end function
+
 ! ******************************************************************************
 ! EQUATION_SOLVER MEMBERS
 ! ------------------------------------------------------------------------------
