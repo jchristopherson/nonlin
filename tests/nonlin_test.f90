@@ -6,6 +6,7 @@ program main
     use nonlin_test_jacobian
     use nonlin_test_solve
     use nonlin_test_poly
+    use nonlin_test_optimize
 
     ! Introduce the testing application
     print '(A)', "Hello from the NONLIN test application."
@@ -24,4 +25,5 @@ program main
     call test_poly_roots()
     call test_poly_add()
     call test_poly_subtract()
+    call test_nelder_mead_1()
 end program
