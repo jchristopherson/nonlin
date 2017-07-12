@@ -54,7 +54,7 @@ contains
         logical :: buildSimplex, fcnvrg
         integer(i32) :: i, ihi, ilo, inhi, ndim, npts, flag, neval, iter, &
             maxeval
-        real(dp) :: ftol, rtol, eps, ytry, ysave
+        real(dp) :: ftol, rtol, eps, ytry, ysave, swp
         real(dp), allocatable, dimension(:) :: y, psum, pmin, work
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
@@ -127,7 +127,7 @@ contains
         neval = npts
         
         do i = 1, ndim
-            psum(i) = sum(p(:,i))
+            psum(i) = sum(this%m_simplex(:,i))
         end do
 
         ! Main Loop
@@ -198,7 +198,7 @@ contains
                     end do
                     neval = neval + npts
                     do i = 1, ndim
-                        psum(i) = sum(p(:,i))
+                        psum(i) = sum(this%m_simplex(:,i))
                     end do
                 end if
             else
@@ -207,6 +207,12 @@ contains
             end if
 
             ! Print iteration status
+            if (this%get_print_status()) then
+                print *, ""
+                print '(AI0)', "Iteration: ", iter
+                print '(AI0)', "Function Evaluations: ", neval
+                print '(AE8.3)', "Convergence Parameter: ", rtol
+            end if
 
             ! Ensure we haven't made too many function evaluations
             if (neval >= maxeval) then
@@ -229,7 +235,7 @@ contains
         if (flag /= 0) then
             write(errmsg, '(AI0E8.3AE8.3)') &
                 "The algorithm failed to converge.  Function evaluations " // &
-                "performed: ", neval, "." // newline('c') // &
+                "performed: ", neval, new_line('c') // &
                 "Convergence Value: ", rtol, new_line('c') // &
                 "Convergence Criteria: ", ftol
             call errmgr%report_error("nm_optimize", trim(errmsg), &
@@ -242,7 +248,8 @@ contains
     !! from the largest point.  If the extrapolation results in a better
     !! estimate, the current high point is replaced with the new estimate.
     !!
-    !! @param[in] fcn
+    !! @param[in,out] this The nelder_mead object.
+    !! @param[in] fcn The function to evaluate.
     !! @param[in,out] y An array containing the function values at each vertex.
     !! @param[in,out] psum An array containing the summation of vertex position
     !!  information.
@@ -251,8 +258,10 @@ contains
     !! @param[out] work An N-element workspace array where N is the number of
     !!  dimensions of the problem.
     !! @return The new function estimate.
-    function nm_extrapolate(fcn, y, psum, ihi, fac, neval, work) result(ytry)
+    function nm_extrapolate(this, fcn, y, psum, ihi, fac, neval, work) &
+            result(ytry)
         ! Arguments
+        class(nelder_mead), intent(inout) :: this
         class(fcnnvar_helper), intent(in) :: fcn
         real(dp), intent(inout), dimension(:) :: y, psum
         integer(i32), intent(in) :: ihi
