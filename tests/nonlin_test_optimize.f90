@@ -5,6 +5,8 @@ module nonlin_test_optimize
     use nonlin_optimize
     use nonlin_types
     implicit none
+    private
+    public :: test_nelder_mead_1
 
 contains
 ! ******************************************************************************
@@ -35,11 +37,14 @@ contains
         fcn => rosenbrock
         call obj%set_fcn(fcn, 2)
 
+        ! Establish convergence properties
+        call solver%set_max_fcn_evals(1000)
+
         ! Define an initial guess
         x = -1.0d0 ! Equivalent to [-1, -1]
 
         ! Call the solver
-        call solve%solver(fcn, x, fout, ib)
+        call solver%solve(obj, x, fout, ib)
 
         ! Display the output
         print '(AF8.3AF8.3A)', "Rosenbrock Minimum: (", x(1), ", ", x(2), ")"

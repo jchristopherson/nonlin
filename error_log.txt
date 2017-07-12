@@ -1,7 +1,9 @@
 
 ***** ERROR *****
-Function: solve_least_squares_vec
-Error Flag: 102
+Function: nm_solve
+Error Flag: 205
 Message:
-Input 2 is not sized correctly.
+The algorithm failed to converge.  Function evaluations performed: 1001
+Convergence Value: .199E+01
+Convergence Criteria: .100E-07
 

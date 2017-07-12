@@ -270,7 +270,7 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, '(AI0E8.3AE8.3)') &
+            write(errmsg, '(AI0AE8.3AE8.3)') &
                 "The algorithm failed to converge.  Function evaluations " // &
                 "performed: ", neval, new_line('c') // &
                 "Convergence Value: ", rtol, new_line('c') // &
