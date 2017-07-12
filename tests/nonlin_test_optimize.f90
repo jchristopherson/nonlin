@@ -40,8 +40,8 @@ contains
         ! Establish convergence properties
         call solver%set_max_fcn_evals(1000)
 
-        ! Define an initial guess
-        x = -1.0d0 ! Equivalent to [-1, -1]
+        ! Define an initial guess - the solution is (1, 1)
+        x = 1.0d0 ! Equivalent to [-1, -1]
 
         ! Call the solver
         call solver%solve(obj, x, fout, ib)
