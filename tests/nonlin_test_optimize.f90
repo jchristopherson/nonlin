@@ -41,14 +41,14 @@ contains
         call solver%set_max_fcn_evals(1000)
 
         ! Define an initial guess - the solution is (1, 1)
-        x = 1.0d0
+        x = -1.0d0
 
         ! Call the solver
         call solver%solve(obj, x, fout, ib)
 
         ! Display the output
-        print '(AF8.3AF8.3A)', "Rosenbrock Minimum: (", x(1), ", ", x(2), ")"
-        print '(AE9.3)', "Residual: ", fout
+        print '(AF8.5AF8.5A)', "Rosenbrock Minimum: (", x(1), ", ", x(2), ")"
+        print '(AE9.3)', "Function Value: ", fout
         print '(AI0)', "Iterations: ", ib%iter_count
         print '(AI0)', "Function Evaluations: ", ib%fcn_count
     end subroutine

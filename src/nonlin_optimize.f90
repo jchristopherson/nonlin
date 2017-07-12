@@ -7,7 +7,7 @@
 ! http://ab-initio.mit.edu/wiki/index.php/NLopt
 
 module nonlin_optimize
-    use linalg_constants, only : dp, i32 
+    use linalg_constants, only : dp, i32
     use ferror, only : errors
     use nonlin_types, only : fcnnvar_helper, optimize_equation, &
         iteration_behavior, NL_OUT_OF_MEMORY_ERROR, NL_CONVERGENCE_ERROR, &
@@ -30,7 +30,7 @@ module nonlin_optimize
         procedure, public :: solve => nm_solve
         !> @brief Extrapolates by the specified factor through the simplex
         !! across from the largest point.  If the extrapolation results in a
-        !! better estimate, the current high point is replaced with the new 
+        !! better estimate, the current high point is replaced with the new
         !! estimate.
         procedure, private :: extrapolate => nm_extrapolate
     end type
@@ -45,7 +45,7 @@ contains
     !! @param[in,out] this The nelder_mead object.
     !! @param[in] fcn The fcnnvar_helper object containing the equation to
     !!  optimize.
-    !! @param[in,out] x On input, the initial guess at the optimal point. 
+    !! @param[in,out] x On input, the initial guess at the optimal point.
     !!  On output, the updated optimal point estimate.
     !! @param[out] fout An optional output, that if provided, returns the
     !!  value of the function at @p x.
@@ -58,7 +58,7 @@ contains
     !!  warning messages that may be encountered are as follows.
     !!  - NL_INVALID_INPUT_ERROR: Occurs if @p x is not appropriately sized for
     !!      the problem as defined in @p fcn.
-    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory 
+    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
     !!      available.
     !!  - NL_CONVERGENCE_ERROR: Occurs if the algorithm cannot converge within
     !!      the allowed number of iterations.
@@ -71,7 +71,7 @@ contains
         type(iteration_behavior), optional :: ib
         class(errors), intent(inout), optional, target :: err
 
-        ! Parameters 
+        ! Parameters
         real(dp), parameter :: negone = -1.0d0
         real(dp), parameter :: half = 0.5d0
         real(dp), parameter :: two = 2.0d0
@@ -120,7 +120,7 @@ contains
             return
         end if
 
-        ! Ensure that if an initial simplex was defined, that it is 
+        ! Ensure that if an initial simplex was defined, that it is
         ! appropriately sized.  If not, simply create a new simplex of the
         ! appropriate size.
         if (allocated(this%m_simplex)) then
@@ -162,7 +162,7 @@ contains
         end do
         if (present(fout)) fout = y(1)
         neval = npts
-        
+
         do i = 1, ndim
             psum(i) = sum(this%m_simplex(:,i))
         end do
@@ -183,7 +183,8 @@ contains
                 inhi = 1
             end if
             do i = 1, npts
-                if (y(i) <= y(ilo)) then
+                if (y(i) <= y(ilo)) ilo = i
+                if (y(i) > y(ihi)) then
                     inhi = ihi
                     ihi = i
                 else if (y(i) > y(inhi)) then
