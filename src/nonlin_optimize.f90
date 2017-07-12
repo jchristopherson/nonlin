@@ -10,7 +10,7 @@ module nonlin_optimize
     use linalg_constants, only : dp, i32 
     use ferror, only : errors
     use nonlin_types, only : fcnnvar_helper, optimize_equation, &
-        iteration_behavior, NL_OUT_OF_MEMORY_ERROR
+        iteration_behavior, NL_OUT_OF_MEMORY_ERROR, NL_CONVERGENCE_ERROR
     implicit none
 
 ! ******************************************************************************
@@ -24,6 +24,11 @@ module nonlin_optimize
     contains
         !> @brief Optimizes the equation.
         procedure, public :: optimize => nm_optimize
+        !> @brief Extrapolates by the specified factor through the simplex
+        !! across from the largest point.  If the extrapolation results in a
+        !! better estimate, the current high point is replaced with the new 
+        !! estimate.
+        procedure, private :: extrapolate => nm_extrapolate
     end type
 
 contains
@@ -40,12 +45,17 @@ contains
         type(iteration_behavior), optional :: ib
         class(errors), intent(inout), optional, target :: err
 
+        ! Parameters 
+        real(dp), parameter :: negone = -1.0d0
+        real(dp), parameter :: half = 0.5d0
+        real(dp), parameter :: two = 2.0d0
+
         ! Local Variables
         logical :: buildSimplex, fcnvrg
         integer(i32) :: i, ihi, ilo, inhi, ndim, npts, flag, neval, iter, &
             maxeval
-        real(dp) :: ftol
-        real(dp), allocatable, dimension(:) :: y, psum, pmin
+        real(dp) :: ftol, rtol, eps, ytry, ysave
+        real(dp), allocatable, dimension(:) :: y, psum, pmin, work
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
         character(len = 256) :: errmsg
@@ -56,6 +66,7 @@ contains
         buildSimplex = .true.
         maxeval = this%get_max_fcn_evals()
         ftol = this%get_tolerance()
+        eps = sqrt(epsilon(eps))
         iter = 0
         neval = 0
         fcnvrg = .false.
@@ -94,6 +105,7 @@ contains
         allocate(y(npts), stat = flag)
         if (flag == 0) allocate(psum(ndim), stat = flag)
         if (flag == 0) allocate(pmin(ndim), stat = flag)
+        if (flag == 0) allocate(work(ndim), stat = flag)
         if (buildSimplex .and. flag == 0) allocate(this%m_simplex(npts, ndim))
         if (flag /= 0) then
             ! ERROR: Out of memory
@@ -111,10 +123,173 @@ contains
         do i = 1, npts
             y(i) = fcn%fcn(this%m_simplex(i,:))
         end do
+        if (present(fout)) fout = y(1)
         neval = npts
+        
+        do i = 1, ndim
+            psum(i) = sum(p(:,i))
+        end do
+
+        ! Main Loop
+        flag = 0 ! Used to check for convergence errors
+        do
+            ! Update the iteration counter
+            iter = iter + 1
+
+            ! Determine the characteristics of each vertex
+            ilo = 1
+            if (y(1) > y(2)) then
+                ihi = 1
+                inhi = 2
+            else
+                ihi = 2
+                inhi = 1
+            end if
+            do i = 1, npts
+                if (y(i) <= y(ilo)) then
+                    inhi = ihi
+                    ihi = i
+                else if (y(i) > y(inhi)) then
+                    if (i /= ihi) inhi = i
+                end if
+            end do
+
+            ! Compute the fractional range from highest to lowest, and return
+            ! if the result is within tolerance
+            rtol = two * abs(y(ihi) - y(ilo)) / &
+                (abs(y(ihi)) + abs(y(ilo)) + eps)
+            if (rtol < ftol) then
+                swp = y(1)
+                y(1) = y(ilo)
+                y(ilo) = swp
+                do i = 1, ndim
+                    swp = this%m_simplex(1,i)
+                    this%m_simplex(1,i) = this%m_simplex(ilo,i)
+                    this%m_simplex(ilo,i) = swp
+                    x(i) = this%m_simplex(1,i)
+                end do
+                if (present(fout)) fout = y(1)
+                fcnvrg = .true.
+                exit
+            end if
+
+            ! Start of a new iteration.  Start by attempting to extrapolate by
+            ! a factor of -1 (reflect the simplex at its highest point)
+            ytry = this%extrapolate(fcn, y, psum, ihi, negone, neval, work)
+            if (ytry <= y(ilo)) then
+                ! The result of the extrapolation is better than the current
+                ! best point.  As a result, try a factor of 2
+                ytry = this%extrapolate(fcn, y, psum, ihi, two, neval, work)
+            else if (ytry >= y(inhi)) then
+                ! The reflected point is worse than the second highest, so look
+                ! for an intermediate lower point (contract the simplex)
+                ysave = y(ihi)
+                ytry = this%extrapolate(fcn, y, psum, ihi, half, neval, work)
+                if (ytry >= ysave) then
+                    ! Cannot improve on the high point.  Try to contract around
+                    ! the low point.
+                    do i = 1, npts
+                        if (i /= ilo) then
+                            psum = half * (this%m_simplex(i,:) + &
+                                this%m_simplex(ilo,:))
+                            this%m_simplex(i,:) = psum
+                            y(i) = fcn%fcn(psum)
+                        end if
+                    end do
+                    neval = neval + npts
+                    do i = 1, ndim
+                        psum(i) = sum(p(:,i))
+                    end do
+                end if
+            else
+                ! Correct the evaluation count
+                neval = neval - 1
+            end if
+
+            ! Print iteration status
+
+            ! Ensure we haven't made too many function evaluations
+            if (neval >= maxeval) then
+                flag = 1
+                exit
+            end if
+        end do
+
+        ! Report out iteration statistics
+        if (present(ib)) then
+            ib%iter_count = iter
+            ib%fcn_count = neval
+            ib%jacobian_count = 0
+            ib%converge_on_fcn = fcnvrg
+            ib%converge_on_chng = .false.
+            ib%converge_on_zero_diff = .false.
+        end if
+
+        ! Check for convergence issues
+        if (flag /= 0) then
+            write(errmsg, '(AI0E8.3AE8.3)') &
+                "The algorithm failed to converge.  Function evaluations " // &
+                "performed: ", neval, "." // newline('c') // &
+                "Convergence Value: ", rtol, new_line('c') // &
+                "Convergence Criteria: ", ftol
+            call errmgr%report_error("nm_optimize", trim(errmsg), &
+                NL_CONVERGENCE_ERROR)
+        end if
     end subroutine
 
 ! ------------------------------------------------------------------------------
+    !> @brief Extrapolates by the specified factor through the simplex across
+    !! from the largest point.  If the extrapolation results in a better
+    !! estimate, the current high point is replaced with the new estimate.
+    !!
+    !! @param[in] fcn
+    !! @param[in,out] y An array containing the function values at each vertex.
+    !! @param[in,out] psum An array containing the summation of vertex position
+    !!  information.
+    !! @param[in] ihi The index of the largest magnitude vertex.
+    !! @param[in,out] neval The number of function evaluations.
+    !! @param[out] work An N-element workspace array where N is the number of
+    !!  dimensions of the problem.
+    !! @return The new function estimate.
+    function nm_extrapolate(fcn, y, psum, ihi, fac, neval, work) result(ytry)
+        ! Arguments
+        class(fcnnvar_helper), intent(in) :: fcn
+        real(dp), intent(inout), dimension(:) :: y, psum
+        integer(i32), intent(in) :: ihi
+        real(dp), intent(in) :: fac
+        integer(i32), intent(inout) :: neval
+        real(dp), intent(out), dimension(:) :: work
+        real(dp) :: ytry
+
+        ! Parameters
+        real(dp), parameter :: one = 1.0d0
+
+        ! Local Variables
+        integer(i32) :: i, ndim
+        real(dp) :: fac1, fac2
+
+        ! Initialization
+        ndim = size(this%m_simplex, 2)
+
+         ! Define a trial point
+         fac1 = (one - fac) / ndim
+         fac2 = fac1 - fac
+         do i = 1, ndim
+            work(i) = psum(i) * fac1 - this%m_simplex(ihi,i) * fac2
+         end do
+
+         ! Evaluate the function at the trial point, and then replace if the
+         ! trial provides an improvement
+         ytry = fcn%fcn(work)
+         neval = neval + 1
+         if (ytry < y(ihi)) then
+            y(ihi) = ytry
+            do i = 1, ndim
+                psum(i) = psum(i) + work(i) - this%m_simplex(ihi,i)
+                this%m_simplex(ihi,i) = work(i)
+            end do
+         end if
+    end function
 
 ! ------------------------------------------------------------------------------
 
