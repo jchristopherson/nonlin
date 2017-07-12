@@ -23,7 +23,7 @@ module nonlin_optimize
         real(dp), allocatable, dimension(:,:) :: m_simplex
     contains
         !> @brief Optimizes the equation.
-        procedure, public :: optimize => nm_optimize
+        procedure, public :: solve => nm_solve
         !> @brief Extrapolates by the specified factor through the simplex
         !! across from the largest point.  If the extrapolation results in a
         !! better estimate, the current high point is replaced with the new 
@@ -36,7 +36,7 @@ contains
 ! NELDER_MEAD MEMBERS
 ! ------------------------------------------------------------------------------
     !
-    subroutine nm_optimize(this, fcn, x, fout, ib, err)
+    subroutine nm_solve(this, fcn, x, fout, ib, err)
         ! Arguments
         class(nelder_mead), intent(inout) :: this
         class(fcnnvar_helper), intent(in) :: fcn

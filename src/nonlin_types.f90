@@ -322,7 +322,7 @@ module nonlin_types
         !! printed.
         procedure, public :: set_print_status => oe_set_print_status
         !> @brief Optimizes the equation.
-        procedure(nonlin_optimize), deferred, public, pass :: optimize
+        procedure(nonlin_optimize), deferred, public, pass :: solve
     end type
 
 ! ******************************************************************************
