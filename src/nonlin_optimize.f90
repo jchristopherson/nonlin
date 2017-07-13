@@ -17,7 +17,8 @@ module nonlin_optimize
 ! ******************************************************************************
 ! TYPES
 ! ------------------------------------------------------------------------------
-    !
+    !> @brief Defines a solver based upon Nelder and Mead's simplex algorithm
+    !! for minimization of functions of multiple variables.
     type, extends(optimize_equation) :: nelder_mead
         private
         !> The simplex vertices.
@@ -65,16 +66,19 @@ contains
     !!
     !! @par Remarks
     !! The implementation of the Nelder-Mead algorithm presented here is a 
-    !! slight modification of the original work of Nelder and Mead.  It is more
-    !! inline with the work given in the Numerical Recipes texts; however, 
-    !! deviations from that code are made, especially relating to convergence
-    !! testing.
+    !! slight modification of the original work of Nelder and Mead.  The 
+    !! Numerical Recipes implementation is also quite similar.  In fact, the
+    !! Numerical Recipes section relating to reflection, contraction, etc.
+    !! is leveraged for this implemetation.
     !!
     !! @par See Also
     !!  - Nelder, John A.; R. Mead (1965). "A simplex method for function 
     !!      minimization". Computer Journal. 7: 308–313.
+    !!  - [Gao, Fuchang, Han, Lixing (2010). "Implementing the Nelder-Mead 
+    !!      simplex algorithm with adaptive parameters."]
+    !!      (http://www.webpages.uidaho.edu/~fuchang/res/ANMS.pdf)
     !!  - [Wikipedia](https://en.wikipedia.org/wiki/Nelder–Mead_method)
-    !! - [Numerical Recipes](http://numerical.recipes/)
+    !!  - [Numerical Recipes](http://numerical.recipes/)
     subroutine nm_solve(this, fcn, x, fout, ib, err)
         ! Arguments
         class(nelder_mead), intent(inout) :: this
@@ -95,7 +99,7 @@ contains
         integer(i32) :: i, ihi, ilo, ihi2, ndim, npts, flag, neval, iter, &
             maxeval
         real(dp) :: ftol, rtol, ftry, fsave, fval, swp
-        real(dp), allocatable, dimension(:) :: f, psum, pmin, work
+        real(dp), allocatable, dimension(:) :: f, pcent, pmin, work
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
         character(len = 256) :: errmsg
@@ -150,7 +154,7 @@ contains
 
         ! Local Memory Allocation
         allocate(f(npts), stat = flag)
-        if (flag == 0) allocate(psum(ndim), stat = flag)
+        if (flag == 0) allocate(pcent(ndim), stat = flag)
         if (flag == 0) allocate(pmin(ndim), stat = flag)
         if (flag == 0) allocate(work(ndim), stat = flag)
         if (buildSimplex .and. flag == 0) allocate(this%m_simplex(npts, ndim))
@@ -180,7 +184,7 @@ contains
         fval = f(1)
 
         do i = 1, ndim
-            psum(i) = sum(this%m_simplex(:,i))
+            pcent(i) = sum(this%m_simplex(:,i))
         end do
 
         ! Main Loop
@@ -231,31 +235,31 @@ contains
 
             ! Start of a new iteration by reflecting the simplex at its largest
             ! point.
-            ftry = this%extrapolate(fcn, f, psum, ihi, negone, neval, work)
+            ftry = this%extrapolate(fcn, f, pcent, ihi, negone, neval, work)
             if (ftry <= f(ilo)) then
                 ! The result of the reflection is better than the current
                 ! best point.  As a result, try a factor of 2 in the reflected
                 ! direction.  Again, the highest point is of interest.
-                ftry = this%extrapolate(fcn, f, psum, ihi, two, neval, work)
+                ftry = this%extrapolate(fcn, f, pcent, ihi, two, neval, work)
             else if (ftry >= f(ihi2)) then
                 ! The reflected point is worse than the second highest, so look
                 ! for an intermediate lower point (contract the simplex)
                 fsave = f(ihi)
-                ftry = this%extrapolate(fcn, f, psum, ihi, half, neval, work)
+                ftry = this%extrapolate(fcn, f, pcent, ihi, half, neval, work)
                 if (ftry >= fsave) then
                     ! Cannot improve on the high point.  Try to contract around
                     ! the low point.
                     do i = 1, npts
                         if (i /= ilo) then
-                            psum = half * (this%m_simplex(i,:) + &
+                            pcent = half * (this%m_simplex(i,:) + &
                                 this%m_simplex(ilo,:))
-                            this%m_simplex(i,:) = psum
-                            f(i) = fcn%fcn(psum)
+                            this%m_simplex(i,:) = pcent
+                            f(i) = fcn%fcn(pcent)
                         end if
                     end do
                     neval = neval + npts
                     do i = 1, ndim
-                        psum(i) = sum(this%m_simplex(:,i))
+                        pcent(i) = sum(this%m_simplex(:,i))
                     end do
                 end if
             else
@@ -312,19 +316,19 @@ contains
     !! @param[in,out] this The nelder_mead object.
     !! @param[in] fcn The function to evaluate.
     !! @param[in,out] y An array containing the function values at each vertex.
-    !! @param[in,out] psum An array containing the summation of vertex position
+    !! @param[in,out] pcent An array containing the centroid of vertex position
     !!  information.
     !! @param[in] ihi The index of the largest magnitude vertex.
     !! @param[in,out] neval The number of function evaluations.
     !! @param[out] work An N-element workspace array where N is the number of
     !!  dimensions of the problem.
     !! @return The new function estimate.
-    function nm_extrapolate(this, fcn, y, psum, ihi, fac, neval, work) &
+    function nm_extrapolate(this, fcn, y, pcent, ihi, fac, neval, work) &
             result(ytry)
         ! Arguments
         class(nelder_mead), intent(inout) :: this
         class(fcnnvar_helper), intent(in) :: fcn
-        real(dp), intent(inout), dimension(:) :: y, psum
+        real(dp), intent(inout), dimension(:) :: y, pcent
         integer(i32), intent(in) :: ihi
         real(dp), intent(in) :: fac
         integer(i32), intent(inout) :: neval
@@ -345,7 +349,7 @@ contains
          fac1 = (one - fac) / ndim
          fac2 = fac1 - fac
          do i = 1, ndim
-            work(i) = psum(i) * fac1 - this%m_simplex(ihi,i) * fac2
+            work(i) = pcent(i) * fac1 - this%m_simplex(ihi,i) * fac2
          end do
 
          ! Evaluate the function at the trial point, and then replace if the
@@ -355,7 +359,7 @@ contains
          if (ytry < y(ihi)) then
             y(ihi) = ytry
             do i = 1, ndim
-                psum(i) = psum(i) + work(i) - this%m_simplex(ihi,i)
+                pcent(i) = pcent(i) + work(i) - this%m_simplex(ihi,i)
                 this%m_simplex(ihi,i) = work(i)
             end do
          end if
