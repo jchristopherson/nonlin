@@ -63,10 +63,18 @@ contains
     !!  - NL_CONVERGENCE_ERROR: Occurs if the algorithm cannot converge within
     !!      the allowed number of iterations.
     !!
+    !! @par Remarks
+    !! The implementation of the Nelder-Mead algorithm presented here is a 
+    !! slight modification of the original work of Nelder and Mead.  It is more
+    !! inline with the work given in the Numerical Recipes texts; however, 
+    !! deviations from that code are made, especially relating to convergence
+    !! testing.
+    !!
     !! @par See Also
     !!  - Nelder, John A.; R. Mead (1965). "A simplex method for function 
     !!      minimization". Computer Journal. 7: 308–313.
     !!  - [Wikipedia](https://en.wikipedia.org/wiki/Nelder–Mead_method)
+    !! - [Numerical Recipes](http://numerical.recipes/)
     subroutine nm_solve(this, fcn, x, fout, ib, err)
         ! Arguments
         class(nelder_mead), intent(inout) :: this
