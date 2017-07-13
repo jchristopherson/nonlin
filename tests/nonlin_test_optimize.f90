@@ -37,11 +37,8 @@ contains
         fcn => rosenbrock
         call obj%set_fcn(fcn, 2)
 
-        ! Establish convergence properties
-        call solver%set_max_fcn_evals(1000)
-
         ! Define an initial guess - the solution is (1, 1)
-        x = -1.0d0
+        call random_number(x)
 
         ! Call the solver
         call solver%solve(obj, x, fout, ib)
