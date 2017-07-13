@@ -72,6 +72,7 @@ contains
         class(errors), intent(inout), optional, target :: err
 
         ! Parameters
+        real(dp), parameter :: zero = 0.0d0
         real(dp), parameter :: negone = -1.0d0
         real(dp), parameter :: half = 0.5d0
         real(dp), parameter :: two = 2.0d0
@@ -151,7 +152,9 @@ contains
         if (buildSimplex) then
             this%m_simplex(1,:) = x
             do i = 2, npts
-                this%m_simplex(i,:) = x + this%m_initSize
+                work = zero
+                work(i) = this%m_initSize
+                this%m_simplex(i,:) = x + work
             end do
         end if
 
