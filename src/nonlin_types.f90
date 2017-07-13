@@ -305,9 +305,9 @@ module nonlin_types
     type, abstract :: optimize_equation
         private
         !> The maximum number of function evaluations allowed.
-        integer(i32) :: m_maxEval = 100
+        integer(i32) :: m_maxEval = 500
         !> The error tolerance used to determine convergence.
-        real(dp) :: m_tol = 1.0d-8
+        real(dp) :: m_tol = 1.0d-12
         !> Set to true to print iteration status; else, false.
         logical :: m_printStatus = .false.
     contains

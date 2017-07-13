@@ -4,6 +4,7 @@ module nonlin_test_optimize
     use linalg_constants, only : dp, i32
     use nonlin_optimize
     use nonlin_types
+    use test_core
     implicit none
     private
     public :: test_nelder_mead_1
@@ -26,11 +27,14 @@ contains
 ! NELDER-MEAD METHOD
 ! ------------------------------------------------------------------------------
     subroutine test_nelder_mead_1()
+        ! Parameters
+        real(dp), parameter :: tol = 1.0d-6
+
         ! Local Variables
         type(nelder_mead) :: solver
         type(fcnnvar_helper) :: obj
         procedure(fcnnvar), pointer :: fcn
-        real(dp) :: x(2), fout
+        real(dp) :: x(2), fout, xans(2)
         type(iteration_behavior) :: ib
 
         ! Initialization
@@ -43,11 +47,19 @@ contains
         ! Call the solver
         call solver%solve(obj, x, fout, ib)
 
-        ! Display the output
-        print '(AF8.5AF8.5A)', "Rosenbrock Minimum: (", x(1), ", ", x(2), ")"
-        print '(AE9.3)', "Function Value: ", fout
-        print '(AI0)', "Iterations: ", ib%iter_count
-        print '(AI0)', "Function Evaluations: ", ib%fcn_count
+        ! Test
+        xans = 1.0d0
+        if (is_mtx_equal(x, xans, tol)) then
+            print '(A)', "Test Passed: Nelder-Mead Test - Rosenbrock Function"
+        else
+            print '(A)', "Test Failed: Nelder-Mead Test - Rosenbrock Function"
+        end if
+
+        ! ! Display the output
+        ! print '(AF8.5AF8.5A)', "Rosenbrock Minimum: (", x(1), ", ", x(2), ")"
+        ! print '(AE9.3)', "Function Value: ", fout
+        ! print '(AI0)', "Iterations: ", ib%iter_count
+        ! print '(AI0)', "Function Evaluations: ", ib%fcn_count
     end subroutine
 
 ! ------------------------------------------------------------------------------    
