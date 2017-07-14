@@ -6,6 +6,10 @@
 ! https://scicomp.stackexchange.com/questions/14787/fortran-library-for-minimization-or-maximization-of-functions-optimization-prob
 ! http://ab-initio.mit.edu/wiki/index.php/NLopt
 
+!> @brief \b nonlin_optimize
+!!
+!! @par Purpose
+!! To provide various optimization routines.
 module nonlin_optimize
     use linalg_constants, only : dp, i32
     use ferror, only : errors
@@ -29,6 +33,15 @@ module nonlin_optimize
     contains
         !> @brief Optimizes the equation.
         procedure, public :: solve => nm_solve
+        !> @brief Gets an (N+1)-by-N matrix containing the current simplex.
+        procedure, public :: get_simplex => nm_get_simplex
+        !> @brief Sets an (N+1)-by-N matrix containing the current simplex.
+        procedure, public :: set_simplex => nm_set_simplex
+        !> @brief Gets the size of the initial simplex.
+        procedure, public :: get_initial_size => nm_get_size
+        !> @brief Sets the size of the initial simplex.
+        procedure, public :: set_initial_size => nm_set_size
+
         !> @brief Extrapolates by the specified factor through the simplex
         !! across from the largest point.  If the extrapolation results in a
         !! better estimate, the current high point is replaced with the new
@@ -63,6 +76,55 @@ contains
     !!      available.
     !!  - NL_CONVERGENCE_ERROR: Occurs if the algorithm cannot converge within
     !!      the allowed number of iterations.
+    !!
+    !! @par Usage
+    !! The following example illustrates how to find the minimum of Rosenbrock's
+    !! function using this Nelder-Mead solver.
+    !! @code{.f90}
+    !! program example
+    !!     use linalg_constants, only : dp, i32
+    !!     use nonlin_optimize, only : nelder_mead
+    !!     use nonlin_types, only : fcnnvar, fcnnvar_helper, iteration_behavior
+    !!     implicit none
+    !!
+    !!     ! Local Variables
+    !!     type(nelder_mead) :: solver
+    !!     type(fcnnvar_helper) :: obj
+    !!     procedure(fcnnvar), pointer :: fcn
+    !!     real(dp) :: x(2), fout
+    !!     type(iteration_behavior) :: ib
+    !!
+    !!     ! Initialization
+    !!     fcn => rosenbrock
+    !!     call obj%set_fcn(fcn, 2)
+    !!
+    !!     ! Define an initial guess - the solution is (1, 1)
+    !!     call random_number(x)
+    !!
+    !!     ! Call the solver
+    !!     call solver%solve(obj, x, fout, ib)
+    !!
+    !!     ! Display the output
+    !!     print '(AF8.5AF8.5A)', "Rosenbrock Minimum: (", x(1), ", ", x(2), ")"
+    !!     print '(AE9.3)', "Function Value: ", fout
+    !!     print '(AI0)', "Iterations: ", ib%iter_count
+    !!     print '(AI0)', "Function Evaluations: ", ib%fcn_count
+    !! contains
+    !!     ! Rosenbrock's Function
+    !!     function rosenbrock(x) result(f)
+    !!         real(dp), intent(in), dimension(:) :: x
+    !!         real(dp) :: f
+    !!         f = 1.0d2 * (x(2) - x(1)**2)**2 + (x(1) - 1.0d0)**2
+    !!     end function
+    !! end
+    !! @endcode
+    !! The above program yields the following output:
+    !! @code{.txt}
+    !! Rosenbrock Minimum: ( 1.00000,  1.00000)
+    !! Function Value: 0.264E-12
+    !! Iterations: 59
+    !! Function Evaluations: 105
+    !! @endcode
     !!
     !! @par Remarks
     !! The implementation of the Nelder-Mead algorithm presented here is a 
@@ -141,9 +203,9 @@ contains
         ! appropriately sized.  If not, simply create a new simplex of the
         ! appropriate size.
         if (allocated(this%m_simplex)) then
-            ! This matrix must be NPTS-BY-NDIM
-            if (size(this%m_simplex, 1) /= npts .or. &
-                size(this%m_simplex, 2) /= ndim) then
+            ! This matrix must be NDIM-by-NPTS
+            if (size(this%m_simplex, 1) /= ndim .or. &
+                size(this%m_simplex, 2) /= npts) then
                     deallocate(this%m_simplex)
                 buildSimplex = .true.
             else
@@ -157,7 +219,7 @@ contains
         if (flag == 0) allocate(pcent(ndim), stat = flag)
         if (flag == 0) allocate(pmin(ndim), stat = flag)
         if (flag == 0) allocate(work(ndim), stat = flag)
-        if (buildSimplex .and. flag == 0) allocate(this%m_simplex(npts, ndim))
+        if (buildSimplex .and. flag == 0) allocate(this%m_simplex(ndim, npts))
         if (flag /= 0) then
             ! ERROR: Out of memory
             call errmgr%report_error("nm_solve", &
@@ -167,24 +229,24 @@ contains
 
         ! Define the initial simplex, if needed
         if (buildSimplex) then
-            this%m_simplex(1,:) = x
+            this%m_simplex(:,1) = x
             do i = 2, npts
-                this%m_simplex(i,:) = x
+                this%m_simplex(:,i) = x
             end do
             do i = 1, ndim
-                this%m_simplex(i+1,i) = this%m_simplex(i+1,i) + this%m_initSize
+                this%m_simplex(i,i+1) = this%m_simplex(i,i+1) + this%m_initSize
             end do
         end if
 
         ! Evaluate the function at each vertex of the simplex
         do i = 1, npts
-            f(i) = fcn%fcn(this%m_simplex(i,:))
+            f(i) = fcn%fcn(this%m_simplex(:,i))
         end do
         neval = npts
         fval = f(1)
 
         do i = 1, ndim
-            pcent(i) = sum(this%m_simplex(:,i))
+            pcent(i) = sum(this%m_simplex(i,:))
         end do
 
         ! Main Loop
@@ -223,10 +285,10 @@ contains
                 f(1) = f(ilo)
                 f(ilo) = swp
                 do i = 1, ndim
-                    swp = this%m_simplex(1,i)
-                    this%m_simplex(1,i) = this%m_simplex(ilo,i)
-                    this%m_simplex(ilo,i) = swp
-                    x(i) = this%m_simplex(1,i)
+                    swp = this%m_simplex(i,1)
+                    this%m_simplex(i,1) = this%m_simplex(i,ilo)
+                    this%m_simplex(i,ilo) = swp
+                    x(i) = this%m_simplex(i,1)
                 end do
                 fval = f(1)
                 fcnvrg = .true.
@@ -251,15 +313,15 @@ contains
                     ! the low point.
                     do i = 1, npts
                         if (i /= ilo) then
-                            pcent = half * (this%m_simplex(i,:) + &
-                                this%m_simplex(ilo,:))
-                            this%m_simplex(i,:) = pcent
+                            pcent = half * (this%m_simplex(:,i) + &
+                                this%m_simplex(:,ilo))
+                            this%m_simplex(:,i) = pcent
                             f(i) = fcn%fcn(pcent)
                         end if
                     end do
                     neval = neval + npts
                     do i = 1, ndim
-                        pcent(i) = sum(this%m_simplex(:,i))
+                        pcent(i) = sum(this%m_simplex(i,:))
                     end do
                 end if
             else
@@ -343,13 +405,13 @@ contains
         real(dp) :: fac1, fac2
 
         ! Initialization
-        ndim = size(this%m_simplex, 2)
+        ndim = size(this%m_simplex, 1)
 
          ! Define a trial point
          fac1 = (one - fac) / ndim
          fac2 = fac1 - fac
          do i = 1, ndim
-            work(i) = pcent(i) * fac1 - this%m_simplex(ihi,i) * fac2
+            work(i) = pcent(i) * fac1 - this%m_simplex(i,ihi) * fac2
          end do
 
          ! Evaluate the function at the trial point, and then replace if the
@@ -359,22 +421,81 @@ contains
          if (ytry < y(ihi)) then
             y(ihi) = ytry
             do i = 1, ndim
-                pcent(i) = pcent(i) + work(i) - this%m_simplex(ihi,i)
-                this%m_simplex(ihi,i) = work(i)
+                pcent(i) = pcent(i) + work(i) - this%m_simplex(i,ihi)
+                this%m_simplex(i,ihi) = work(i)
             end do
          end if
     end function
 
 ! ------------------------------------------------------------------------------
+    !> @brief Gets an N-by-(N+1) matrix containing the current simplex.
+    !!
+    !! @param[in] this The nelder_mead object.
+    !! @return The N-by-(N+1) matrix containing the simplex.  Each vertex of the
+    !!  simplex is stored as its own column of this matrix.
+    pure function nm_get_simplex(this) result(p)
+        class(nelder_mead), intent(in) :: this
+        real(dp), allocatable, dimension(:,:) :: p
+        integer(i32) :: m, n
+        if (allocated(this%m_simplex)) then
+            m = size(this%m_simplex, 1)
+            n = size(this%m_simplex, 2)
+            allocate(p(m,n))
+            p = this%m_simplex
+        end if
+    end function
 
-
+! --------------------
+    !> @brief Sets an N-by-(N+1) matrix as the current simplex.  Notice, if this
+    !! matrix is different in size from the problem dimensionallity, the 
+    !! Nelder-Mead routine will replace it with an appropriately sized matrix.
+    !!
+    !! @param[in,out] this The nelder_mead object.
+    !! @param[in] x The simplex matrix.  Each column of the matrix must contain
+    !!  the coordinates of each vertex of the simplex.
+    subroutine nm_set_simplex(this, x)
+        class(nelder_mead), intent(inout) :: this
+        real(dp), dimension(:,:) :: x
+        integer(i32) :: m, n
+        m = size(x, 1)
+        n = size(x, 2)
+        if (allocated(this%m_simplex)) then
+            if (size(this%m_simplex, 1) /= m .or. &
+                size(this%m_simplex, 2) /= n) then
+                deallocate(this%m_simplex)
+                allocate(this%m_simplex(m, n))
+            end if
+        else
+            allocate(this%m_simplex(m, n))
+        end if
+        this%m_simplex = x
+    end subroutine
 
 ! ------------------------------------------------------------------------------
-! Other References:
-! - http://people.sc.fsu.edu/~jburkardt/cpp_src/asa047/asa047.html
-! - https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method
-! - http://www.brnt.eu/phd/node10.html#SECTION00622200000000000000
-! - http://www.webpages.uidaho.edu/~fuchang/res/ANMS.pdf
+    !> @brief Gets the size of the initial simplex that will be utilized by
+    !! the Nelder-Mead algorithm in the event that the user does not supply
+    !! a simplex geometry, or if the user supplies an invalid simplex geometry.
+    !!
+    !! @param[in] this The nelder_mead object.
+    !! @return The size of the simplex (length of an edge).
+    pure function nm_get_size(this) result(x)
+        class(nelder_mead), intent(in) :: this
+        real(dp) :: x
+        x = this%m_initSize
+    end function
+
+! --------------------
+    !> @brief Sets the size of the initial simplex that will be utilized by
+    !! the Nelder-Mead algorithm in the event that the user does not supply
+    !! a simplex geometry, or if the user supplies an invalid simplex geometry.
+    !!
+    !! @param[in,out] this The nelder_mead object.
+    !! @param[in] x The size of the simplex (length of an edge).
+    subroutine nm_set_size(this, x)
+        class(nelder_mead), intent(inout) :: this
+        real(dp), intent(in) :: x
+        this%m_initSize = x
+    end subroutine
 
 ! ------------------------------------------------------------------------------
 end module
