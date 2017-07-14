@@ -14,6 +14,7 @@ module nonlin_types
     public :: fcn1var
     public :: fcnnvar
     public :: jacobianfcn
+    public :: gradientfcn
     public :: vecfcn_helper
     public :: fcn1var_helper
     public :: fcnnvar_helper
@@ -101,6 +102,18 @@ module nonlin_types
             real(dp), intent(in), dimension(:) :: x
             real(dp) :: f
         end function
+
+        !> @brief Describes a routine capable of computing the gradient vector
+        !! of an equation of N variables.
+        !!
+        !! @param[in] x An N-element array containing the independent variables.
+        !! @param[out] g An N-element array where the gradient vector will be
+        !!  written as output.
+        subroutine gradientfcn(x, g)
+            use linalg_constants, only : dp
+            real(dp), intent(in), dimension(:) :: x
+            real(dp), intent(out), dimension(:) :: g
+        end subroutine
     end interface
 
 ! ******************************************************************************
@@ -172,6 +185,8 @@ module nonlin_types
         private
         !> A pointer to the target fcnnvar routine.
         procedure(fcnnvar), pointer, nopass :: m_fcn => null()
+        !> A pointer to the gradient routine.
+        procedure(gradientfcn), pointer, nopass :: m_grad => null()
         !> The number of variables in m_fcn
         integer(i32) :: m_nvar = 0
     contains
@@ -183,6 +198,14 @@ module nonlin_types
         procedure, public :: set_fcn => fnh_set_fcn
         !> @brief Gets the number of variables in this system.
         procedure, public :: get_variable_count => fnh_get_nvar
+        !> @brief Establishes a pointer to the routine containing the gradient
+        !! vector of the function.
+        procedure, public :: set_gradient_fcn => fnh_set_grad
+        !> @brief Tests if the pointer to the routine containing the gradient 
+        !! has been assigned.
+        procedure, public :: is_gradient_defined => fnh_is_grad_defined
+        !> @brief Computes the gradient of the function.
+        procedure, public :: gradient => fnh_grad_fcn
     end type
 
 ! ------------------------------------------------------------------------------
@@ -769,6 +792,109 @@ contains
         integer(i32) :: n
         n = this%m_nvar
     end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Establishes a pointer to the routine containing the gradient
+    !! vector of the function.
+    !!
+    !! @param[in,out] this The fcnnvar_helper object.
+    !! @param[in] fcn The pointer to the gradient routine.
+    subroutine fnh_set_grad(this, fcn)
+        class(fcnnvar_helper), intent(inout) :: this
+        procedure(gradientfcn), pointer, intent(in) :: fcn
+        this%m_grad => fcn
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Tests if the pointer to the routine containing the gradient has
+    !! been assigned.
+    !!
+    !! @param[in] this The fcnnvar_helper object.
+    !! @return Returns true if the pointer has been assigned; else, false.
+    pure function fnh_is_grad_defined(this) result(x)
+        class(fcnnvar_helper), intent(in) :: this
+        logical :: x
+        x = associated(this%m_grad)
+    end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Executes the routine containing the gradient, if supplied.  If not
+    !! supplied, the gradient is computed via finite differences.
+    !!
+    !! @param[in] this The fcnnvar_helper object.
+    !! @param[in,out] x An N-element array containing the independent variables
+    !!  defining the point about which the derivatives will be calculated.  This
+    !!  array is restored upon output.
+    !! @param[out] g An N-element array where the gradient will be written upon
+    !!  output.
+    !! @param[in] fv An optional input providing the function value at @p x.
+    !! @param[out] err An optional integer output that can be used to determine
+    !!  error status.  If not used, and an error is encountered, the routine
+    !!  simply returns silently.  If used, the following error codes identify
+    !!  error status:
+    !!  - 0: No error has occurred.
+    !!  - n: A positive integer denoting the index of an invalid input.
+    subroutine fnh_grad_fcn(this, x, g, fv, err)
+        ! Arguments
+        class(fcnnvar_helper), intent(in) :: this
+        real(dp), intent(inout), dimension(:) :: x
+        real(dp), intent(out), dimension(:) :: g
+        real(dp), intent(in), optional :: fv
+        integer(i32), intent(out), optional :: err
+
+        ! Parameters
+        real(dp), parameter :: zero = 0.0d0
+
+        ! Local Variables
+        integer(i32) :: j, n, flag
+        real(dp) :: eps, epsmch, h, temp, f, f1
+
+        ! Initialization
+        if (present(err)) err = 0
+        n = this%m_nvar
+
+        ! Input Checking
+        flag = 0
+        if (size(x) /= n) then
+            flag = 2
+        else if (size(g) /= n) then
+            flag = 3
+        end if
+        if (flag /= 0) then
+            ! ERROR: Incorrectly sized input arrays
+            if (present(err)) err = flag
+            return
+        end if
+
+        ! Process
+        if (.not.this%is_fcn_defined()) return
+        if (this%is_gradient_defined()) then
+            ! Call the user-defined gradient routine
+            call this%m_grad(x, g)
+        else
+            ! Compute the gradient via finite differences
+            if (present(fv)) then
+                f = fv
+            else
+                f = this%fcn(x)
+            end if
+
+            ! Establish step size factors
+            epsmch = epsilon(epsmch)
+            eps = sqrt(epsmch)
+
+            ! Compute the derivatives
+            do j = 1, n
+                temp = x(j)
+                h = eps * abs(temp)
+                if (h == zero) h = eps
+                x(j) = temp + h
+                f1 = this%fcn(x)
+                x(j) = temp
+                g(j) = (f1 - f) / h
+            end do
+        end if
+    end subroutine
 
 ! ******************************************************************************
 ! EQUATION_SOLVER MEMBERS
