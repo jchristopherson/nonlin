@@ -164,7 +164,7 @@ The example yields the following output:
 Rosenbrock Minimum: ( 1.00000,  1.00000)
 Function Value: 0.264E-12
 Iterations: 59
-Function Evaluations: 105
+Function Evaluations: 112
 ```
 Notice, the convergence tolerance was set to its default value (1e-12).
 

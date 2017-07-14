@@ -123,7 +123,7 @@ contains
     !! Rosenbrock Minimum: ( 1.00000,  1.00000)
     !! Function Value: 0.264E-12
     !! Iterations: 59
-    !! Function Evaluations: 105
+    !! Function Evaluations: 112
     !! @endcode
     !!
     !! @par Remarks
@@ -324,9 +324,6 @@ contains
                         pcent(i) = sum(this%m_simplex(i,:))
                     end do
                 end if
-            else
-                ! Correct the evaluation count
-                neval = neval - 1
             end if
 
             ! Print iteration status
