@@ -16,7 +16,11 @@ module nonlin_optimize
     use nonlin_types, only : fcnnvar_helper, optimize_equation, &
         iteration_behavior, NL_OUT_OF_MEMORY_ERROR, NL_CONVERGENCE_ERROR, &
         NL_INVALID_INPUT_ERROR
+    use nonlin_linesearch, only : line_search
     implicit none
+    private
+    public :: nelder_mead
+    public :: bfgs
 
 ! ******************************************************************************
 ! TYPES
@@ -47,6 +51,42 @@ module nonlin_optimize
         !! better estimate, the current high point is replaced with the new
         !! estimate.
         procedure, private :: extrapolate => nm_extrapolate
+    end type
+
+! ------------------------------------------------------------------------------
+    !> @brief A class describing equation optimizers that use a line search
+    !! algorithm to improve convergence behavior.
+    type, abstract, extends(optimize_equation) :: line_search_optimizer
+        private
+        !> The line search object.
+        class(line_search), allocatable :: m_lineSearch
+        !> Set to true if a line search should be used regardless of the status
+        !! of m_lineSearch
+        logical :: m_useLineSearch = .true.
+    contains
+        !> @brief Gets the line search module.
+        procedure, public :: get_line_search => lso_get_line_search
+        !> @brief Sets the line search module.
+        procedure, public :: set_line_search => lso_set_line_search
+        !> @brief Establishes a default line_search object for the line search
+        !! module.
+        procedure, public :: set_default_line_search => lso_set_default
+        !> @brief Tests to see if a line search module is defined.
+        procedure, public :: is_line_search_defined => &
+            lso_is_line_search_defined
+        !> @brief Gets a value determining if a line-search should be employed.
+        procedure, public :: get_use_line_search => lso_get_use_search
+        !> @brief Sets a value determining if a line-search should be employed.
+        procedure, public :: set_use_line_search => lso_set_use_search
+    end type
+
+! ------------------------------------------------------------------------------
+    !> @brief Defines a Broyden–Fletcher–Goldfarb–Shanno (BFGS) solver for 
+    !! minimization of functions of multiple variables.
+    type, extends(line_search_optimizer) :: bfgs
+    contains
+        !> @brief Optimizes the equation.
+        procedure, public :: solve => bfgs_solve
     end type
 
 contains
@@ -494,5 +534,92 @@ contains
         this%m_initSize = x
     end subroutine
 
+! ******************************************************************************
+! LINE_SEARCH_OPTIMIZER MEMBERS
+! ------------------------------------------------------------------------------
+    !> @brief Gets the line search module.
+    !!
+    !! @param[in] this The line_search_optimizer object.
+    !! @param[out] ls The line_search object.
+    subroutine lso_get_line_search(this, ls)
+        class(line_search_optimizer), intent(in) :: this
+        class(line_search), intent(out), allocatable :: ls
+        if (allocated(this%m_lineSearch)) &
+            allocate(ls, source = this%m_lineSearch)
+    end subroutine
+
+! ----------------------
+    !> @brief Sets the line search module.
+    !!
+    !! @param[in,out] this The line_search_optimizer object.
+    !! @param[in] ls The line_search object.
+    subroutine lso_set_line_search(this, ls)
+        class(line_search_optimizer), intent(inout) :: this
+        class(line_search), intent(in) :: ls
+        if (allocated(this%m_lineSearch)) deallocate(this%m_lineSearch)
+        allocate(this%m_lineSearch, source = ls)
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Establishes a default line_search object for the line search
+    !! module.
+    !!
+    !! @param[in,out] this The line_search_optimizer object.
+    subroutine lso_set_default(this)
+        class(line_search_optimizer), intent(inout) :: this
+        type(line_search) :: ls
+        call this%set_line_search(ls)
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Tests to see if a line search module is defined.
+    !!
+    !! @param[in] this The line_search_optimizer object.
+    !! @return Returns true if a module is defined; else, false.
+    pure function lso_is_line_search_defined(this) result(x)
+        class(line_search_optimizer), intent(in) :: this
+        logical :: x
+        x = allocated(this%m_lineSearch)
+    end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Gets a value determining if a line-search should be employed.
+    !!
+    !! @param[in] this The line_search_optimizer object.
+    !! @return Returns true if a line search should be used; else, false.
+    pure function lso_get_use_search(this) result(x)
+        class(line_search_optimizer), intent(in) :: this
+        logical :: x
+        x = this%m_useLineSearch
+    end function
+
+! --------------------
+    !> @brief Sets a value determining if a line-search should be employed.
+    !!
+    !! @param[in,out] this The line_search_optimizer object.
+    !! @param[in] x Set to true if a line search should be used; else, false.
+    subroutine lso_set_use_search(this, x)
+        class(line_search_optimizer), intent(inout) :: this
+        logical, intent(in) :: x
+        this%m_useLineSearch = x
+    end subroutine
+
+! ******************************************************************************
+! BFGS MEMBERS
+! ------------------------------------------------------------------------------
+    !
+    subroutine bfgs_solve(this, fcn, x, fout, ib, err)
+        ! Arguments
+        class(bfgs), intent(inout) :: this
+        class(fcnnvar_helper), intent(in) :: fcn
+        real(dp), intent(inout), dimension(:) :: x
+        real(dp), intent(out), optional :: fout
+        type(iteration_behavior), optional :: ib
+        class(errors), intent(inout), optional, target :: err
+    end subroutine
+
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
+! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
 end module
