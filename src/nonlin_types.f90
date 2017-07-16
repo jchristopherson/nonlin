@@ -21,7 +21,7 @@ module nonlin_types
     public :: iteration_behavior
     public :: equation_solver
     public :: equation_solver_1var
-    public :: optimize_equation
+    public :: equation_optimizer
     public :: value_pair
     public :: nonlin_solver
     public :: nonlin_solver_1var
@@ -325,7 +325,7 @@ module nonlin_types
 ! ------------------------------------------------------------------------------
     !> @brief A base class for optimization of an equation of multiple 
     !! variables.
-    type, abstract :: optimize_equation
+    type, abstract :: equation_optimizer
         private
         !> The maximum number of function evaluations allowed.
         integer(i32) :: m_maxEval = 500
@@ -427,7 +427,7 @@ module nonlin_types
         !> @brief Describes the interface of a routine for optimizing an 
         !! equation of N variables.
         !!
-        !! @param[in,out] this The optimize_equation-based object.
+        !! @param[in,out] this The equation_optimizer-based object.
         !! @param[in] fcn The fcnnvar_helper object containing the equation to
         !!  optimize.
         !! @param[in,out] x On input, the initial guess at the optimal point. 
@@ -445,10 +445,10 @@ module nonlin_types
         subroutine nonlin_optimize(this, fcn, x, fout, ib, err)
             use linalg_constants, only : dp, i32
             use ferror, only : errors
-            import optimize_equation
+            import equation_optimizer
             import fcnnvar_helper
             import iteration_behavior
-            class(optimize_equation), intent(inout) :: this
+            class(equation_optimizer), intent(inout) :: this
             class(fcnnvar_helper), intent(in) :: fcn
             real(dp), intent(inout), dimension(:) :: x
             real(dp), intent(out), optional :: fout
@@ -1107,14 +1107,14 @@ contains
     end subroutine
 
 ! ******************************************************************************
-! OPTIMIZE_EQUATIONS MEMBERS
+! EQUATION_OPTIMIZER MEMBERS
 ! ------------------------------------------------------------------------------
     !> @brief Gets the maximum number of function evaluations allowed.
     !!
-    !! @param[in] this The optimize_equation object.
+    !! @param[in] this The equation_optimizer object.
     !! @return The maximum number of function evaluations.
     pure function oe_get_max_eval(this) result(n)
-        class(optimize_equation), intent(in) :: this
+        class(equation_optimizer), intent(in) :: this
         integer(i32) :: n
         n = this%m_maxEval
     end function
@@ -1122,10 +1122,10 @@ contains
 ! --------------------
     !> @brief Sets the maximum number of function evaluations allowed.
     !!
-    !! @param[in,out] this The optimize_equation object.
+    !! @param[in,out] this The equation_optimizer object.
     !! @param[in] n The maximum number of function evaluations.
     subroutine oe_set_max_eval(this, n)
-        class(optimize_equation), intent(inout) :: this
+        class(equation_optimizer), intent(inout) :: this
         integer(i32), intent(in) :: n
         this%m_maxEval = n
     end subroutine
@@ -1133,10 +1133,10 @@ contains
 ! ------------------------------------------------------------------------------
     !> @brief Gets the tolerance on convergence.
     !!
-    !! @param[in] this The optimize_equation object.
+    !! @param[in] this The equation_optimizer object.
     !! @return The convergence tolerance.
     pure function oe_get_tol(this) result(x)
-        class(optimize_equation), intent(in) :: this
+        class(equation_optimizer), intent(in) :: this
         real(dp) :: x
         x = this%m_tol
     end function
@@ -1144,10 +1144,10 @@ contains
 ! --------------------
     !> @brief Sets the tolerance on convergence.
     !!
-    !! @param[in,out] this The optimize_equation object.
+    !! @param[in,out] this The equation_optimizer object.
     !! @param[in] x The convergence tolerance.
     subroutine oe_set_tol(this, x)
-        class(optimize_equation), intent(inout) :: this
+        class(equation_optimizer), intent(inout) :: this
         real(dp), intent(in) :: x
         this%m_tol = x
     end subroutine
@@ -1156,10 +1156,10 @@ contains
     !> @brief Gets a logical value determining if iteration status should be
     !! printed.
     !!
-    !! @param[in] this The optimize_equation object.
+    !! @param[in] this The equation_optimizer object.
     !! @return True if the iteration status should be printed; else, false.
     pure function oe_get_print_status(this) result(x)
-        class(optimize_equation), intent(in) :: this
+        class(equation_optimizer), intent(in) :: this
         logical :: x
         x = this%m_printStatus
     end function
@@ -1168,10 +1168,10 @@ contains
     !> @brief Sets a logical value determining if iteration status should be
     !! printed.
     !!
-    !! @param[in,out] this The optimize_equation object.
+    !! @param[in,out] this The equation_optimizer object.
     !! @param[in] x True if the iteration status should be printed; else, false.
     subroutine oe_set_print_status(this, x)
-        class(optimize_equation), intent(inout) :: this
+        class(equation_optimizer), intent(inout) :: this
         logical, intent(in) :: x
         this%m_printStatus = x
     end subroutine

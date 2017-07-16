@@ -13,13 +13,14 @@
 module nonlin_optimize
     use linalg_constants, only : dp, i32
     use ferror, only : errors
-    use nonlin_types, only : fcnnvar_helper, optimize_equation, &
+    use nonlin_types, only : fcnnvar_helper, equation_optimizer, &
         iteration_behavior, NL_OUT_OF_MEMORY_ERROR, NL_CONVERGENCE_ERROR, &
         NL_INVALID_INPUT_ERROR
     use nonlin_linesearch, only : line_search
     implicit none
     private
     public :: nelder_mead
+    public :: line_search_optimizer
     public :: bfgs
 
 ! ******************************************************************************
@@ -27,7 +28,7 @@ module nonlin_optimize
 ! ------------------------------------------------------------------------------
     !> @brief Defines a solver based upon Nelder and Mead's simplex algorithm
     !! for minimization of functions of multiple variables.
-    type, extends(optimize_equation) :: nelder_mead
+    type, extends(equation_optimizer) :: nelder_mead
         private
         !> The simplex vertices.
         real(dp), allocatable, dimension(:,:) :: m_simplex
@@ -56,7 +57,7 @@ module nonlin_optimize
 ! ------------------------------------------------------------------------------
     !> @brief A class describing equation optimizers that use a line search
     !! algorithm to improve convergence behavior.
-    type, abstract, extends(optimize_equation) :: line_search_optimizer
+    type, abstract, extends(equation_optimizer) :: line_search_optimizer
         private
         !> The line search object.
         class(line_search), allocatable :: m_lineSearch
