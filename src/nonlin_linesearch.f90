@@ -334,30 +334,31 @@ contains
                 exit
             else
                 ! Convergence has not yet occurred, continue backtracking
-                if (niter == 1) then
-                    ! Use the quadratic function approximation
-                    tmplam = -slope / (two * (f - fo - slope))
-                else
-                    ! Use the cubic function approximation
-                    rhs1 = f - fo - alam * slope
-                    rhs2 = f2 - fo - alam2 * slope
-                    a = (rhs1 / alam**2 - rhs2 / alam2**2) / (alam - alam2)
-                    b = (-alam2 * rhs1 / alam**2 + alam * rhs2 / alam2**2) / &
-                        (alam - alam2)
-                    if (a == zero) then
-                        tmplam = -slope / (two * b)
-                    else
-                        disc = b**2 - three * a * slope
-                        if (disc < zero) then
-                            tmplam = p5 * alam
-                        else if (b <= zero) then
-                            tmplam = (-b + sqrt(disc)) / (three * a)
-                        else
-                            tmplam = -slope / (b + sqrt(disc))
-                        end if
-                    end if
-                    if (tmplam > p5 * alam) tmplam = p5 * alam
-                end if
+                ! if (niter == 1) then
+                !     ! Use the quadratic function approximation
+                !     tmplam = -slope / (two * (f - fo - slope))
+                ! else
+                !     ! Use the cubic function approximation
+                !     rhs1 = f - fo - alam * slope
+                !     rhs2 = f2 - fo - alam2 * slope
+                !     a = (rhs1 / alam**2 - rhs2 / alam2**2) / (alam - alam2)
+                !     b = (-alam2 * rhs1 / alam**2 + alam * rhs2 / alam2**2) / &
+                !         (alam - alam2)
+                !     if (a == zero) then
+                !         tmplam = -slope / (two * b)
+                !     else
+                !         disc = b**2 - three * a * slope
+                !         if (disc < zero) then
+                !             tmplam = p5 * alam
+                !         else if (b <= zero) then
+                !             tmplam = (-b + sqrt(disc)) / (three * a)
+                !         else
+                !             tmplam = -slope / (b + sqrt(disc))
+                !         end if
+                !     end if
+                !     if (tmplam > p5 * alam) tmplam = p5 * alam
+                ! end if
+                tmplam = min_backtrack_search(niter, fo, f, f2, alam, alam2, slope)
             end if
             
             ! Set up parameters for the cubic model as we've already been 
@@ -393,5 +394,49 @@ contains
         end if
     end subroutine
 
+! ------------------------------------------------------------------------------
+    !
+    pure function min_backtrack_search(mode, f0, f, f1, alam, alam1, slope) result(lam)
+        ! Arguments
+        integer(i32), intent(in) :: mode
+        real(dp), intent(in) :: f0, f, f1, alam, alam1, slope
+        real(dp) :: lam
+
+        ! Parameters
+        real(dp), parameter :: zero = 0.0d0
+        real(dp), parameter :: p5 = 0.5d0
+        real(dp), parameter :: two = 2.0d0
+        real(dp), parameter :: three = 3.0d0
+
+        ! Local Variables
+        real(dp) :: rhs1, rhs2, a, b, disc
+
+        ! Process
+        if (mode == 1) then
+            ! Use a quadratic function approximation
+            lam = -slope / (two * (f - f0 - slope))
+        else
+            ! Use a cubic function
+            rhs1 = f - f0 - alam * slope
+            rhs2 = f1 - f0 - alam1 * slope
+            a = (rhs1 / alam**2 - rhs2 / alam1**2) / (alam - alam1)
+            b = (-alam1 * rhs1 / alam**2 + alam * rhs2 / alam1**2) / &
+                (alam - alam1)
+            if (a == zero) then
+                lam = -slope / (two * b)
+            else
+                disc = b**2 - three * a * slope
+                if (disc < zero) then
+                    lam = p5 * alam
+                else if (b <= zero) then
+                    lam = (-b + sqrt(disc)) / (three * a)
+                else
+                    lam = -slope / (b + sqrt(disc))
+                end if
+            end if
+            if (lam > p5 * alam) lam = p5 * alam
+        end if
+    end function
+    
 ! ------------------------------------------------------------------------------
 end module

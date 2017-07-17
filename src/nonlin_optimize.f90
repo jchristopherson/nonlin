@@ -625,8 +625,8 @@ contains
 
         ! Local Variables
         logical :: fcnvrg, xcnvrg, gcnvrg
-        integer(i32) :: i, n, maxeval, neval, ngrad, flag
-        real(dp) :: ftol, xtol, gtol, fp
+        integer(i32) :: i, n, maxeval, neval, ngrad, flag, iter
+        real(dp) :: ftol, xtol, gtol, fp, stpmax
         real(dp), allocatable, dimension(:) :: g, xi
         real(dp), allocatable, dimension(:,:) :: b
         class(errors), pointer :: errmgr
@@ -637,7 +637,6 @@ contains
 
         ! Initialization
         n = fcn%get_variable_count()
-        buildSimplex = .true.
         maxeval = this%get_max_fcn_evals()
         ftol = this%get_tolerance()
         iter = 0
@@ -657,7 +656,7 @@ contains
         if (present(err)) then
             errmgr => err
         else
-            errmgr
+            errmgr => deferr
         end if
         if (this%get_use_line_search()) then
             if (.not.this%is_line_search_defined()) &
@@ -686,7 +685,7 @@ contains
 
         ! Define the initial direction, and a limit on the line search step
         xi = -g
-        stpmax = factor * max(norm2(x), n)
+        stpmax = factor * max(norm2(x), real(n, dp))
 
         ! Main Loop
         flag = 0
