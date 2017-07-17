@@ -617,6 +617,148 @@ contains
         real(dp), intent(out), optional :: fout
         type(iteration_behavior), optional :: ib
         class(errors), intent(inout), optional, target :: err
+
+        ! Parameters
+        real(dp), parameter :: zero = 0.0d0
+        real(dp), parameter :: one = 1.0d0
+        real(dp), parameter :: factor = 1.0d2
+
+        ! Local Variables
+        logical :: fcnvrg, xcnvrg, gcnvrg
+        integer(i32) :: i, n, maxeval, neval, ngrad, flag
+        real(dp) :: ftol, xtol, gtol, fp
+        real(dp), allocatable, dimension(:) :: g, xi
+        real(dp), allocatable, dimension(:,:) :: b
+        class(errors), pointer :: errmgr
+        type(errors), target :: deferr
+        character(len = 256) :: errmsg
+        type(iteration_behavior) :: lib
+        class(line_search), allocatable :: ls
+
+        ! Initialization
+        n = fcn%get_variable_count()
+        buildSimplex = .true.
+        maxeval = this%get_max_fcn_evals()
+        ftol = this%get_tolerance()
+        iter = 0
+        neval = 0
+        ngrad = 0
+        fcnvrg = .false.
+        xcnvrg = .false.
+        gcnvrg = .false.
+        if (present(ib)) then
+            ib%iter_count = iter
+            ib%fcn_count = neval
+            ib%jacobian_count = 0
+            ib%converge_on_fcn = fcnvrg
+            ib%converge_on_chng = xcnvrg
+            ib%converge_on_zero_diff = gcnvrg
+        end if
+        if (present(err)) then
+            errmgr => err
+        else
+            errmgr
+        end if
+        if (this%get_use_line_search()) then
+            if (.not.this%is_line_search_defined()) &
+                call this%set_default_line_search()
+            call this%get_line_search(ls)
+        end if
+
+        ! Input Check
+
+        ! Local Memory Allocation
+        allocate(g(n), stat = flag)
+        if (flag == 0) allocate(xi(n), stat = flag)
+        if (flag == 0) allocate(b(n,n), stat = flag)
+        if (flag /= 0) then
+            ! ERROR: Memory Error
+        end if
+
+        ! Process
+        fp = fcn%fcn(x)
+        call fcn%gradient(x, g, fp)
+        neval = 1
+        ngrad = 1
+
+        ! Set the approximate Hessian matrix to an identity matrix
+        call dlaset('A', n, n, zero, one, b, n)
+
+        ! Define the initial direction, and a limit on the line search step
+        xi = -g
+        stpmax = factor * max(norm2(x), n)
+
+        ! Main Loop
+        flag = 0
+        do
+            ! Update the iteration counter
+            iter = iter + 1
+
+            ! Apply the line search, if needed
+            ! call lnsrch(n, p, fp, g, xi, pnew, fret, stpmax, check, func)
+            !
+            ! SYNTAX:
+            ! - n = # of variables
+            ! - p = n-element array of current solution estimate
+            ! - fold = function value at p
+            ! - g = gradient at p
+            ! - xi = direction vector
+            ! - pnew = [output] new point (new x)
+            ! - fret = [output] function value at pnew
+            ! - stpmax = maximum number of steps
+            ! - check = check variable (false on normal exit, true if x is too close to xold)
+            ! - func = function
+            if (this%get_use_line_search()) then
+                ! TO DO: Either create a wrapper to allow the line search code
+                ! to accept a function of one output and multiple inputs, or
+                ! add an overloaded routine to the line search class allowing
+                ! for such an input
+            else
+                ! No line search - just update the solution estimate
+            end if
+
+
+
+
+            ! Print iteration status
+            if (this%get_print_status()) then
+                ! print *, ""
+                ! print '(AI0)', "Iteration: ", iter
+                ! print '(AI0)', "Function Evaluations: ", neval
+                ! print '(AE8.3)', "Function Value: ", fval
+                ! print '(AE8.3)', "Convergence Parameter: ", rtol
+            end if
+
+            ! Ensure we haven't made too many function evaluations
+            if (neval >= maxeval) then
+                flag = 1
+                exit
+            end if
+        end do
+
+        ! Report out iteration statistics
+        if (present(ib)) then
+            ib%iter_count = iter
+            ib%fcn_count = neval
+            ib%jacobian_count = 0
+            ib%converge_on_fcn = fcnvrg
+            ib%converge_on_chng = xcnvrg
+            ib%converge_on_zero_diff = gcnvrg
+        end if
+
+        ! Get the function value at the computed minimum
+        if (present(fout)) fout = fp
+
+        ! Check for convergence issues
+        if (flag /= 0) then
+            ! write(errmsg, '(AI0AE8.3AE8.3)') &
+            !     "The algorithm failed to converge." // new_line('c') // &
+            !     "Function evaluations performed: ", neval, new_line('c') // &
+            !     "Convergence Parameter: ", rtol, new_line('c') // &
+            !     "Convergence Criteria: ", ftol
+            ! call errmgr%report_error("bfgs_solve", trim(errmsg), &
+            !     NL_CONVERGENCE_ERROR)
+        end if
     end subroutine
 
 ! ------------------------------------------------------------------------------
