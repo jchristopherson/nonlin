@@ -714,7 +714,7 @@ contains
                 ! No line search - just update the solution estimate
             end if
 
-
+            ! REF: https://en.wikipedia.org/wiki/Quasi-Newton_method
 
 
             ! Print iteration status
