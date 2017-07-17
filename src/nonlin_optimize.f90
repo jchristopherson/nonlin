@@ -626,7 +626,7 @@ contains
         ! Local Variables
         logical :: fcnvrg, xcnvrg, gcnvrg
         integer(i32) :: i, n, maxeval, neval, ngrad, flag, iter
-        real(dp) :: ftol, xtol, gtol, fp, stpmax
+        real(dp) :: ftol, xtol, gtol, fp, stpmax, fret
         real(dp), allocatable, dimension(:) :: g, xi
         real(dp), allocatable, dimension(:,:) :: b
         class(errors), pointer :: errmgr
@@ -704,14 +704,12 @@ contains
             ! - xi = direction vector
             ! - pnew = [output] new point (new x)
             ! - fret = [output] function value at pnew
-            ! - stpmax = maximum number of steps
+            ! - stpmax = maximum allowable step size
             ! - check = check variable (false on normal exit, true if x is too close to xold)
             ! - func = function
             if (this%get_use_line_search()) then
-                ! TO DO: Either create a wrapper to allow the line search code
-                ! to accept a function of one output and multiple inputs, or
-                ! add an overloaded routine to the line search class allowing
-                ! for such an input
+                call ls%search(fcn, x, g, xi, pnew, fp, fret, lib, errmgr)
+                neval = neval + lib%fcn_count
             else
                 ! No line search - just update the solution estimate
             end if
