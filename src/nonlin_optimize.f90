@@ -11,13 +11,15 @@
 !! @par Purpose
 !! To provide various optimization routines.
 module nonlin_optimize
-    use linalg_constants, only : dp, i32
+    use linalg_constants, only : dp, i32, LA_MATRIX_FORMAT_ERROR
     use ferror, only : errors
     use nonlin_types, only : fcnnvar_helper, equation_optimizer, &
         iteration_behavior, NL_OUT_OF_MEMORY_ERROR, NL_CONVERGENCE_ERROR, &
         NL_INVALID_INPUT_ERROR
     use nonlin_linesearch, only : line_search
-    use linalg_core, only : mtx_mult
+    use linalg_core, only : mtx_mult, rank1_update
+    use linalg_factor, only : cholesky_factor
+    use linalg_solve, only : solve_cholesky
     implicit none
     private
     public :: nelder_mead
@@ -622,12 +624,13 @@ contains
         ! Parameters
         real(dp), parameter :: zero = 0.0d0
         real(dp), parameter :: one = 1.0d0
+        real(dp), parameter :: negone = -1.0d0
         real(dp), parameter :: factor = 1.0d2
 
         ! Local Variables
         logical :: fcnvrg, xcnvrg, gcnvrg
         integer(i32) :: i, n, maxeval, neval, ngrad, flag, iter
-        real(dp) :: ftol, xtol, gtol, fp, stpmax, fret
+        real(dp) :: ftol, xtol, gtol, fp, stpmax, fret, a1, a2
         real(dp), allocatable, dimension(:) :: g, dx, u, y, gnew, xnew
         real(dp), allocatable, dimension(:,:) :: b
         class(errors), pointer :: errmgr
@@ -730,19 +733,33 @@ contains
 
             ! Compute the new gradient, and test for convergence
             call fcn%gradient(xnew, gnew, fp)
+            ngrad = ngrad + 1
 
             ! Compute u = B(k) * (x(k+1) - x(k)), and y = g(x(k+1)) - g(x(k))
-            call mtx_mult(.false., one, b, dx, zero, u)
+            call mtx_mult(.false., one, b, dx, zero, u) ! u = B(k) * dx
             do i = 1, n
                 y(i) = gnew(i) - g(i)
                 g(i) = gnew(i) ! Also update g
             end do
 
-            ! Compute the BFGS update: B(k+1) = B(k) + a*y*y**T - b*u*u**T
-            ! where: a = 1 / (y**T * y), and b = dx**T * u
+            ! Compute the BFGS update: B(k+1) = B(k) + a1*y*y**T + a2*u*u**T
+            ! where: a1 = 1 / (y**T * dx), and a2 = -1 / (dx**T * u)
+            a1 = one / dot_product(y, dx)
+            a2 = negone / dot_product(dx, u)
+            call sym_rank2_update(.true., b, a1, y, a2, u)
 
             ! Compute the next direction using Cholesky factorization
             ! B * dx = -g
+            call cholesky_factor(b, .true., errmgr)
+            if (errmgr%has_error_occurred()) then
+                if (errmgr%get_error_flag() == LA_MATRIX_FORMAT_ERROR) then
+                    ! ERROR: The matrix B is not positive definite
+                end if
+            end if
+
+            ! Compute the solution to: B * dx = -g
+            dx = -g
+            call solve_cholesky(.true., b, dx)
 
             ! REF: https://en.wikipedia.org/wiki/Quasi-Newton_method
 
@@ -788,7 +805,50 @@ contains
         end if
     end subroutine
 
+! ******************************************************************************
+! MISC. ROUTINES
 ! ------------------------------------------------------------------------------
+    !> @brief Computes the rank 2 operation: 
+    !! A = A + alpha * x * x**T + beta * y * y**T, where A is a symmetric 
+    !! matrix.
+    !!
+    !! @param[in] upper Set to true to operate only on the upper triangular
+    !!  portion of @p a; else, set to false to operate only on the lower
+    !!  triangular portion of @p a.
+    !! @param[in,out] a On input, the N-by-N symmetric matrix A.  On output, the
+    !!  updated matrix.  Notice, only the upper or lower portion of the matrix
+    !!  is referenced/modified dependent upon the value of @p upper.
+    !! @param[in] alpha A scalar multiplier.
+    !! @param[in] x The N-element array X.
+    !! @param[in] beta A scalar multiplier.
+    !! @param[in] y The N-element array Y.
+    subroutine sym_rank2_update(upper, a, alpha, x, beta, y)
+        ! Arguments
+        logical, intent(in) :: upper
+        real(dp), intent(inout), dimension(:,:) :: a
+        real(dp), intent(in) :: alpha, beta
+        real(dp), intent(in), dimension(:) :: x, y
+
+        ! Local Variables
+        integer(i32) :: i, j, n
+
+        ! Process
+        n = size(a, 1)
+        if (upper) then
+            do j = 1, n
+                do i = 1, j
+                    a(i,j) = a(i,j) + alpha * x(i) * x(j) + beta * y(i) * y(j)
+                end do
+            end do
+        else
+            do j = 1, n
+                do i = j, n
+                    a(i,j) = a(i,j) + alpha * x(i) * x(j) + beta * y(i) * y(j)
+                end do
+            end do
+        end if
+    end subroutine
+
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
