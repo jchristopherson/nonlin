@@ -612,6 +612,7 @@ contains
 ! BFGS MEMBERS
 ! ------------------------------------------------------------------------------
     !
+    ! REF: https://en.wikipedia.org/wiki/Quasi-Newton_method
     subroutine bfgs_solve(this, fcn, x, fout, ib, err)
         ! Arguments
         class(bfgs), intent(inout) :: this
@@ -628,9 +629,10 @@ contains
         real(dp), parameter :: factor = 1.0d2
 
         ! Local Variables
-        logical :: fcnvrg, xcnvrg, gcnvrg
+        logical :: xcnvrg, gcnvrg
         integer(i32) :: i, n, maxeval, neval, ngrad, flag, iter
-        real(dp) :: ftol, xtol, gtol, fp, stpmax, fret, a1, a2
+        real(dp) :: xtol, gtol, fp, stpmax, fret, a1, a2, xtest, gtest, &
+            temp, den
         real(dp), allocatable, dimension(:) :: g, dx, u, y, gnew, xnew
         real(dp), allocatable, dimension(:,:) :: b
         class(errors), pointer :: errmgr
@@ -642,18 +644,18 @@ contains
         ! Initialization
         n = fcn%get_variable_count()
         maxeval = this%get_max_fcn_evals()
-        ftol = this%get_tolerance()
+        gtol = this%get_tolerance()
+        xtol = epsilon(xtol) ! FIX!!!!!
         iter = 0
         neval = 0
         ngrad = 0
-        fcnvrg = .false.
         xcnvrg = .false.
         gcnvrg = .false.
         if (present(ib)) then
             ib%iter_count = iter
             ib%fcn_count = neval
             ib%jacobian_count = 0
-            ib%converge_on_fcn = fcnvrg
+            ib%converge_on_fcn = .false.
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = gcnvrg
         end if
@@ -688,7 +690,7 @@ contains
         neval = 1
         ngrad = 1
 
-        ! Set the approximate Hessian matrix to an identity matrix
+        ! Set the approximate inverse Hessian matrix to an identity matrix
         call dlaset('A', n, n, zero, one, b, n)
 
         ! Define the initial direction, and a limit on the line search step
@@ -701,20 +703,8 @@ contains
             ! Update the iteration counter
             iter = iter + 1
 
-            ! Apply the line search, if needed
-            ! call lnsrch(n, p, fp, g, xi, pnew, fret, stpmax, check, func)
-            !
-            ! SYNTAX:
-            ! - n = # of variables
-            ! - p = n-element array of current solution estimate
-            ! - fold = function value at p
-            ! - g = gradient at p
-            ! - xi = direction vector
-            ! - pnew = [output] new point (new x)
-            ! - fret = [output] function value at pnew
-            ! - stpmax = maximum allowable step size
-            ! - check = check variable (false on normal exit, true if x is too close to xold)
-            ! - func = function
+            ! Apply the line search, if needed 
+            ! TO DO: deal with stpmax???
             if (this%get_use_line_search()) then
                 call ls%search(fcn, x, g, dx, xnew, fp, fret, lib, errmgr)
                 neval = neval + lib%fcn_count
@@ -730,10 +720,30 @@ contains
             end do
 
             ! Test for convergence on the change in X
+            xtest = zero
+            do i = 1, n
+                temp = abs(dx(i)) / max(abs(x(i)), one)
+                xtest = max(temp, xtest)
+            end do
+            if (xtest < xtol) then
+                xcnvrg = .true.
+                exit
+            end if
 
             ! Compute the new gradient, and test for convergence
             call fcn%gradient(xnew, gnew, fp)
             ngrad = ngrad + 1
+            
+            gtest = zero
+            den = max(fp, one)
+            do i = 1, n
+                temp = abs(g(i)) * max(abs(x(i)), one) / den
+                gtest = max(gtest, temp)
+            end do
+            if (gtest < gtol) then
+                gcnvrg = .true.
+                exit
+            end if
 
             ! Compute u = B(k) * (x(k+1) - x(k)), and y = g(x(k+1)) - g(x(k))
             call dsymv('u', n, one, b, n, dx, 1, zero, u, 1) ! u = B(k) * dx
@@ -761,16 +771,14 @@ contains
             dx = -g
             call solve_cholesky(.true., b, dx)
 
-            ! REF: https://en.wikipedia.org/wiki/Quasi-Newton_method
-
-
             ! Print iteration status
             if (this%get_print_status()) then
-                ! print *, ""
-                ! print '(AI0)', "Iteration: ", iter
-                ! print '(AI0)', "Function Evaluations: ", neval
-                ! print '(AE8.3)', "Function Value: ", fval
-                ! print '(AE8.3)', "Convergence Parameter: ", rtol
+                print *, ""
+                print '(AI0)', "Iteration: ", iter
+                print '(AI0)', "Function Evaluations: ", neval
+                print '(AE8.3)', "Function Value: ", fp
+                print '(AE8.3)', "Change in Variable: ", xtest
+                print '(AE8.3)', "Gradient Slope: ", gtest
             end if
 
             ! Ensure we haven't made too many function evaluations
@@ -785,7 +793,7 @@ contains
             ib%iter_count = iter
             ib%fcn_count = neval
             ib%jacobian_count = 0
-            ib%converge_on_fcn = fcnvrg
+            ib%converge_on_fcn = .false.
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = gcnvrg
         end if
@@ -795,13 +803,14 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            ! write(errmsg, '(AI0AE8.3AE8.3)') &
-            !     "The algorithm failed to converge." // new_line('c') // &
-            !     "Function evaluations performed: ", neval, new_line('c') // &
-            !     "Convergence Parameter: ", rtol, new_line('c') // &
-            !     "Convergence Criteria: ", ftol
-            ! call errmgr%report_error("bfgs_solve", trim(errmsg), &
-            !     NL_CONVERGENCE_ERROR)
+            write(errmsg, '(AI0AE8.3AE8.3AE8.3)') &
+                "The algorithm failed to converge." // new_line('c') // &
+                "Function evaluations performed: ", neval, new_line('c') // &
+                "Function Value: ", fp, new_line('c') // &
+                "Change in Variable: ", xtest, new_line('c') // &
+                "Gradient: ", gtest
+            call errmgr%report_error("bfgs_solve", trim(errmsg), &
+                NL_CONVERGENCE_ERROR)
         end if
     end subroutine
 
