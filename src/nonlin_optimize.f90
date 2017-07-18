@@ -709,11 +709,14 @@ contains
                 call limit_search_vector(dx, stpmax)
                 call ls%search(fcn, x, g, dx, xnew, fp, fret, lib, errmgr)
                 neval = neval + lib%fcn_count
+                fp = fret
             else
                 ! No line search - just update the solution estimate
                 ! TO DO: Define the estimate
+                xnew = x + dx
+                fp = fcn%fcn(xnew)
+                neval = neval + 1
             end if
-            fp = fret
 
             ! Update the line direction and the current point
             do i = 1, n
