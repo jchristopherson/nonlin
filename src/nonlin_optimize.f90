@@ -17,6 +17,7 @@ module nonlin_optimize
         iteration_behavior, NL_OUT_OF_MEMORY_ERROR, NL_CONVERGENCE_ERROR, &
         NL_INVALID_INPUT_ERROR
     use nonlin_linesearch, only : line_search
+    use linalg_core, only : mtx_mult
     implicit none
     private
     public :: nelder_mead
@@ -627,7 +628,7 @@ contains
         logical :: fcnvrg, xcnvrg, gcnvrg
         integer(i32) :: i, n, maxeval, neval, ngrad, flag, iter
         real(dp) :: ftol, xtol, gtol, fp, stpmax, fret
-        real(dp), allocatable, dimension(:) :: g, xi
+        real(dp), allocatable, dimension(:) :: g, dx, u, y, gnew, xnew
         real(dp), allocatable, dimension(:,:) :: b
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
@@ -668,7 +669,11 @@ contains
 
         ! Local Memory Allocation
         allocate(g(n), stat = flag)
-        if (flag == 0) allocate(xi(n), stat = flag)
+        if (flag == 0) allocate(dx(n), stat = flag)
+        if (flag == 0) allocate(u(n), stat = flag)
+        if (flag == 0) allocate(y(n), stat = flag)
+        if (flag == 0) allocate(gnew(n), stat = flag)
+        if (flag == 0) allocate(xnew(n), stat = flag)
         if (flag == 0) allocate(b(n,n), stat = flag)
         if (flag /= 0) then
             ! ERROR: Memory Error
@@ -684,7 +689,7 @@ contains
         call dlaset('A', n, n, zero, one, b, n)
 
         ! Define the initial direction, and a limit on the line search step
-        xi = -g
+        dx = -g
         stpmax = factor * max(norm2(x), real(n, dp))
 
         ! Main Loop
@@ -708,11 +713,36 @@ contains
             ! - check = check variable (false on normal exit, true if x is too close to xold)
             ! - func = function
             if (this%get_use_line_search()) then
-                call ls%search(fcn, x, g, xi, pnew, fp, fret, lib, errmgr)
+                call ls%search(fcn, x, g, dx, xnew, fp, fret, lib, errmgr)
                 neval = neval + lib%fcn_count
             else
                 ! No line search - just update the solution estimate
             end if
+            fp = fret
+
+            ! Update the line direction and the current point
+            do i = 1, n
+                dx(i) = xnew(i) - x(i)
+                x(i) = xnew(i)
+            end do
+
+            ! Test for convergence on the change in X
+
+            ! Compute the new gradient, and test for convergence
+            call fcn%gradient(xnew, gnew, fp)
+
+            ! Compute u = B(k) * (x(k+1) - x(k)), and y = g(x(k+1)) - g(x(k))
+            call mtx_mult(.false., one, b, dx, zero, u)
+            do i = 1, n
+                y(i) = gnew(i) - g(i)
+                g(i) = gnew(i) ! Also update g
+            end do
+
+            ! Compute the BFGS update: B(k+1) = B(k) + a*y*y**T - b*u*u**T
+            ! where: a = 1 / (y**T * y), and b = dx**T * u
+
+            ! Compute the next direction using Cholesky factorization
+            ! B * dx = -g
 
             ! REF: https://en.wikipedia.org/wiki/Quasi-Newton_method
 
