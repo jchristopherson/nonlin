@@ -106,4 +106,45 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
+    subroutine test_bfgs_1()
+        ! Parameters
+        real(dp), parameter :: tol = 1.0d-6
+
+        ! Local Variables
+        type(bfgs) :: solver
+        type(fcnnvar_helper) :: obj
+        procedure(fcnnvar), pointer :: fcn
+        real(dp) :: x(2), fout, xans(2)
+        type(iteration_behavior) :: ib
+
+        ! Initialization
+        fcn => rosenbrock
+        call obj%set_fcn(fcn, 2)
+
+        ! Define an initial guess - the solution is (1, 1)
+        call random_number(x)
+
+        ! Call the solver
+        call solver%solve(obj, x, fout, ib)
+
+        ! Test
+        xans = 1.0d0
+        if (is_mtx_equal(x, xans, tol)) then
+            print '(A)', "Test Passed: BFGS - Rosenbrock Function"
+        else
+            print '(A)', "Test Failed: BFGS - Rosenbrock Function"
+            print '(AF8.5AF8.5A)', "Expected: (", xans(1), ", ", xans(2), ")"
+            print '(AF8.5AF8.5A)', "Computed: (", x(1), ", ", x(2), ")"
+        end if
+
+        ! ! Display the output
+        ! print '(AF8.5AF8.5A)', "Rosenbrock Minimum: (", x(1), ", ", x(2), ")"
+        ! print '(AE9.3)', "Function Value: ", fout
+        ! print '(AI0)', "Iterations: ", ib%iter_count
+        ! print '(AI0)', "Function Evaluations: ", ib%fcn_count
+    end subroutine
+
+! ------------------------------------------------------------------------------
+
+! ------------------------------------------------------------------------------
 end module
