@@ -18,7 +18,7 @@ module nonlin_optimize
         NL_INVALID_INPUT_ERROR
     use nonlin_linesearch, only : line_search, limit_search_vector
     use linalg_core, only : rank1_update
-    use linalg_factor, only : cholesky_factor
+    use linalg_factor, only : cholesky_rank1_update
     use linalg_solve, only : solve_cholesky
     implicit none
     private
@@ -765,12 +765,16 @@ contains
 
             ! Compute the next direction using Cholesky factorization
             ! B * dx = -g
-            call cholesky_factor(b, .true., errmgr)
-            if (errmgr%has_error_occurred()) then
-                if (errmgr%get_error_flag() == LA_MATRIX_FORMAT_ERROR) then
-                    ! ERROR: The matrix B is not positive definite
-                end if
-            end if
+            !call cholesky_factor(b, .true., errmgr)
+            y = a1 * y
+            u = a2 * u
+            call cholesky_rank1_update(b, y) ! Apply the update: B + a1*y*y**T
+            call cholesky_rank1_update(b, u) ! Apply the remaining update
+            ! if (errmgr%has_error_occurred()) then
+            !     if (errmgr%get_error_flag() == LA_MATRIX_FORMAT_ERROR) then
+            !         ! ERROR: The matrix B is not positive definite
+            !     end if
+            ! end if
 
             ! Compute the solution to: B * dx = -g
             dx = -g
@@ -783,7 +787,7 @@ contains
                 print '(AI0)', "Function Evaluations: ", neval
                 print '(AE8.3)', "Function Value: ", fp
                 print '(AE8.3)', "Change in Variable: ", xtest
-                print '(AE8.3)', "Gradient Slope: ", gtest
+                print '(AE8.3)', "Gradient: ", gtest
             end if
 
             ! Ensure we haven't made too many function evaluations
