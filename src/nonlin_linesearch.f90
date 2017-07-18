@@ -13,6 +13,7 @@ module nonlin_linesearch
     implicit none
     private
     public :: line_search
+    public :: limit_search_vector
 
 ! ******************************************************************************
 ! TYPES
@@ -630,5 +631,28 @@ contains
         end if
     end function
     
+! ------------------------------------------------------------------------------
+    !> @brief Provides a means of scaling the length of the search direction
+    !! vector.
+    !!
+    !! @param[in,out] x On input, the search direction vector.  On output, the
+    !!  search direction vector limited in length to that specified by @p lim.
+    !!  If the vector is originally shorter than the limit length, no change
+    !!  is made.
+    !! @param[in] lim The length limit value.
+    subroutine limit_search_vector(x, lim)
+        ! Arguments
+        real(dp), intent(inout), dimension(:) :: x
+        real(dp), intent(in) :: lim
+
+        ! Local Variables
+        real(dp) :: mag
+
+        ! Process
+        mag = norm2(x)
+        if (mag == 0.0d0) return
+        if (mag > lim) x = (lim / mag) * x
+    end subroutine
+
 ! ------------------------------------------------------------------------------
 end module

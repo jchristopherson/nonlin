@@ -16,7 +16,7 @@ module nonlin_optimize
     use nonlin_types, only : fcnnvar_helper, equation_optimizer, &
         iteration_behavior, NL_OUT_OF_MEMORY_ERROR, NL_CONVERGENCE_ERROR, &
         NL_INVALID_INPUT_ERROR
-    use nonlin_linesearch, only : line_search
+    use nonlin_linesearch, only : line_search, limit_search_vector
     use linalg_core, only : rank1_update
     use linalg_factor, only : cholesky_factor
     use linalg_solve, only : solve_cholesky
@@ -706,10 +706,12 @@ contains
             ! Apply the line search, if needed 
             ! TO DO: deal with stpmax???
             if (this%get_use_line_search()) then
+                call limit_search_vector(dx, stpmax)
                 call ls%search(fcn, x, g, dx, xnew, fp, fret, lib, errmgr)
                 neval = neval + lib%fcn_count
             else
                 ! No line search - just update the solution estimate
+                ! TO DO: Define the estimate
             end if
             fp = fret
 
