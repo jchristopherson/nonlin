@@ -125,6 +125,9 @@ contains
         ! Define an initial guess - the solution is (1, 1)
         call random_number(x)
 
+        ! Print iteration status
+        call solver%set_print_status(.true.)
+
         ! Call the solver
         call solver%solve(obj, x, fout, ib)
 

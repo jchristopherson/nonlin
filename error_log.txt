@@ -1,9 +1,7 @@
 
 ***** ERROR *****
-Function: nm_solve
-Error Flag: 205
+Function: cholesky_factor
+Error Flag: 104
 Message:
-The algorithm failed to converge.  Function evaluations performed: 1001
-Convergence Value: .199E+01
-Convergence Criteria: .100E-07
+The leading minor of order 2 is not positive definite.
 
