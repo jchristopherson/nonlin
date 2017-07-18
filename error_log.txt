@@ -1,7 +1,0 @@
-
-***** ERROR *****
-Function: cholesky_factor
-Error Flag: 104
-Message:
-The leading minor of order 2 is not positive definite.
-
