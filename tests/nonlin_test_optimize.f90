@@ -9,6 +9,7 @@ module nonlin_test_optimize
     private
     public :: test_nelder_mead_1
     public :: test_nelder_mead_2
+    public :: test_bfgs_1
 
 contains
 ! ******************************************************************************

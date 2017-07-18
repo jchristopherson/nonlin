@@ -27,4 +27,5 @@ program main
     call test_poly_subtract()
     call test_nelder_mead_1()
     call test_nelder_mead_2()
+    call test_bfgs_1()
 end program
