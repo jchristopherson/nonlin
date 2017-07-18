@@ -17,7 +17,7 @@ module nonlin_optimize
         iteration_behavior, NL_OUT_OF_MEMORY_ERROR, NL_CONVERGENCE_ERROR, &
         NL_INVALID_INPUT_ERROR
     use nonlin_linesearch, only : line_search
-    use linalg_core, only : mtx_mult, rank1_update
+    use linalg_core, only : rank1_update
     use linalg_factor, only : cholesky_factor
     use linalg_solve, only : solve_cholesky
     implicit none
@@ -736,7 +736,7 @@ contains
             ngrad = ngrad + 1
 
             ! Compute u = B(k) * (x(k+1) - x(k)), and y = g(x(k+1)) - g(x(k))
-            call mtx_mult(.false., one, b, dx, zero, u) ! u = B(k) * dx
+            call dsymv('u', n, one, b, n, dx, 1, zero, u, 1) ! u = B(k) * dx
             do i = 1, n
                 y(i) = gnew(i) - g(i)
                 g(i) = gnew(i) ! Also update g
