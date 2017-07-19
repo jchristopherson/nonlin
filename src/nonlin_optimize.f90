@@ -627,13 +627,13 @@ contains
         real(dp), parameter :: one = 1.0d0
         real(dp), parameter :: negone = -1.0d0
         real(dp), parameter :: factor = 1.0d2
+        real(dp), parameter :: small = 1.0d-10
 
         ! Local Variables
         logical :: xcnvrg, gcnvrg
         integer(i32) :: i, n, maxeval, neval, ngrad, flag, iter
-        real(dp) :: xtol, gtol, fp, stpmax, fret, a1, a2, xtest, gtest, &
-            temp, den
-        real(dp), allocatable, dimension(:) :: g, dx, u, y, gnew, xnew
+        real(dp) :: xtol, gtol, fp, stpmax, fret, a1, a2, xtest, gtest, temp
+        real(dp), allocatable, dimension(:) :: g, dx, u, v, gold, xnew
         real(dp), allocatable, dimension(:,:) :: b
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
@@ -676,8 +676,8 @@ contains
         allocate(g(n), stat = flag)
         if (flag == 0) allocate(dx(n), stat = flag)
         if (flag == 0) allocate(u(n), stat = flag)
-        if (flag == 0) allocate(y(n), stat = flag)
-        if (flag == 0) allocate(gnew(n), stat = flag)
+        if (flag == 0) allocate(v(n), stat = flag)
+        if (flag == 0) allocate(gold(n), stat = flag)
         if (flag == 0) allocate(xnew(n), stat = flag)
         if (flag == 0) allocate(b(n,n), stat = flag)
         if (flag /= 0) then
@@ -703,8 +703,31 @@ contains
             ! Update the iteration counter
             iter = iter + 1
 
-            ! Apply the line search, if needed 
-            ! TO DO: deal with stpmax???
+            !
+            if (iter == 1) then
+                dx = -g
+            else
+                y = g - gold
+                bdx = matmul(transpose(r), matmul(r, dx))
+                ydx = dot_product(y, dx)
+                if (ydx > small) then
+                    ! Compute the rank 1 update and downdate
+                    u = y / sqrt(ydx)
+                    v = bdx / sqrt(dot_product(dx, bdx))
+                    call cholesky_rank1_update(r, u)
+                end if ! Else just skip the update
+            end if
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            ! Apply the line search, if needed
             if (this%get_use_line_search()) then
                 call limit_search_vector(dx, stpmax)
                 call ls%search(fcn, x, g, dx, xnew, fp, fret, lib, errmgr)
@@ -736,45 +759,47 @@ contains
             end if
 
             ! Compute the new gradient, and test for convergence
-            call fcn%gradient(xnew, gnew, fp)
-            ngrad = ngrad + 1
+            ! call fcn%gradient(xnew, gnew, fp)
+            ! ngrad = ngrad + 1
             
-            gtest = zero
-            den = max(fp, one)
-            do i = 1, n
-                temp = abs(g(i)) * max(abs(x(i)), one) / den
-                gtest = max(gtest, temp)
-            end do
+            gtest = norm2(g)
             if (gtest < gtol) then
                 gcnvrg = .true.
                 exit
             end if
 
-            ! Compute u = B(k) * (x(k+1) - x(k)), and y = g(x(k+1)) - g(x(k))
-            call dsymv('u', n, one, b, n, dx, 1, zero, u, 1) ! u = B(k) * dx
+            ! Compute: B(k+1) = B(k) + a1*u*u**T + a2*v*v**T
+            ! u = g(k+1) - g(k)
+            ! v = B(k) * dx(k) = R**T * R * dx
+            ! a1 = 1 / (u**T * dx)
+            ! a2 = 1 / (dx**T * B(k) * dx(k)) = 1 / (dx**T * v)
             do i = 1, n
-                y(i) = gnew(i) - g(i)
-                g(i) = gnew(i) ! Also update g
+                u(i) = gnew(i) - g(i)
+                g(i) = gnew(i) ! Also update the gradient
             end do
 
-            ! Compute the BFGS update: B(k+1) = B(k) + a1*y*y**T + a2*u*u**T
-            ! where: a1 = 1 / (y**T * dx), and a2 = -1 / (dx**T * u)
-            a1 = one / dot_product(y, dx)
-            a2 = negone / dot_product(dx, u)
-            call sym_rank2_update(.true., b, a1, y, a2, u)
+            ! Update the Cholesky factorization of the Hessian approximation
+            ! R = sqrt((u**T * u) / (u**T * dx)) * identity(n, n)
+            a1 = one / dot_product(u, dx)
+            if (iter /= 1) then
+                temp = sqrt(a1 * dot_product(u, u))
+                b = zero
+                do i = 1, n
+                    b(i,i) = temp
+                end do
+            end if
 
-            ! Compute the next direction using Cholesky factorization
-            ! B * dx = -g
-            !call cholesky_factor(b, .true., errmgr)
-            y = a1 * y
-            u = a2 * u
-            call cholesky_rank1_update(b, y) ! Apply the update: B + a1*y*y**T
-            call cholesky_rank1_update(b, u) ! Apply the remaining update
-            ! if (errmgr%has_error_occurred()) then
-            !     if (errmgr%get_error_flag() == LA_MATRIX_FORMAT_ERROR) then
-            !         ! ERROR: The matrix B is not positive definite
-            !     end if
-            ! end if
+            !call dsymv('u', n, one, b, n, dx, 1, zero, v, 1)
+            v = matmul(transpose(b), matmul(b, dx))
+
+            a2 = negone / dot_product(dx, v)
+            call sym_rank2_update(.true., b, a1, u, a2, v)
+            
+            ! Compute the rank 1 updates the Cholesky factorization
+            u = a1 * u
+            v = a2 * v
+            call cholesky_rank1_update(b, u)
+            call cholesky_rank1_update(b, v)
 
             ! Compute the solution to: B * dx = -g
             dx = -g
