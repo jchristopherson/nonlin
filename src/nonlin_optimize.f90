@@ -17,8 +17,8 @@ module nonlin_optimize
         iteration_behavior, NL_OUT_OF_MEMORY_ERROR, NL_CONVERGENCE_ERROR, &
         NL_INVALID_INPUT_ERROR
     use nonlin_linesearch, only : line_search, limit_search_vector
-    use linalg_core, only : rank1_update
-    use linalg_factor, only : cholesky_rank1_update
+    use linalg_core, only : rank1_update, tri_mtx_mult
+    use linalg_factor, only : cholesky_rank1_update, cholesky_rank1_downdate
     use linalg_solve, only : solve_cholesky
     implicit none
     private
@@ -703,18 +703,28 @@ contains
             ! Update the iteration counter
             iter = iter + 1
 
-            !
+            ! Perform the BFGS update
             if (iter == 1) then
                 dx = -g
             else
                 y = g - gold
-                bdx = matmul(transpose(r), matmul(r, dx))
+
+                ! Use the Cholesky version of the Hessian approximation
+
+                ! Compute: B = R**T * R
+                call tri_mtx_mult(.true., one, r, zero, b)
+
+                ! Compute B * dX (B is symmetric)
+                call dsymv('u', n, one, b, n, dx, 1, zero, bdx, 1)
+
+                ! Perform the actual update
                 ydx = dot_product(y, dx)
                 if (ydx > small) then
                     ! Compute the rank 1 update and downdate
                     u = y / sqrt(ydx)
                     v = bdx / sqrt(dot_product(dx, bdx))
                     call cholesky_rank1_update(r, u)
+                    call cholesky_rank1_downdate(r, v)
                 end if ! Else just skip the update
             end if
             
