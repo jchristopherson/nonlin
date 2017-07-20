@@ -119,7 +119,7 @@ These coefficients yield a maximum residual of 0.5064.
 The following graph illustrates the fit.
 ![](images/Curve_Fit_Example_1.png?raw=true)
 
-## Example 4
+## Example 3
 This example uses the Nelder-Mead simplex method to find the minimum of the Rosenbrock function.
 ```fortran
 program example
