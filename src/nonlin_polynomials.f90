@@ -168,6 +168,59 @@ contains
     !!      was specified, or if order is too large for the data set.
     !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
     !!  - NL_ARRAY_SIZE_ERROR: Occurs if @p x and @p y are different sizes.
+    !!
+    !! @par Usage
+    !! The following code provides an example of how to fit a polynomial to a
+    !! set of data.
+    !! @code{.f90}
+    !! program example
+    !!     use linalg_constants, only : dp, i32
+    !!     use nonlin_polynomials
+    !!
+    !!     ! Local Variables
+    !!     real(dp), dimension(21) :: xp, yp, yf, yc, err
+    !!     real(dp) :: res
+    !!     type(polynomial) :: p
+    !!
+    !!     ! Data to fit
+    !!     xp = [0.0d0, 0.1d0, 0.2d0, 0.3d0, 0.4d0, 0.5d0, 0.6d0, 0.7d0, 0.8d0, &
+    !!         0.9d0, 1.0d0, 1.1d0, 1.2d0, 1.3d0, 1.4d0, 1.5d0, 1.6d0, 1.7d0, &
+    !!         1.8d0, 1.9d0, 2.0d0]
+    !!     yp = [1.216737514d0, 1.250032542d0, 1.305579195d0, 1.040182335d0, &
+    !!         1.751867738d0, 1.109716707d0, 2.018141531d0, 1.992418729d0, &
+    !!         1.807916923d0, 2.078806005d0, 2.698801324d0, 2.644662712d0, &
+    !!         3.412756702d0, 4.406137221d0, 4.567156645d0, 4.999550779d0, &
+    !!         5.652854194d0, 6.784320119d0, 8.307936836d0, 8.395126494d0, &
+    !!         10.30252404d0]
+    !!
+    !!     ! Create a copy of yp as it will be overwritten in the fit command
+    !!     yc = yp
+    !!
+    !!     ! Fit the polynomial
+    !!     call p%fit(xp, yp, 3)
+    !!
+    !!     ! Evaluate the polynomial at xp, and then determine the residual
+    !!     yf = p%evaluate(xp)
+    !!     err = abs(yf - yc)
+    !!     res = maxval(err)
+    !!
+    !!     ! Print out the coefficients
+    !!      print '(A)', "Polynomial Coefficients (c0 + c1*x + c2*x**2 + c3*x**3):"
+    !!      do i = 1, 4
+    !!          print '(AI0AF12.9)', "c", i - 1, " = ", p%get(i)
+    !!      end do
+    !!      print '(AE9.4)', "Residual: ", res
+    !! end program
+    !! @endcode
+    !! The above program returns the following results.
+    !! @code{.txt}
+    !! Polynomial Coefficients (c0 + c1*x + c2*x**2 + c3*x**3):
+    !! c0 =  1.186614186
+    !! c1 =  0.446613631
+    !! c2 = -0.122320499
+    !! c3 =  1.064762822
+    !! Residual: .5064E+00
+    !! @endcode
     subroutine polynomial_fit(this, x, y, order, err)
         ! Arguments
         class(polynomial), intent(inout) :: this
@@ -448,6 +501,56 @@ contains
     !!  - LA_OUT_OF_MEMORY_ERROR: Occurs if local memory must be allocated, and
     !!      there is insufficient memory available.
     !!  - LA_CONVERGENCE_ERROR: Occurs if the algorithm failed to converge.
+    !!
+    !! @par Usage
+    !! The following code provides an example of how to compute the roots of a
+    !! polynomial.  This examples uses a tenth order polynomial; however, this
+    !! process is applicable to any order.
+    !! @code{.f90}
+    !! program example
+    !!     use linalg_constants, only : dp, i32
+    !!     use nonlin_polynomials
+    !! 
+    !!     ! Parameters
+    !!     integer(i32), parameter :: order = 10
+    !! 
+    !!     ! Local Variables
+    !!     integer(i32) :: i
+    !!     type(polynomial) :: p
+    !!     real(dp), dimension(order+1) :: coeff
+    !!     complex(dp), allocatable, dimension(:) :: rts, sol
+    !! 
+    !!     ! Define the polynomial
+    !!     call random_number(coeff)
+    !!     call p%initialize(order)
+    !!     do i = 1, size(coeff)
+    !!         call p%set(i, coeff(i))
+    !!     end do
+    !! 
+    !!     ! Compute the roots via the polynomial routine
+    !!     rts = p%roots()
+    !! 
+    !!     ! Compute the value of the polynomial at each root and ensure it
+    !!     ! is sufficiently close to zero.
+    !!     sol = p%evaluate(rts)
+    !!     do i = 1, size(sol)
+    !!         print '(AE9.3AE9.3A)', "(", real(sol(i)), ", ", aimag(sol(i)), ")"
+    !!     end do
+    !! end program
+    !! @endcode
+    !! The above program returns the following results.
+    !! @code{.txt}
+    !! (-.466E-14, -.161E-14)
+    !! (-.466E-14, 0.161E-14)
+    !! (-.999E-15, 0.211E-14)
+    !! (-.999E-15, -.211E-14)
+    !! (0.444E-15, 0.108E-14)
+    !! (0.444E-15, -.108E-14)
+    !! (-.144E-14, -.433E-14)
+    !! (-.144E-14, 0.433E-14)
+    !! (0.644E-14, -.100E-13)
+    !! (0.644E-14, 0.100E-13)
+    !! @endcode
     function polynomial_roots(this, err) result(z)
         ! Arguments
         class(polynomial), intent(in) :: this
