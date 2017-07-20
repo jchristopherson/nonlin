@@ -15,7 +15,7 @@ module nonlin_optimize
     use ferror, only : errors
     use nonlin_types, only : fcnnvar_helper, equation_optimizer, &
         iteration_behavior, NL_OUT_OF_MEMORY_ERROR, NL_CONVERGENCE_ERROR, &
-        NL_INVALID_INPUT_ERROR
+        NL_INVALID_INPUT_ERROR, NL_INVALID_OPERATION_ERROR
     use nonlin_linesearch, only : line_search, limit_search_vector
     use linalg_core, only : rank1_update, tri_mtx_mult
     use linalg_factor, only : cholesky_rank1_update, cholesky_rank1_downdate
@@ -741,10 +741,10 @@ contains
                 NL_INVALID_OPERATION_ERROR)
             return
         end if
-        if (size(x) /= ndim) then
+        if (size(x) /= n) then
             write(errmsg, '(AI0AI0A)') &
                 "It was expected to receive a coordinate vector of length ", &
-                ndim, " , but a vector of length ", size(x), " was received."
+                n, " , but a vector of length ", size(x), " was received."
             call errmgr%report_error("bfgs_solve", trim(errmsg), &
                 NL_INVALID_INPUT_ERROR)
             return
