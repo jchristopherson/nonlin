@@ -632,9 +632,10 @@ contains
         ! Local Variables
         logical :: xcnvrg, gcnvrg
         integer(i32) :: i, n, maxeval, neval, ngrad, flag, iter
-        real(dp) :: xtol, gtol, fp, stpmax, fret, a1, a2, xtest, gtest, temp
-        real(dp), allocatable, dimension(:) :: g, dx, u, v, gold, xnew
-        real(dp), allocatable, dimension(:,:) :: b
+        real(dp) :: xtol, gtol, fp, stpmax, fret, xtest, gtest, temp, progTol, &
+            ydx
+        real(dp), allocatable, dimension(:) :: g, dx, u, v, y, gold, xnew, bdx
+        real(dp), allocatable, dimension(:,:) :: b, r
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
         character(len = 256) :: errmsg
@@ -646,6 +647,7 @@ contains
         maxeval = this%get_max_fcn_evals()
         gtol = this%get_tolerance()
         xtol = epsilon(xtol) ! FIX!!!!!
+        progTol = epsilon(progTol) ! FIX!!!!
         iter = 0
         neval = 0
         ngrad = 0
@@ -677,9 +679,12 @@ contains
         if (flag == 0) allocate(dx(n), stat = flag)
         if (flag == 0) allocate(u(n), stat = flag)
         if (flag == 0) allocate(v(n), stat = flag)
+        if (flag == 0) allocate(y(n), stat = flag)
+        if (flag == 0) allocate(bdx(n), stat = flag)
         if (flag == 0) allocate(gold(n), stat = flag)
         if (flag == 0) allocate(xnew(n), stat = flag)
         if (flag == 0) allocate(b(n,n), stat = flag)
+        if (flag == 0) allocate(r(n,n), stat = flag)
         if (flag /= 0) then
             ! ERROR: Memory Error
         end if
@@ -690,8 +695,7 @@ contains
         neval = 1
         ngrad = 1
 
-        ! Set the approximate inverse Hessian matrix to an identity matrix
-        call dlaset('A', n, n, zero, one, b, n)
+        ! Check for a "zero" gradient at the initial point
 
         ! Define the initial direction, and a limit on the line search step
         dx = -g
@@ -703,60 +707,27 @@ contains
             ! Update the iteration counter
             iter = iter + 1
 
-            ! Perform the BFGS update
-            if (iter == 1) then
-                dx = -g
-            else
-                y = g - gold
-
-                ! Use the Cholesky version of the Hessian approximation
-
-                ! Compute: B = R**T * R
-                call tri_mtx_mult(.true., one, r, zero, b)
-
-                ! Compute B * dX (B is symmetric)
-                call dsymv('u', n, one, b, n, dx, 1, zero, bdx, 1)
-
-                ! Perform the actual update
-                ydx = dot_product(y, dx)
-                if (ydx > small) then
-                    ! Compute the rank 1 update and downdate
-                    u = y / sqrt(ydx)
-                    v = bdx / sqrt(dot_product(dx, bdx))
-                    call cholesky_rank1_update(r, u)
-                    call cholesky_rank1_downdate(r, v)
-                end if ! Else just skip the update
-            end if
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            ! Apply the line search, if needed
+            ! Perform the line search
             if (this%get_use_line_search()) then
                 call limit_search_vector(dx, stpmax)
                 call ls%search(fcn, x, g, dx, xnew, fp, fret, lib, errmgr)
                 neval = neval + lib%fcn_count
                 fp = fret
             else
-                ! No line search - just update the solution estimate
-                ! TO DO: Define the estimate
                 xnew = x + dx
                 fp = fcn%fcn(xnew)
                 neval = neval + 1
             end if
 
-            ! Update the line direction and the current point
+            ! Update the gradient and line direction
             do i = 1, n
                 dx(i) = xnew(i) - x(i)
                 x(i) = xnew(i)
+                gold(i) = g(i)
             end do
-
+            call fcn%gradient(x, g, fp)
+            ngrad = ngrad + 1
+            
             ! Test for convergence on the change in X
             xtest = zero
             do i = 1, n
@@ -768,53 +739,47 @@ contains
                 exit
             end if
 
-            ! Compute the new gradient, and test for convergence
-            ! call fcn%gradient(xnew, gnew, fp)
-            ! ngrad = ngrad + 1
-            
+            ! Test for convergence on the gradient
             gtest = norm2(g)
             if (gtest < gtol) then
                 gcnvrg = .true.
                 exit
             end if
 
-            ! Compute: B(k+1) = B(k) + a1*u*u**T + a2*v*v**T
-            ! u = g(k+1) - g(k)
-            ! v = B(k) * dx(k) = R**T * R * dx
-            ! a1 = 1 / (u**T * dx)
-            ! a2 = 1 / (dx**T * B(k) * dx(k)) = 1 / (dx**T * v)
-            do i = 1, n
-                u(i) = gnew(i) - g(i)
-                g(i) = gnew(i) ! Also update the gradient
-            end do
+            ! Perform the BFGS update
+            y = g - gold
+            ydx = dot_product(y, dx)
 
-            ! Update the Cholesky factorization of the Hessian approximation
-            ! R = sqrt((u**T * u) / (u**T * dx)) * identity(n, n)
-            a1 = one / dot_product(u, dx)
-            if (iter /= 1) then
-                temp = sqrt(a1 * dot_product(u, u))
-                b = zero
-                do i = 1, n
-                    b(i,i) = temp
-                end do
+            ! Establish an initial approximation to the Hessian matrix
+            if (iter == 1) then
+                temp = sqrt(dot_product(y, y) / ydx)
+                call dlaset('A', n, n, zero, temp, r, n)
             end if
 
-            !call dsymv('u', n, one, b, n, dx, 1, zero, v, 1)
-            v = matmul(transpose(b), matmul(b, dx))
+            ! Compute: B = R**T * R
+            call tri_mtx_mult(.true., one, r, zero, b)
 
-            a2 = negone / dot_product(dx, v)
-            call sym_rank2_update(.true., b, a1, u, a2, v)
-            
-            ! Compute the rank 1 updates the Cholesky factorization
-            u = a1 * u
-            v = a2 * v
-            call cholesky_rank1_update(b, u)
-            call cholesky_rank1_update(b, v)
+            ! Compute bdx = B * dX (B is symmetric)
+            call dsymv('u', n, one, b, n, dx, 1, zero, bdx, 1)
 
-            ! Compute the solution to: B * dx = -g
+            ! Perform the actual update
+            if (ydx > small) then
+                ! Compute the rank 1 update and downdate
+                u = y / sqrt(ydx)
+                v = bdx / sqrt(dot_product(dx, bdx))
+                call cholesky_rank1_update(r, u)
+                call cholesky_rank1_downdate(r, v)
+            end if ! Else just skip the update
+
+            ! Compute the solution to: B * dx = -g = (R**T * R) * dx
             dx = -g
-            call solve_cholesky(.true., b, dx)
-
+            call solve_cholesky(.true., r, dx)
+            
+            ! Check that progress is being made
+            if (dot_product(g, dx) > -progTol) then
+                ! ERROR: Progress is no longer being made
+            end if
+            
             ! Print iteration status
             if (this%get_print_status()) then
                 print *, ""
@@ -855,50 +820,6 @@ contains
                 "Gradient: ", gtest
             call errmgr%report_error("bfgs_solve", trim(errmsg), &
                 NL_CONVERGENCE_ERROR)
-        end if
-    end subroutine
-
-! ******************************************************************************
-! MISC. ROUTINES
-! ------------------------------------------------------------------------------
-    !> @brief Computes the rank 2 operation: 
-    !! A = A + alpha * x * x**T + beta * y * y**T, where A is a symmetric 
-    !! matrix.
-    !!
-    !! @param[in] upper Set to true to operate only on the upper triangular
-    !!  portion of @p a; else, set to false to operate only on the lower
-    !!  triangular portion of @p a.
-    !! @param[in,out] a On input, the N-by-N symmetric matrix A.  On output, the
-    !!  updated matrix.  Notice, only the upper or lower portion of the matrix
-    !!  is referenced/modified dependent upon the value of @p upper.
-    !! @param[in] alpha A scalar multiplier.
-    !! @param[in] x The N-element array X.
-    !! @param[in] beta A scalar multiplier.
-    !! @param[in] y The N-element array Y.
-    subroutine sym_rank2_update(upper, a, alpha, x, beta, y)
-        ! Arguments
-        logical, intent(in) :: upper
-        real(dp), intent(inout), dimension(:,:) :: a
-        real(dp), intent(in) :: alpha, beta
-        real(dp), intent(in), dimension(:) :: x, y
-
-        ! Local Variables
-        integer(i32) :: i, j, n
-
-        ! Process
-        n = size(a, 1)
-        if (upper) then
-            do j = 1, n
-                do i = 1, j
-                    a(i,j) = a(i,j) + alpha * x(i) * x(j) + beta * y(i) * y(j)
-                end do
-            end do
-        else
-            do j = 1, n
-                do i = j, n
-                    a(i,j) = a(i,j) + alpha * x(i) * x(j) + beta * y(i) * y(j)
-                end do
-            end do
         end if
     end subroutine
 
