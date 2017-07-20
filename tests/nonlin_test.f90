@@ -5,6 +5,8 @@ program main
     ! Imported Modules
     use nonlin_test_jacobian
     use nonlin_test_solve
+    use nonlin_test_poly
+    use nonlin_test_optimize
 
     ! Introduce the testing application
     print '(A)', "Hello from the NONLIN test application."
@@ -19,4 +21,12 @@ program main
     call test_least_squares_2()
     call test_least_squares_3()
     call test_brent_1()
+    call test_poly_fit()
+    call test_poly_roots()
+    call test_poly_add()
+    call test_poly_subtract()
+    call test_nelder_mead_1()
+    call test_nelder_mead_2()
+    call test_bfgs_1()
+    call test_bfgs_2()
 end program

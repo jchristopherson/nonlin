@@ -12,15 +12,20 @@ module nonlin_types
     private
     public :: vecfcn
     public :: fcn1var
+    public :: fcnnvar
     public :: jacobianfcn
+    public :: gradientfcn
     public :: vecfcn_helper
     public :: fcn1var_helper
+    public :: fcnnvar_helper
     public :: iteration_behavior
     public :: equation_solver
     public :: equation_solver_1var
+    public :: equation_optimizer
     public :: value_pair
     public :: nonlin_solver
     public :: nonlin_solver_1var
+    public :: nonlin_optimize
     public :: print_status
     public :: NL_INVALID_INPUT_ERROR
     public :: NL_ARRAY_SIZE_ERROR
@@ -87,6 +92,28 @@ module nonlin_types
             real(dp), intent(in), dimension(:) :: x
             real(dp), intent(out), dimension(:,:) :: jac
         end subroutine
+
+        !> @brief Describes a function of N variables.
+        !!
+        !! @param[in] x An N-element array containing the independent variables.
+        !! @return The value of the function at @p x.
+        function fcnnvar(x) result(f)
+            use linalg_constants, only : dp
+            real(dp), intent(in), dimension(:) :: x
+            real(dp) :: f
+        end function
+
+        !> @brief Describes a routine capable of computing the gradient vector
+        !! of an equation of N variables.
+        !!
+        !! @param[in] x An N-element array containing the independent variables.
+        !! @param[out] g An N-element array where the gradient vector will be
+        !!  written as output.
+        subroutine gradientfcn(x, g)
+            use linalg_constants, only : dp
+            real(dp), intent(in), dimension(:) :: x
+            real(dp), intent(out), dimension(:) :: g
+        end subroutine
     end interface
 
 ! ******************************************************************************
@@ -149,6 +176,36 @@ module nonlin_types
         !> @brief Establishes a pointer to the routine containing the equations
         !! to solve.
         procedure, public :: set_fcn => f1h_set_fcn
+    end type
+
+! ------------------------------------------------------------------------------
+    !> @brief Defines a type capable of encapsulating an equation of N 
+    !! variables.
+    type fcnnvar_helper
+        private
+        !> A pointer to the target fcnnvar routine.
+        procedure(fcnnvar), pointer, nopass :: m_fcn => null()
+        !> A pointer to the gradient routine.
+        procedure(gradientfcn), pointer, nopass :: m_grad => null()
+        !> The number of variables in m_fcn
+        integer(i32) :: m_nvar = 0
+    contains
+        !> @brief Executes the routine containing the function to evaluate.
+        procedure, public :: fcn => fnh_fcn
+        !> @brief Tests if the pointer to the function has been assigned.
+        procedure, public :: is_fcn_defined => fnh_is_fcn_defined
+        !> @brief Establishes a pointer to the routine containing the function.
+        procedure, public :: set_fcn => fnh_set_fcn
+        !> @brief Gets the number of variables in this system.
+        procedure, public :: get_variable_count => fnh_get_nvar
+        !> @brief Establishes a pointer to the routine containing the gradient
+        !! vector of the function.
+        procedure, public :: set_gradient_fcn => fnh_set_grad
+        !> @brief Tests if the pointer to the routine containing the gradient 
+        !! has been assigned.
+        procedure, public :: is_gradient_defined => fnh_is_grad_defined
+        !> @brief Computes the gradient of the function.
+        procedure, public :: gradient => fnh_grad_fcn
     end type
 
 ! ------------------------------------------------------------------------------
@@ -265,6 +322,36 @@ module nonlin_types
         real(dp) :: x2
     end type
 
+! ------------------------------------------------------------------------------
+    !> @brief A base class for optimization of an equation of multiple 
+    !! variables.
+    type, abstract :: equation_optimizer
+        private
+        !> The maximum number of function evaluations allowed.
+        integer(i32) :: m_maxEval = 500
+        !> The error tolerance used to determine convergence.
+        real(dp) :: m_tol = 1.0d-12
+        !> Set to true to print iteration status; else, false.
+        logical :: m_printStatus = .false.
+    contains
+        !> @brief Gets the maximum number of function evaluations allowed.
+        procedure, public :: get_max_fcn_evals => oe_get_max_eval
+        !> @brief Sets the maximum number of function evaluations allowed.
+        procedure, public :: set_max_fcn_evals => oe_set_max_eval
+        !> @brief Gets the tolerance on convergence.
+        procedure, public :: get_tolerance => oe_get_tol
+        !> @brief Sets the tolerance on convergence.
+        procedure, public :: set_tolerance => oe_set_tol
+        !> @brief Gets a logical value determining if iteration status should be
+        !! printed.
+        procedure, public :: get_print_status => oe_get_print_status
+        !> @brief Sets a logical value determining if iteration status should be
+        !! printed.
+        procedure, public :: set_print_status => oe_set_print_status
+        !> @brief Optimizes the equation.
+        procedure(nonlin_optimize), deferred, public, pass :: solve
+    end type
+
 ! ******************************************************************************
 ! ABSTRACT ROUTINE INTERFACES
 ! ------------------------------------------------------------------------------
@@ -299,7 +386,7 @@ module nonlin_types
             real(dp), intent(inout), dimension(:) :: x
             real(dp), intent(out), dimension(:) :: fvec
             type(iteration_behavior), optional :: ib
-            class(errors), intent(in), optional, target :: err
+            class(errors), intent(inout), optional, target :: err
         end subroutine
 
         !> @brief Describes the interface of a solver for an equation of one
@@ -334,8 +421,41 @@ module nonlin_types
             type(value_pair), intent(in) :: lim
             real(dp), intent(out), optional :: f
             type(iteration_behavior), optional :: ib
-            class(errors), intent(in), optional, target :: err
+            class(errors), intent(inout), optional, target :: err
         end subroutine
+
+        !> @brief Describes the interface of a routine for optimizing an 
+        !! equation of N variables.
+        !!
+        !! @param[in,out] this The equation_optimizer-based object.
+        !! @param[in] fcn The fcnnvar_helper object containing the equation to
+        !!  optimize.
+        !! @param[in,out] x On input, the initial guess at the optimal point. 
+        !!  On output, the updated optimal point estimate.
+        !! @param[out] fout An optional output, that if provided, returns the
+        !!  value of the function at @p x.
+        !! @param[out] ib An optional output, that if provided, allows the
+        !!  caller to obtain iteration performance statistics.
+        !! @param[out] err An optional errors-based object that if provided can
+        !!  be used to retrieve information relating to any errors encountered
+        !!  during execution.  If not provided, a default implementation of the
+        !!  errors class is used internally to provide error handling.  The
+        !!  possible error codes returned will likely vary from solver to
+        !!  solver.
+        subroutine nonlin_optimize(this, fcn, x, fout, ib, err)
+            use linalg_constants, only : dp, i32
+            use ferror, only : errors
+            import equation_optimizer
+            import fcnnvar_helper
+            import iteration_behavior
+            class(equation_optimizer), intent(inout) :: this
+            class(fcnnvar_helper), intent(in) :: fcn
+            real(dp), intent(inout), dimension(:) :: x
+            real(dp), intent(out), optional :: fout
+            type(iteration_behavior), optional :: ib
+            class(errors), intent(inout), optional, target :: err
+        end subroutine
+
     end interface
 
 
@@ -616,7 +736,166 @@ contains
         procedure(fcn1var), intent(in), pointer :: fcn
         this%m_fcn => fcn
     end subroutine
-    
+
+! ******************************************************************************
+! FCNNVAR_HELPER MEMBERS
+! ------------------------------------------------------------------------------
+    !> @brief Executes the routine containing the function to evaluate.
+    !!
+    !! @param[in] this The fcnnvar_helper object.
+    !! @param[in] x The value of the independent variable at which the function
+    !!  should be evaluated.
+    !! @return The value of the function at @p x.
+    function fnh_fcn(this, x) result(f)
+        class(fcnnvar_helper), intent(in) :: this
+        real(dp), intent(in), dimension(:) :: x
+        real(dp) :: f
+        if (associated(this%m_fcn)) then
+            f = this%m_fcn(x)
+        end if
+    end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Tests if the pointer to the function containing the equation to 
+    !! solve has been assigned.
+    !!
+    !! @param[in] this The fcnnvar_helper object.
+    !! @return Returns true if the pointer has been assigned; else, false.
+    pure function fnh_is_fcn_defined(this) result(x)
+        class(fcnnvar_helper), intent(in) :: this
+        logical :: x
+        x = associated(this%m_fcn)
+    end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Establishes a pointer to the routine containing the equations to 
+    !! solve.
+    !! 
+    !! @param[in,out] this The fcnnvar_helper object.
+    !! @param[in] fcn The function pointer.
+    !! @param[in] nvar The number of variables in the function.
+    subroutine fnh_set_fcn(this, fcn, nvar)
+        class(fcnnvar_helper), intent(inout) :: this
+        procedure(fcnnvar), intent(in), pointer :: fcn
+        integer(i32), intent(in) :: nvar
+        this%m_fcn => fcn
+        this%m_nvar = nvar
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Gets the number of variables in this system.
+    !!
+    !! @param[in] this The fcnnvar_helper object.
+    !! @return The number of variables.
+    pure function fnh_get_nvar(this) result(n)
+        class(fcnnvar_helper), intent(in) :: this
+        integer(i32) :: n
+        n = this%m_nvar
+    end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Establishes a pointer to the routine containing the gradient
+    !! vector of the function.
+    !!
+    !! @param[in,out] this The fcnnvar_helper object.
+    !! @param[in] fcn The pointer to the gradient routine.
+    subroutine fnh_set_grad(this, fcn)
+        class(fcnnvar_helper), intent(inout) :: this
+        procedure(gradientfcn), pointer, intent(in) :: fcn
+        this%m_grad => fcn
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Tests if the pointer to the routine containing the gradient has
+    !! been assigned.
+    !!
+    !! @param[in] this The fcnnvar_helper object.
+    !! @return Returns true if the pointer has been assigned; else, false.
+    pure function fnh_is_grad_defined(this) result(x)
+        class(fcnnvar_helper), intent(in) :: this
+        logical :: x
+        x = associated(this%m_grad)
+    end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Executes the routine containing the gradient, if supplied.  If not
+    !! supplied, the gradient is computed via finite differences.
+    !!
+    !! @param[in] this The fcnnvar_helper object.
+    !! @param[in,out] x An N-element array containing the independent variables
+    !!  defining the point about which the derivatives will be calculated.  This
+    !!  array is restored upon output.
+    !! @param[out] g An N-element array where the gradient will be written upon
+    !!  output.
+    !! @param[in] fv An optional input providing the function value at @p x.
+    !! @param[out] err An optional integer output that can be used to determine
+    !!  error status.  If not used, and an error is encountered, the routine
+    !!  simply returns silently.  If used, the following error codes identify
+    !!  error status:
+    !!  - 0: No error has occurred.
+    !!  - n: A positive integer denoting the index of an invalid input.
+    subroutine fnh_grad_fcn(this, x, g, fv, err)
+        ! Arguments
+        class(fcnnvar_helper), intent(in) :: this
+        real(dp), intent(inout), dimension(:) :: x
+        real(dp), intent(out), dimension(:) :: g
+        real(dp), intent(in), optional :: fv
+        integer(i32), intent(out), optional :: err
+
+        ! Parameters
+        real(dp), parameter :: zero = 0.0d0
+
+        ! Local Variables
+        integer(i32) :: j, n, flag
+        real(dp) :: eps, epsmch, h, temp, f, f1
+
+        ! Initialization
+        if (present(err)) err = 0
+        n = this%m_nvar
+
+        ! Input Checking
+        flag = 0
+        if (size(x) /= n) then
+            flag = 2
+        else if (size(g) /= n) then
+            flag = 3
+        end if
+        if (flag /= 0) then
+            ! ERROR: Incorrectly sized input arrays
+            if (present(err)) err = flag
+            return
+        end if
+
+        ! Process
+        if (.not.this%is_fcn_defined()) return
+        if (this%is_gradient_defined()) then
+            ! Call the user-defined gradient routine
+            call this%m_grad(x, g)
+        else
+            ! Compute the gradient via finite differences
+            if (present(fv)) then
+                f = fv
+            else
+                f = this%fcn(x)
+            end if
+
+            ! Establish step size factors
+            epsmch = epsilon(epsmch)
+            eps = sqrt(epsmch)
+
+            ! Compute the derivatives
+            do j = 1, n
+                temp = x(j)
+                h = eps * abs(temp)
+                if (h == zero) h = eps
+                x(j) = temp + h
+                f1 = this%fcn(x)
+                x(j) = temp
+                g(j) = (f1 - f) / h
+            end do
+        end if
+    end subroutine
+
 ! ******************************************************************************
 ! EQUATION_SOLVER MEMBERS
 ! ------------------------------------------------------------------------------
@@ -827,6 +1106,75 @@ contains
         this%m_printStatus = x
     end subroutine
 
+! ******************************************************************************
+! EQUATION_OPTIMIZER MEMBERS
+! ------------------------------------------------------------------------------
+    !> @brief Gets the maximum number of function evaluations allowed.
+    !!
+    !! @param[in] this The equation_optimizer object.
+    !! @return The maximum number of function evaluations.
+    pure function oe_get_max_eval(this) result(n)
+        class(equation_optimizer), intent(in) :: this
+        integer(i32) :: n
+        n = this%m_maxEval
+    end function
+
+! --------------------
+    !> @brief Sets the maximum number of function evaluations allowed.
+    !!
+    !! @param[in,out] this The equation_optimizer object.
+    !! @param[in] n The maximum number of function evaluations.
+    subroutine oe_set_max_eval(this, n)
+        class(equation_optimizer), intent(inout) :: this
+        integer(i32), intent(in) :: n
+        this%m_maxEval = n
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Gets the tolerance on convergence.
+    !!
+    !! @param[in] this The equation_optimizer object.
+    !! @return The convergence tolerance.
+    pure function oe_get_tol(this) result(x)
+        class(equation_optimizer), intent(in) :: this
+        real(dp) :: x
+        x = this%m_tol
+    end function
+
+! --------------------
+    !> @brief Sets the tolerance on convergence.
+    !!
+    !! @param[in,out] this The equation_optimizer object.
+    !! @param[in] x The convergence tolerance.
+    subroutine oe_set_tol(this, x)
+        class(equation_optimizer), intent(inout) :: this
+        real(dp), intent(in) :: x
+        this%m_tol = x
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Gets a logical value determining if iteration status should be
+    !! printed.
+    !!
+    !! @param[in] this The equation_optimizer object.
+    !! @return True if the iteration status should be printed; else, false.
+    pure function oe_get_print_status(this) result(x)
+        class(equation_optimizer), intent(in) :: this
+        logical :: x
+        x = this%m_printStatus
+    end function
+
+! --------------------
+    !> @brief Sets a logical value determining if iteration status should be
+    !! printed.
+    !!
+    !! @param[in,out] this The equation_optimizer object.
+    !! @param[in] x True if the iteration status should be printed; else, false.
+    subroutine oe_set_print_status(this, x)
+        class(equation_optimizer), intent(inout) :: this
+        logical, intent(in) :: x
+        this%m_printStatus = x
+    end subroutine
 
 ! ******************************************************************************
 ! MISC. ROUTINES
