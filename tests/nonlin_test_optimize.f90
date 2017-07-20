@@ -132,9 +132,9 @@ contains
         ! Test
         xans = 1.0d0
         if (is_mtx_equal(x, xans, tol)) then
-            print '(A)', "Test Passed: BFGS - Rosenbrock Function"
+            print '(A)', "Test Passed: BFGS Test - Rosenbrock Function"
         else
-            print '(A)', "Test Failed: BFGS - Rosenbrock Function"
+            print '(A)', "Test Failed: BFGS Test - Rosenbrock Function"
             print '(AF8.5AF8.5A)', "Expected: (", xans(1), ", ", xans(2), ")"
             print '(AF8.5AF8.5A)', "Computed: (", x(1), ", ", x(2), ")"
         end if
