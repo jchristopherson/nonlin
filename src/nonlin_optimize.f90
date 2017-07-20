@@ -672,6 +672,55 @@ contains
     !!  - NL_CONVERGENCE_ERROR: Occurs if the algorithm cannot converge within
     !!      the allowed number of iterations.
     !!
+    !! @par Usage
+    !! The following example illustrates how to find the minimum of Rosenbrock's
+    !! function using this BFGS solver.
+    !! @code{.f90}
+    !! program example
+    !!     use linalg_constants, only : dp, i32
+    !!     use nonlin_optimize, only : bfgs
+    !!     use nonlin_types, only : fcnnvar, fcnnvar_helper, iteration_behavior
+    !!     implicit none
+    !!
+    !!     ! Local Variables
+    !!     type(bfgs) :: solver
+    !!     type(fcnnvar_helper) :: obj
+    !!     procedure(fcnnvar), pointer :: fcn
+    !!     real(dp) :: x(2), fout
+    !!     type(iteration_behavior) :: ib
+    !!
+    !!     ! Initialization
+    !!     fcn => rosenbrock
+    !!     call obj%set_fcn(fcn, 2)
+    !!
+    !!     ! Define an initial guess - the solution is (1, 1)
+    !!     call random_number(x)
+    !!
+    !!     ! Call the solver
+    !!     call solver%solve(obj, x, fout, ib)
+    !!
+    !!     ! Display the output
+    !!     print '(AF8.5AF8.5A)', "Rosenbrock Minimum: (", x(1), ", ", x(2), ")"
+    !!     print '(AE9.3)', "Function Value: ", fout
+    !!     print '(AI0)', "Iterations: ", ib%iter_count
+    !!     print '(AI0)', "Function Evaluations: ", ib%fcn_count
+    !! contains
+    !!     ! Rosenbrock's Function
+    !!     function rosenbrock(x) result(f)
+    !!         real(dp), intent(in), dimension(:) :: x
+    !!         real(dp) :: f
+    !!         f = 1.0d2 * (x(2) - x(1)**2)**2 + (x(1) - 1.0d0)**2
+    !!     end function
+    !! end
+    !! @endcode
+    !! The above program yields the following output:
+    !! @code{.txt}
+    !! Rosenbrock Minimum: ( 1.00000,  0.99999)
+    !! Function Value: 0.200E-10
+    !! Iterations: 47
+    !! Function Evaluations: 70
+    !! @endcode
+    !!
     !! @par See Also
     !! - [Wikipedia - BFGS Methods](https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%93Goldfarb%E2%80%93Shanno_algorithm)
     !! - [Wikipedia - Quasi-Newton Methods](https://en.wikipedia.org/wiki/Quasi-Newton_method)
