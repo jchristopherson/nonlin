@@ -8,7 +8,7 @@
 module nonlin_solve
     use linalg_constants, only : dp, i32
     use nonlin_types
-    use nonlin_linesearch, only : line_search
+    use nonlin_linesearch, only : line_search, limit_search_vector
     use ferror, only : errors
     use linalg_factor, only : qr_factor, form_qr, qr_rank1_update, lu_factor
     use linalg_core, only : rank1_update, mtx_mult, recip_mult_array
@@ -455,6 +455,7 @@ contains
                     if (temp > stpmax) df(1:nvar) = df(1:nvar) * (stpmax / temp)
 
                     ! Apply the line search
+                    call limit_search_vector(df(1:nvar), stpmax)
                     call ls%search(fcn, xold, dx, df(1:nvar), x, fvec, fold, &
                         f, lib, errmgr)
                     neval = neval + lib%fcn_count
@@ -825,6 +826,7 @@ contains
                     if (temp > stpmax) dir = dir * (stpmax / temp)
 
                     ! Apply the line search
+                    call limit_search_vector(dir, stpmax)
                     call ls%search(fcn, xold, grad, dir, x, fvec, &
                         fold, f, lib, errmgr)
                     neval = neval + lib%fcn_count
