@@ -67,6 +67,8 @@ module nonlin_optimize
         !> Set to true if a line search should be used regardless of the status
         !! of m_lineSearch
         logical :: m_useLineSearch = .true.
+        !> The convergence criteria on change in variable
+        real(dp) :: m_xtol = 1.0d-12
     contains
         !> @brief Gets the line search module.
         procedure, public :: get_line_search => lso_get_line_search
@@ -82,6 +84,10 @@ module nonlin_optimize
         procedure, public :: get_use_line_search => lso_get_use_search
         !> @brief Sets a value determining if a line-search should be employed.
         procedure, public :: set_use_line_search => lso_set_use_search
+        !> @brief Gets the convergence on change in variable tolerance.
+        procedure, public :: get_var_tolerance => lso_get_var_tol
+        !> @brief Sets the convergence on change in variable tolerance.
+        procedure, public :: set_var_tolerance => lso_set_var_tol
     end type
 
 ! ------------------------------------------------------------------------------
@@ -114,6 +120,7 @@ contains
     !!  execution.  If not provided, a default implementation of the errors
     !!  class is used internally to provide error handling.  Possible errors and
     !!  warning messages that may be encountered are as follows.
+    !!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
     !!  - NL_INVALID_INPUT_ERROR: Occurs if @p x is not appropriately sized for
     !!      the problem as defined in @p fcn.
     !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
@@ -234,6 +241,13 @@ contains
         end if
 
         ! Input Check
+        if (.not.fcn%is_fcn_defined()) then
+            ! ERROR: No function is defined
+            call errmgr%report_error("nm_solve", &
+                "No function has been defined.", &
+                NL_INVALID_OPERATION_ERROR)
+            return
+        end if
         if (size(x) /= ndim) then
             write(errmsg, '(AI0AI0A)') &
                 "It was expected to receive a coordinate vector of length ", &
@@ -608,11 +622,60 @@ contains
         this%m_useLineSearch = x
     end subroutine
 
+! ------------------------------------------------------------------------------
+    !> @brief Gets the convergence on change in variable tolerance.
+    !!
+    !! @param[in] this The line_search_optimizer object.
+    !! @return The tolerance value.
+    pure function lso_get_var_tol(this) result(x)
+        class(line_search_optimizer), intent(in) :: this
+        real(dp) :: x
+        x = this%m_xtol
+    end function
+
+! --------------------
+    !> @brief Sets the convergence on change in variable tolerance.
+    !!
+    !! @param[in,out] this The line_search_optimizer object.
+    !! @param[in] x The tolerance value.
+    subroutine lso_set_var_tol(this, x)
+        class(line_search_optimizer), intent(inout) :: this
+        real(dp), intent(in) :: x
+        this%m_xtol = x
+    end subroutine
+
 ! ******************************************************************************
 ! BFGS MEMBERS
 ! ------------------------------------------------------------------------------
-    !
-    ! REF: https://en.wikipedia.org/wiki/Quasi-Newton_method
+    !> @brief Utilizes the Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm
+    !! for finding a minimum value of the specified function.
+    !!
+    !! @param[in,out] this The bfgs_mead object.
+    !! @param[in] fcn The fcnnvar_helper object containing the equation to
+    !!  optimize.
+    !! @param[in,out] x On input, the initial guess at the optimal point.
+    !!  On output, the updated optimal point estimate.
+    !! @param[out] fout An optional output, that if provided, returns the
+    !!  value of the function at @p x.
+    !! @param[out] ib An optional output, that if provided, allows the
+    !!  caller to obtain iteration performance statistics.
+    !! @param[out] err An optional errors-based object that if provided can be
+    !!  used to retrieve information relating to any errors encountered during
+    !!  execution.  If not provided, a default implementation of the errors
+    !!  class is used internally to provide error handling.  Possible errors and
+    !!  warning messages that may be encountered are as follows.
+    !!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+    !!  - NL_INVALID_INPUT_ERROR: Occurs if @p x is not appropriately sized for
+    !!      the problem as defined in @p fcn.
+    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+    !!      available.
+    !!  - NL_CONVERGENCE_ERROR: Occurs if the algorithm cannot converge within
+    !!      the allowed number of iterations.
+    !!
+    !! @par See Also
+    !! - [Wikipedia - BFGS Methods](https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%93Goldfarb%E2%80%93Shanno_algorithm)
+    !! - [Wikipedia - Quasi-Newton Methods](https://en.wikipedia.org/wiki/Quasi-Newton_method)
+    !! - [minFunc](https://www.cs.ubc.ca/~schmidtm/Software/minFunc.html)
     subroutine bfgs_solve(this, fcn, x, fout, ib, err)
         ! Arguments
         class(bfgs), intent(inout) :: this
@@ -632,8 +695,7 @@ contains
         ! Local Variables
         logical :: xcnvrg, gcnvrg
         integer(i32) :: i, n, maxeval, neval, ngrad, flag, iter
-        real(dp) :: xtol, gtol, fp, stpmax, fret, xtest, gtest, temp, progTol, &
-            ydx
+        real(dp) :: xtol, gtol, fp, stpmax, fret, xtest, gtest, temp, ydx
         real(dp), allocatable, dimension(:) :: g, dx, u, v, y, gold, xnew, bdx
         real(dp), allocatable, dimension(:,:) :: b, r
         class(errors), pointer :: errmgr
@@ -646,8 +708,7 @@ contains
         n = fcn%get_variable_count()
         maxeval = this%get_max_fcn_evals()
         gtol = this%get_tolerance()
-        xtol = epsilon(xtol) ! FIX!!!!!
-        progTol = epsilon(progTol) ! FIX!!!!
+        xtol = this%m_xtol
         iter = 0
         neval = 0
         ngrad = 0
@@ -673,6 +734,21 @@ contains
         end if
 
         ! Input Check
+        if (.not.fcn%is_fcn_defined()) then
+            ! ERROR: No function is defined
+            call errmgr%report_error("bfgs_solve", &
+                "No function has been defined.", &
+                NL_INVALID_OPERATION_ERROR)
+            return
+        end if
+        if (size(x) /= ndim) then
+            write(errmsg, '(AI0AI0A)') &
+                "It was expected to receive a coordinate vector of length ", &
+                ndim, " , but a vector of length ", size(x), " was received."
+            call errmgr%report_error("bfgs_solve", trim(errmsg), &
+                NL_INVALID_INPUT_ERROR)
+            return
+        end if
 
         ! Local Memory Allocation
         allocate(g(n), stat = flag)
@@ -687,6 +763,9 @@ contains
         if (flag == 0) allocate(r(n,n), stat = flag)
         if (flag /= 0) then
             ! ERROR: Memory Error
+            call errmgr%report_error("bfgs_solve", &
+                "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
+            return
         end if
 
         ! Process
@@ -696,106 +775,110 @@ contains
         ngrad = 1
 
         ! Check for a "zero" gradient at the initial point
-
-        ! Define the initial direction, and a limit on the line search step
-        dx = -g
-        stpmax = factor * max(norm2(x), real(n, dp))
+        gtest = norm2(g)
+        if (gtest < gtol) then
+            gcnvrg = .true.
+        end if
 
         ! Main Loop
         flag = 0
-        do
-            ! Update the iteration counter
-            iter = iter + 1
+        if (.not.gcnvrg) then
+            do
+                ! Update the iteration counter
+                iter = iter + 1
 
-            ! Perform the line search
-            if (this%get_use_line_search()) then
-                call limit_search_vector(dx, stpmax)
-                call ls%search(fcn, x, g, dx, xnew, fp, fret, lib, errmgr)
-                neval = neval + lib%fcn_count
-                fp = fret
-            else
-                xnew = x + dx
-                fp = fcn%fcn(xnew)
-                neval = neval + 1
-            end if
+                ! Define the initial direction, and a limit on the line search 
+                ! step
+                if (iter == 1) then
+                    dx = -g
+                    stpmax = factor * max(norm2(x), real(n, dp))
+                end if
 
-            ! Update the gradient and line direction
-            do i = 1, n
-                dx(i) = xnew(i) - x(i)
-                x(i) = xnew(i)
-                gold(i) = g(i)
+                ! Perform the line search
+                if (this%get_use_line_search()) then
+                    call limit_search_vector(dx, stpmax)
+                    call ls%search(fcn, x, g, dx, xnew, fp, fret, lib, errmgr)
+                    neval = neval + lib%fcn_count
+                    fp = fret
+                else
+                    xnew = x + dx
+                    fp = fcn%fcn(xnew)
+                    neval = neval + 1
+                end if
+
+                ! Update the gradient and line direction
+                do i = 1, n
+                    dx(i) = xnew(i) - x(i)
+                    x(i) = xnew(i)
+                    gold(i) = g(i)
+                end do
+                call fcn%gradient(x, g, fp)
+                ngrad = ngrad + 1
+                
+                ! Test for convergence on the change in X
+                xtest = zero
+                do i = 1, n
+                    temp = abs(dx(i)) / max(abs(x(i)), one)
+                    xtest = max(temp, xtest)
+                end do
+                if (xtest < xtol) then
+                    xcnvrg = .true.
+                    exit
+                end if
+
+                ! Test for convergence on the gradient
+                gtest = norm2(g)
+                if (gtest < gtol) then
+                    gcnvrg = .true.
+                    exit
+                end if
+
+                ! Perform the BFGS update
+                y = g - gold
+                ydx = dot_product(y, dx)
+
+                ! Establish an initial approximation to the Hessian matrix
+                if (iter == 1) then
+                    temp = sqrt(dot_product(y, y) / ydx)
+                    call dlaset('A', n, n, zero, temp, r, n)
+                end if
+
+                ! Compute: B = R**T * R
+                call tri_mtx_mult(.true., one, r, zero, b)
+
+                ! Compute bdx = B * dX (B is symmetric)
+                call dsymv('u', n, one, b, n, dx, 1, zero, bdx, 1)
+
+                ! Perform the actual update
+                if (ydx > small) then
+                    ! Compute the rank 1 update and downdate
+                    u = y / sqrt(ydx)
+                    v = bdx / sqrt(dot_product(dx, bdx))
+                    call cholesky_rank1_update(r, u)
+                    call cholesky_rank1_downdate(r, v)
+                end if ! Else just skip the update
+
+                ! Compute the solution to: B * dx = -g = (R**T * R) * dx
+                dx = -g
+                call solve_cholesky(.true., r, dx)
+                
+                ! Print iteration status
+                if (this%get_print_status()) then
+                    print *, ""
+                    print '(AI0)', "Iteration: ", iter
+                    print '(AI0)', "Function Evaluations: ", neval
+                    print '(AE8.3)', "Function Value: ", fp
+                    print '(AE8.3)', "Change in Variable: ", xtest
+                    print '(AE8.3)', "Gradient: ", gtest
+                end if
+
+                ! Ensure we haven't made too many function evaluations
+                if (neval >= maxeval) then
+                    flag = 1
+                    exit
+                end if
             end do
-            call fcn%gradient(x, g, fp)
-            ngrad = ngrad + 1
-            
-            ! Test for convergence on the change in X
-            xtest = zero
-            do i = 1, n
-                temp = abs(dx(i)) / max(abs(x(i)), one)
-                xtest = max(temp, xtest)
-            end do
-            if (xtest < xtol) then
-                xcnvrg = .true.
-                exit
-            end if
-
-            ! Test for convergence on the gradient
-            gtest = norm2(g)
-            if (gtest < gtol) then
-                gcnvrg = .true.
-                exit
-            end if
-
-            ! Perform the BFGS update
-            y = g - gold
-            ydx = dot_product(y, dx)
-
-            ! Establish an initial approximation to the Hessian matrix
-            if (iter == 1) then
-                temp = sqrt(dot_product(y, y) / ydx)
-                call dlaset('A', n, n, zero, temp, r, n)
-            end if
-
-            ! Compute: B = R**T * R
-            call tri_mtx_mult(.true., one, r, zero, b)
-
-            ! Compute bdx = B * dX (B is symmetric)
-            call dsymv('u', n, one, b, n, dx, 1, zero, bdx, 1)
-
-            ! Perform the actual update
-            if (ydx > small) then
-                ! Compute the rank 1 update and downdate
-                u = y / sqrt(ydx)
-                v = bdx / sqrt(dot_product(dx, bdx))
-                call cholesky_rank1_update(r, u)
-                call cholesky_rank1_downdate(r, v)
-            end if ! Else just skip the update
-
-            ! Compute the solution to: B * dx = -g = (R**T * R) * dx
-            dx = -g
-            call solve_cholesky(.true., r, dx)
-            
-            ! Check that progress is being made
-            if (dot_product(g, dx) > -progTol) then
-                ! ERROR: Progress is no longer being made
-            end if
-            
-            ! Print iteration status
-            if (this%get_print_status()) then
-                print *, ""
-                print '(AI0)', "Iteration: ", iter
-                print '(AI0)', "Function Evaluations: ", neval
-                print '(AE8.3)', "Function Value: ", fp
-                print '(AE8.3)', "Change in Variable: ", xtest
-                print '(AE8.3)', "Gradient: ", gtest
-            end if
-
-            ! Ensure we haven't made too many function evaluations
-            if (neval >= maxeval) then
-                flag = 1
-                exit
-            end if
-        end do
+        end if
 
         ! Report out iteration statistics
         if (present(ib)) then
