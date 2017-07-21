@@ -582,12 +582,12 @@ contains
     !!
     !! @param[in] this The polynomial.
     !! @param[in] ind The polynomial coefficient index (0 < ind <= order + 1).
-    !! @param[out] info An output that returns information regarding
-    !! any erroneous behavior that occurred during execution of the function.
-    !! If not used, and an error occurs, the error information will be provided
-    !! via printed output.  Possible error codes are as follows:
-    !! - NO_ERROR: No error encountered.
-    !! - INVALID_INPUT_ERROR: Occurs if the requested index is less than or
+    !! @param[out] err An optional errors-based object that if provided can be
+    !!  used to retrieve information relating to any errors encountered during
+    !!  execution.  If not provided, a default implementation of the errors
+    !!  class is used internally to provide error handling.  Possible errors and
+    !!  warning messages that may be encountered are as follows.
+    !! - NL_INVALID_INPUT_ERROR: Occurs if the requested index is less than or
     !!      equal to zero, or if the requested index exceeds the number of
     !!      polynomial coefficients.
     !!
@@ -653,11 +653,11 @@ contains
     !! @param[in,out] this The polynomial.
     !! @param[in] ind The polynomial coefficient index (0 < ind <= order + 1).
     !! @param[in] c The polynomial coefficient.
-    !! @param[out] info An output that returns information regarding
-    !! any erroneous behavior that occurred during execution of the function.
-    !! If not used, and an error occurs, the error information will be provided
-    !! via printed output.  Possible error codes are as follows:
-    !! - NO_ERROR: No error encountered.
+    !! @param[out] err An optional errors-based object that if provided can be
+    !!  used to retrieve information relating to any errors encountered during
+    !!  execution.  If not provided, a default implementation of the errors
+    !!  class is used internally to provide error handling.  Possible errors and
+    !!  warning messages that may be encountered are as follows.
     !! - INVALID_INPUT_ERROR: Occurs if the requested index is less than or
     !!      equal to zero, or if the requested index exceeds the number of
     !!      polynomial coefficients.
