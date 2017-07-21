@@ -4,7 +4,7 @@
 
 #include <stdbool.h>
 #include <complex.h>
-#include "external/linalg/ferror/include/ferror.h"
+#include "ferror.h"
 
 /** An error flag denoting an invalid input. */
 #define NL_INVALID_INPUT_ERROR = 201
@@ -200,7 +200,7 @@ void solve_quasi_newton(vecfcn fcn, jacobianfcn jac, int n, double *x,
                         line_search_control *lsearch,
                         iteration_behavior *ib, errorhandler err);
 
-/** @brief Applies Newton's method in conjunction with a backtracking type 
+/** @brief Applies Newton's method in conjunction with a backtracking type
  * line search to solve N equations of N unknowns.
  *
  * @param fcn A pointer to the routine containing the system of
@@ -325,7 +325,7 @@ int get_polynomial_order(const polynomial poly);
  *  - NL_ARRAY_SIZE_ERROR: Occurs if @p x and @p y are different sizes.
  * @return A pointer to the newly created polynomial object.
  */
-polynomial fit_polynomial(int n, const double *x, double *y, int order, 
+polynomial fit_polynomial(int n, const double *x, double *y, int order,
                           errorhandler err);
 
 /** @brief Fits a polynomial of the specified order that passes through zero
@@ -347,31 +347,31 @@ polynomial fit_polynomial(int n, const double *x, double *y, int order,
  *  - NL_ARRAY_SIZE_ERROR: Occurs if @p x and @p y are different sizes.
  * @return A pointer to the newly created polynomial object.
  */
-polynomial fit_polynomial_thru_zero(int n, const double *x, double *y, 
+polynomial fit_polynomial_thru_zero(int n, const double *x, double *y,
                                     int order, errorhandler err);
 
 /** @brief Evaluates a polynomial at the specified points.
  *
  * @param poly A pointer to the polynomial object.
  * @param n The number of points to evaluate.
- * @param x An N-element array containing the points at which to 
+ * @param x An N-element array containing the points at which to
  *  evaluate the polynomial.
- * @param y An N-element array where the resulting polynomial outputs 
+ * @param y An N-element array where the resulting polynomial outputs
  *  will be written.
  */
-void evaluate_polynomial(const polynomial poly, int n, const double *x, 
+void evaluate_polynomial(const polynomial poly, int n, const double *x,
                          double *y);
 
 /** @brief Evaluates a polynomial at the specified points.
  *
  * @param poly A pointer to the polynomial object.
  * @param n The number of points to evaluate.
- * @param x An N-element array containing the points at which to 
+ * @param x An N-element array containing the points at which to
  *  evaluate the polynomial.
- * @param y An N-element array where the resulting polynomial outputs 
+ * @param y An N-element array where the resulting polynomial outputs
  *  will be written.
  */
-void evaluate_polynomial_cmplx(const polynomial poly, int n, 
+void evaluate_polynomial_cmplx(const polynomial poly, int n,
                                const double complex *x, double complex *y);
 
 /** @brief Computes all the roots of a polynomial by computing the
@@ -407,7 +407,7 @@ void polynomial_roots(const polynomial poly, int n, double complex *rts,
  *      equal to zero, or if the requested index exceeds the number of
  *      polynomial coefficients.
  */
-double get_polynomial_coefficient(const polynomial poly, int ind, 
+double get_polynomial_coefficient(const polynomial poly, int ind,
                                   errorhandler err);
 
 /** @brief Sets the requested polynomial coefficient by index.  The
@@ -425,7 +425,7 @@ double get_polynomial_coefficient(const polynomial poly, int ind,
  *      equal to zero, or if the requested index exceeds the number of
  *      polynomial coefficients.
  */
-void set_polynomial_coefficient(polynomial poly, int ind, double x, 
+void set_polynomial_coefficient(polynomial poly, int ind, double x,
                                 errorhandler err);
 
 #ifdef __cplusplus
