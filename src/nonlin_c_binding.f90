@@ -895,9 +895,9 @@ contains
     !!
     !! @param[in] poly A pointer to the polynomial object.
     !! @param[in] n The number of points to evaluate.
-    !! @param[in] x An N-element array containing the points at which to 
+    !! @param[in] x An N-element array containing the points at which to
     !!  evaluate the polynomial.
-    !! @param[out] y An N-element array where the resulting polynomial outputs 
+    !! @param[out] y An N-element array where the resulting polynomial outputs
     !!  will be written.
     subroutine evaluate_polynomial(poly, n, x, y) &
             bind(C, name = "evaluate_polynomial")
@@ -921,9 +921,9 @@ contains
     !!
     !! @param[in] poly A pointer to the polynomial object.
     !! @param[in] n The number of points to evaluate.
-    !! @param[in] x An N-element array containing the points at which to 
+    !! @param[in] x An N-element array containing the points at which to
     !!  evaluate the polynomial.
-    !! @param[out] y An N-element array where the resulting polynomial outputs 
+    !! @param[out] y An N-element array where the resulting polynomial outputs
     !!  will be written.
     subroutine evaluate_polynomial_cmplx(poly, n, x, y) &
             bind(C, name = "evaluate_polynomial_cmplx")
@@ -1037,7 +1037,7 @@ contains
     !! - NL_INVALID_INPUT_ERROR: Occurs if the requested index is less than or
     !!      equal to zero, or if the requested index exceeds the number of
     !!      polynomial coefficients.
-    subroutine set_polynomial_coefficient(poly, ind, x, err) & 
+    subroutine set_polynomial_coefficient(poly, ind, x, err) &
             bind(C, name = "set_polynomial_coefficient")
         ! Arguments
         type(c_ptr), intent(in), value :: poly
