@@ -13,6 +13,8 @@ module nonlin_c_binding
     use nonlin_least_squares
     use nonlin_polynomials
     use ferror, only : errors
+    use ferror_c_binding, only : errorhandler, get_errorhandler, &
+        update_errorhandler
     implicit none
 
 
@@ -439,11 +441,11 @@ contains
         real(dp), intent(out) :: x, f
         type(solver_control), intent(in) :: tol
         type(iteration_behavior), intent(out) :: ib
-        type(c_ptr), intent(in), value :: err
+        type(errorhandler), intent(inout) :: err
 
         ! Local Variables
         procedure(cfcn1var), pointer :: fptr
-        type(errors), pointer :: eptr
+        class(errors), allocatable :: eptr
         type(brent_solver) :: solver
         type(cfcn1var_helper) :: obj
 
@@ -456,9 +458,10 @@ contains
         call obj%set_cfcn(fptr)
 
         ! Process
-        if (c_associated(err)) then
-            call c_f_pointer(err, eptr)
+        call get_errorhandler(err, eptr)
+        if (allocated(eptr)) then
             call solver%solve(obj, x, lim, f, ib, eptr)
+            call update_errorhandler(eptr, err)
         else
             call solver%solve(obj, x, lim, f, ib)
         end if
@@ -515,12 +518,12 @@ contains
         type(solver_control), intent(in) :: tol
         type(c_ptr), intent(in), value :: lsearch
         type(iteration_behavior), intent(out) :: ib
-        type(c_ptr), intent(in), value :: err
+        type(errorhandler), intent(inout) :: err
 
         ! Local Variables
         procedure(cvecfcn), pointer :: fptr
         procedure(cjacobianfcn), pointer :: jptr
-        type(errors), pointer :: eptr
+        class(errors), allocatable :: eptr
         type(quasi_newton_solver) :: solver
         type(cvecfcn_helper) :: obj
         type(line_search) :: ls
@@ -552,9 +555,10 @@ contains
         end if
 
         ! Process
-        if (c_associated(err)) then
-            call c_f_pointer(err, eptr)
+        call get_errorhandler(err, eptr)
+        if (allocated(eptr)) then
             call solver%solve(obj, x, fvec, ib, eptr)
+            call update_errorhandler(eptr, err)
         else
             call solver%solve(obj, x, fvec, ib)
         end if
@@ -610,12 +614,12 @@ contains
         type(solver_control), intent(in) :: tol
         type(c_ptr), intent(in), value :: lsearch
         type(iteration_behavior), intent(out) :: ib
-        type(c_ptr), intent(in), value :: err
+        type(errorhandler), intent(inout) :: err
 
         ! Local Variables
         procedure(cvecfcn), pointer :: fptr
         procedure(cjacobianfcn), pointer :: jptr
-        type(errors), pointer :: eptr
+        class(errors), allocatable :: eptr
         type(newton_solver) :: solver
         type(cvecfcn_helper) :: obj
         type(line_search) :: ls
@@ -647,9 +651,10 @@ contains
         end if
 
         ! Process
-        if (c_associated(err)) then
-            call c_f_pointer(err, eptr)
+        call get_errorhandler(err, eptr)
+        if (allocated(err)) then
             call solver%solve(obj, x, fvec, ib, eptr)
+            call update_errorhandler(eptr, err)
         else
             call solver%solve(obj, x, fvec, ib)
         end if
@@ -701,12 +706,12 @@ contains
         real(dp), intent(out) :: fvec(neqn)
         type(solver_control), intent(in) :: tol
         type(iteration_behavior), intent(out) :: ib
-        type(c_ptr), intent(in), value :: err
+        type(errorhandler), intent(inout) :: err
 
         ! Local Variables
         procedure(cvecfcn), pointer :: fptr
         procedure(cjacobianfcn), pointer :: jptr
-        type(errors), pointer :: eptr
+        class(errors), allocatable :: eptr
         type(least_squares_solver) :: solver
         type(cvecfcn_helper) :: obj
 
@@ -724,9 +729,10 @@ contains
         call solver%set_print_status(logical(tol%print_status))
 
         ! Process
-        if (c_associated(err)) then
-            call c_f_pointer(err, eptr)
+        call get_errorhandler(err, eptr)
+        if (allocated(err)) then
             call solver%solve(obj, x, fvec, ib, eptr)
+            call update_errorhandler(eptr, err)
         else
             call solver%solve(obj, x, fvec, ib)
         end if
