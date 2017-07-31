@@ -652,7 +652,7 @@ contains
 
         ! Process
         call get_errorhandler(err, eptr)
-        if (allocated(err)) then
+        if (allocated(eptr)) then
             call solver%solve(obj, x, fvec, ib, eptr)
             call update_errorhandler(eptr, err)
         else
@@ -730,7 +730,7 @@ contains
 
         ! Process
         call get_errorhandler(err, eptr)
-        if (allocated(err)) then
+        if (allocated(eptr)) then
             call solver%solve(obj, x, fvec, ib, eptr)
             call update_errorhandler(eptr, err)
         else
@@ -802,7 +802,7 @@ contains
         type(polynomial), pointer :: pptr
 
         ! Ensure the pointer isn't null
-        if (.not.c_associated(poly)) return
+        ! if (.not.c_associated(poly)) return
         call c_f_pointer(poly, pptr)
         n = pptr%order()
     end function
@@ -1018,7 +1018,7 @@ contains
         type(errors), pointer :: eptr
 
         ! Process
-        if (.not.c_associated(poly)) return
+        ! if (.not.c_associated(poly)) return
         call c_f_pointer(poly, pptr)
         if (c_associated(err)) then
             call c_f_pointer(err, eptr)

@@ -1,7 +1,6 @@
 # Master CMAKE Build Script
-cmake_minimum_required(VERSION 2.6)
-enable_language(Fortran)
-project(nonlin)
+cmake_minimum_required(VERSION 3.0)
+project(nonlin C CXX Fortran)
 
 # Define version information
 set(nonlin_VERSION_MAJOR 1)
@@ -89,6 +88,7 @@ if (BUILD_SHARED_LIBS)
       -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
       -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
   add_subdirectory(external/linalg)
+  # add_subdirectory(external/linalg/ferror)
 else()
   # Building a static library, simply add source code to this library
   file(GLOB_RECURSE linalg_sources 
@@ -100,24 +100,22 @@ else()
   list(APPEND sources ${linalg_sources})
 endif()
 
-# Define testing source files
-set(testing_sources ${sources})
-
-# Append any files in the tests directory
-list(APPEND testing_sources external/linalg/tests/test_core.f90
-  tests/nonlin_test.f90 tests/nonlin_test_jacobian.f90
-  tests/nonlin_test_solve.f90 tests/nonlin_test_poly.f90
-  tests/nonlin_test_optimize.f90)
-
 # If BUILD_SHARED_LIBS is defined, then a shared library (DLL) will be built;
 # else, a static library will be built.
 add_library(nonlin ${sources})
 if (BUILD_SHARED_LIBS)
-  target_link_libraries(nonlin linalg)
+  target_link_libraries(nonlin linalg ferror)
 endif ()
 
-# Build the test executable
-add_executable(nonlin_test ${testing_sources})
-if (BUILD_SHARED_LIBS)
-  target_link_libraries(nonlin_test linalg)
-endif()
+# ------------------------------------------------------------------------------
+# TESTS
+# ------------------------------------------------------------------------------
+set(nonlin_test_sources external/linalg/tests/test_core.f90
+  tests/nonlin_test.f90 tests/nonlin_test_jacobian.f90
+  tests/nonlin_test_solve.f90 tests/nonlin_test_poly.f90
+  tests/nonlin_test_optimize.f90)
+add_executable(nonlin_test ${nonlin_test_sources})
+target_link_libraries(nonlin_test nonlin)
+add_custom_command(OUTPUT nonlin_tests DEPENDS ${nonlin_test_sources}
+  COMMAND nonlin_test)
+add_custom_target(run_nonlin_tests ALL DEPENDS nonlin_tests)
