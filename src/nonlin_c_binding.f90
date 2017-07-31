@@ -102,6 +102,15 @@ end interface
     end type
 
 ! ------------------------------------------------------------------------------
+    !> @brief A C compatible type encapsulating a polynomial object.
+    type, bind(C) :: c_polynomial
+        !> @brief The size of the polynomial object, in bytes.
+        integer(i32) :: n
+        !> @brief A pointer to the polynomial object.
+        type(c_ptr) :: ptr
+    end type
+
+! ------------------------------------------------------------------------------
     !> @brief A container allowing the use of cfcn1var in the solver codes.
     type, extends(fcn1var_helper) :: cfcn1var_helper
         private
@@ -424,10 +433,10 @@ contains
     !!  parameters.
     !! @param[out] ib On output, an iteration_behavior object containing the
     !!  iteration performance statistics.
-    !! @param[in] err A pointer to the C error handler object.  If no error
-    !!  handling is desired, simply pass NULL, and errors will be dealt with
-    !!  by the default internal error handler.  Possible errors that may be
-    !!  encountered are as follows.
+    !! @param[in] err The errorhandler object.  If no error handling is
+    !!  desired, simply pass NULL, and errors will be dealt with by the default
+    !!  internal error handler.  Possible errors that may be encountered are as
+    !!  follows.
     !!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
     !!  - NL_INVALID_INPUT_ERROR: Occurs if the number of equations is different
     !!      than the number of variables.
@@ -491,10 +500,10 @@ contains
     !!  simply pass NULL.
     !! @param[out] ib On output, an iteration_behavior object containing the
     !!  iteration performance statistics.
-    !! @param[in] err A pointer to the C error handler object.  If no error
-    !!  handling is desired, simply pass NULL, and errors will be dealt with
-    !!  by the default internal error handler.  Possible errors that may be
-    !!  encountered are as follows.
+    !! @param[in] err The errorhandler object.  If no error handling is
+    !!  desired, simply pass NULL, and errors will be dealt with by the default
+    !!  internal error handler.  Possible errors that may be encountered are as
+    !!  follows.
     !!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
     !!  - NL_INVALID_INPUT_ERROR: Occurs if the number of equations is different
     !!      than the number of variables.
@@ -587,10 +596,10 @@ contains
     !!  simply pass NULL.
     !! @param[out] ib On output, an iteration_behavior object containing the
     !!  iteration performance statistics.
-    !! @param[in] err A pointer to the C error handler object.  If no error
-    !!  handling is desired, simply pass NULL, and errors will be dealt with
-    !!  by the default internal error handler.  Possible errors that may be
-    !!  encountered are as follows.
+    !! @param[in] err The errorhandler object.  If no error handling is
+    !!  desired, simply pass NULL, and errors will be dealt with by the default
+    !!  internal error handler.  Possible errors that may be encountered are as
+    !!  follows.
     !!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
     !!  - NL_INVALID_INPUT_ERROR: Occurs if the number of equations is different
     !!      than the number of variables.
@@ -682,10 +691,10 @@ contains
     !!  parameters.
     !! @param[out] ib On output, an iteration_behavior object containing the
     !!  iteration performance statistics.
-    !! @param[in] err A pointer to the C error handler object.  If no error
-    !!  handling is desired, simply pass NULL, and errors will be dealt with
-    !!  by the default internal error handler.  Possible errors that may be
-    !!  encountered are as follows.
+    !! @param[in] err The errorhandler object.  If no error handling is
+    !!  desired, simply pass NULL, and errors will be dealt with by the default
+    !!  internal error handler.  Possible errors that may be encountered are as
+    !!  follows.
     !!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
     !!  - NL_INVALID_INPUT_ERROR: Occurs if the number of equations is less than
     !!      than the number of variables.
@@ -751,40 +760,68 @@ contains
 ! ******************************************************************************
 ! POLYNOMIAL ROUTINES
 ! ------------------------------------------------------------------------------
-    !> @brief Returns a pointer to a new polynomial object.
+    !> @brief Initializes a new polynomial object.
     !!
-    !! @param[in] order The order of the polynomial (must be > 0).
-    !! @return A pointer to the newly created polynomial object.
-    function alloc_polynomial(order) result(ptr) &
-            bind(C, name = "alloc_polynomial")
+    !! @param[out] obj The polynomial object to initialize.
+    !! @param[in] order The order of the polynomial.  This value must be > 0.
+    subroutine alloc_polynomial(obj, order) bind(C, name = "alloc_polynomial")
         ! Arguments
+        type(c_polynomial), intent(out) :: obj
         integer(i32), intent(in), value :: order
-        type(c_ptr) :: ptr
-
-        ! Create a new polynomial object, and then associate the C pointer
-        type(polynomial), pointer :: pptr
-        allocate(pptr)
-        call pptr%initialize(order)
-        ptr = c_loc(pptr)
-    end function
-
-! ------------------------------------------------------------------------------
-    !> @brief Cleans up after a polynomial object.
-    !!
-    !! @param[in] ptr A pointer to the polynomial object.
-    subroutine free_polynomial(ptr) bind(C, name = "free_polynomial")
-        ! Arguments
-        type(c_ptr), intent(in), value :: ptr
 
         ! Local Variables
-        type(polynomial), pointer :: pptr
+        integer(c_short), allocatable, target, dimension(:) :: temp
+        type(polynomial) :: poly
 
-        ! Ensure the pointer isn't null
-        if (.not.c_associated(ptr)) return
+        ! Process
+        call poly%initialize(order)
+        temp = transfer(poly, temp)
+        obj%n = size(temp)
+        obj%ptr = c_loc(temp(1))
+    end subroutine
 
-        ! Free memory
-        call c_f_pointer(ptr, pptr)
-        deallocate(pptr)
+! ------------------------------------------------------------------------------
+    !> @brief Retrieves the polynomial object from the C compatible 
+    !! c_polynomial data structure.
+    !!
+    !! @param[in] obj The C compatible c_polynomial data structure.
+    !! @param[out] poly The resulting polynomials object.
+    subroutine get_polynomial(obj, poly)
+        ! Arguments
+        type(c_polynomial), intent(in), target :: obj
+        class(polynomial), intent(out), allocatable :: poly
+
+        ! Local Variables
+        integer(c_short), poitner, dimension(:) :: temp
+        type(polynomial) :: item
+        type(c_ptr) :: testptr
+
+        ! Process
+        testptr = c_loc(obj) ! Ensures that obj wasn't passed as NULL from C
+        if (.not.c_associated(testptr)) return
+        if (.not.c_associated(obj%ptr)) return
+        call c_f_pointer(obj%ptr, temp, shape = [obj%n])
+        item = transfer(temp, item)
+        allocate(poly, source = item)
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Updates the c_polynomial object.
+    !!
+    !! @param[in] poly The polynomial object.
+    !! @param[out] cobj The c_polynomial object to update.
+    subroutine update_polynomial(poly, cobj)
+        ! Arguments
+        class(polynomial), intent(in) :: poly
+        type(c_polynomial), intent(out) :: cobj
+
+        ! Local Variables
+        integer(c_short), allocatable, target, dimension(:) :: temp
+
+        ! Process
+        temp = transfer(poly, temp)
+        cobj%n = size(temp)
+        cobj%ptr = c_loc(temp(1))
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -795,61 +832,60 @@ contains
     function get_polynomial_order_c(poly) result(n) &
             bind(C, name = "get_polynomial_order")
         ! Arguments
-        type(c_ptr), intent(in), value :: poly
+        type(c_polynomial), intent(in) :: poly
         integer(i32) :: n
 
         ! Local Variables
-        type(polynomial), pointer :: pptr
+        class(polynomial), allocatable :: pptr
 
-        ! Ensure the pointer isn't null
-        ! if (.not.c_associated(poly)) return
-        call c_f_pointer(poly, pptr)
+        ! Process
+        n = 0
+        get_polynomial(poly, pptr)
+        if (.not.allocated(ppt)) return
         n = pptr%order()
     end function
 
 ! ------------------------------------------------------------------------------
     !> @brief Fits a polynomial of the specified order to a data set.
     !!
+    !! @param[out] poly The c_polynomial object to initialize.
     !! @param[in] n The size of the arrays.
     !! @param[in] x An N-element array containing the independent variable data
     !!  points.  Notice, must be N > @p order.
     !! @param[in,out] y On input, an N-element array containing the dependent
     !!  variable data points.  On output, the contents are overwritten.
     !! @param[in] order The order of the polynomial (must be >= 1).
-    !! @param[in] err A pointer to the C error handler object.  If no error
-    !!  handling is desired, simply pass NULL, and errors will be dealt with
-    !!  by the default internal error handler.  Possible errors that may be
-    !!  encountered are as follows.
+    !! @param[in,out] err The errorhandler object.  If no error handling is
+    !!  desired, simply pass NULL, and errors will be dealt with by the default
+    !!  internal error handler.  Possible errors that may be encountered are as
+    !!  follows.
     !!  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
     !!      was specified, or if order is too large for the data set.
     !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
     !!  - NL_ARRAY_SIZE_ERROR: Occurs if @p x and @p y are different sizes.
-    !! @return A pointer to the newly created polynomial object.
-    function fit_polynomial(n, x, y, order, err) result(ptr) &
+    subroutine fit_polynomial(poly, n, x, y, order, err) &
             bind(C, name = "fit_polynomial")
         ! Arguments
+        type(c_polynomial), intent(out) :: poly
         integer(i32), intent(in), value :: n, order
         real(dp), intent(in) :: x(n)
         real(dp), intent(inout) :: y(n)
-        type(c_ptr), intent(in), value :: err
-        type(c_ptr) :: ptr
+        type(errorhandler), intent(inout) :: err
 
         ! Local Variables
-        type(errors), pointer :: eptr
-        type(polynomial), pointer :: pptr
-
-        ! Initialization
-        allocate(pptr)
+        class(errors), allocatable :: eptr
+        type(polynomial) :: pptr
 
         ! Process
-        if (c_associated(err)) then
-            call c_f_pointer(err, eptr)
+        call get_errorhandler(err, eptr)
+        if (allocated(eptr)) then
             call pptr%fit(x, y, order, eptr)
+            call update_errorhandler(eptr, err)
         else
             call pptr%fit(x, y, order)
         end if
-        ptr = c_loc(pptr)
-    end function
+        call update_polynomial(pptr, poly)
+    end subroutine
 
 ! ------------------------------------------------------------------------------
     !> @brief Fits a polynomial of the specified order that passes through zero
