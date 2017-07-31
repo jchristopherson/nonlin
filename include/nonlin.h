@@ -327,93 +327,72 @@ int get_polynomial_order(const polynomial *poly);
 !!  - NL_ARRAY_SIZE_ERROR: Occurs if @p x and @p y are different sizes.
  */
 void fit_polynomial(polynomial *poly, int n, const double *x, double *y,
-                    int order, errorhandler err);
+                    int order, errorhandler *err);
 
-// /** @brief Fits a polynomial of the specified order to a data set.
-//  *
-//  * @param n The size of the arrays.
-//  * @param x An N-element array containing the independent variable data
-//  *  points.  Notice, must be N > @p order.
-//  * @param y On input, an N-element array containing the dependent
-//  *  variable data points.  On output, the contents are overwritten.
-//  * @param order The order of the polynomial (must be >= 1).
-//  * @param err A pointer to the C error handler object.  If no error
-//  *  handling is desired, simply pass NULL, and errors will be dealt with
-//  *  by the default internal error handler.  Possible errors that may be
-//  *  encountered are as follows.
-//  *  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
-//  *      was specified, or if order is too large for the data set.
-//  *  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
-//  *  - NL_ARRAY_SIZE_ERROR: Occurs if @p x and @p y are different sizes.
-//  * @return A pointer to the newly created polynomial object.
-//  */
-// polynomial fit_polynomial(int n, const double *x, double *y, int order,
-//                           errorhandler err);
+/** @brief Fits a polynomial of the specified order that passes through zero
+!! to a data set.
+!!
+!! @param[out] poly The c_polynomial object to initialize.
+!! @param[in] n The size of the arrays.
+!! @param[in] x An N-element array containing the independent variable data
+!!  points.  Notice, must be N > @p order.
+!! @param[in,out] y On input, an N-element array containing the dependent
+!!  variable data points.  On output, the contents are overwritten.
+!! @param[in] order The order of the polynomial (must be >= 1).
+!! @param[in,out] err The errorhandler object.  If no error handling is
+!!  desired, simply pass NULL, and errors will be dealt with by the default
+!!  internal error handler.  Possible errors that may be encountered are as
+!!  follows.
+!!  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
+!!      was specified, or if order is too large for the data set.
+!!  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
+!!  - NL_ARRAY_SIZE_ERROR: Occurs if @p x and @p y are different sizes.
+ */
+void fit_polynomial_thru_zero(polynomial *poly, int n, const double *x,
+                              double *y, int order, errorhandler *err);
 
-// /** @brief Fits a polynomial of the specified order that passes through zero
-//  * to a data set.
-//  *
-//  * @param n The size of the arrays.
-//  * @param x An N-element array containing the independent variable data
-//  *  points.  Notice, must be N > @p order.
-//  * @param y On input, an N-element array containing the dependent
-//  *  variable data points.  On output, the contents are overwritten.
-//  * @param order The order of the polynomial (must be >= 1).
-//  * @param err A pointer to the C error handler object.  If no error
-//  *  handling is desired, simply pass NULL, and errors will be dealt with
-//  *  by the default internal error handler.  Possible errors that may be
-//  *  encountered are as follows.
-//  *  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
-//  *      was specified, or if order is too large for the data set.
-//  *  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
-//  *  - NL_ARRAY_SIZE_ERROR: Occurs if @p x and @p y are different sizes.
-//  * @return A pointer to the newly created polynomial object.
-//  */
-// polynomial fit_polynomial_thru_zero(int n, const double *x, double *y,
-//                                     int order, errorhandler err);
+/** @brief Evaluates a polynomial at the specified points.
+ *
+ * @param poly A pointer to the polynomial object.
+ * @param n The number of points to evaluate.
+ * @param x An N-element array containing the points at which to
+ *  evaluate the polynomial.
+ * @param y An N-element array where the resulting polynomial outputs
+ *  will be written.
+ */
+void evaluate_polynomial(const polynomial *poly, int n, const double *x,
+                         double *y);
 
-// /** @brief Evaluates a polynomial at the specified points.
-//  *
-//  * @param poly A pointer to the polynomial object.
-//  * @param n The number of points to evaluate.
-//  * @param x An N-element array containing the points at which to
-//  *  evaluate the polynomial.
-//  * @param y An N-element array where the resulting polynomial outputs
-//  *  will be written.
-//  */
-// void evaluate_polynomial(const polynomial poly, int n, const double *x,
-//                          double *y);
+/** @brief Evaluates a polynomial at the specified points.
+ *
+ * @param poly A pointer to the polynomial object.
+ * @param n The number of points to evaluate.
+ * @param x An N-element array containing the points at which to
+ *  evaluate the polynomial.
+ * @param y An N-element array where the resulting polynomial outputs
+ *  will be written.
+ */
+void evaluate_polynomial_cmplx(const polynomial *poly, int n,
+                               const double complex *x, double complex *y);
 
-// /** @brief Evaluates a polynomial at the specified points.
-//  *
-//  * @param poly A pointer to the polynomial object.
-//  * @param n The number of points to evaluate.
-//  * @param x An N-element array containing the points at which to
-//  *  evaluate the polynomial.
-//  * @param y An N-element array where the resulting polynomial outputs
-//  *  will be written.
-//  */
-// void evaluate_polynomial_cmplx(const polynomial poly, int n,
-//                                const double complex *x, double complex *y);
-
-// /** @brief Computes all the roots of a polynomial by computing the
-//  * eigenvalues of the polynomial companion matrix.
-//  *
-//  * @param poly A pointer to the polynomial object.
-//  * @param n The size of @p rts.  This value should be the same as the
-//  *  order of the polynomial.
-//  * @param rts An N-element array where the roots of the polynomial
-//  *  will be written.
-//  * @param err A pointer to the C error handler object.  If no error
-//  *  handling is desired, simply pass NULL, and errors will be dealt with
-//  *  by the default internal error handler.  Possible errors that may be
-//  *  encountered are as follows.
-//  *  - LA_OUT_OF_MEMORY_ERROR: Occurs if local memory must be allocated, and
-//  *      there is insufficient memory available.
-//  *  - LA_CONVERGENCE_ERROR: Occurs if the algorithm failed to converge.
-//  */
-// void polynomial_roots(const polynomial poly, int n, double complex *rts,
-//                       errorhandler err);
+/** @brief Computes all the roots of a polynomial by computing the
+!! eigenvalues of the polynomial companion matrix.
+!!
+!! @param[in] poly The c_polynomial object.
+!! @param[in] n The size of @p rts.  This value should be the same as the
+!!  order of the polynomial.
+!! @param[out] rts An N-element array where the roots of the polynomial
+!!  will be written.
+!! @param[out] err The errorhandler object.  If no error handling is
+!!  desired, simply pass NULL, and errors will be dealt with by the default
+!!  internal error handler.  Possible errors that may be encountered are as
+!!  follows.
+!!  - LA_OUT_OF_MEMORY_ERROR: Occurs if local memory must be allocated, and
+!!      there is insufficient memory available.
+!!  - LA_CONVERGENCE_ERROR: Occurs if the algorithm failed to converge.
+ */
+void polynomial_roots(const polynomial *poly, int n, double complex *rts,
+                      errorhandler *err);
 
 // /** @brief Gets the requested polynomial coefficient by index.  The
 //  * coefficient index is established as follows: c(1) + c(2) * x +

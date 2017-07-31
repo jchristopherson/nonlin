@@ -762,7 +762,7 @@ contains
 ! ------------------------------------------------------------------------------
     !> @brief Initializes a new polynomial object.
     !!
-    !! @param[out] obj The polynomial object to initialize.
+    !! @param[out] obj The c_polynomial object to initialize.
     !! @param[in] order The order of the polynomial.  This value must be > 0.
     subroutine alloc_polynomial(obj, order) bind(C, name = "alloc_polynomial")
         ! Arguments
@@ -827,7 +827,7 @@ contains
 ! ------------------------------------------------------------------------------
     !> @brief Gets the order of the polynomial.
     !!
-    !! @param[in] poly A pointer to the polynomial object.
+    !! @param[in] poly The c_polynomial object.
     !! @return The order of the polynomial object.
     function get_polynomial_order_c(poly) result(n) &
             bind(C, name = "get_polynomial_order")
@@ -855,7 +855,7 @@ contains
     !! @param[in,out] y On input, an N-element array containing the dependent
     !!  variable data points.  On output, the contents are overwritten.
     !! @param[in] order The order of the polynomial (must be >= 1).
-    !! @param[in,out] err The errorhandler object.  If no error handling is
+    !! @param[out] err The errorhandler object.  If no error handling is
     !!  desired, simply pass NULL, and errors will be dealt with by the default
     !!  internal error handler.  Possible errors that may be encountered are as
     !!  follows.
@@ -877,6 +877,8 @@ contains
         type(polynomial) :: pptr
 
         ! Process
+        get_polynomial(poly, pptr)
+        if (.not.allocated(ppt)) return
         call get_errorhandler(err, eptr)
         if (allocated(eptr)) then
             call pptr%fit(x, y, order, eptr)
@@ -891,51 +893,51 @@ contains
     !> @brief Fits a polynomial of the specified order that passes through zero
     !! to a data set.
     !!
+    !! @param[out] poly The c_polynomial object to initialize.
     !! @param[in] n The size of the arrays.
     !! @param[in] x An N-element array containing the independent variable data
     !!  points.  Notice, must be N > @p order.
     !! @param[in,out] y On input, an N-element array containing the dependent
     !!  variable data points.  On output, the contents are overwritten.
     !! @param[in] order The order of the polynomial (must be >= 1).
-    !! @param[in] err A pointer to the C error handler object.  If no error
-    !!  handling is desired, simply pass NULL, and errors will be dealt with
-    !!  by the default internal error handler.  Possible errors that may be
-    !!  encountered are as follows.
+    !! @param[out] err The errorhandler object.  If no error handling is
+    !!  desired, simply pass NULL, and errors will be dealt with by the default
+    !!  internal error handler.  Possible errors that may be encountered are as
+    !!  follows.
     !!  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
     !!      was specified, or if order is too large for the data set.
     !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
     !!  - NL_ARRAY_SIZE_ERROR: Occurs if @p x and @p y are different sizes.
-    !! @return A pointer to the newly created polynomial object.
-    function fit_polynomial_thru_zero(n, x, y, order, err) result(ptr) &
+    subroutine fit_polynomial_thru_zero(poly, n, x, y, order, err) &
             bind(C, name = "fit_polynomial_thru_zero")
         ! Arguments
+        type(c_polynomial), intent(out) :: poly
         integer(i32), intent(in), value :: n, order
         real(dp), intent(in) :: x(n)
         real(dp), intent(inout) :: y(n)
-        type(c_ptr), intent(in), value :: err
-        type(c_ptr) :: ptr
+        type(errorhandler), intent(inout) :: err
 
         ! Local Variables
-        type(errors), pointer :: eptr
-        type(polynomial), pointer :: pptr
-
-        ! Initialization
-        allocate(pptr)
+        class(errors), allocatable :: eptr
+        type(polynomial) :: pptr
 
         ! Process
-        if (c_associated(err)) then
-            call c_f_pointer(err, eptr)
+        get_polynomial(poly, pptr)
+        if (.not.allocated(ppt)) return
+        call get_errorhandler(err, eptr)
+        if (allocated(eptr)) then
             call pptr%fit_thru_zero(x, y, order, eptr)
+            call update_errorhandler(eptr, err)
         else
             call pptr%fit_thru_zero(x, y, order)
         end if
-        ptr = c_loc(pptr)
-    end function
+        call update_polynomial(pptr, poly)
+    end subroutine
 
 ! ------------------------------------------------------------------------------
     !> @brief Evaluates a polynomial at the specified points.
     !!
-    !! @param[in] poly A pointer to the polynomial object.
+    !! @param[in] poly The c_polynomial object.
     !! @param[in] n The number of points to evaluate.
     !! @param[in] x An N-element array containing the points at which to
     !!  evaluate the polynomial.
@@ -944,24 +946,24 @@ contains
     subroutine evaluate_polynomial(poly, n, x, y) &
             bind(C, name = "evaluate_polynomial")
         ! Arguments
-        type(c_ptr), intent(in), value :: poly
+        type(c_polynomial), intent(in) :: poly
         integer(i32), intent(in), value :: n
         real(dp), intent(in) :: x(n)
         real(dp), intent(out) :: y(n)
 
         ! Local Variables
-        type(polynomial), pointer :: pptr
+        class(polynomial), allocatable :: pptr
 
         ! Process
-        if (.not.c_associated(poly)) return
-        call c_f_pointer(poly, pptr)
+        get_polynomial(poly, pptr)
+        if (.not.allocated(ppt)) return
         y = pptr%evaluate(x)
     end subroutine
 
 ! ------------------------------------------------------------------------------
     !> @brief Evaluates a polynomial at the specified points.
     !!
-    !! @param[in] poly A pointer to the polynomial object.
+    !! @param[in] poly The c_polynomial object.
     !! @param[in] n The number of points to evaluate.
     !! @param[in] x An N-element array containing the points at which to
     !!  evaluate the polynomial.
@@ -970,17 +972,17 @@ contains
     subroutine evaluate_polynomial_cmplx(poly, n, x, y) &
             bind(C, name = "evaluate_polynomial_cmplx")
         ! Arguments
-        type(c_ptr), intent(in), value :: poly
+        type(c_polynomial), intent(in) :: poly
         integer(i32), intent(in), value :: n
         complex(dp), intent(in) :: x(n)
         complex(dp), intent(out) :: y(n)
 
         ! Local Variables
-        type(polynomial), pointer :: pptr
+        class(polynomial), allocatable :: pptr
 
         ! Process
-        if (.not.c_associated(poly)) return
-        call c_f_pointer(poly, pptr)
+        get_polynomial(poly, pptr)
+        if (.not.allocated(ppt)) return
         y = pptr%evaluate(x)
     end subroutine
 
@@ -988,38 +990,39 @@ contains
     !> @brief Computes all the roots of a polynomial by computing the
     !! eigenvalues of the polynomial companion matrix.
     !!
-    !! @param[in] poly A pointer to the polynomial object.
+    !! @param[in] poly The c_polynomial object.
     !! @param[in] n The size of @p rts.  This value should be the same as the
     !!  order of the polynomial.
     !! @param[out] rts An N-element array where the roots of the polynomial
     !!  will be written.
-    !! @param[in] err A pointer to the C error handler object.  If no error
-    !!  handling is desired, simply pass NULL, and errors will be dealt with
-    !!  by the default internal error handler.  Possible errors that may be
-    !!  encountered are as follows.
+    !! @param[out] err The errorhandler object.  If no error handling is
+    !!  desired, simply pass NULL, and errors will be dealt with by the default
+    !!  internal error handler.  Possible errors that may be encountered are as
+    !!  follows.
     !!  - LA_OUT_OF_MEMORY_ERROR: Occurs if local memory must be allocated, and
     !!      there is insufficient memory available.
     !!  - LA_CONVERGENCE_ERROR: Occurs if the algorithm failed to converge.
     subroutine polynomial_roots_c(poly, n, rts, err) &
             bind(C, name = "polynomial_roots")
         ! Arguments
-        type(c_ptr), intent(in), value :: poly
+        type(c_polynomial), intent(in) :: poly
         integer(i32), intent(in), value :: n
         complex(dp), intent(out) :: rts(n)
-        type(c_ptr), intent(in), value :: err
+        type(errorhandler), intent(inout) :: err
 
         ! Local Variables
-        type(polynomial), pointer :: pptr
-        type(errors), pointer :: eptr
+        class(polynomial), allocatable :: pptr
+        class(errors), allocatable :: eptr
         complex(dp), allocatable, dimension(:) :: roots
         integer(i32) :: m
 
         ! Process
-        if (.not.c_associated(poly)) return
-        call c_f_pointer(poly, pptr)
-        if (c_associated(err)) then
-            call c_f_pointer(err, eptr)
+        get_polynomial(poly, pptr)
+        if (.not.allocated(ppt)) return
+        call get_errorhandler(err, eptr)
+        if (allocated(eptr)) then
             roots = pptr%roots(eptr)
+            call update_errorhandler(eptr, err)
         else
             roots = pptr%roots()
         end if
