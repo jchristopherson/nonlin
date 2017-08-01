@@ -8,25 +8,66 @@ program main
     use nonlin_test_poly
     use nonlin_test_optimize
 
-    ! Introduce the testing application
-    print '(A)', "Hello from the NONLIN test application."
+    ! Local Variables
+    logical :: rst, overall
+
+    ! Initialization
+    overall = .true.
 
     ! Tests
-    call test_jacobian_1()
-    call test_quasinewton_1()
-    call test_quasinewton_2()
-    call test_newton_1()
-    call test_newton_2()
-    call test_least_squares_1()
-    call test_least_squares_2()
+    rst = test_jacobian_1()
+    if (.not.rst) overall = .false.
+
+    rst = test_quasinewton_1()
+    if (.not.rst) overall = .false.
+
+    rst = test_quasinewton_2()
+    if (.not.rst) overall = .false.
+
+    rst = test_newton_1()
+    if (.not.rst) overall = .false.
+
+    rst = test_newton_2()
+    if (.not.rst) overall = .false.
+
+    rst = test_least_squares_1()
+    if (.not.rst) overall = .false.
+
+    rst = test_least_squares_2()
+    if (.not.rst) overall = .false.
+
     call test_least_squares_3()
-    call test_brent_1()
+
+    rst = test_brent_1()
+    if (.not.rst) overall = .false.
+
     call test_poly_fit()
-    call test_poly_roots()
-    call test_poly_add()
-    call test_poly_subtract()
-    call test_nelder_mead_1()
-    call test_nelder_mead_2()
-    call test_bfgs_1()
-    call test_bfgs_2()
+    rst = test_poly_roots()
+    if (.not.rst) overall = .false.
+
+    rst = test_poly_add()
+    if (.not.rst) overall = .false.
+
+    rst = test_poly_subtract()
+    if (.not.rst) overall = .false.
+
+    rst = test_nelder_mead_1()
+    if (.not.rst) overall = .false.
+
+    rst = test_nelder_mead_2()
+    if (.not.rst) overall = .false.
+
+    rst = test_bfgs_1()
+    if (.not.rst) overall = .false.
+
+    rst = test_bfgs_2()
+    if (.not.rst) overall = .false.
+
+
+    ! End
+    if (overall) then
+        print '(A)', "NONLIN TEST STATUS: PASS"
+    else
+        print '(A)', "NONLIN TEST STATUS: FAILED"
+    end if
 end program

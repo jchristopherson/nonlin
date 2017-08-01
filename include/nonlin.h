@@ -108,6 +108,8 @@ typedef struct {
     int fcn_count;
     /** @brief Specifies the number of Jacobian evaluations performed. */
     int jacobian_count;
+    /** Specifies the number of gradient vector evaluations performed. */
+    int gradient_count;
     /** @brief True if the solution converged as a result of a zero-valued
      * function; else, false.
      */

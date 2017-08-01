@@ -218,6 +218,8 @@ module nonlin_types
         integer(i32) :: fcn_count
         !> Specifies the number of Jacobian evaluations performed.
         integer(i32) :: jacobian_count
+        !> Specifies the number of gradient vector evaluations performed.
+        integer(i32) :: gradient_count
         !> True if the solution converged as a result of a zero-valued
         !! function; else, false.
         logical(c_bool) :: converge_on_fcn

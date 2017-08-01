@@ -50,7 +50,7 @@ contains
 
 ! ------------------------------------------------------------------------------
     ! Tests the polynomial root finding capabilities.
-    subroutine test_poly_roots()
+    function test_poly_roots() result(check)
         ! Parameters
         real(dp), parameter :: tol = 1.0d-8
         integer(i32), parameter :: order = 10
@@ -83,13 +83,11 @@ contains
                 exit
             end if
         end do
-
-        if (check) print '(A)', "Test Passed: Polynomial Roots Test 1"
-    end subroutine
+    end function
 
 ! ------------------------------------------------------------------------------
     ! Tests the polynomial addition routine
-    subroutine test_poly_add()
+    function test_poly_add() result(check)
         ! Parameters
         integer(i32), parameter :: order1 = 10
         integer(i32), parameter :: order2 = 20
@@ -140,13 +138,11 @@ contains
                 print '(A)', "Test Failed: Polynomial Addition Test 1"
             end if
         end if
-
-        if (check) print '(A)', "Test Passed: Polynomial Addition Test 1"
-    end subroutine
+    end function
 
 ! ------------------------------------------------------------------------------
     ! Tests the polynomial subtraction routine
-    subroutine test_poly_subtract()
+    function test_poly_subtract() result(check)
         ! Parameters
         integer(i32), parameter :: order1 = 10
         integer(i32), parameter :: order2 = 20
@@ -200,9 +196,7 @@ contains
                 print '(A)', "Test Failed: Polynomial Subtraction Test 1"
             end if
         end if
-
-        if (check) print '(A)', "Test Passed: Polynomial Subtraction Test 1"
-    end subroutine
+    end function
 
 ! ------------------------------------------------------------------------------
 end module

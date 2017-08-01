@@ -132,7 +132,7 @@ contains
 ! ******************************************************************************
 ! SOLVER TEST ROUTINES
 ! ------------------------------------------------------------------------------
-    subroutine test_quasinewton_1()
+    function test_quasinewton_1() result(check)
         ! Local Variables
         type(vecfcn_helper) :: obj
         procedure(vecfcn), pointer :: fcn
@@ -174,15 +174,10 @@ contains
                 print '(AI0)', "Function Evaluations: ", ib%fcn_count
             end if
         end do
-
-        ! Inform user of a succussful test
-        if (check) then
-            print '(A)', "Test Passed: Quasi-Newton Test 1"
-        end if
-    end subroutine
+    end function
 
 ! ------------------------------------------------------------------------------
-    subroutine test_quasinewton_2()
+    function test_quasinewton_2() result(check)
         ! Local Variables
         type(vecfcn_helper) :: obj
         procedure(vecfcn), pointer :: fcn
@@ -226,15 +221,10 @@ contains
                 print '(AI0)', "Function Evaluations: ", ib%fcn_count
             end if
         end do
-
-        ! Inform user of a succussful test
-        if (check) then
-            print '(A)', "Test Passed: Quasi-Newton Test 2"
-        end if
-    end subroutine
+    end function
 
 ! ------------------------------------------------------------------------------
-    subroutine test_newton_1()
+    function test_newton_1() result(check)
         ! Local Variables
         type(vecfcn_helper) :: obj
         procedure(vecfcn), pointer :: fcn
@@ -276,15 +266,10 @@ contains
                 print '(AI0)', "Function Evaluations: ", ib%fcn_count
             end if
         end do
-
-        ! Inform user of a succussful test
-        if (check) then
-            print '(A)', "Test Passed: Newton Test 1"
-        end if
-    end subroutine
+    end function
 
 ! ------------------------------------------------------------------------------
-    subroutine test_newton_2()
+    function test_newton_2() result(check)
         ! Local Variables
         type(vecfcn_helper) :: obj
         procedure(vecfcn), pointer :: fcn
@@ -328,15 +313,10 @@ contains
                 print '(AI0)', "Function Evaluations: ", ib%fcn_count
             end if
         end do
-
-        ! Inform user of a succussful test
-        if (check) then
-            print '(A)', "Test Passed: Newton Test 2"
-        end if
-    end subroutine
+    end function
 
 ! ------------------------------------------------------------------------------
-    subroutine test_least_squares_1()
+    function test_least_squares_1() result(check)
         ! Local Variables
         type(vecfcn_helper) :: obj
         procedure(vecfcn), pointer :: fcn
@@ -378,15 +358,10 @@ contains
                 print '(AI0)', "Function Evaluations: ", ib%fcn_count
             end if
         end do
-
-        ! Inform user of a succussful test
-        if (check) then
-            print '(A)', "Test Passed: Least Squares Test 1"
-        end if
-    end subroutine
+    end function
 
 ! ------------------------------------------------------------------------------
-    subroutine test_least_squares_2()
+    function test_least_squares_2() result(check)
         ! Local Variables
         type(vecfcn_helper) :: obj
         procedure(vecfcn), pointer :: fcn
@@ -433,12 +408,7 @@ contains
                 print '(AI0)', "Function Evaluations: ", ib%fcn_count
             end if
         end do
-
-        ! Inform user of a succussful test
-        if (check) then
-            print '(A)', "Test Passed: Least Squares Test 2"
-        end if
-    end subroutine
+    end function
 
 ! ------------------------------------------------------------------------------
     subroutine test_least_squares_3()
@@ -461,7 +431,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    subroutine test_brent_1()
+    function test_brent_1() result(check)
         ! Local Variables
         type(brent_solver) :: solver
         type(fcn1var_helper) :: obj
@@ -493,12 +463,7 @@ contains
                 "Test Failed: Brent's Method Test 1.  Expected: ", pi, &
                 ", Found: ", x
         end if
-
-        ! Check
-        if (check) then
-            print '(A)', "Test Passed: Brent's Method Test 1"
-        end if
-    end subroutine
+    end function
 
 ! ------------------------------------------------------------------------------
 end module

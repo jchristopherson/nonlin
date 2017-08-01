@@ -290,6 +290,7 @@ contains
             ib%iter_count = iter
             ib%fcn_count = neval
             ib%jacobian_count = njac
+            ib%gradient_count = 0
             ib%converge_on_fcn = fcnvrg
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = gcnvrg
@@ -534,6 +535,7 @@ contains
             ib%iter_count = iter
             ib%fcn_count = neval
             ib%jacobian_count = njac
+            ib%gradient_count = 0
             ib%converge_on_fcn = fcnvrg
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = gcnvrg
@@ -704,6 +706,7 @@ contains
             ib%iter_count = iter
             ib%fcn_count = neval
             ib%jacobian_count = njac
+            ib%gradient_count = 0
             ib%converge_on_fcn = fcnvrg
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = gcnvrg
@@ -877,6 +880,7 @@ contains
             ib%iter_count = iter
             ib%fcn_count = neval
             ib%jacobian_count = njac
+            ib%gradient_count = 0
             ib%converge_on_fcn = fcnvrg
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = gcnvrg
@@ -1010,6 +1014,7 @@ contains
             ib%iter_count = iter
             ib%fcn_count = neval
             ib%jacobian_count = 0
+            ib%gradient_count = 0
             ib%converge_on_fcn = fcnvrg
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = .false.
@@ -1148,6 +1153,7 @@ contains
             ib%iter_count = iter
             ib%fcn_count = neval
             ib%jacobian_count = 0
+            ib%gradient_count = 0
             ib%converge_on_fcn = fcnvrg
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = .false.

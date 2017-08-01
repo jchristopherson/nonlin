@@ -43,7 +43,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    subroutine test_jacobian_1()
+    function test_jacobian_1() result(rst)
         ! Local Variables
         type(vecfcn_helper) :: obj
         procedure(vecfcn), pointer :: fcn
@@ -128,10 +128,7 @@ contains
                 print *, numjac(i,:)
             end do
         end if
-
-        ! End
-        if (rst) print '(A)', "Test Passed: Jacobian Test 1"
-    end subroutine
+    end function
 
 ! ------------------------------------------------------------------------------
 end module
