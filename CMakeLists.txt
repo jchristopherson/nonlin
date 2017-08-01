@@ -108,6 +108,26 @@ if (BUILD_SHARED_LIBS)
 endif ()
 
 # ------------------------------------------------------------------------------
+# EXAMPLES
+# ------------------------------------------------------------------------------
+option(BUILD_EXAMPLES "Build examples?" OFF)
+if (BUILD_EXAMPLES)
+  # Inform the user we're building the examples
+  message(STATUS "Building NONLIN examples.")
+
+  # Quasi-Newton Example
+  add_executable(quasi_newton_example examples/nonlin_quasi_newton_example.f90)
+  target_link_libraries(quasi_newton_example nonlin)
+
+  # Least-Squares Example
+  add_executable(least_squares_example 
+    examples/nonlin_least_squares_example.f90)
+  target_link_libraries(least_squares_example nonlin)
+
+# --------------------
+endif()
+
+# ------------------------------------------------------------------------------
 # TESTS
 # ------------------------------------------------------------------------------
 set(nonlin_test_sources external/linalg/tests/test_core.f90
