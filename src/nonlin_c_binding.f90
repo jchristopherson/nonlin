@@ -792,7 +792,7 @@ contains
         class(polynomial), intent(out), allocatable :: poly
 
         ! Local Variables
-        integer(c_short), poitner, dimension(:) :: temp
+        integer(c_short), pointer, dimension(:) :: temp
         type(polynomial) :: item
         type(c_ptr) :: testptr
 
@@ -840,8 +840,8 @@ contains
 
         ! Process
         n = 0
-        get_polynomial(poly, pptr)
-        if (.not.allocated(ppt)) return
+        call get_polynomial(poly, pptr)
+        if (.not.allocated(pptr)) return
         n = pptr%order()
     end function
 
@@ -874,11 +874,11 @@ contains
 
         ! Local Variables
         class(errors), allocatable :: eptr
-        type(polynomial) :: pptr
+        class(polynomial), allocatable :: pptr
 
         ! Process
-        get_polynomial(poly, pptr)
-        if (.not.allocated(ppt)) return
+        call get_polynomial(poly, pptr)
+        if (.not.allocated(pptr)) return
         call get_errorhandler(err, eptr)
         if (allocated(eptr)) then
             call pptr%fit(x, y, order, eptr)
@@ -919,11 +919,11 @@ contains
 
         ! Local Variables
         class(errors), allocatable :: eptr
-        type(polynomial) :: pptr
+        class(polynomial), allocatable :: pptr
 
         ! Process
-        get_polynomial(poly, pptr)
-        if (.not.allocated(ppt)) return
+        call get_polynomial(poly, pptr)
+        if (.not.allocated(pptr)) return
         call get_errorhandler(err, eptr)
         if (allocated(eptr)) then
             call pptr%fit_thru_zero(x, y, order, eptr)
@@ -955,8 +955,8 @@ contains
         class(polynomial), allocatable :: pptr
 
         ! Process
-        get_polynomial(poly, pptr)
-        if (.not.allocated(ppt)) return
+        call get_polynomial(poly, pptr)
+        if (.not.allocated(pptr)) return
         y = pptr%evaluate(x)
     end subroutine
 
@@ -981,8 +981,8 @@ contains
         class(polynomial), allocatable :: pptr
 
         ! Process
-        get_polynomial(poly, pptr)
-        if (.not.allocated(ppt)) return
+        call get_polynomial(poly, pptr)
+        if (.not.allocated(pptr)) return
         y = pptr%evaluate(x)
     end subroutine
 
@@ -1017,8 +1017,8 @@ contains
         integer(i32) :: m
 
         ! Process
-        get_polynomial(poly, pptr)
-        if (.not.allocated(ppt)) return
+        call get_polynomial(poly, pptr)
+        if (.not.allocated(pptr)) return
         call get_errorhandler(err, eptr)
         if (allocated(eptr)) then
             roots = pptr%roots(eptr)
@@ -1058,8 +1058,8 @@ contains
 
         ! Process
         x = 0.0d0
-        get_polynomial(poly, pptr)
-        if (.not.allocated(ppt)) return
+        call get_polynomial(poly, pptr)
+        if (.not.allocated(pptr)) return
         call get_errorhandler(err, eptr)
         if (allocated(eptr)) then
             x = pptr%get(ind, eptr)
@@ -1097,8 +1097,8 @@ contains
         class(errors), allocatable :: eptr
 
         ! Process
-        get_polynomial(poly, pptr)
-        if (.not.allocated(ppt)) return
+        call get_polynomial(poly, pptr)
+        if (.not.allocated(pptr)) return
         call get_errorhandler(err, eptr)
         if (allocated(eptr)) then
             call pptr%set(ind, x, eptr)
