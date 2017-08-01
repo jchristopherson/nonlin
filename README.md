@@ -100,10 +100,10 @@ program example
     call solver%solve(obj, x, f)
 
     ! Display the output
-    print "(AF12.10)", "c1: ", x(1)
+    print "(AF12.10)", "c0: ", x(4)
+    print "(AF12.10)", "c1: ", x(3)
     print "(AF12.10)", "c2: ", x(2)
-    print "(AF12.10)", "c3: ", x(3)
-    print "(AF12.10)", "c4: ", x(4)
+    print "(AF12.10)", "c3: ", x(1)
     print "(AF7.5)", "Max Residual: ", maxval(abs(f))
 
 contains
@@ -138,10 +138,10 @@ end program
 ```
 The above program produces the following output.
 ```text
-c1: 1.0647627571
+c0: 1.1866142244
+c1: 0.4466134462
 c2: -.1223202909
-c3: 0.4466134462
-c4: 1.1866142244
+c3: 1.0647627571
 Max Residual: 0.50636
 ```
 
