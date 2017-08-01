@@ -295,9 +295,9 @@ void solve_nl_least_squares(vecfcn fcn, jacobianfcn jac, int neqn, int nvar,
 
 
 /** @brief Initializes a new polynomial object.
-!!
-!! @param[out] obj The polynomial object to initialize.
-!! @param[in] order The order of the polynomial.  This value must be > 0.
+ *
+ * @param obj The polynomial object to initialize.
+ * @param order The order of the polynomial.  This value must be > 0.
  */
 void alloc_polynomial(polynomial *poly, int order);
 
@@ -309,44 +309,44 @@ void alloc_polynomial(polynomial *poly, int order);
 int get_polynomial_order(const polynomial *poly);
 
 /** @brief Fits a polynomial of the specified order to a data set.
-!!
-!! @param[out] poly The polynomial object to initialize.
-!! @param[in] n The size of the arrays.
-!! @param[in] x An N-element array containing the independent variable data
-!!  points.  Notice, must be N > @p order.
-!! @param[in,out] y On input, an N-element array containing the dependent
-!!  variable data points.  On output, the contents are overwritten.
-!! @param[in] order The order of the polynomial (must be >= 1).
-!! @param[in,out] err The errorhandler object.  If no error handling is
-!!  desired, simply pass NULL, and errors will be dealt with by the default
-!!  internal error handler.  Possible errors that may be encountered are as
-!!  follows.
-!!  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
-!!      was specified, or if order is too large for the data set.
-!!  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
-!!  - NL_ARRAY_SIZE_ERROR: Occurs if @p x and @p y are different sizes.
+ *
+ * @param poly The polynomial object to initialize.
+ * @param n The size of the arrays.
+ * @param x An N-element array containing the independent variable data
+ *  points.  Notice, must be N > @p order.
+ * @param y On input, an N-element array containing the dependent
+ *  variable data points.  On output, the contents are overwritten.
+ * @param order The order of the polynomial (must be >= 1).
+ * @param err The errorhandler object.  If no error handling is
+ *  desired, simply pass NULL, and errors will be dealt with by the default
+ *  internal error handler.  Possible errors that may be encountered are as
+ *  follows.
+ *  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
+ *      was specified, or if order is too large for the data set.
+ *  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
+ *  - NL_ARRAY_SIZE_ERROR: Occurs if @p x and @p y are different sizes.
  */
 void fit_polynomial(polynomial *poly, int n, const double *x, double *y,
                     int order, errorhandler *err);
 
 /** @brief Fits a polynomial of the specified order that passes through zero
-!! to a data set.
-!!
-!! @param[out] poly The c_polynomial object to initialize.
-!! @param[in] n The size of the arrays.
-!! @param[in] x An N-element array containing the independent variable data
-!!  points.  Notice, must be N > @p order.
-!! @param[in,out] y On input, an N-element array containing the dependent
-!!  variable data points.  On output, the contents are overwritten.
-!! @param[in] order The order of the polynomial (must be >= 1).
-!! @param[in,out] err The errorhandler object.  If no error handling is
-!!  desired, simply pass NULL, and errors will be dealt with by the default
-!!  internal error handler.  Possible errors that may be encountered are as
-!!  follows.
-!!  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
-!!      was specified, or if order is too large for the data set.
-!!  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
-!!  - NL_ARRAY_SIZE_ERROR: Occurs if @p x and @p y are different sizes.
+ * to a data set.
+ *
+ * @param poly The c_polynomial object to initialize.
+ * @param n The size of the arrays.
+ * @param x An N-element array containing the independent variable data
+ *  points.  Notice, must be N > @p order.
+ * @param y On input, an N-element array containing the dependent
+ *  variable data points.  On output, the contents are overwritten.
+ * @param order The order of the polynomial (must be >= 1).
+ * @param err The errorhandler object.  If no error handling is
+ *  desired, simply pass NULL, and errors will be dealt with by the default
+ *  internal error handler.  Possible errors that may be encountered are as
+ *  follows.
+ *  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
+ *      was specified, or if order is too large for the data set.
+ *  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
+ *  - NL_ARRAY_SIZE_ERROR: Occurs if @p x and @p y are different sizes.
  */
 void fit_polynomial_thru_zero(polynomial *poly, int n, const double *x,
                               double *y, int order, errorhandler *err);
@@ -376,58 +376,58 @@ void evaluate_polynomial_cmplx(const polynomial *poly, int n,
                                const double complex *x, double complex *y);
 
 /** @brief Computes all the roots of a polynomial by computing the
-!! eigenvalues of the polynomial companion matrix.
-!!
-!! @param[in] poly The c_polynomial object.
-!! @param[in] n The size of @p rts.  This value should be the same as the
-!!  order of the polynomial.
-!! @param[out] rts An N-element array where the roots of the polynomial
-!!  will be written.
-!! @param[out] err The errorhandler object.  If no error handling is
-!!  desired, simply pass NULL, and errors will be dealt with by the default
-!!  internal error handler.  Possible errors that may be encountered are as
-!!  follows.
-!!  - LA_OUT_OF_MEMORY_ERROR: Occurs if local memory must be allocated, and
-!!      there is insufficient memory available.
-!!  - LA_CONVERGENCE_ERROR: Occurs if the algorithm failed to converge.
+ * eigenvalues of the polynomial companion matrix.
+ *
+ * @param poly A pointer to the polynomial object.
+ * @param n The size of @p rts.  This value should be the same as the
+ *  order of the polynomial.
+ * @param rts An N-element array where the roots of the polynomial
+ *  will be written.
+ * @param err The errorhandler object.  If no error handling is
+ *  desired, simply pass NULL, and errors will be dealt with by the default
+ *  internal error handler.  Possible errors that may be encountered are as
+ *  follows.
+ *  - LA_OUT_OF_MEMORY_ERROR: Occurs if local memory must be allocated, and
+ *      there is insufficient memory available.
+ *  - LA_CONVERGENCE_ERROR: Occurs if the algorithm failed to converge.
  */
 void polynomial_roots(const polynomial *poly, int n, double complex *rts,
                       errorhandler *err);
 
-// /** @brief Gets the requested polynomial coefficient by index.  The
-//  * coefficient index is established as follows: c(1) + c(2) * x +
-//  * c(3) * x**2 + ... c(n) * x**n-1.
-//  *
-//  * @param poly A pointer to the polynomial object.
-//  * @param ind The polynomial coefficient index (0 < ind <= order + 1).
-//  * @param err A pointer to the C error handler object.  If no error
-//  *  handling is desired, simply pass NULL, and errors will be dealt with
-//  *  by the default internal error handler.  Possible errors that may be
-//  *  encountered are as follows.
-//  * - NL_INVALID_INPUT_ERROR: Occurs if the requested index is less than or
-//  *      equal to zero, or if the requested index exceeds the number of
-//  *      polynomial coefficients.
-//  */
-// double get_polynomial_coefficient(const polynomial poly, int ind,
-//                                   errorhandler err);
+/** @brief Gets the requested polynomial coefficient by index.  The
+ * coefficient index is established as follows: c(1) + c(2) * x +
+ * c(3) * x**2 + ... c(n) * x**n-1.
+ *
+ * @param poly A pointer to the polynomial object.
+ * @param ind The polynomial coefficient index (0 < ind <= order + 1).
+ * @param err The errorhandler object.  If no error handling is
+ *  desired, simply pass NULL, and errors will be dealt with by the default
+ *  internal error handler.  Possible errors that may be encountered are as
+ *  follows.
+ * - NL_INVALID_INPUT_ERROR: Occurs if the requested index is less than or
+ *      equal to zero, or if the requested index exceeds the number of
+ *      polynomial coefficients.
+ */
+double get_polynomial_coefficient(const polynomial *poly, int ind,
+                                  errorhandler *err);
 
-// /** @brief Sets the requested polynomial coefficient by index.  The
-//  * coefficient index is established as follows: c(1) + c(2) * x +
-//  * c(3) * x**2 + ... c(n) * x**n-1.
-//  *
-//  * @param poly A pointer to the polynomial object.
-//  * @param ind The polynomial coefficient index (0 < ind <= order + 1).
-//  * @param x The polynomial coefficient.
-//  * @param err A pointer to the C error handler object.  If no error
-//  *  handling is desired, simply pass NULL, and errors will be dealt with
-//  *  by the default internal error handler.  Possible errors that may be
-//  *  encountered are as follows.
-//  * - NL_INVALID_INPUT_ERROR: Occurs if the requested index is less than or
-//  *      equal to zero, or if the requested index exceeds the number of
-//  *      polynomial coefficients.
-//  */
-// void set_polynomial_coefficient(polynomial poly, int ind, double x,
-//                                 errorhandler err);
+/** @brief Sets the requested polynomial coefficient by index.  The
+ * coefficient index is established as follows: c(1) + c(2) * x +
+ * c(3) * x**2 + ... c(n) * x**n-1.
+ *
+ * @param poly A pointer to the polynomial object.
+ * @param ind The polynomial coefficient index (0 < ind <= order + 1).
+ * @param x The polynomial coefficient.
+ * @param err The errorhandler object.  If no error handling is
+ *  desired, simply pass NULL, and errors will be dealt with by the default
+ *  internal error handler.  Possible errors that may be encountered are as
+ *  follows.
+ * - NL_INVALID_INPUT_ERROR: Occurs if the requested index is less than or
+ *      equal to zero, or if the requested index exceeds the number of
+ *      polynomial coefficients.
+ */
+void set_polynomial_coefficient(polynomial *poly, int ind, double x,
+                                errorhandler *err);
 
 #ifdef __cplusplus
 }

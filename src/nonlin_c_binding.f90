@@ -855,7 +855,7 @@ contains
     !! @param[in,out] y On input, an N-element array containing the dependent
     !!  variable data points.  On output, the contents are overwritten.
     !! @param[in] order The order of the polynomial (must be >= 1).
-    !! @param[out] err The errorhandler object.  If no error handling is
+    !! @param[in,out] err The errorhandler object.  If no error handling is
     !!  desired, simply pass NULL, and errors will be dealt with by the default
     !!  internal error handler.  Possible errors that may be encountered are as
     !!  follows.
@@ -900,7 +900,7 @@ contains
     !! @param[in,out] y On input, an N-element array containing the dependent
     !!  variable data points.  On output, the contents are overwritten.
     !! @param[in] order The order of the polynomial (must be >= 1).
-    !! @param[out] err The errorhandler object.  If no error handling is
+    !! @param[in,out] err The errorhandler object.  If no error handling is
     !!  desired, simply pass NULL, and errors will be dealt with by the default
     !!  internal error handler.  Possible errors that may be encountered are as
     !!  follows.
@@ -995,7 +995,7 @@ contains
     !!  order of the polynomial.
     !! @param[out] rts An N-element array where the roots of the polynomial
     !!  will be written.
-    !! @param[out] err The errorhandler object.  If no error handling is
+    !! @param[in,out] err The errorhandler object.  If no error handling is
     !!  desired, simply pass NULL, and errors will be dealt with by the default
     !!  internal error handler.  Possible errors that may be encountered are as
     !!  follows.
@@ -1035,33 +1035,35 @@ contains
     !! coefficient index is established as follows: c(1) + c(2) * x +
     !! c(3) * x**2 + ... c(n) * x**n-1.
     !!
-    !! @param[in] poly A pointer to the polynomial object.
+    !! @param[in] poly The c_polynomial object.
     !! @param[in] ind The polynomial coefficient index (0 < ind <= order + 1).
-    !! @param[in] err A pointer to the C error handler object.  If no error
-    !!  handling is desired, simply pass NULL, and errors will be dealt with
-    !!  by the default internal error handler.  Possible errors that may be
-    !!  encountered are as follows.
+    !! @param[in,out] err The errorhandler object.  If no error handling is
+    !!  desired, simply pass NULL, and errors will be dealt with by the default
+    !!  internal error handler.  Possible errors that may be encountered are as
+    !!  follows.
     !! - NL_INVALID_INPUT_ERROR: Occurs if the requested index is less than or
     !!      equal to zero, or if the requested index exceeds the number of
     !!      polynomial coefficients.
     function get_polynomial_coefficient(poly, ind, err) result(x) &
             bind(C, name = "get_polynomial_coefficient")
         ! Arguments
-        type(c_ptr), intent(in), value :: poly
+        type(c_polynomial), intent(in) :: poly
         integer(i32), intent(in), value :: ind
-        type(c_ptr), intent(in), value :: err
+        type(errorhandler), intent(inout) :: err
         real(dp) :: x
 
         ! Local Variables
-        type(polynomial), pointer :: pptr
-        type(errors), pointer :: eptr
+        class(polynomial), allocatable :: pptr
+        class(errors), allocatable :: eptr
 
         ! Process
-        ! if (.not.c_associated(poly)) return
-        call c_f_pointer(poly, pptr)
-        if (c_associated(err)) then
-            call c_f_pointer(err, eptr)
+        x = 0.0d0
+        get_polynomial(poly, pptr)
+        if (.not.allocated(ppt)) return
+        call get_errorhandler(err, eptr)
+        if (allocated(eptr)) then
             x = pptr%get(ind, eptr)
+            call update_errorhandler(eptr, err)
         else
             x = pptr%get(ind)
         end if
@@ -1072,37 +1074,39 @@ contains
     !! coefficient index is established as follows: c(1) + c(2) * x +
     !! c(3) * x**2 + ... c(n) * x**n-1.
     !!
-    !! @param[in,out] poly A pointer to the polynomial object.
+    !! @param[in,out] poly The c_polynomial object.
     !! @param[in] ind The polynomial coefficient index (0 < ind <= order + 1).
     !! @param[in] x The polynomial coefficient.
-    !! @param[in] err A pointer to the C error handler object.  If no error
-    !!  handling is desired, simply pass NULL, and errors will be dealt with
-    !!  by the default internal error handler.  Possible errors that may be
-    !!  encountered are as follows.
+    !! @param[in,out] err The errorhandler object.  If no error handling is
+    !!  desired, simply pass NULL, and errors will be dealt with by the default
+    !!  internal error handler.  Possible errors that may be encountered are as
+    !!  follows.
     !! - NL_INVALID_INPUT_ERROR: Occurs if the requested index is less than or
     !!      equal to zero, or if the requested index exceeds the number of
     !!      polynomial coefficients.
     subroutine set_polynomial_coefficient(poly, ind, x, err) &
             bind(C, name = "set_polynomial_coefficient")
         ! Arguments
-        type(c_ptr), intent(in), value :: poly
+        type(c_polynomial), intent(inout) :: poly
         integer(i32), intent(in), value :: ind
         real(dp), intent(in), value :: x
-        type(c_ptr), intent(in), value :: err
+        type(errorhandler), intent(inout) :: err
 
         ! Local Variables
-        type(polynomial), pointer :: pptr
-        type(errors), pointer :: eptr
+        class(polynomial), allocatable :: pptr
+        class(errors), allocatable :: eptr
 
         ! Process
-        if (.not.c_associated(poly)) return
-        call c_f_pointer(poly, pptr)
-        if (c_associated(err)) then
-            call c_f_pointer(err, eptr)
+        get_polynomial(poly, pptr)
+        if (.not.allocated(ppt)) return
+        call get_errorhandler(err, eptr)
+        if (allocated(eptr)) then
             call pptr%set(ind, x, eptr)
+            call update_errorhandler(eptr, err)
         else
             call pptr%set(ind, x)
         end if
+        call update_polynomial(pptr, poly)
     end subroutine
 
 ! ------------------------------------------------------------------------------
