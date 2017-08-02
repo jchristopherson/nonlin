@@ -124,6 +124,14 @@ if (BUILD_EXAMPLES)
     examples/nonlin_least_squares_example.f90)
   target_link_libraries(least_squares_example nonlin)
 
+  # Polynomial Fitting Example
+  add_executable(poly_fit_example examples/nonlin_poly_fit_example.f90)
+  target_link_libraries(poly_fit_example nonlin)
+
+  # Nelder-Mead Example
+  add_executable(nm_opt_example examples/nonlin_nm_opt_example.f90)
+  target_link_libraries(nm_opt_example nonlin)
+
 # --------------------
 endif()
 

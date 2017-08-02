@@ -23,11 +23,11 @@ program example
     call solver%solve(obj, x, f)
 
     ! Display the output
-    print "(AF12.10)", "c0: ", x(4)
-    print "(AF12.10)", "c1: ", x(3)
-    print "(AF12.10)", "c2: ", x(2)
-    print "(AF12.10)", "c3: ", x(1)
-    print "(AF7.5)", "Max Residual: ", maxval(abs(f))
+    print '(AF12.10)', "c0: ", x(4)
+    print '(AF12.10)', "c1: ", x(3)
+    print '(AF12.10)', "c2: ", x(2)
+    print '(AF12.10)', "c3: ", x(1)
+    print '(AF7.5)', "Max Residual: ", maxval(abs(f))
 
 contains
     ! The function containing the data to fit

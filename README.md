@@ -100,11 +100,11 @@ program example
     call solver%solve(obj, x, f)
 
     ! Display the output
-    print "(AF12.10)", "c0: ", x(4)
-    print "(AF12.10)", "c1: ", x(3)
-    print "(AF12.10)", "c2: ", x(2)
-    print "(AF12.10)", "c3: ", x(1)
-    print "(AF7.5)", "Max Residual: ", maxval(abs(f))
+    print '(AF12.10)', "c0: ", x(4)
+    print '(AF12.10)', "c1: ", x(3)
+    print '(AF12.10)', "c2: ", x(2)
+    print '(AF12.10)', "c3: ", x(1)
+    print '(AF7.5)', "Max Residual: ", maxval(abs(f))
 
 contains
     ! The function containing the data to fit
@@ -154,8 +154,10 @@ This example utilizes the polynomial type to fit a polynomial to the data set ut
 program example
     use linalg_constants, only : dp, i32
     use nonlin_polynomials
+    implicit none
 
     ! Local Variables
+    integer(i32) :: i
     real(dp), dimension(21) :: xp, yp, yf, yc, err
     real(dp) :: res
     type(polynomial) :: p
@@ -183,21 +185,17 @@ program example
     res = maxval(err)
 
     ! Print out the coefficients
-     print '(A)', "Polynomial Coefficients (c0 + c1*x + c2*x**2 + c3*x**3):"
-     do i = 1, 4
-         print '(AI0AF12.9)', "c", i - 1, " = ", p%get(i)
-     end do
-     print '(AE9.4)', "Residual: ", res
+    print '(AI0AF12.10)', ("c", i - 1, " = ", p%get(i), i = 1, 4)
+    print '(AF7.5)', "Max Residual: ", res
 end program
 ```
 The example yields the following coefficients.
 ```text
-Polynomial Coefficients (c0 + c1*x + c2*x**2 + c3*x**3):
-c0 =  1.186614186
-c1 =  0.446613631
-c2 = -0.122320499
-c3 =  1.064762822
-Residual: .5064E+00
+c0 = 1.1866141861
+c1 = 0.4466136311
+c2 = -.1223204989
+c3 = 1.0647628218
+Max Residual: 0.50636
 ```
 Notice, as expected, the results are very similar to the output of Example 2.
 
@@ -228,7 +226,7 @@ program example
     call solver%solve(obj, x, fout, ib)
 
      ! Display the output
-     print '(AF8.5AF8.5A)', "Rosenbrock Minimum: (", x(1), ", ", x(2), ")"
+     print '(AF7.5AF7.5A)', "Minimum: (", x(1), ", ", x(2), ")"
      print '(AE9.3)', "Function Value: ", fout
      print '(AI0)', "Iterations: ", ib%iter_count
      print '(AI0)', "Function Evaluations: ", ib%fcn_count
@@ -239,14 +237,14 @@ contains
         real(dp) :: f
         f = 1.0d2 * (x(2) - x(1)**2)**2 + (x(1) - 1.0d0)**2
     end function
-end
+end program
 ```
 The example yields the following output:
 ```text
-Rosenbrock Minimum: ( 1.00000,  1.00000)
-Function Value: 0.264E-12
-Iterations: 59
-Function Evaluations: 112
+Minimum: (1.00000, 1.00000)
+Function Value: 0.121E-12
+Iterations: 52
+Function Evaluations: 101
 ```
 Notice, the convergence tolerance was set to its default value (1e-12).
 
