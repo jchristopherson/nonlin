@@ -26,12 +26,9 @@ void jac1(int neqn, int nvar, const double *x, double *jac) {
 // Tests against the answer for system #1
 bool is_ans_1(const double *x, double tol) {
     bool rst = true;
-    const double x1 = 5.0;
-    const double x2 = 3.0;
     double ax1, ax2;
-    ax1 = abs(x[0]) - x1;
-    ax2 = abs(x[1]) - x2;
-    printf("AX1 = %f\nAX2 = %f\nX[0] = %f\nX[1] = %f\nX1 = %f\nX2 = %f\n", ax1, ax2, x[0], x[1], x1, x2);
+    ax1 = fabs(x[0]) - 5.0;
+    ax2 = fabs(x[1]) - 3.0;
     if (abs(ax1) > tol || abs(ax2) > tol) rst = false;
     return rst;
 }
