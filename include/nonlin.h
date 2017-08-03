@@ -206,7 +206,7 @@ void solve_brent(fcn1var fcn, value_pair lim, double *x, double *f,
 void solve_quasi_newton(vecfcn fcn, jacobianfcn jac, int n, double *x,
                         double *fvec, const solver_control *tol,
                         line_search_control *lsearch,
-                        iteration_behavior *ib, errorhandler err);
+                        iteration_behavior *ib, errorhandler *err);
 
 /** @brief Applies Newton's method in conjunction with a backtracking type
  * line search to solve N equations of N unknowns.
@@ -250,7 +250,7 @@ void solve_quasi_newton(vecfcn fcn, jacobianfcn jac, int n, double *x,
  */
 void solve_newton(vecfcn fcn, jacobianfcn jac, int n, double *x, double *fvec,
                   const solver_control *tol, line_search_control *lsearch,
-                  iteration_behavior *ib, errorhandler err);
+                  iteration_behavior *ib, errorhandler *err);
 
 /** @brief Applies the Levenberg-Marquardt method to solve the nonlinear
  * least-squares problem.
@@ -291,7 +291,7 @@ void solve_newton(vecfcn fcn, jacobianfcn jac, int n, double *x, double *fvec,
  */
 void solve_nl_least_squares(vecfcn fcn, jacobianfcn jac, int neqn, int nvar,
                             double *x, double *fvec, const solver_control *tol,
-                            iteration_behavior *ib, errorhandler err);
+                            iteration_behavior *ib, errorhandler *err);
 
 
 
