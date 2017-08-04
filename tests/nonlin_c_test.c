@@ -11,6 +11,12 @@ int main() {
     rst = test_quasinewton();
     if (!rst) overall = false;
 
+    rst = test_newton();
+    if (!rst) overall = false;
+
+    rst = test_least_squares();
+    if (!rst) overall = false;
+
     // End
     if (overall) printf("NONLIN C TEST STATUS: PASS\n");
     else printf("NONLIN C TEST STATUS: FAILED\n");

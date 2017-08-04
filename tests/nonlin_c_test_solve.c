@@ -58,12 +58,88 @@ bool test_quasinewton() {
     x[1] = 1.0;
 
     // Compute the solution
-    solve_quasi_newton(fcn1, NULL, 2, x, f, &tol, NULL, &ib, NULL);
+    solve_quasi_newton(fcn1, jac1, 2, x, f, &tol, NULL, &ib, NULL);
 
     // Test
     if (!is_ans_1(x, test)) {
         rst = false;
         printf("Test Failed: Quasi-Newton, Sytem #1\nExpected: +/-(%f, %f)\nReceived: (%f, %f)\n",
+            ans1, ans2, x[0], x[1]);
+    }
+
+    // End
+    return rst;
+}
+
+
+
+bool test_newton() {
+    // Local Variables
+    const double test = 1.0e-6;
+    const double ans1 = 5.0;
+    const double ans2 = 3.0;
+
+    bool rst = true;
+    iteration_behavior ib;
+    solver_control tol;
+    double x[2], f[2];
+
+    // Set up tolerances
+    tol.max_evals = 500;
+    tol.fcn_tolerance = 1.0e-8;
+    tol.var_tolerances = 1.0e-12;
+    tol.grad_tolerances = 1.0e-12;
+    tol.print_status = false;
+
+    // Define an initial guess
+    x[0] = 1.0;
+    x[1] = 1.0;
+
+    // Compute the solution
+    solve_newton(fcn1, jac1, 2, x, f, &tol, NULL, &ib, NULL);
+
+    // Test
+    if (!is_ans_1(x, test)) {
+        rst = false;
+        printf("Test Failed: Newton, Sytem #1\nExpected: +/-(%f, %f)\nReceived: (%f, %f)\n",
+            ans1, ans2, x[0], x[1]);
+    }
+
+    // End
+    return rst;
+}
+
+
+
+bool test_least_squares() {
+    // Local Variables
+    const double test = 1.0e-6;
+    const double ans1 = 5.0;
+    const double ans2 = 3.0;
+
+    bool rst = true;
+    iteration_behavior ib;
+    solver_control tol;
+    double x[2], f[2];
+
+    // Set up tolerances
+    tol.max_evals = 500;
+    tol.fcn_tolerance = 1.0e-8;
+    tol.var_tolerances = 1.0e-12;
+    tol.grad_tolerances = 1.0e-12;
+    tol.print_status = false;
+
+    // Define an initial guess
+    x[0] = 1.0;
+    x[1] = 1.0;
+
+    // Compute the solution
+    solve_nl_least_squares(fcn1, jac1, 2, 2, x, f, &tol, &ib, NULL);
+
+    // Test
+    if (!is_ans_1(x, test)) {
+        rst = false;
+        printf("Test Failed: Levenberg-Marquardt, Sytem #1\nExpected: +/-(%f, %f)\nReceived: (%f, %f)\n",
             ans1, ans2, x[0], x[1]);
     }
 
