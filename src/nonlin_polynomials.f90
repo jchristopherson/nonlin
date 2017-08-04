@@ -812,4 +812,87 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
+    !
+    function poly_poly_mult(x, y) result(z)
+        ! Arguments
+        class(polynomial), intent(in) :: x, y
+        type(polynomial) :: z
+    end function
+
+! ------------------------------------------------------------------------------
+
+! Example Polynomial Code (Coefficients go from lowest order to highest)
+! src: https://github.com/JuliaMath/Polynomials.jl
+!
+! function *{T,S}(p1::Poly{T}, p2::Poly{S})
+!     if p1.var != p2.var
+!         error("Polynomials must have same variable")
+!     end
+!     R = promote_type(T,S)
+!     n = length(p1)-1
+!     m = length(p2)-1
+!     a = zeros(R,m+n+1)
+
+!     for i = 0:n
+!         for j = 0:m
+!             a[i+j+1] += p1[i] * p2[j]
+!         end
+!     end
+!     Poly(a,p1.var)
+! end
+
+! ## older . operators, hack to avoid warning on v0.6
+! dot_operators = quote
+!     @compat Base.:.+{T<:Number}(c::T, p::Poly) = +(p, c)
+!     @compat Base.:.+{T<:Number}(p::Poly, c::T) = +(p, c)
+!     @compat Base.:.-{T<:Number}(p::Poly, c::T) = +(p, -c)
+!     @compat Base.:.-{T<:Number}(c::T, p::Poly) = +(p, -c)
+!     @compat Base.:.*{T<:Number,S}(c::T, p::Poly{S}) = Poly(c * p.a, p.var)
+!     @compat Base.:.*{T<:Number,S}(p::Poly{S}, c::T) = Poly(p.a * c, p.var)
+! end
+! VERSION < v"0.6.0-dev" && eval(dot_operators)
+
+
+! # are any values NaN
+! hasnan(p::Poly) = reduce(|, (@compat isnan.(p.a)))
+
+! function divrem{T, S}(num::Poly{T}, den::Poly{S})
+!     if num.var != den.var
+!         error("Polynomials must have same variable")
+!     end
+!     m = length(den)-1
+!     if m == 0 && den[0] == 0
+!         throw(DivideError())
+!     end
+!     R = typeof(one(T)/one(S))
+!     n = length(num)-1
+!     deg = n-m+1
+!     if deg <= 0
+!         return convert(Poly{R}, zero(num)), convert(Poly{R}, num)
+!     end
+
+!     aQ = zeros(R, deg)
+!     # aR = deepcopy(num.a)
+!     # @show num.a
+!     aR = R[ num.a[i] for i = 1:n+1 ]
+!     for i = n:-1:m
+!         quot = aR[i+1] / den[m]
+!         aQ[i-m+1] = quot
+!         for j = 0:m
+!             elem = den[j]*quot
+!             aR[i-(m-j)+1] -= elem
+!         end
+!     end
+!     pQ = Poly(aQ, num.var)
+!     pR = Poly(aR, num.var)
+
+!     return pQ, pR
+! end
+
+! div(num::Poly, den::Poly) = divrem(num, den)[1]
+! rem(num::Poly, den::Poly) = divrem(num, den)[2]
+
+! ==(p1::Poly, p2::Poly) = (p1.var == p2.var && p1.a == p2.a)
+! ==(p1::Poly, n::Number) = (coeffs(p1) == [n])
+! ==(n::Number, p1::Poly) = (p1 == n)
 end module
