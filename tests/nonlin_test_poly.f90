@@ -199,4 +199,55 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
+    ! Tests the polynomial multiplication routine
+    function test_poly_multiply() result(check)
+        ! Local Variables
+        logical :: check
+        type(polynomial) :: p1, p2, p3, ans
+        real(dp), allocatable, dimension(:) :: a, b
+        real(dp), parameter :: tol = 1.0d-8
+
+        ! Initialization
+        call p1%initialize(3)
+        call p2%initialize(2)
+        call ans%initialize(5)
+
+        ! Set p1 = 5 + 10x**2 + 6x**3
+        call p1%set(1, 5.0d0)
+        call p1%set(2, 0.0d0)
+        call p1%set(3, 10.0d0)
+        call p1%set(4, 6.0d0)
+
+        ! Set p2 = 1 + 2x + 4x**2
+        call p2%set(1, 1.0d0)
+        call p2%set(2, 2.0d0)
+        call p2%set(3, 4.0d0)
+
+        ! Answer: ans = 5 + 10x + 30x**2 + 26x**3 + 52x**4 + 24x**5
+        call ans%set(1, 5.0d0)
+        call ans%set(2, 10.0d0)
+        call ans%set(3, 30.0d0)
+        call ans%set(4, 26.0d0)
+        call ans%set(5, 52.0d0)
+        call ans%set(6, 24.0d0)
+
+        ! Compute p1 * p2 = p3
+        p3 = p1 * p2
+
+        ! Test
+        a = p3%get_all()
+        b = ans%get_all()
+        if (.not.is_mtx_equal(a, b, tol)) then
+            check = .false.
+            print '(A)', "Test Failed: Polynomial Multiplication"
+            print '(A)', "Expected:"
+            print *, b
+            print '(A)', "Computed:"
+            print *, a
+        else
+            check = .true.
+        end if
+    end function
+
+! ------------------------------------------------------------------------------
 end module

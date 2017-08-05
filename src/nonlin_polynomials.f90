@@ -841,8 +841,8 @@ contains
         ! Process
         do i = 1, n
             do j = 1, m
-                val = z%get(i + j) + x%get(i) * y%get(i)
-                call z%set(i + j, val)
+                val = z%get(i + j - 1) + x%get(i) * y%get(j)
+                call z%set(i + j - 1, val)
             end do
         end do
     end function

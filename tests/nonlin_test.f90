@@ -51,6 +51,9 @@ program main
     rst = test_poly_subtract()
     if (.not.rst) overall = .false.
 
+    rst = test_poly_multiply()
+    if (.not.rst) overall = .false.
+
     rst = test_nelder_mead_1()
     if (.not.rst) overall = .false.
 
