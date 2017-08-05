@@ -21,6 +21,7 @@ module nonlin_polynomials
 
 private
 public :: polynomial
+public :: operator(=)
 public :: operator(+)
 public :: operator(-)
 public :: operator(*)
@@ -28,6 +29,12 @@ public :: operator(*)
 ! ******************************************************************************
 ! INTERFACES
 ! ------------------------------------------------------------------------------
+!> @brief Defines polynomial assignment.
+interface operator(=)
+    module procedure :: poly_equals
+    module procedure :: poly_dbl_equals
+end interface
+
 !> @brief Defines polynomial addition.
 interface operator(+)
     module procedure :: poly_poly_add
@@ -704,6 +711,47 @@ contains
 ! ******************************************************************************
 ! OPERATORS
 ! ------------------------------------------------------------------------------
+    !> @brief Assigns the contents of one polynomial to another.
+    !!
+    !! @param[out] x The assignee.
+    !! @param[int] y The polynomial to copy
+    subroutine poly_equals(x, y)
+        ! Arguments
+        class(polynomial), intent(out) :: x
+        class(polynomial), intent(in) :: y
+
+        ! Local Variables
+        integer(i32) :: i, ord
+
+        ! Process
+        ord = y%order()
+        call x%initialize(ord)
+        do i = 1, ord + 1
+            call x%set(i, y%get(i))
+        end do
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Assigns a number to each coefficient of the polynomial.
+    !!
+    !! @param[in,out] x The assignee.
+    !! @param[in] y The value to assign.
+    subroutine poly_dbl_equals(x, y)
+        ! Arguments
+        class(polynomial), intent(inout) :: x
+        real(dp) :: y
+
+        ! Local Variables
+        integer(i32) :: i, ord
+
+        ! Process
+        ord = x%order()
+        do i = 1, ord + 1
+            call x%set(i, y)
+        end do
+    end subroutine
+
+! ------------------------------------------------------------------------------
     !> @brief Adds two polynomials.
     !!
     !! @param[in] x The left-hand-side argument.
@@ -846,6 +894,10 @@ contains
             end do
         end do
     end function
+
+! ------------------------------------------------------------------------------
+
+! ------------------------------------------------------------------------------
 
 ! ------------------------------------------------------------------------------
 
