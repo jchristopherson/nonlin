@@ -21,7 +21,7 @@ module nonlin_polynomials
 
 private
 public :: polynomial
-public :: operator(=)
+public :: assignment(=)
 public :: operator(+)
 public :: operator(-)
 public :: operator(*)
@@ -30,7 +30,7 @@ public :: operator(*)
 ! INTERFACES
 ! ------------------------------------------------------------------------------
 !> @brief Defines polynomial assignment.
-interface operator(=)
+interface assignment(=)
     module procedure :: poly_equals
     module procedure :: poly_dbl_equals
 end interface
@@ -717,7 +717,7 @@ contains
     !! @param[int] y The polynomial to copy
     subroutine poly_equals(x, y)
         ! Arguments
-        class(polynomial), intent(out) :: x
+        class(polynomial), intent(inout) :: x
         class(polynomial), intent(in) :: y
 
         ! Local Variables
@@ -725,7 +725,7 @@ contains
 
         ! Process
         ord = y%order()
-        call x%initialize(ord)
+        if (x%order() /= ord) call x%initialize(ord)
         do i = 1, ord + 1
             call x%set(i, y%get(i))
         end do
@@ -739,7 +739,7 @@ contains
     subroutine poly_dbl_equals(x, y)
         ! Arguments
         class(polynomial), intent(inout) :: x
-        real(dp) :: y
+        real(dp), intent(in) :: y
 
         ! Local Variables
         integer(i32) :: i, ord
