@@ -23,6 +23,7 @@ private
 public :: polynomial
 public :: operator(+)
 public :: operator(-)
+public :: operator(*)
 
 ! ******************************************************************************
 ! INTERFACES
@@ -35,6 +36,11 @@ end interface
 !> @brief Defines polynomial subtraction.
 interface operator(-)
     module procedure :: poly_poly_subtract
+end interface
+
+!> @brief Defines polynomial multiplication
+interface operator(*)
+    module procedure :: poly_poly_mult
 end interface
 
 ! ******************************************************************************
@@ -812,11 +818,33 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !
+    !> @brief Multiplies two polynomials.
+    !!
+    !! @param[in] x The left-hand-side argument.
+    !! @param[in] y The right-hand-side argument.
+    !!
+    !! @return The resulting polynomial.
     function poly_poly_mult(x, y) result(z)
         ! Arguments
         class(polynomial), intent(in) :: x, y
         type(polynomial) :: z
+
+        ! Local Variables
+        integer(i32) :: i, j, m, n
+        real(dp) :: val
+
+        ! Initialization
+        n = x%order() + 1
+        m = y%order() + 1
+        call z%initialize(x%order() + y%order()) ! Sets z to all zeros
+
+        ! Process
+        do i = 1, n
+            do j = 1, m
+                val = z%get(i + j) + x%get(i) * y%get(i)
+                call z%set(i + j, val)
+            end do
+        end do
     end function
 
 ! ------------------------------------------------------------------------------
