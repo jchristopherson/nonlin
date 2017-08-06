@@ -48,6 +48,8 @@ end interface
 !> @brief Defines polynomial multiplication
 interface operator(*)
     module procedure :: poly_poly_mult
+    module procedure :: poly_dbl_mult
+    module procedure :: dbl_poly_mult
 end interface
 
 ! ******************************************************************************
@@ -896,8 +898,52 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
+    !> @brief Multiplies a polynomial by a scalar value.
+    !!
+    !! @param[in] x The polynomial.
+    !! @param[in] y The scalar value.
+    !! 
+    !! @return The resulting polynomial.
+    function poly_dbl_mult(x, y) result(z)
+        ! Arguments
+        class(polynomial), intent(in) :: x
+        real(dp), intent(in) :: y
+        type(polynomial) :: z
+
+        ! Local Variables
+        integer(i32) :: i, ord
+
+        ! Process
+        ord = x%order()
+        call z%initialize(ord)
+        do i = 1, ord + 1
+            call z%set(i, x%get(i) * y)
+        end do
+    end function
 
 ! ------------------------------------------------------------------------------
+    !> @brief Multiplies a polynomial by a scalar value.
+    !!
+    !! @param[in] x The scalar value.
+    !! @param[in] y The polynomial.
+    !! 
+    !! @return The resulting polynomial.
+    function dbl_poly_mult(x, y) result(z)
+        ! Arguments
+        real(dp), intent(in) :: x
+        class(polynomial), intent(in) :: y
+        type(polynomial) :: z
+
+        ! Local Variables
+        integer(i32) :: i, ord
+
+        ! Process
+        ord = y%order()
+        call z%initialize(ord)
+        do i = 1, ord + 1
+            call z%set(i, y%get(i) * x)
+        end do
+    end function
 
 ! ------------------------------------------------------------------------------
 
