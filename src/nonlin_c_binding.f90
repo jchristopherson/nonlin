@@ -1201,7 +1201,7 @@ contains
         call get_polynomial(dst, y)
         if (.not.allocated(x) .or. .not.allocated(y)) return
         y = x
-        call update_polynomial(y, rst)
+        call update_polynomial(y, dst)
     end subroutine
 
 ! ------------------------------------------------------------------------------
