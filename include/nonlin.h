@@ -458,6 +458,13 @@ void polynomial_subtract(const polynomial *p1, const polynomial *p2,
 void polynomial_multiply(const polynomial *p1, const polynomial *p2,
                          polynomial *rst);
 
+/** @brief Copies the contents of one polynomial object to another.
+ *
+ * @param src The source polynomial object.
+ * @param dst The destination polynomial.
+ */
+void polynomial_copy(const polynomial *src, polynomial *dst);
+
 #ifdef __cplusplus
 }
 #endif

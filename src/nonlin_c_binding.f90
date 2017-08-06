@@ -1184,6 +1184,25 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
+    !> @brief Copies the contents of one polynomial object to another.
+    !!
+    !! @param[in] src The source polynomial object.
+    !! @param[out] dst The destination polynomial.
+    subroutine polynomial_copy(src, dst) bind(C, name = "polynomial_copy")
+        ! Arguments
+        type(c_polynomial), intent(in) :: src
+        type(c_polynomial), intent(out) :: dst
+
+        ! Local Variables
+        class(polynomial), allocatable :: x, y
+
+        ! Process
+        call get_polynomial(src, x)
+        call get_polynomial(dst, y)
+        if (.not.allocated(x) .or. .not.allocated(y)) return
+        y = x
+        call update_polynomial(y, rst)
+    end subroutine
 
 ! ------------------------------------------------------------------------------
 
