@@ -431,6 +431,33 @@ double get_polynomial_coefficient(const polynomial *poly, int ind,
 void set_polynomial_coefficient(polynomial *poly, int ind, double x,
                                 errorhandler *err);
 
+/** @brief Adds two polynomials.
+ *
+ * @param p1 The left-hand-side argument.
+ * @param p2 The right-hand-side argument.
+ * @param rst The resulting polynomial.
+ */
+void polynomial_add(const polynomial *p1, const polynomial *p2, 
+                    polynomial *rst);
+
+/** @brief Subtracts two polynomials.
+ *
+ * @param p1 The left-hand-side argument.
+ * @param p2 The right-hand-side argument.
+ * @param rst The resulting polynomial.
+ */
+void polynomial_subtract(const polynomial *p1, const polynomial *p2, 
+                         polynomial *rst);
+
+/** @brief Multiplies two polynomials.
+ *
+ * @param p1 The left-hand-side argument.
+ * @param p2 The right-hand-side argument.
+ * @param rst The resulting polynomial.
+ */
+void polynomial_multiply(const polynomial *p1, const polynomial *p2,
+                         polynomial *rst);
+
 #ifdef __cplusplus
 }
 #endif

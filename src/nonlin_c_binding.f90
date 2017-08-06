@@ -1110,4 +1110,82 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
+    !> @brief Adds two polynomials.
+    !!
+    !! @param[in] p1 The left-hand-side argument.
+    !! @param[in] p2 The right-hand-side argument.
+    !! @param[out] rst The resulting polynomial.
+    subroutine polynomial_add(p1, p2, rst) bind(C, name = "polynomial_add")
+        ! Arguments
+        type(c_polynomial), intent(in) :: p1, p2
+        type(c_polynomial), intent(out) :: rst
+
+        ! Local Variables
+        class(polynomial), allocatable :: x, y, z
+
+        ! Process
+        call get_polynomial(p1, x)
+        call get_polynomial(p2, y)
+        call get_polynomial(rst, z)
+        if (.not.allocated(x) .or. .not.allocated(y) .or. .not.allocated(z)) &
+            return
+        z = x + y
+        call update_polynomial(z, rst)
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Subtracts two polynomials.
+    !!
+    !! @param[in] p1 The left-hand-side argument.
+    !! @param[in] p2 The right-hand-side argument.
+    !! @param[out] rst The resulting polynomial.
+    subroutine polynomial_subtract(p1, p2, rst) &
+            bind(C, name = "polynomial_subtract")
+        ! Arguments
+        type(c_polynomial), intent(in) :: p1, p2
+        type(c_polynomial), intent(out) :: rst
+
+        ! Local Variables
+        class(polynomial), allocatable :: x, y, z
+
+        ! Process
+        call get_polynomial(p1, x)
+        call get_polynomial(p2, y)
+        call get_polynomial(rst, z)
+        if (.not.allocated(x) .or. .not.allocated(y) .or. .not.allocated(z)) &
+            return
+        z = x - y
+        call update_polynomial(z, rst)
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Multiplies two polynomials.
+    !!
+    !! @param[in] p1 The left-hand-side argument.
+    !! @param[in] p2 The right-hand-side argument.
+    !! @param[out] rst The resulting polynomial.
+    subroutine polynomial_multiply(p1, p2, rst) &
+            bind(C, name = "polynomial_multiply")
+        ! Arguments
+        type(c_polynomial), intent(in) :: p1, p2
+        type(c_polynomial), intent(out) :: rst
+
+        ! Local Variables
+        class(polynomial), allocatable :: x, y, z
+
+        ! Process
+        call get_polynomial(p1, x)
+        call get_polynomial(p2, y)
+        call get_polynomial(rst, z)
+        if (.not.allocated(x) .or. .not.allocated(y) .or. .not.allocated(z)) &
+            return
+        z = x * y
+        call update_polynomial(z, rst)
+    end subroutine
+
+! ------------------------------------------------------------------------------
+
+! ------------------------------------------------------------------------------
+
+! ------------------------------------------------------------------------------
 end module
