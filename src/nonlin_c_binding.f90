@@ -747,6 +747,37 @@ contains
         end if
     end subroutine
 
+! ------------------------------------------------------------------------------
+    !> @brief Sets defaults for the solver_control type.
+    !!
+    !! @param[out] tol The solver_control object.
+    subroutine set_nonlin_defaults(tol) bind(C, name = "set_nonlin_defaults")
+        ! Arguments
+        type(solver_control), intent(out) :: tol
+
+        ! Process
+        tol%max_evals = 100
+        tol%fcn_tolerance = 1.0d-8
+        tol%var_tolerance = 1.0d-12
+        tol%grad_tolerance = 1.0d-12
+        tol%print_status = .false.
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Sets defaults for the line_search_control type.
+    !!
+    !! @param[out] ls The line_search_control object.
+    subroutine set_nonlin_ls_defaults(ls) &
+            bind(C, name = "set_nonlin_ls_defaults")
+        ! Arguments
+        type(line_search_control), intent(out) :: ls
+
+        ! Process
+        ls%max_evals = 100
+        ls%alpha = 1.0d-4
+        ls%factor = 0.1d0
+    end subroutine
+
 ! ******************************************************************************
 ! OPTIMIZATION ROUTINES
 ! ------------------------------------------------------------------------------

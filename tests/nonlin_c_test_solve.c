@@ -82,21 +82,19 @@ bool test_newton() {
     bool rst = true;
     iteration_behavior ib;
     solver_control tol;
+    line_search_control ls;
     double x[2], f[2];
 
     // Set up tolerances
-    tol.max_evals = 500;
-    tol.fcn_tolerance = 1.0e-8;
-    tol.var_tolerances = 1.0e-12;
-    tol.grad_tolerances = 1.0e-12;
-    tol.print_status = false;
+    set_nonlin_defaults(&tol);
+    set_nonlin_ls_defaults(&ls);
 
     // Define an initial guess
     x[0] = 1.0;
     x[1] = 1.0;
 
     // Compute the solution
-    solve_newton(fcn1, jac1, 2, x, f, &tol, NULL, &ib, NULL);
+    solve_newton(fcn1, jac1, 2, x, f, &tol, &ls, &ib, NULL);
 
     // Test
     if (!is_ans_1(x, test)) {

@@ -293,6 +293,20 @@ void solve_nl_least_squares(vecfcn fcn, jacobianfcn jac, int neqn, int nvar,
                             double *x, double *fvec, const solver_control *tol,
                             iteration_behavior *ib, errorhandler *err);
 
+/** @brief Sets defaults for the solver_control type.
+ *
+ * @param tol The solver_control object.
+ */
+void set_nonlin_defaults(solver_control *tol);
+
+/** @brief Sets defaults for the line_search_control type.
+ *
+ * @param ls The line_search_control object.
+ */
+ void set_nonlin_ls_defaults(line_search_control *ls);
+
+
+
 
 
 
