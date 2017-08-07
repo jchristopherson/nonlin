@@ -800,15 +800,66 @@ contains
         type(c_polynomial), intent(out) :: obj
         integer(i32), intent(in), value :: order
 
+        ! ! Local Variables
+        ! integer(c_short), allocatable, target, dimension(:) :: temp
+        ! integer(c_short), pointer, dimension(:) :: tgt
+        ! type(polynomial) :: poly
+
+        ! ! Process
+        ! call poly%initialize(order)
+        ! temp = transfer(poly, temp)
+        ! obj%n = size(temp)
+        ! allocate(tgt(obj%n))
+        ! tgt = temp
+        ! obj%ptr = c_loc(tgt(1))
+
         ! Local Variables
-        integer(c_short), allocatable, target, dimension(:) :: temp
-        type(polynomial) :: poly
+        type(polynomial), pointer :: poly
 
         ! Process
+        allocate(poly)
         call poly%initialize(order)
-        temp = transfer(poly, temp)
-        obj%n = size(temp)
-        obj%ptr = c_loc(temp(1))
+        obj%ptr = c_loc(poly)
+        obj%n = sizeof(poly)
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Frees resources held by a c_polynomial object.
+    !!
+    !! @param[in,out] obj The c_polynomial object.
+    subroutine free_polynomial(obj) bind(C, name = "free_polynomial")
+        ! Arguments
+        type(c_polynomial), intent(inout), target :: obj
+        
+        ! ! Local Variables
+        ! integer(c_short), pointer, dimension(:) :: temp
+        ! type(c_ptr) :: testptr
+
+        ! ! Process
+        ! testptr = c_loc(obj)
+        ! if (.not.c_associated(testptr)) return
+        ! if (.not.c_associated(obj%ptr)) return
+        ! if (obj%n == 0) return
+        ! call c_f_pointer(obj%ptr, temp, shape = [obj%n])
+        ! if (associated(temp)) then
+        !     deallocate(temp)
+        ! end if
+        ! obj%n = 0
+        ! obj%ptr = c_null_ptr
+
+        ! Local Variables
+        type(c_ptr) :: testptr
+        type(polynomial), pointer :: poly
+
+        ! Process
+        testptr = c_loc(obj)
+        if (.not.c_associated(testptr)) return
+        if (.not.c_associated(obj%ptr)) return
+        if (obj%n == 0) return
+        call c_f_pointer(obj%ptr, poly)
+        if (associated(poly)) deallocate(poly)
+        obj%n = 0
+        obj%ptr = c_null_ptr
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -820,39 +871,54 @@ contains
     subroutine get_polynomial(obj, poly)
         ! Arguments
         type(c_polynomial), intent(in), target :: obj
-        class(polynomial), intent(out), allocatable :: poly
+        type(polynomial), intent(out), pointer :: poly
+
+        ! ! Local Variables
+        ! integer(c_short), pointer, dimension(:) :: temp
+        ! type(polynomial) :: item
+        ! type(c_ptr) :: testptr
+
+        ! ! Process
+        ! testptr = c_loc(obj) ! Ensures that obj wasn't passed as NULL from C
+        ! if (.not.c_associated(testptr)) return
+        ! if (.not.c_associated(obj%ptr)) return
+        ! call c_f_pointer(obj%ptr, temp, shape = [obj%n])
+        ! item = transfer(temp, item)
+        ! allocate(poly, source = item)
 
         ! Local Variables
-        integer(c_short), pointer, dimension(:) :: temp
-        type(polynomial) :: item
         type(c_ptr) :: testptr
 
         ! Process
-        testptr = c_loc(obj) ! Ensures that obj wasn't passed as NULL from C
+        testptr = c_loc(obj)
         if (.not.c_associated(testptr)) return
         if (.not.c_associated(obj%ptr)) return
-        call c_f_pointer(obj%ptr, temp, shape = [obj%n])
-        item = transfer(temp, item)
-        allocate(poly, source = item)
+        if (obj%n == 0) return
+        call c_f_pointer(obj%ptr, poly)
     end subroutine
 
 ! ------------------------------------------------------------------------------
     !> @brief Updates the c_polynomial object.
     !!
     !! @param[in] poly The polynomial object.
-    !! @param[out] cobj The c_polynomial object to update.
+    !! @param[in,out] cobj The c_polynomial object to update.  Necessary clean
+    !!  up operations are also performed.
     subroutine update_polynomial(poly, cobj)
         ! Arguments
         class(polynomial), intent(in) :: poly
-        type(c_polynomial), intent(out) :: cobj
+        type(c_polynomial), intent(inout) :: cobj
 
         ! Local Variables
         integer(c_short), allocatable, target, dimension(:) :: temp
+        integer(c_short), pointer, dimension(:) :: tgt
 
         ! Process
-        temp = transfer(poly, temp)
-        cobj%n = size(temp)
-        cobj%ptr = c_loc(temp(1))
+        ! call free_polynomial(cobj)
+        ! temp = transfer(poly, temp)
+        ! cobj%n = size(temp)
+        ! allocate(tgt(cobj%n))
+        ! tgt = temp
+        ! cobj%ptr = c_loc(tgt(1))
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -867,12 +933,12 @@ contains
         integer(i32) :: n
 
         ! Local Variables
-        class(polynomial), allocatable :: pptr
+        type(polynomial), pointer :: pptr
 
         ! Process
         n = 0
         call get_polynomial(poly, pptr)
-        if (.not.allocated(pptr)) return
+        if (.not.associated(pptr)) return
         n = pptr%order()
     end function
 
@@ -905,11 +971,11 @@ contains
 
         ! Local Variables
         class(errors), allocatable :: eptr
-        class(polynomial), allocatable :: pptr
+        type(polynomial), pointer :: pptr
 
         ! Process
         call get_polynomial(poly, pptr)
-        if (.not.allocated(pptr)) return
+        if (.not.associated(pptr)) return
         call get_errorhandler(err, eptr)
         if (allocated(eptr)) then
             call pptr%fit(x, y, order, eptr)
@@ -917,7 +983,7 @@ contains
         else
             call pptr%fit(x, y, order)
         end if
-        call update_polynomial(pptr, poly)
+        ! call update_polynomial(pptr, poly)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -950,11 +1016,11 @@ contains
 
         ! Local Variables
         class(errors), allocatable :: eptr
-        class(polynomial), allocatable :: pptr
+        type(polynomial), pointer :: pptr
 
         ! Process
         call get_polynomial(poly, pptr)
-        if (.not.allocated(pptr)) return
+        if (.not.associated(pptr)) return
         call get_errorhandler(err, eptr)
         if (allocated(eptr)) then
             call pptr%fit_thru_zero(x, y, order, eptr)
@@ -962,7 +1028,7 @@ contains
         else
             call pptr%fit_thru_zero(x, y, order)
         end if
-        call update_polynomial(pptr, poly)
+        ! call update_polynomial(pptr, poly)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -983,11 +1049,11 @@ contains
         real(dp), intent(out) :: y(n)
 
         ! Local Variables
-        class(polynomial), allocatable :: pptr
+        type(polynomial), pointer :: pptr
 
         ! Process
         call get_polynomial(poly, pptr)
-        if (.not.allocated(pptr)) return
+        if (.not.associated(pptr)) return
         y = pptr%evaluate(x)
     end subroutine
 
@@ -1009,11 +1075,11 @@ contains
         complex(dp), intent(out) :: y(n)
 
         ! Local Variables
-        class(polynomial), allocatable :: pptr
+        type(polynomial), pointer :: pptr
 
         ! Process
         call get_polynomial(poly, pptr)
-        if (.not.allocated(pptr)) return
+        if (.not.associated(pptr)) return
         y = pptr%evaluate(x)
     end subroutine
 
@@ -1042,14 +1108,14 @@ contains
         type(errorhandler), intent(inout) :: err
 
         ! Local Variables
-        class(polynomial), allocatable :: pptr
+        type(polynomial), pointer :: pptr
         class(errors), allocatable :: eptr
         complex(dp), allocatable, dimension(:) :: roots
         integer(i32) :: m
 
         ! Process
         call get_polynomial(poly, pptr)
-        if (.not.allocated(pptr)) return
+        if (.not.associated(pptr)) return
         call get_errorhandler(err, eptr)
         if (allocated(eptr)) then
             roots = pptr%roots(eptr)
@@ -1084,13 +1150,13 @@ contains
         real(dp) :: x
 
         ! Local Variables
-        class(polynomial), allocatable :: pptr
+        type(polynomial), pointer :: pptr
         class(errors), allocatable :: eptr
 
         ! Process
         x = 0.0d0
         call get_polynomial(poly, pptr)
-        if (.not.allocated(pptr)) return
+        if (.not.associated(pptr)) return
         call get_errorhandler(err, eptr)
         if (allocated(eptr)) then
             x = pptr%get(ind, eptr)
@@ -1124,12 +1190,12 @@ contains
         type(errorhandler), intent(inout) :: err
 
         ! Local Variables
-        class(polynomial), allocatable :: pptr
+        type(polynomial), pointer :: pptr
         class(errors), allocatable :: eptr
 
         ! Process
         call get_polynomial(poly, pptr)
-        if (.not.allocated(pptr)) return
+        if (.not.associated(pptr)) return
         call get_errorhandler(err, eptr)
         if (allocated(eptr)) then
             call pptr%set(ind, x, eptr)
@@ -1137,7 +1203,7 @@ contains
         else
             call pptr%set(ind, x)
         end if
-        call update_polynomial(pptr, poly)
+        ! call update_polynomial(pptr, poly)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -1152,16 +1218,16 @@ contains
         type(c_polynomial), intent(out) :: rst
 
         ! Local Variables
-        class(polynomial), allocatable :: x, y, z
+        type(polynomial), pointer :: x, y, z
 
         ! Process
         call get_polynomial(p1, x)
         call get_polynomial(p2, y)
         call get_polynomial(rst, z)
-        if (.not.allocated(x) .or. .not.allocated(y) .or. .not.allocated(z)) &
+        if (.not.associated(x) .or. .not.associated(y) .or. .not.associated(z)) &
             return
         z = x + y
-        call update_polynomial(z, rst)
+        ! call update_polynomial(z, rst)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -1177,16 +1243,16 @@ contains
         type(c_polynomial), intent(out) :: rst
 
         ! Local Variables
-        class(polynomial), allocatable :: x, y, z
+        type(polynomial), pointer :: x, y, z
 
         ! Process
         call get_polynomial(p1, x)
         call get_polynomial(p2, y)
         call get_polynomial(rst, z)
-        if (.not.allocated(x) .or. .not.allocated(y) .or. .not.allocated(z)) &
+        if (.not.associated(x) .or. .not.associated(y) .or. .not.associated(z)) &
             return
         z = x - y
-        call update_polynomial(z, rst)
+        ! call update_polynomial(z, rst)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -1202,16 +1268,16 @@ contains
         type(c_polynomial), intent(out) :: rst
 
         ! Local Variables
-        class(polynomial), allocatable :: x, y, z
+        type(polynomial), pointer :: x, y, z
 
         ! Process
         call get_polynomial(p1, x)
         call get_polynomial(p2, y)
         call get_polynomial(rst, z)
-        if (.not.allocated(x) .or. .not.allocated(y) .or. .not.allocated(z)) &
+        if (.not.associated(x) .or. .not.associated(y) .or. .not.associated(z)) &
             return
         z = x * y
-        call update_polynomial(z, rst)
+        ! call update_polynomial(z, rst)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -1225,14 +1291,14 @@ contains
         type(c_polynomial), intent(out) :: dst
 
         ! Local Variables
-        class(polynomial), allocatable :: x, y
+        type(polynomial), pointer :: x, y
 
         ! Process
         call get_polynomial(src, x)
         call get_polynomial(dst, y)
-        if (.not.allocated(x) .or. .not.allocated(y)) return
+        if (.not.associated(x) .or. .not.associated(y)) return
         y = x
-        call update_polynomial(y, dst)
+        ! call update_polynomial(y, dst)
     end subroutine
 
 ! ------------------------------------------------------------------------------

@@ -312,10 +312,16 @@ void set_nonlin_defaults(solver_control *tol);
 
 /** @brief Initializes a new polynomial object.
  *
- * @param obj The polynomial object to initialize.
+ * @param poly The polynomial object to initialize.
  * @param order The order of the polynomial.  This value must be > 0.
  */
 void alloc_polynomial(polynomial *poly, int order);
+
+/** @brief Frees resources held by a polynomial object.
+ *
+ * @param obj The polynomial object.
+ */
+void free_polynomial(polynomial *poly);
 
 /** @brief Gets the order of the polynomial.
  *
