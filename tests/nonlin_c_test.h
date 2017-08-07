@@ -18,4 +18,8 @@ bool test_quasinewton();
 bool test_newton();
 bool test_least_squares();
 
+// Polynomial Test Routines
+bool test_poly_roots();
+bool test_poly_multiply();
+
 #endif
