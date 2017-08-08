@@ -34,6 +34,7 @@ bool test_poly_roots() {
     }
 
     // End
+    free_polynomial(&p);
     return rst;
 }
 
@@ -73,5 +74,8 @@ bool test_poly_multiply() {
 
 
     // End
+    free_polynomial(&x);
+    free_polynomial(&y);
+    free_polynomial(&z);
     return rst;
 }

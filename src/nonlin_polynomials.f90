@@ -63,29 +63,29 @@ private
     real(dp), allocatable, dimension(:) :: m_coeffs
 contains
     !> @brief Initializes the polynomial instance.
-    procedure, public :: initialize => init_polynomial
+    procedure, public :: initialize => init_poly
     !> @brief Returns the order of the polynomial object.
-    procedure, public :: order => get_polynomial_order
+    procedure, public :: order => get_poly_order
     !> @brief Fits a polynomial of the specified order to a data set.
-    procedure, public :: fit => polynomial_fit
+    procedure, public :: fit => poly_fit
     !> @brief Fits a polynomial of the specified order that passes through zero
     !! to a data set.
-    procedure, public :: fit_thru_zero => polynomial_fit_thru_zero
+    procedure, public :: fit_thru_zero => poly_fit_thru_zero
     !> @brief Evaluates a polynomial at the specified points.
     generic, public :: evaluate => evaluate_real, evaluate_complex
     !> @brief Returns the companion matrix for the polynomial.
-    procedure, public :: companion_mtx => polynomial_companion_mtx
+    procedure, public :: companion_mtx => poly_companion_mtx
     !> @brief Computes all the roots of a polynomial.
-    procedure, public :: roots => polynomial_roots
+    procedure, public :: roots => poly_roots
     !> @brief Gets the requested polynomial coefficient.
-    procedure, public :: get => get_polynomial_coefficient
+    procedure, public :: get => get_poly_coefficient
     !> @brief Gets an array containing all the coefficients of the polynomial.
-    procedure, public :: get_all => get_polynomial_coefficients
+    procedure, public :: get_all => get_poly_coefficients
     !> @brief Sets the requested polynomial coefficient by index.
-    procedure, public :: set => set_polynomial_coefficient
+    procedure, public :: set => set_poly_coefficient
 
-    procedure :: evaluate_real => polynomial_eval_double
-    procedure :: evaluate_complex => polynomial_eval_complex
+    procedure :: evaluate_real => poly_eval_double
+    procedure :: evaluate_complex => poly_eval_complex
 end type
 
 contains
@@ -105,7 +105,7 @@ contains
     !!  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
     !!      was specified.
     !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
-    subroutine init_polynomial(this, order, err)
+    subroutine init_poly(this, order, err)
         ! Arguments
         class(polynomial), intent(inout) :: this
         integer(i32), intent(in) :: order
@@ -155,7 +155,7 @@ contains
     !!
     !! @return The order of the polynomial.  Returns -1 in the event no
     !! polynomial coefficients have been defined.
-    pure function get_polynomial_order(this) result(n)
+    pure function get_poly_order(this) result(n)
         class(polynomial), intent(in) :: this
         integer(i32) :: n
         if (.not.allocated(this%m_coeffs)) then
@@ -236,7 +236,7 @@ contains
     !! c3 =  1.064762822
     !! Residual: .5064E+00
     !! @endcode
-    subroutine polynomial_fit(this, x, y, order, err)
+    subroutine poly_fit(this, x, y, order, err)
         ! Arguments
         class(polynomial), intent(inout) :: this
         real(dp), intent(in), dimension(:) :: x
@@ -327,7 +327,7 @@ contains
     !!      was specified, or if order is too large for the data set.
     !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
     !!  - NL_ARRAY_SIZE_ERROR: Occurs if @p x and @p y are different sizes.
-    subroutine polynomial_fit_thru_zero(this, x, y, order, err)
+    subroutine poly_fit_thru_zero(this, x, y, order, err)
         ! Arguments
         class(polynomial), intent(inout) :: this
         real(dp), intent(in), dimension(:) :: x
@@ -404,7 +404,7 @@ contains
     !! @param[in] x The value(s) at which to evaluate the polynomial.
     !!
     !! @return The value(s) of the polynomial at @p x.
-    elemental function polynomial_eval_double(this, x) result(y)
+    elemental function poly_eval_double(this, x) result(y)
         ! Arguments
         class(polynomial), intent(in) :: this
         real(dp), intent(in) :: x
@@ -441,7 +441,7 @@ contains
     !! @param[in] x The value(s) at which to evaluate the polynomial.
     !!
     !! @return The value(s) of the polynomial at @p x.
-    elemental function polynomial_eval_complex(this, x) result(y)
+    elemental function poly_eval_complex(this, x) result(y)
         ! Arguments
         class(polynomial), intent(in) :: this
         complex(dp), intent(in) :: x
@@ -481,7 +481,7 @@ contains
     !! @par See Also
     !! - [Wikipedia](https://en.wikipedia.org/wiki/Companion_matrix)
     !! - [Wolfram MathWorld](http://mathworld.wolfram.com/CompanionMatrix.html)
-    pure function polynomial_companion_mtx(this) result(c)
+    pure function poly_companion_mtx(this) result(c)
         ! Arguments
         class(polynomial), intent(in) :: this
         real(dp), dimension(this%order(), this%order()) :: c
@@ -566,7 +566,7 @@ contains
     !! (0.644E-14, -.100E-13)
     !! (0.644E-14, 0.100E-13)
     !! @endcode
-    function polynomial_roots(this, err) result(z)
+    function poly_roots(this, err) result(z)
         ! Arguments
         class(polynomial), intent(in) :: this
         complex(dp), dimension(this%order()) :: z
@@ -607,7 +607,7 @@ contains
     !!      polynomial coefficients.
     !!
     !! @return The requested coefficient.
-    function get_polynomial_coefficient(this, ind, err) result(c)
+    function get_poly_coefficient(this, ind, err) result(c)
         ! Arguments
         class(polynomial), intent(in) :: this
         integer(i32), intent(in) :: ind
@@ -650,7 +650,7 @@ contains
     !! @param[in] this The polynomial object.
     !!
     !! @return The array of coefficients.
-    pure function get_polynomial_coefficients(this) result(c)
+    pure function get_poly_coefficients(this) result(c)
         ! Arguments
         class(polynomial), intent(in) :: this
         real(dp), dimension(this%order() + 1) :: c
@@ -676,7 +676,7 @@ contains
     !! - INVALID_INPUT_ERROR: Occurs if the requested index is less than or
     !!      equal to zero, or if the requested index exceeds the number of
     !!      polynomial coefficients.
-    subroutine set_polynomial_coefficient(this, ind, c, err)
+    subroutine set_poly_coefficient(this, ind, c, err)
         ! Arguments
         class(polynomial), intent(inout) :: this
         integer(i32), intent(in) :: ind

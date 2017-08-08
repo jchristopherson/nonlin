@@ -104,10 +104,10 @@ end interface
 ! ------------------------------------------------------------------------------
     !> @brief A C compatible type encapsulating a polynomial object.
     type, bind(C) :: c_polynomial
-        !> @brief The size of the polynomial object, in bytes.
-        integer(i32) :: n
         !> @brief A pointer to the polynomial object.
         type(c_ptr) :: ptr
+        !> @brief The size of the polynomial object, in bytes.
+        integer(i32) :: n
     end type
 
 ! ------------------------------------------------------------------------------
@@ -830,7 +830,7 @@ contains
     subroutine free_polynomial(obj) bind(C, name = "free_polynomial")
         ! Arguments
         type(c_polynomial), intent(inout), target :: obj
-        
+
         ! ! Local Variables
         ! integer(c_short), pointer, dimension(:) :: temp
         ! type(c_ptr) :: testptr
@@ -863,7 +863,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Retrieves the polynomial object from the C compatible 
+    !> @brief Retrieves the polynomial object from the C compatible
     !! c_polynomial data structure.
     !!
     !! @param[in] obj The C compatible c_polynomial data structure.
@@ -895,30 +895,6 @@ contains
         if (.not.c_associated(obj%ptr)) return
         if (obj%n == 0) return
         call c_f_pointer(obj%ptr, poly)
-    end subroutine
-
-! ------------------------------------------------------------------------------
-    !> @brief Updates the c_polynomial object.
-    !!
-    !! @param[in] poly The polynomial object.
-    !! @param[in,out] cobj The c_polynomial object to update.  Necessary clean
-    !!  up operations are also performed.
-    subroutine update_polynomial(poly, cobj)
-        ! Arguments
-        class(polynomial), intent(in) :: poly
-        type(c_polynomial), intent(inout) :: cobj
-
-        ! Local Variables
-        integer(c_short), allocatable, target, dimension(:) :: temp
-        integer(c_short), pointer, dimension(:) :: tgt
-
-        ! Process
-        ! call free_polynomial(cobj)
-        ! temp = transfer(poly, temp)
-        ! cobj%n = size(temp)
-        ! allocate(tgt(cobj%n))
-        ! tgt = temp
-        ! cobj%ptr = c_loc(tgt(1))
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -1181,7 +1157,7 @@ contains
     !! - NL_INVALID_INPUT_ERROR: Occurs if the requested index is less than or
     !!      equal to zero, or if the requested index exceeds the number of
     !!      polynomial coefficients.
-    subroutine set_polynomial_coefficient(poly, ind, x, err) &
+    subroutine set_polynomial_set_coefficient(poly, ind, x, err) &
             bind(C, name = "set_polynomial_coefficient")
         ! Arguments
         type(c_polynomial), intent(inout) :: poly

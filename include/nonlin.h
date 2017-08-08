@@ -127,10 +127,10 @@ typedef struct {
 
 /** @brief A C compatible type encapsulating a polynomial object. */
 typedef struct {
-    /** @brief The size of the polynomial object, in bytes. */
-    int n;
     /** @brief A pointer to the polynomial object. */
     void *ptr;
+    /** @brief The size of the polynomial object, in bytes. */
+    int n;
 } polynomial;
 
 
