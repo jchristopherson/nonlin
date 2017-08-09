@@ -800,19 +800,6 @@ contains
         type(c_polynomial), intent(out) :: obj
         integer(i32), intent(in), value :: order
 
-        ! ! Local Variables
-        ! integer(c_short), allocatable, target, dimension(:) :: temp
-        ! integer(c_short), pointer, dimension(:) :: tgt
-        ! type(polynomial) :: poly
-
-        ! ! Process
-        ! call poly%initialize(order)
-        ! temp = transfer(poly, temp)
-        ! obj%n = size(temp)
-        ! allocate(tgt(obj%n))
-        ! tgt = temp
-        ! obj%ptr = c_loc(tgt(1))
-
         ! Local Variables
         type(polynomial), pointer :: poly
 
@@ -831,22 +818,6 @@ contains
         ! Arguments
         type(c_polynomial), intent(inout), target :: obj
 
-        ! ! Local Variables
-        ! integer(c_short), pointer, dimension(:) :: temp
-        ! type(c_ptr) :: testptr
-
-        ! ! Process
-        ! testptr = c_loc(obj)
-        ! if (.not.c_associated(testptr)) return
-        ! if (.not.c_associated(obj%ptr)) return
-        ! if (obj%n == 0) return
-        ! call c_f_pointer(obj%ptr, temp, shape = [obj%n])
-        ! if (associated(temp)) then
-        !     deallocate(temp)
-        ! end if
-        ! obj%n = 0
-        ! obj%ptr = c_null_ptr
-
         ! Local Variables
         type(c_ptr) :: testptr
         type(polynomial), pointer :: poly
@@ -855,7 +826,6 @@ contains
         testptr = c_loc(obj)
         if (.not.c_associated(testptr)) return
         if (.not.c_associated(obj%ptr)) return
-        if (obj%n == 0) return
         call c_f_pointer(obj%ptr, poly)
         if (associated(poly)) deallocate(poly)
         obj%n = 0
@@ -873,24 +843,12 @@ contains
         type(c_polynomial), intent(in), target :: obj
         type(polynomial), intent(out), pointer :: poly
 
-        ! ! Local Variables
-        ! integer(c_short), pointer, dimension(:) :: temp
-        ! type(polynomial) :: item
-        ! type(c_ptr) :: testptr
-
-        ! ! Process
-        ! testptr = c_loc(obj) ! Ensures that obj wasn't passed as NULL from C
-        ! if (.not.c_associated(testptr)) return
-        ! if (.not.c_associated(obj%ptr)) return
-        ! call c_f_pointer(obj%ptr, temp, shape = [obj%n])
-        ! item = transfer(temp, item)
-        ! allocate(poly, source = item)
-
         ! Local Variables
         type(c_ptr) :: testptr
 
         ! Process
         testptr = c_loc(obj)
+        nullify(poly)
         if (.not.c_associated(testptr)) return
         if (.not.c_associated(obj%ptr)) return
         if (obj%n == 0) return
