@@ -13,8 +13,7 @@ module nonlin_c_binding
     use nonlin_least_squares
     use nonlin_polynomials
     use ferror, only : errors
-    use ferror_c_binding, only : errorhandler, get_errorhandler, &
-        update_errorhandler
+    use ferror_c_binding, only : errorhandler, get_errorhandler
     implicit none
 
 
@@ -454,7 +453,7 @@ contains
 
         ! Local Variables
         procedure(cfcn1var), pointer :: fptr
-        class(errors), allocatable :: eptr
+        type(errors), pointer :: eptr
         type(brent_solver) :: solver
         type(cfcn1var_helper) :: obj
 
@@ -468,9 +467,8 @@ contains
 
         ! Process
         call get_errorhandler(err, eptr)
-        if (allocated(eptr)) then
+        if (associated(eptr)) then
             call solver%solve(obj, x, lim, f, ib, eptr)
-            call update_errorhandler(eptr, err)
         else
             call solver%solve(obj, x, lim, f, ib)
         end if
@@ -532,7 +530,7 @@ contains
         ! Local Variables
         procedure(cvecfcn), pointer :: fptr
         procedure(cjacobianfcn), pointer :: jptr
-        class(errors), allocatable :: eptr
+        type(errors), pointer :: eptr
         type(quasi_newton_solver) :: solver
         type(cvecfcn_helper) :: obj
         type(line_search) :: ls
@@ -565,9 +563,8 @@ contains
 
         ! Process
         call get_errorhandler(err, eptr)
-        if (allocated(eptr)) then
+        if (associated(eptr)) then
             call solver%solve(obj, x, fvec, ib, eptr)
-            call update_errorhandler(eptr, err)
         else
             call solver%solve(obj, x, fvec, ib)
         end if
@@ -628,7 +625,7 @@ contains
         ! Local Variables
         procedure(cvecfcn), pointer :: fptr
         procedure(cjacobianfcn), pointer :: jptr
-        class(errors), allocatable :: eptr
+        type(errors), pointer :: eptr
         type(newton_solver) :: solver
         type(cvecfcn_helper) :: obj
         type(line_search) :: ls
@@ -661,9 +658,8 @@ contains
 
         ! Process
         call get_errorhandler(err, eptr)
-        if (allocated(eptr)) then
+        if (associated(eptr)) then
             call solver%solve(obj, x, fvec, ib, eptr)
-            call update_errorhandler(eptr, err)
         else
             call solver%solve(obj, x, fvec, ib)
         end if
@@ -720,7 +716,7 @@ contains
         ! Local Variables
         procedure(cvecfcn), pointer :: fptr
         procedure(cjacobianfcn), pointer :: jptr
-        class(errors), allocatable :: eptr
+        type(errors), pointer :: eptr
         type(least_squares_solver) :: solver
         type(cvecfcn_helper) :: obj
 
@@ -739,9 +735,8 @@ contains
 
         ! Process
         call get_errorhandler(err, eptr)
-        if (allocated(eptr)) then
+        if (associated(eptr)) then
             call solver%solve(obj, x, fvec, ib, eptr)
-            call update_errorhandler(eptr, err)
         else
             call solver%solve(obj, x, fvec, ib)
         end if
@@ -904,16 +899,15 @@ contains
         type(errorhandler), intent(inout) :: err
 
         ! Local Variables
-        class(errors), allocatable :: eptr
+        type(errors), pointer :: eptr
         type(polynomial), pointer :: pptr
 
         ! Process
         call get_polynomial(poly, pptr)
         if (.not.associated(pptr)) return
         call get_errorhandler(err, eptr)
-        if (allocated(eptr)) then
+        if (associated(eptr)) then
             call pptr%fit(x, y, order, eptr)
-            call update_errorhandler(eptr, err)
         else
             call pptr%fit(x, y, order)
         end if
@@ -949,16 +943,15 @@ contains
         type(errorhandler), intent(inout) :: err
 
         ! Local Variables
-        class(errors), allocatable :: eptr
+        type(errors), pointer :: eptr
         type(polynomial), pointer :: pptr
 
         ! Process
         call get_polynomial(poly, pptr)
         if (.not.associated(pptr)) return
         call get_errorhandler(err, eptr)
-        if (allocated(eptr)) then
+        if (associated(eptr)) then
             call pptr%fit_thru_zero(x, y, order, eptr)
-            call update_errorhandler(eptr, err)
         else
             call pptr%fit_thru_zero(x, y, order)
         end if
@@ -1043,7 +1036,7 @@ contains
 
         ! Local Variables
         type(polynomial), pointer :: pptr
-        class(errors), allocatable :: eptr
+        type(errors), pointer :: eptr
         complex(dp), allocatable, dimension(:) :: roots
         integer(i32) :: m
 
@@ -1051,9 +1044,8 @@ contains
         call get_polynomial(poly, pptr)
         if (.not.associated(pptr)) return
         call get_errorhandler(err, eptr)
-        if (allocated(eptr)) then
+        if (associated(eptr)) then
             roots = pptr%roots(eptr)
-            call update_errorhandler(eptr, err)
         else
             roots = pptr%roots()
         end if
@@ -1085,16 +1077,15 @@ contains
 
         ! Local Variables
         type(polynomial), pointer :: pptr
-        class(errors), allocatable :: eptr
+        type(errors), pointer :: eptr
 
         ! Process
         x = 0.0d0
         call get_polynomial(poly, pptr)
         if (.not.associated(pptr)) return
         call get_errorhandler(err, eptr)
-        if (allocated(eptr)) then
+        if (associated(eptr)) then
             x = pptr%get(ind, eptr)
-            call update_errorhandler(eptr, err)
         else
             x = pptr%get(ind)
         end if
@@ -1125,19 +1116,17 @@ contains
 
         ! Local Variables
         type(polynomial), pointer :: pptr
-        class(errors), allocatable :: eptr
+        type(errors), pointer :: eptr
 
         ! Process
         call get_polynomial(poly, pptr)
         if (.not.associated(pptr)) return
         call get_errorhandler(err, eptr)
-        if (allocated(eptr)) then
+        if (associated(eptr)) then
             call pptr%set(ind, x, eptr)
-            call update_errorhandler(eptr, err)
         else
             call pptr%set(ind, x)
         end if
-        ! call update_polynomial(pptr, poly)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -1161,7 +1150,6 @@ contains
         if (.not.associated(x) .or. .not.associated(y) .or. .not.associated(z)) &
             return
         z = x + y
-        ! call update_polynomial(z, rst)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -1186,7 +1174,6 @@ contains
         if (.not.associated(x) .or. .not.associated(y) .or. .not.associated(z)) &
             return
         z = x - y
-        ! call update_polynomial(z, rst)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -1211,7 +1198,6 @@ contains
         if (.not.associated(x) .or. .not.associated(y) .or. .not.associated(z)) &
             return
         z = x * y
-        ! call update_polynomial(z, rst)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -1232,7 +1218,6 @@ contains
         call get_polynomial(dst, y)
         if (.not.associated(x) .or. .not.associated(y)) return
         y = x
-        ! call update_polynomial(y, dst)
     end subroutine
 
 ! ------------------------------------------------------------------------------
