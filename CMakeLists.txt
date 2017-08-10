@@ -133,6 +133,14 @@ if (BUILD_EXAMPLES)
   target_link_libraries(nm_opt_example nonlin)
 
 # --------------------
+  include_directories(${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/external/linalg/ferror/include
+    ${PROJECT_SOURCE_DIR}/external/linalg/include)
+  
+  # C Quasi-Newton Example
+  add_executable(nonlin_quasi_newton_c_example 
+    examples/nonlin_quasi_newton_c_example.c)
+  target_link_libraries(nonlin_quasi_newton_c_example nonlin)
 endif()
 
 # ------------------------------------------------------------------------------

@@ -205,7 +205,7 @@ void solve_brent(fcn1var fcn, value_pair lim, double *x, double *f,
  */
 void solve_quasi_newton(vecfcn fcn, jacobianfcn jac, int n, double *x,
                         double *fvec, const solver_control *tol,
-                        line_search_control *lsearch,
+                        const line_search_control *lsearch,
                         iteration_behavior *ib, errorhandler *err);
 
 /** @brief Applies Newton's method in conjunction with a backtracking type
@@ -249,7 +249,7 @@ void solve_quasi_newton(vecfcn fcn, jacobianfcn jac, int n, double *x,
  *      gradient vector becomes sufficiently close to zero.
  */
 void solve_newton(vecfcn fcn, jacobianfcn jac, int n, double *x, double *fvec,
-                  const solver_control *tol, line_search_control *lsearch,
+                  const solver_control *tol, const line_search_control *lsearch,
                   iteration_behavior *ib, errorhandler *err);
 
 /** @brief Applies the Levenberg-Marquardt method to solve the nonlinear
