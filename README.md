@@ -300,7 +300,7 @@ Iterations: 10
 Function Evaluations: 14
 Jacobian Evaluations: 2
 ```
-Notice, this example allows the solver to reset its Jacobian estimate after 5 iterations (default behavior).  As such, the results differ slightly (number of iterations, residual, etc.) than the Fortran based example from above in which the solver was not set to reset the Jacobian after so few iterations.
+Notice, this example allows the solver to reset its Jacobian estimate after 5 iterations (default behavior).  As such, the results differ slightly (number of iterations, residual, etc.) as compared with the Fortran based example from above in which the solver was not set to reset the Jacobian after so few iterations.
 
 ## Documentation
 Documentation can be found [here](doc/refman.pdf)
