@@ -20,6 +20,9 @@ int main() {
     rst = test_nelder_mead();
     if (!rst) overall = false;
 
+    rst = test_bfgs();
+    if (!rst) overall = false;
+
     rst = test_poly_roots();
     if (!rst) overall = false;
 

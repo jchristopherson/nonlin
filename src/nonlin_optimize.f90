@@ -759,7 +759,7 @@ contains
         n = fcn%get_variable_count()
         maxeval = this%get_max_fcn_evals()
         gtol = this%get_tolerance()
-        xtol = this%m_xtol
+        xtol = this%get_var_tolerance()
         iter = 0
         neval = 0
         ngrad = 0

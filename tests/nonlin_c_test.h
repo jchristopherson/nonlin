@@ -18,6 +18,7 @@ bool test_quasinewton();
 bool test_newton();
 bool test_least_squares();
 bool test_nelder_mead();
+bool test_bfgs();
 
 // Polynomial Test Routines
 bool test_poly_roots();

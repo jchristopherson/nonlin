@@ -179,3 +179,31 @@ bool test_nelder_mead() {
     // End
     return rst;
 }
+
+
+bool test_bfgs() {
+    // Local Variables
+    const double check = 1.0e-5;
+    bool rst = true;
+    iteration_behavior ib;
+    solver_control tol;
+    line_search_control ls;
+    double f, x[2] = {0.0, 0.0};
+
+    // Initialization
+    set_nonlin_defaults(&tol);
+    set_nonlin_ls_defaults(&ls);
+
+    // Compute the solution
+    bfgs(rosenbrock, NULL, 2, x, &f, &tol, &ls, &ib, NULL);
+
+    // Test (solution is [1, 1])
+    if (fabs(x[0] - 1.0) > check || fabs(x[1] - 1.0) > check) {
+        rst = false;
+        printf("Test Failed: BFGS, Rosebrock Function\nExpected: (1, 1)\nReceived: (%f, %f)\n",
+            x[0], x[1]);
+    }
+
+    // End
+    return rst;
+}

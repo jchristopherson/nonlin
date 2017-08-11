@@ -357,7 +357,38 @@ void nelder_mead(fcnnvar fcn, int nvar, double *x, double *f,
                  const double *smplx, const solver_control *tol, 
                  iteration_behavior *ib, errorhandler *err);
 
-
+/** @brief Utilizes the Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm
+!! for finding a minimum value of the specified function.
+!!
+!! @param[in] fcn A pointer to the routine containing the function on which
+!!  to operate.
+!! @param[in] grad An optional pointer to a routine capable of computing
+!!  the gradient of the function contained within @p fcn.  If no routine
+!!  is supplied (NULL), the solver will numerically estimate the gradient.
+!! @param[in] nvar The dimension of the problem (number of variables).
+!! @param[in,out] x On input, the initial guess at the optimal point.
+!!  On output, the updated optimal point estimate.
+!! @param[out] f An optional output, that if provided, returns the
+!!  value of the function at @p x.
+!! @param[in] tol A solver_control object defining the solver control
+!!  parameters.
+!! @param[out] ib On output, an iteration_behavior object containing the
+!!  iteration performance statistics.
+!! @param[in] err The errorhandler object.  If no error handling is
+!!  desired, simply pass NULL, and errors will be dealt with by the default
+!!  internal error handler.  Possible errors that may be encountered are as
+!!  follows.
+!!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+!!  - NL_INVALID_INPUT_ERROR: Occurs if @p x is not appropriately sized for
+!!      the problem as defined in @p fcn.
+!!  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+!!      available.
+!!  - NL_CONVERGENCE_ERROR: Occurs if the algorithm cannot converge within
+!!      the allowed number of iterations.
+ */
+void bfgs(fcnnvar fcn, gradientfcn grad, int nvar, double *x, double *f,
+          const solver_control *tol, const line_search_control *lsearch,
+          iteration_behavior *ib, errorhandler *err);
 
 
 /** @brief Initializes a new polynomial object.

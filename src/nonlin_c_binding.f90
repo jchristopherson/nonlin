@@ -1049,6 +1049,88 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
+    !> @brief Utilizes the Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm
+    !! for finding a minimum value of the specified function.
+    !!
+    !! @param[in] fcn A pointer to the routine containing the function on which
+    !!  to operate.
+    !! @param[in] grad An optional pointer to a routine capable of computing
+    !!  the gradient of the function contained within @p fcn.  If no routine
+    !!  is supplied (NULL), the solver will numerically estimate the gradient.
+    !! @param[in] nvar The dimension of the problem (number of variables).
+    !! @param[in,out] x On input, the initial guess at the optimal point.
+    !!  On output, the updated optimal point estimate.
+    !! @param[out] f An optional output, that if provided, returns the
+    !!  value of the function at @p x.
+    !! @param[in] tol A solver_control object defining the solver control
+    !!  parameters.
+    !! @param[out] ib On output, an iteration_behavior object containing the
+    !!  iteration performance statistics.
+    !! @param[in] err The errorhandler object.  If no error handling is
+    !!  desired, simply pass NULL, and errors will be dealt with by the default
+    !!  internal error handler.  Possible errors that may be encountered are as
+    !!  follows.
+    !!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+    !!  - NL_INVALID_INPUT_ERROR: Occurs if @p x is not appropriately sized for
+    !!      the problem as defined in @p fcn.
+    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+    !!      available.
+    !!  - NL_CONVERGENCE_ERROR: Occurs if the algorithm cannot converge within
+    !!      the allowed number of iterations.
+    subroutine bfgs_c(fcn, grad, nvar, x, f, tol, lsearch, ib, err) &
+            bind(C, name = "bfgs")
+        ! Arguments
+        type(c_funptr), intent(in), value :: fcn, grad
+        integer(i32), intent(in), value :: nvar
+        real(dp), intent(inout) :: x(nvar)
+        real(dp), intent(out) :: f
+        type(solver_control), intent(in) :: tol
+        type(c_ptr), intent(in), value :: lsearch
+        type(iteration_behavior), intent(out) :: ib
+        type(errorhandler), intent(inout) :: err
+
+        ! Local Variables
+        procedure(cfcnnvar), pointer :: fptr
+        procedure(cgradientfcn), pointer :: gptr
+        type(errors), pointer :: eptr
+        type(bfgs) :: solver
+        type(cfcnnvar_helper) :: obj
+        type(line_search) :: ls
+        type(line_search_control), pointer :: lsc
+
+        ! Initialization
+        call c_f_procpointer(fcn, fptr)
+        call obj%set_cfcn(fptr, nvar)
+        if (c_associated(grad)) then
+            call c_f_procpointer(grad, gptr)
+            call obj%set_cgradient_fcn(gptr)
+        end if
+        call solver%set_max_fcn_evals(tol%max_evals)
+        call solver%set_tolerance(tol%fcn_tolerance)
+        call solver%set_var_tolerance(tol%var_tolerance)
+        call solver%set_print_status(logical(tol%print_status))
+        if (c_associated(lsearch)) then
+            ! Use a line search
+            call c_f_pointer(lsearch, lsc)
+            call ls%set_max_fcn_evals(lsc%max_evals)
+            call ls%set_scaling_factor(lsc%alpha)
+            call ls%set_distance_factor(lsc%factor)
+            call solver%set_use_line_search(.true.)
+            call solver%set_line_search(ls)
+        else
+            ! Do not use a line search
+            call solver%set_use_line_search(.false.)
+        end if
+
+        ! Process
+        call get_errorhandler(err, eptr)
+        if (associated(eptr)) then
+            call solver%solve(obj, x, f, ib, eptr)
+        else
+            call solver%solve(obj, x, f, ib)
+        end if
+    end subroutine
+
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
