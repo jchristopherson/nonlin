@@ -1,5 +1,14 @@
 ! nonlin_types.f90
 
+!> @mainpage
+!!
+!! @section intro_sec Introduction
+!! NONLIN is a library that provides routines to compute the solutions to 
+!! systems of nonlinear equations.
+!!
+!! @author Jason Christopherson
+!! @version 1.1.0
+
 !> @brief \b nonlin_types
 !!
 !! @par Purpose
