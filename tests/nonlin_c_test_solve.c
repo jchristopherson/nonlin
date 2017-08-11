@@ -172,4 +172,7 @@ bool test_nelder_mead() {
         printf("Test Failed: Nelder-Mead, Rosebrock Function\nExpected: (1, 1)\nReceived: (%f, %f)\n",
             x[0], x[1]);
     }
+
+    // End
+    return rst;
 }
