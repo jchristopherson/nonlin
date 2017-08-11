@@ -189,7 +189,7 @@ program example
     print '(AF7.5)', "Max Residual: ", res
 end program
 ```
-The example yields the following coefficients.
+The above program yields the following coefficients.
 ```text
 c0 = 1.1866141861
 c1 = 0.4466136311
@@ -239,7 +239,7 @@ contains
     end function
 end program
 ```
-The example yields the following output:
+The above program produces the following output:
 ```text
 Minimum: (1.00000, 1.00000)
 Function Value: 0.121E-12
@@ -292,7 +292,7 @@ void fcn(int neqn, int nvar, const double *x, double *f) {
     f[1] = SQR(x[0]) - 2.0 * SQR(x[1]) - 7.0;
 }
 ```
-The output of the above is as follows:
+The above program produces the following output:
 ```text
 Solution: (5.000000, 3.000000)
 Residual: (6.038903e-011, 1.206786e-010)
@@ -301,6 +301,48 @@ Function Evaluations: 14
 Jacobian Evaluations: 2
 ```
 Notice, this example allows the solver to reset its Jacobian estimate after 5 iterations (default behavior).  As such, the results differ slightly (number of iterations, residual, etc.) as compared with the Fortran based example from above in which the solver was not set to reset the Jacobian after so few iterations.
+
+## C Example 2
+This example illustrates the use of the BFGS routine to find the minimum of the Rosenbrock function.  The minimum is located at (1, 1), which yields a function value of 0.
+```c
+#include <stdio.h>
+#include "nonlin.h"
+
+#define SQR(x) ((x) * (x))
+double fcn(int nvar, const double *x);
+
+int main() {
+    // Local Variables
+    iteration_behavior ib;
+    solver_control tol;
+    line_search_control ls;
+    double f, x[2] = {0.0, 0.0};
+
+    // Define the default tolerances
+    set_nonlin_defaults(&tol);
+    set_nonlin_ls_defaults(&ls);
+
+    // Compute the solution.  Let the solver compute the gradient vector
+    // via numerical means.
+    bfgs(fcn, NULL, 2, x, &f, &tol, &ls, &ib, NULL);
+
+    // Display the results
+    printf("Solution: (%f, %f)\nFunction Value: %f\nIterations: %i\n",
+        x[0], x[1], f, ib.iter_count);
+}
+
+
+// Rosenbrock's Function:
+double fcn(int nvar, const double *x) {
+    return 1.0e2 * SQR(x[1] - SQR(x[0])) + SQR(x[0] - 1.0);
+}
+```
+The above program produces the following output:
+```text
+Solution: (0.999996, 0.999991)
+Function Value: 0.000000
+Iterations: 24
+```
 
 ## Documentation
 Documentation can be found [here](doc/refman.pdf)

@@ -141,6 +141,10 @@ if (BUILD_EXAMPLES)
   add_executable(nonlin_quasi_newton_c_example 
     examples/nonlin_quasi_newton_c_example.c)
   target_link_libraries(nonlin_quasi_newton_c_example nonlin)
+
+  # C BFGS Example
+  add_executable(nonlin_bfgs_c_example examples/nonlin_bfgs_c_example.c)
+  target_link_libraries(nonlin_bfgs_c_example nonlin)
 endif()
 
 # ------------------------------------------------------------------------------
