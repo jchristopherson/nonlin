@@ -327,10 +327,9 @@ int main() {
     bfgs(fcn, NULL, 2, x, &f, &tol, &ls, &ib, NULL);
 
     // Display the results
-    printf("Solution: (%f, %f)\nFunction Value: %f\nIterations: %i\n",
+    printf("Solution: (%6.4f, %6.4f)\nFunction Value: %6.4f\nIterations: %i\n",
         x[0], x[1], f, ib.iter_count);
 }
-
 
 // Rosenbrock's Function:
 double fcn(int nvar, const double *x) {
@@ -339,8 +338,8 @@ double fcn(int nvar, const double *x) {
 ```
 The above program produces the following output:
 ```text
-Solution: (0.999996, 0.999991)
-Function Value: 0.000000
+Solution: (1.0000, 1.0000)
+Function Value: 0.0000
 Iterations: 24
 ```
 
