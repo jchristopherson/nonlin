@@ -151,20 +151,23 @@ bool test_least_squares() {
 
 bool test_nelder_mead() {
     // Local Variables
-    const double check = 1.0e-6;
+    const double check = 1.0e-5;
     bool rst = true;
     iteration_behavior ib;
     solver_control tol;
-    double f, x[2] = {0.0, 0.0};
+    double f, s[6], x[2] = {0.0, 0.0};
 
     // Initialization
     set_nonlin_defaults(&tol);
     tol.max_evals = 500; // This routine can take a lot of evaluations to converge
     tol.fcn_tolerance = 1.0e-12;
     
+    // Define a simplex (this is an optional step, but can help convergence)
+    s[0] = 0.0;     s[2] = 0.0;     s[4] = 2.0;
+    s[1] = 0.0;     s[3] = 2.0;     s[5] = 0.0;
 
     // Compute the solution
-    nelder_mead(rosenbrock, 2, x, &f, NULL, &tol, &ib, NULL);
+    nelder_mead(rosenbrock, 2, x, &f, s, &tol, &ib, NULL);
 
     // Test (solution is [1, 1])
     if (fabs(x[0] - 1.0) > check || fabs(x[1] - 1.0) > check) {
