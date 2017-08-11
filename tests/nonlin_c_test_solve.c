@@ -33,6 +33,9 @@ bool is_ans_1(const double *x, double tol) {
     return rst;
 }
 
+double rosenbrock(int n, const double *x) {
+    return 1.0e2 * SQR(x[1] - SQR(x[0])) + SQR(x[0] - 1.0);
+}
 
 
 bool test_quasinewton() {
@@ -49,8 +52,8 @@ bool test_quasinewton() {
     // Set up tolerances
     tol.max_evals = 500;
     tol.fcn_tolerance = 1.0e-8;
-    tol.var_tolerances = 1.0e-12;
-    tol.grad_tolerances = 1.0e-12;
+    tol.var_tolerance = 1.0e-12;
+    tol.grad_tolerance = 1.0e-12;
     tol.print_status = false;
 
     // Define an initial guess
@@ -123,8 +126,8 @@ bool test_least_squares() {
     // Set up tolerances
     tol.max_evals = 500;
     tol.fcn_tolerance = 1.0e-8;
-    tol.var_tolerances = 1.0e-12;
-    tol.grad_tolerances = 1.0e-12;
+    tol.var_tolerance = 1.0e-12;
+    tol.grad_tolerance = 1.0e-12;
     tol.print_status = false;
 
     // Define an initial guess
@@ -143,4 +146,30 @@ bool test_least_squares() {
 
     // End
     return rst;
+}
+
+
+bool test_nelder_mead() {
+    // Local Variables
+    const double check = 1.0e-6;
+    bool rst = true;
+    iteration_behavior ib;
+    solver_control tol;
+    double f, x[2] = {0.0, 0.0};
+
+    // Initialization
+    set_nonlin_defaults(&tol);
+    tol.max_evals = 500; // This routine can take a lot of evaluations to converge
+    tol.fcn_tolerance = 1.0e-12;
+    
+
+    // Compute the solution
+    nelder_mead(rosenbrock, 2, x, &f, NULL, &tol, &ib, NULL);
+
+    // Test (solution is [1, 1])
+    if (fabs(x[0] - 1.0) > check || fabs(x[1] - 1.0) > check) {
+        rst = false;
+        printf("Test Failed: Nelder-Mead, Rosebrock Function\nExpected: (1, 1)\nReceived: (%f, %f)\n",
+            x[0], x[1]);
+    }
 }

@@ -17,6 +17,7 @@ void jac1(int neqn, int nvar, const double *x, double *jac);
 bool test_quasinewton();
 bool test_newton();
 bool test_least_squares();
+bool test_nelder_mead();
 
 // Polynomial Test Routines
 bool test_poly_roots();

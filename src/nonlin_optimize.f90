@@ -41,9 +41,9 @@ module nonlin_optimize
     contains
         !> @brief Optimizes the equation.
         procedure, public :: solve => nm_solve
-        !> @brief Gets an (N+1)-by-N matrix containing the current simplex.
+        !> @brief Gets an N-by-(N+1) matrix containing the current simplex.
         procedure, public :: get_simplex => nm_get_simplex
-        !> @brief Sets an (N+1)-by-N matrix containing the current simplex.
+        !> @brief Sets an N-by-(N+1) matrix containing the current simplex.
         procedure, public :: set_simplex => nm_set_simplex
         !> @brief Gets the size of the initial simplex.
         procedure, public :: get_initial_size => nm_get_size

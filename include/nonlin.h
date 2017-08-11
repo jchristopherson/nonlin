@@ -52,6 +52,24 @@ typedef void (*vecfcn)(int neqn, int nvar, const double *x, double *f);
  */
 typedef void (*jacobianfcn)(int neqn, int nvar, const double *x, double *jac);
 
+/** @brief Describes a function of N variables.
+!!
+!! @param[in] nvar The number of variables.
+!! @param[in] x An NVAR-element array containing the independent variables.
+!! @return The value of the function at @p x.
+ */
+typedef double (*fcnnvar)(int nvar, const double *x);
+
+/** @brief Describes a routine capable of computing the gradient vector
+!! of an equation of N variables.
+!!
+!! @param[in] nvar The number of variables.
+!! @param[in] x An NVAR-element array containing the independent variables.
+!! @param[out] g An NVAR-element array where the gradient vector will be
+!!  written as output.
+ */
+typedef void (*gradientfcn)(int nvar, const double *x, double *g);
+
 
 /** @brief Defines a set of solver control information. */
 typedef struct {
@@ -60,9 +78,9 @@ typedef struct {
     /** @brief The convergence criteria on function values. */
     double fcn_tolerance;
     /** @brief The convergence criteria on change in variable values. */
-    double var_tolerances;
+    double var_tolerance;
     /** @brief The convergence criteria for the slope of the gradient vector. */
-    double grad_tolerances;
+    double grad_tolerance;
     /** @brief Controls whether iteration status is printed. */
     bool print_status;
 } solver_control;
@@ -303,9 +321,41 @@ void set_nonlin_defaults(solver_control *tol);
  *
  * @param ls The line_search_control object.
  */
- void set_nonlin_ls_defaults(line_search_control *ls);
+void set_nonlin_ls_defaults(line_search_control *ls);
 
-
+/** @brief Utilizes the Nelder-Mead simplex method for finding a minimum
+!! value of the specified function.
+!!
+!! @param[in] fcn A pointer to the routine containing the function on which
+!!  to operate.
+!! @param[in] nvar The dimension of the problem (number of variables).
+!! @param[in,out] x On input, the initial guess at the optimal point.
+!!  On output, the updated optimal point estimate.
+!! @param[out] f An optional output, that if provided, returns the
+!!  value of the function at @p x.
+!! @param[in] smplx An optional NVAR-by-(NVAR + 1) matrix, that if supplied
+!!  provides an initial simplex geometry (each column is a vertex location).
+!!  If not provided (NULL), the solver generates its own estimate of a
+!!  starting simplex geometry.
+!! @param[in] tol A solver_control object defining the solver control
+!!  parameters.
+!! @param[out] ib On output, an iteration_behavior object containing the
+!!  iteration performance statistics.
+!! @param[in] err The errorhandler object.  If no error handling is
+!!  desired, simply pass NULL, and errors will be dealt with by the default
+!!  internal error handler.  Possible errors that may be encountered are as
+!!  follows.
+!!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+!!  - NL_INVALID_INPUT_ERROR: Occurs if @p x is not appropriately sized for
+!!      the problem as defined in @p fcn.
+!!  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+!!      available.
+!!  - NL_CONVERGENCE_ERROR: Occurs if the algorithm cannot converge within
+!!      the allowed number of iterations.
+ */
+void nelder_mead(fcnnvar fcn, int nvar, double *x, double *f, 
+                 const double *smplx, const solver_control *tol, 
+                 iteration_behavior *ib, errorhandler *err);
 
 
 

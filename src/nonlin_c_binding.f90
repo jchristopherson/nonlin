@@ -12,6 +12,7 @@ module nonlin_c_binding
     use nonlin_solve
     use nonlin_least_squares
     use nonlin_polynomials
+    use nonlin_optimize
     use ferror, only : errors
     use ferror_c_binding, only : errorhandler, get_errorhandler
     implicit none
@@ -58,6 +59,31 @@ interface
         integer(i32), intent(in), value :: neqn, nvar
         real(dp), intent(in) :: x(nvar)
         real(dp), intent(out) :: jac(neqn, nvar)
+    end subroutine
+
+    !> @brief The C-friendly interface to fcnnvar.
+    !!
+    !! @param[in] nvar The number of variables.
+    !! @param[in] x An NVAR-element array containing the independent variables.
+    !! @return The value of the function at @p x.
+    function cfcnnvar(nvar, x) result(f)
+        use linalg_constants, only : dp, i32
+        integer(i32), intent(in), value :: nvar
+        real(dp), intent(in) :: x(nvar)
+        real(dp) :: f
+    end function
+
+    !> @brief A C-friendly interface to gradientfcn.
+    !!
+    !! @param[in] nvar The number of variables.
+    !! @param[in] x An NVAR-element array containing the independent variables.
+    !! @param[out] g An NVAR-element array where the gradient vector will be
+    !!  written as output.
+    subroutine cgradientfcn(nvar, x, g)
+        use linalg_constants, only : dp, i32
+        integer(i32), intent(in), value :: nvar
+        real(dp), intent(in) :: x(nvar)
+        real(dp), intent(out) :: g(nvar)
     end subroutine
 end interface
 
@@ -110,7 +136,7 @@ end interface
     end type
 
 ! ------------------------------------------------------------------------------
-    !> @brief A container allowing the use of cfcn1var in the solver codes.
+    !> @brief A type allowing the use of cfcn1var in the solver codes.
     type, extends(fcn1var_helper) :: cfcn1var_helper
         private
         !> A pointer to the target cfcn1var routine.
@@ -127,7 +153,7 @@ end interface
     end type
 
 ! ------------------------------------------------------------------------------
-    !> @brief A container allowing the use of cvecfcn in the solver codes.
+    !> @brief A type allowing the use of cvecfcn in the solver codes.
     type, extends(vecfcn_helper) :: cvecfcn_helper
         private
         !> A pointer to the target cvecfcn routine.
@@ -158,6 +184,32 @@ end interface
         !! differences.
         procedure, public :: jacobian => cvfh_jac_fcn
     end type
+
+! ------------------------------------------------------------------------------
+    !> @brief A type allowing the use of cfcnnvar in the solver codes.
+    type, extends(fcnnvar_helper) :: cfcnnvar_helper
+        private
+        !> A pointer to the target cfcnnvar routine.
+        procedure(cfcnnvar), pointer, nopass :: m_cfcn => null()
+        !> A pointer to the gradient routine.
+        procedure(cgradientfcn), pointer, nopass :: m_cgrad => null()
+    contains
+        !> @brief Executes the routine containing the function to evaluate.
+        procedure, public :: fcn => cfnh_fcn
+        !> @brief Tests if the pointer to the function has been assigned.
+        procedure, public :: is_fcn_defined => cfnh_is_fcn_defined
+        !> @brief Establishes a pointer to the routine containing the function.
+        procedure, public :: set_cfcn => cfnh_set_fcn
+        !> @brief Establishes a pointer to the routine containing the gradient
+        !! vector of the function.
+        procedure, public :: set_cgradient_fcn => cfnh_set_grad
+        !> @brief Tests if the pointer to the routine containing the gradient 
+        !! has been assigned.
+        procedure, public :: is_gradient_defined => cfnh_is_grad_defined
+        !> @brief Computes the gradient of the function.
+        procedure, public :: gradient => cfnh_grad_fcn
+    end type
+
 
 contains
 ! ******************************************************************************
@@ -223,7 +275,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Tests if the pointer to the subroutine containing the system of
+    !> @brief Tests if the pointer to the procedure containing the system of
     !! equations to solve has been assigned.
     !!
     !! @param[in] this The cvecfcn_helper object.
@@ -415,6 +467,158 @@ contains
                 call this%fcn(x, f1ptr)
                 x(j) = temp
                 jac(:,j) = (f1ptr - fptr) / h
+            end do
+        end if
+    end subroutine
+
+! ******************************************************************************
+! CFCNNVAR_HELPER MEMBERS
+! ------------------------------------------------------------------------------
+    !> @brief Establishes a poitner to the routine containing the equation to
+    !! solve.
+    !!
+    !! @param[in,out] this The cfcnnvar_helper object.
+    !! @param[in] fcn The function pointer.
+    !! @param[in] nvar The number of variables.
+    subroutine cfnh_set_fcn(this, fcn, nvar)
+        class(cfcnnvar_helper), intent(inout) :: this
+        procedure(cfcnnvar), intent(in), pointer :: fcn
+        integer(i32), intent(in) :: nvar
+        procedure(fcnnvar), pointer :: nptr
+        nptr => null()
+        call this%set_fcn(nptr, nvar)
+        this%m_cfcn => fcn
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Tests if the pointer to the procedure containing the system of
+    !! equations to solve has been assigned.
+    !!
+    !! @param[in] this The cfcnnvar_helper object.
+    !! @return Returns true if the pointer has been assigned; else, false.
+    pure function cfnh_is_fcn_defined(this) result(x)
+        class(cfcnnvar_helper), intent(in) :: this
+        logical :: x
+        x = associated(this%m_cfcn)
+    end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Executes the routine containing the function to evaluate.
+    !!
+    !! @param[in] this The cfcnnvar_helper object.
+    !! @param[in] x The value of the independent variable at which the function
+    !!  should be evaluated.
+    !! @return The value of the function at @p x.
+    function cfnh_fcn(this, x) result(f)
+        class(cfcnnvar_helper), intent(in) :: this
+        real(dp), intent(in), dimension(:) :: x
+        integer(i32) :: nvar
+        real(dp) :: f
+        nvar = this%get_variable_count()
+        if (this%is_fcn_defined()) then
+            f = this%m_cfcn(nvar, x)
+        end if
+    end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Establishes a pointer to the routine containing the gradient
+    !! vector of the function.
+    !!
+    !! @param[in,out] this The cfcnnvar_helper object.
+    !! @param[in] fcn The pointer to the gradient routine.
+    subroutine cfnh_set_grad(this, fcn)
+        class(cfcnnvar_helper), intent(inout) :: this
+        procedure(cgradientfcn), pointer, intent(in) :: fcn
+        this%m_cgrad => fcn
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Tests if the pointer to the routine containing the gradient has
+    !! been assigned.
+    !!
+    !! @param[in] this The cfcnnvar_helper object.
+    !! @return Returns true if the pointer has been assigned; else, false.
+    pure function cfnh_is_grad_defined(this) result(x)
+        class(cfcnnvar_helper), intent(in) :: this
+        logical :: x
+        x = associated(this%m_cgrad)
+    end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Executes the routine containing the gradient, if supplied.  If not
+    !! supplied, the gradient is computed via finite differences.
+    !!
+    !! @param[in] this The cfcnnvar_helper object.
+    !! @param[in,out] x An N-element array containing the independent variables
+    !!  defining the point about which the derivatives will be calculated.  This
+    !!  array is restored upon output.
+    !! @param[out] g An N-element array where the gradient will be written upon
+    !!  output.
+    !! @param[in] fv An optional input providing the function value at @p x.
+    !! @param[out] err An optional integer output that can be used to determine
+    !!  error status.  If not used, and an error is encountered, the routine
+    !!  simply returns silently.  If used, the following error codes identify
+    !!  error status:
+    !!  - 0: No error has occurred.
+    !!  - n: A positive integer denoting the index of an invalid input.
+    subroutine cfnh_grad_fcn(this, x, g, fv, err)
+        ! Arguments
+        class(cfcnnvar_helper), intent(in) :: this
+        real(dp), intent(inout), dimension(:) :: x
+        real(dp), intent(out), dimension(:) :: g
+        real(dp), intent(in), optional :: fv
+        integer(i32), intent(out), optional :: err
+
+        ! Parameters
+        real(dp), parameter :: zero = 0.0d0
+
+        ! Local Variables
+        integer(i32) :: j, n, flag
+        real(dp) :: eps, epsmch, h, temp, f, f1
+
+        ! Initialization
+        if (present(err)) err = 0
+        n = this%get_variable_count()
+
+        ! Input Checking
+        flag = 0
+        if (size(x) /= n) then
+            flag = 2
+        else if (size(g) /= n) then
+            flag = 3
+        end if
+        if (flag /= 0) then
+            ! ERROR: Incorrectly sized input arrays
+            if (present(err)) err = flag
+            return
+        end if
+
+        ! Process
+        if (.not.this%is_fcn_defined()) return
+        if (this%is_gradient_defined()) then
+            ! Call the user-defined gradient routine
+            call this%m_cgrad(n, x, g)
+        else
+            ! Compute the gradient via finite differences
+            if (present(fv)) then
+                f = fv
+            else
+                f = this%fcn(x)
+            end if
+
+            ! Establish step size factors
+            epsmch = epsilon(epsmch)
+            eps = sqrt(epsmch)
+
+            ! Compute the derivatives
+            do j = 1, n
+                temp = x(j)
+                h = eps * abs(temp)
+                if (h == zero) h = eps
+                x(j) = temp + h
+                f1 = this%fcn(x)
+                x(j) = temp
+                g(j) = (f1 - f) / h
             end do
         end if
     end subroutine
@@ -776,6 +980,74 @@ contains
 ! ******************************************************************************
 ! OPTIMIZATION ROUTINES
 ! ------------------------------------------------------------------------------
+    !> @brief Utilizes the Nelder-Mead simplex method for finding a minimum
+    !! value of the specified function.
+    !!
+    !! @param[in] fcn A pointer to the routine containing the function on which
+    !!  to operate.
+    !! @param[in] nvar The dimension of the problem (number of variables).
+    !! @param[in,out] x On input, the initial guess at the optimal point.
+    !!  On output, the updated optimal point estimate.
+    !! @param[out] f An optional output, that if provided, returns the
+    !!  value of the function at @p x.
+    !! @param[in] smplx An optional NVAR-by-(NVAR + 1) matrix, that if supplied
+    !!  provides an initial simplex geometry (each column is a vertex location).
+    !!  If not provided (NULL), the solver generates its own estimate of a
+    !!  starting simplex geometry.
+    !! @param[in] tol A solver_control object defining the solver control
+    !!  parameters.
+    !! @param[out] ib On output, an iteration_behavior object containing the
+    !!  iteration performance statistics.
+    !! @param[in] err The errorhandler object.  If no error handling is
+    !!  desired, simply pass NULL, and errors will be dealt with by the default
+    !!  internal error handler.  Possible errors that may be encountered are as
+    !!  follows.
+    !!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+    !!  - NL_INVALID_INPUT_ERROR: Occurs if @p x is not appropriately sized for
+    !!      the problem as defined in @p fcn.
+    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+    !!      available.
+    !!  - NL_CONVERGENCE_ERROR: Occurs if the algorithm cannot converge within
+    !!      the allowed number of iterations.
+    subroutine nelder_mead_c(fcn, nvar, x, f, smplx, tol, ib, err) &
+            bind(C, name = "nelder_mead")
+        ! Arguments
+        type(c_funptr), intent(in), value :: fcn
+        integer(i32), intent(in), value :: nvar
+        real(dp), intent(inout) :: x(nvar)
+        real(dp), intent(out) :: f
+        type(c_ptr), intent(in), value :: smplx
+        type(solver_control), intent(in) :: tol
+        type(iteration_behavior), intent(out) :: ib
+        type(errorhandler), intent(inout) :: err
+
+        ! Local Variables
+        procedure(cfcnnvar), pointer :: fptr
+        type(errors), pointer :: eptr
+        type(nelder_mead) :: solver
+        type(cfcnnvar_helper) :: obj
+        real(dp), pointer, dimension(:,:) :: sptr
+
+        ! Initialization
+        call c_f_procpointer(fcn, fptr)
+        call solver%set_max_fcn_evals(tol%max_evals)
+        call solver%set_tolerance(tol%fcn_tolerance)
+        call solver%set_print_status(logical(tol%print_status))
+        call obj%set_cfcn(fptr, nvar)
+        if (c_associated(smplx)) then
+            call c_f_pointer(smplx, sptr, [nvar, nvar + 1])
+            call solver%set_simplex(sptr)
+        end if
+
+        ! Process
+        call get_errorhandler(err, eptr)
+        if (associated(eptr)) then
+            call solver%solve(obj, x, f, ib, eptr)
+        else
+            call solver%solve(obj, x, f, ib)
+        end if
+    end subroutine
+
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
