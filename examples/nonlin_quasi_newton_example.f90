@@ -1,8 +1,7 @@
 ! nonlin_quasi_newton_example.f90
 
 program  example
-    use linalg_constants, only : dp, i32
-    use nonlin_types, only : vecfcn_helper, vecfcn, iteration_behavior
+    use nonlin_types, only : dp, i32, vecfcn_helper, vecfcn, iteration_behavior
     use nonlin_solve, only : quasi_newton_solver
     implicit none
 

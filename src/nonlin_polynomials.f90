@@ -11,12 +11,11 @@
 !! @par Purpose
 !! Provides a means of defining and operating on polynomials.
 module nonlin_polynomials
-    use linalg_constants, only : dp, i32
     use linalg_eigen, only : eigen
     use linalg_solve, only : solve_least_squares
     use ferror, only : errors
     use nonlin_types, only : NL_INVALID_INPUT_ERROR, NL_ARRAY_SIZE_ERROR, &
-        NL_OUT_OF_MEMORY_ERROR
+        NL_OUT_OF_MEMORY_ERROR, dp, i32
     implicit none
 
 private

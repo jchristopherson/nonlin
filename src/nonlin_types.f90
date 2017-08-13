@@ -15,10 +15,12 @@
 !! To provide various types and constants useful in the solution of systems of
 !! nonlinear equations.
 module nonlin_types
+    use, intrinsic :: iso_fortran_env, only : int32, real64
     use, intrinsic :: iso_c_binding, only : c_bool
-    use linalg_constants, only : dp, i32
     implicit none
     private
+    public :: dp
+    public :: i32
     public :: vecfcn
     public :: fcn1var
     public :: fcnnvar
@@ -44,6 +46,14 @@ module nonlin_types
     public :: NL_DIVERGENT_BEHAVIOR_ERROR
     public :: NL_SPURIOUS_CONVERGENCE_ERROR
     public :: NL_TOLERANCE_TOO_SMALL_ERROR
+
+! ******************************************************************************
+! NUMERIC TYPE CONSTANTS
+! ------------------------------------------------------------------------------
+    !> @brief Defines a double-precision (64-bit) floating-point type.
+    integer, parameter :: dp = real64
+    !> @brief Defines a 32-bit signed integer type.
+    integer, parameter :: i32 = int32
 
 ! ******************************************************************************
 ! ERROR FLAGS

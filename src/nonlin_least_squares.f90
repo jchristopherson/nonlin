@@ -5,7 +5,6 @@
 !! @par Purpose
 !! To provide routines capable of solving the nonlinear least squares problem.
 module nonlin_least_squares
-    use linalg_constants, only : dp, i32
     use nonlin_types
     use ferror, only : errors
     implicit none

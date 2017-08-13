@@ -2,7 +2,6 @@
 
 ! Tests the Jacobian calculation utilities.
 module nonlin_test_jacobian
-    use linalg_constants, only : dp, i32
     use nonlin_types
     use test_core
     implicit none

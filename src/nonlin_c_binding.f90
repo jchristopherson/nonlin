@@ -6,7 +6,6 @@
 !! Provides C bindings to the nonlin library.
 module nonlin_c_binding
     use, intrinsic :: iso_c_binding
-    use linalg_constants, only : dp, i32
     use nonlin_types
     use nonlin_linesearch
     use nonlin_solve

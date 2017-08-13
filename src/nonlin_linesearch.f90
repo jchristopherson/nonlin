@@ -7,7 +7,6 @@
 !! influences of the nonlinear equation solver model on the convergence of the
 !! iteration process.
 module nonlin_linesearch
-    use linalg_constants, only : dp, i32
     use nonlin_types
     use ferror, only : errors
     implicit none

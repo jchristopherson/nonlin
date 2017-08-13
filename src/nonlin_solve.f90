@@ -6,7 +6,6 @@
 !! To provide various routines capapble of solving systems of nonlinear
 !! equations.
 module nonlin_solve
-    use linalg_constants, only : dp, i32
     use nonlin_types
     use nonlin_linesearch, only : line_search, limit_search_vector
     use ferror, only : errors

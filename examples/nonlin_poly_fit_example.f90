@@ -1,7 +1,7 @@
 ! nonlin_poly_fit_example.f90
 
 program example
-    use linalg_constants, only : dp, i32
+    use nonlin_types, only : dp, i32
     use nonlin_polynomials
     implicit none
 

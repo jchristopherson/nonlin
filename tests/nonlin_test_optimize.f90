@@ -1,7 +1,6 @@
 ! nonlin_test_optimize.f90
 
 module nonlin_test_optimize
-    use linalg_constants, only : dp, i32
     use nonlin_optimize
     use nonlin_types
     use test_core

@@ -1,8 +1,7 @@
 ! nonlin_least_squares_example.f90
 
 program example
-    use linalg_constants, only : dp, i32
-    use nonlin_types, only : vecfcn_helper, vecfcn
+    use nonlin_types, only : dp, i32, vecfcn_helper, vecfcn
     use nonlin_least_squares, only : least_squares_solver
     implicit none
 

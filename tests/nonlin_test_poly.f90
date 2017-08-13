@@ -1,7 +1,7 @@
 ! nonlin_test_poly.f90
 
 module nonlin_test_poly
-    use linalg_constants, only : dp, i32
+    use nonlin_types, only : dp, i32
     use nonlin_polynomials
     use test_core
     implicit none

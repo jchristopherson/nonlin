@@ -1,9 +1,9 @@
 ! nonlin_nm_opt_example.f90
 
 program example
-    use linalg_constants, only : dp, i32
     use nonlin_optimize, only : nelder_mead
-    use nonlin_types, only : fcnnvar, fcnnvar_helper, iteration_behavior
+    use nonlin_types, only : dp, i32, fcnnvar, fcnnvar_helper, &
+        iteration_behavior
     implicit none
 
     ! Local Variables

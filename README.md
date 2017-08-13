@@ -6,8 +6,7 @@ This example solves a set of two equations of two unknowns using a Quasi-Newton 
 
 ```fortran
 program  example
-    use linalg_constants, only : dp, i32
-    use nonlin_types, only : vecfcn_helper, vecfcn, iteration_behavior
+    use nonlin_types, only : dp, i32, vecfcn_helper, vecfcn, iteration_behavior
     use nonlin_solve, only : quasi_newton_solver
     implicit none
 
@@ -78,8 +77,7 @@ This example uses a least-squares approach to determine the coefficients of a po
 
 ```fortran
 program example
-    use linalg_constants, only : dp, i32
-    use nonlin_types, only : vecfcn_helper, vecfcn
+    use nonlin_types, only : dp, i32, vecfcn_helper, vecfcn
     use nonlin_least_squares, only : least_squares_solver
     implicit none
 
@@ -152,7 +150,7 @@ The following graph illustrates the fit.
 This example utilizes the polynomial type to fit a polynomial to the data set utilized in Example 2.
 ```fortran
 program example
-    use linalg_constants, only : dp, i32
+    use nonlin_types, only : dp, i32
     use nonlin_polynomials
     implicit none
 
@@ -203,9 +201,9 @@ Notice, as expected, the results are very similar to the output of Example 2.
 This example uses the Nelder-Mead simplex method to find the minimum of the Rosenbrock function.
 ```fortran
 program example
-    use linalg_constants, only : dp, i32
     use nonlin_optimize, only : nelder_mead
-    use nonlin_types, only : fcnnvar, fcnnvar_helper, iteration_behavior
+    use nonlin_types, only : dp, i32, fcnnvar, fcnnvar_helper, &
+        iteration_behavior
     implicit none
 
     ! Local Variables

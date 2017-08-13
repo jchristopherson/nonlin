@@ -1,7 +1,6 @@
 ! nonlin_test_solve.f90
 
 module nonlin_test_solve
-    use linalg_constants, only : dp, i32
     use nonlin_types
     use nonlin_solve
     use nonlin_least_squares
