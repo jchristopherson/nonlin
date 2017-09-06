@@ -73,7 +73,9 @@ else (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
 # Specify source files
-file(GLOB_RECURSE sources src/*.f90)
+set(sources src/nonlin_types.f90 src/nonlin_solve.f90 src/nonlin_polynomials.f90
+  src/nonlin_optimize.f90 src/nonlin_linesearch.f90 src/nonlin_least_squares.f90
+  src/nonlin_c_binding.f90)
 
 # Define necessary CMake variables, and define the dependency.
 if (BUILD_SHARED_LIBS)
@@ -88,7 +90,6 @@ if (BUILD_SHARED_LIBS)
       -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
       -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
   add_subdirectory(external/linalg)
-  # add_subdirectory(external/linalg/ferror)
 else()
   # Building a static library, simply add source code to this library
   file(GLOB_RECURSE linalg_sources 
