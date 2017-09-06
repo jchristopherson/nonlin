@@ -208,6 +208,10 @@ contains
     !!     ! Set the initial conditions to [1, 1]
     !!     x = 1.0d0
     !!
+    !!     ! Define the function
+    !!     fcn => fcn1
+    !!     call obj%set_fcn(fcn, 2, 2)
+    !!
     !!     ! Solve the system of equations.  The solution overwrites X
     !!     call solver%solve(obj, x, f)
     !!
@@ -628,6 +632,10 @@ contains
     !!     ! Set the initial conditions to [1, 1]
     !!     x = 1.0d0
     !!
+    !!     ! Define the function
+    !!     fcn => fcn1
+    !!     call obj%set_fcn(fcn, 2, 2)
+    !!
     !!     ! Solve the system of equations.  The solution overwrites X
     !!     call solver%solve(obj, x, f)
     !!
@@ -941,6 +949,10 @@ contains
     !!     ! Define the solution limits
     !!     lmiits%x1 = 1.5d0
     !!     limits%x2 = 5.0d0
+    !!
+    !!     ! Define the function
+    !!     fcn => fcn1
+    !!     call obj%set_fcn(fcn)
     !!
     !!     ! Solve the equation
     !!     call solver%solve(obj, x, limits, f)

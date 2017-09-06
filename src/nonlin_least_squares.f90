@@ -127,6 +127,10 @@ contains
     !!     ! Set the initial conditions to [1, 1]
     !!     x = 1.0d0
     !!
+    !!     ! Define the function
+    !!     fcn => fcn1
+    !!     call obj%set_fcn(fcn, 2, 2)
+    !!
     !!     ! Solve the system of equations.  The solution overwrites X
     !!     call solver%solve(obj, x, f)
     !!

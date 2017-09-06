@@ -512,9 +512,9 @@ contains
     !!  execution.  If not provided, a default implementation of the errors
     !!  class is used internally to provide error handling.  Possible errors and
     !!  warning messages that may be encountered are as follows.
-    !!  - LA_OUT_OF_MEMORY_ERROR: Occurs if local memory must be allocated, and
+    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if local memory must be allocated, and
     !!      there is insufficient memory available.
-    !!  - LA_CONVERGENCE_ERROR: Occurs if the algorithm failed to converge.
+    !!  - NL_CONVERGENCE_ERROR: Occurs if the algorithm failed to converge.
     !!
     !! @par Usage
     !! The following code provides an example of how to compute the roots of a
@@ -672,7 +672,7 @@ contains
     !!  execution.  If not provided, a default implementation of the errors
     !!  class is used internally to provide error handling.  Possible errors and
     !!  warning messages that may be encountered are as follows.
-    !! - INVALID_INPUT_ERROR: Occurs if the requested index is less than or
+    !! - NL_INVALID_INPUT_ERROR: Occurs if the requested index is less than or
     !!      equal to zero, or if the requested index exceeds the number of
     !!      polynomial coefficients.
     subroutine set_poly_coefficient(this, ind, c, err)
