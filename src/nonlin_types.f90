@@ -17,6 +17,8 @@
 module nonlin_types
     use, intrinsic :: iso_fortran_env, only : int32, real64
     use, intrinsic :: iso_c_binding, only : c_bool
+    use linalg_constants, only : LA_OUT_OF_MEMORY_ERROR, &
+        LA_INVALID_OPERATION_ERROR, LA_CONVERGENCE_ERROR
     implicit none
     private
     public :: dp
@@ -63,11 +65,12 @@ module nonlin_types
     !> An error flag denoting an improperly sized array.
     integer, parameter :: NL_ARRAY_SIZE_ERROR = 202
     !> An error denoting that there is insufficient memory available.
-    integer, parameter :: NL_OUT_OF_MEMORY_ERROR = 203
+    integer, parameter :: NL_OUT_OF_MEMORY_ERROR = LA_OUT_OF_MEMORY_ERROR
     !> An error resulting from an invalid operation.
-    integer, parameter :: NL_INVALID_OPERATION_ERROR = 204
+    integer, parameter :: NL_INVALID_OPERATION_ERROR = &
+        LA_INVALID_OPERATION_ERROR
     !> An error resulting from a lack of convergence.
-    integer, parameter :: NL_CONVERGENCE_ERROR = 205
+    integer, parameter :: NL_CONVERGENCE_ERROR = LA_CONVERGENCE_ERROR
     !> An error resulting from a divergent condition.
     integer, parameter :: NL_DIVERGENT_BEHAVIOR_ERROR = 206
     !> An error indicating a possible spurious convergence condition.
