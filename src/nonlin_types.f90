@@ -603,8 +603,10 @@ contains
 
         ! Initialization
         if (present(err)) err = 0
-        m = this%m_nfcn
-        n = this%m_nvar
+        ! m = this%m_nfcn
+        ! n = this%m_nvar
+        m = this%get_equation_count()
+        n = this%get_variable_count()
 
         ! Input Checking
         flag = 0
@@ -875,7 +877,8 @@ contains
 
         ! Initialization
         if (present(err)) err = 0
-        n = this%m_nvar
+        ! n = this%m_nvar
+        n = this%get_variable_count()
 
         ! Input Checking
         flag = 0
