@@ -178,10 +178,6 @@ end interface
         !! solve.  No action is taken if the pointer to the subroutine has not
         !! been defined.
         procedure, public :: fcn => cvfh_fcn
-        !> @brief Executes the routine containing the Jacobian matrix if
-        !! supplied.  If not supplied, the Jacobian is computed via finite
-        !! differences.
-        procedure, public :: jacobian => cvfh_jac_fcn
     end type
 
 ! ------------------------------------------------------------------------------
@@ -205,8 +201,6 @@ end interface
         !> @brief Tests if the pointer to the routine containing the gradient 
         !! has been assigned.
         procedure, public :: is_gradient_defined => cfnh_is_grad_defined
-        !> @brief Computes the gradient of the function.
-        procedure, public :: gradient => cfnh_grad_fcn
     end type
 
 
@@ -330,146 +324,6 @@ contains
         x = associated(this%m_cjac)
     end function
 
-! ------------------------------------------------------------------------------
-    !> @brief Executes the routine containing the Jacobian matrix if supplied.
-    !! If not supplied, the Jacobian is computed via finite differences.
-    !!
-    !! @param[in] this The vecfcn_helper object.
-    !! @param[in] x An N-element array containing the independent variabls
-    !!  defining the point about which the derivatives will be calculated.
-    !! @param[out] jac An M-by-N matrix where, on output, the Jacobian will
-    !!  be written.
-    !! @param[in] fv An optional M-element array containing the function values
-    !!  at @p x.  If not supplied, the function values are computed at @p x.
-    !! @param[out] work An optional input, that if provided, prevents any local
-    !!  memory allocation.  If not provided, the memory required is allocated
-    !!  within.  If provided, the length of the array must be at least
-    !!  @p olwork.  Notice, a workspace array is only utilized if the user does
-    !!  not provide a routine for computing the Jacobian.
-    !! @param[out] olwork An optional output used to determine workspace size.
-    !!  If supplied, the routine determines the optimal size for @p work, and
-    !!  returns without performing any actual calculations.
-    !! @param[out] err An optional integer output that can be used to determine
-    !!  error status.  If not used, and an error is encountered, the routine
-    !!  simply returns silently.  If used, the following error codes identify
-    !!  error status:
-    !!  - 0: No error has occurred.
-    !!  - n: A positive integer denoting the index of an invalid input.
-    !!  - -1: Indicates internal memory allocation failed.
-    subroutine cvfh_jac_fcn(this, x, jac, fv, work, olwork, err)
-        ! Arguments
-        class(cvecfcn_helper), intent(in) :: this
-        real(dp), intent(inout), dimension(:) :: x
-        real(dp), intent(out), dimension(:,:) :: jac
-        real(dp), intent(in), dimension(:), optional, target :: fv
-        real(dp), intent(out), dimension(:), optional, target :: work
-        integer(i32), intent(out), optional :: olwork, err
-
-        ! Parameters
-        real(dp), parameter :: zero = 0.0d0
-
-        ! Local Variables
-        integer(i32) :: j, m, n, lwork, flag
-        real(dp) :: eps, epsmch, h, temp
-        real(dp), pointer, dimension(:) :: fptr, f1ptr
-        real(dp), allocatable, target, dimension(:) :: wrk
-
-        ! Initialization
-        if (present(err)) err = 0
-        m = this%get_equation_count()
-        n = this%get_variable_count()
-
-        ! Input Checking
-        flag = 0
-        if (size(x) /= n) then
-            flag = 2
-        else if (size(jac, 1) /= m .or. size(jac, 2) /= n) then
-            flag = 3
-        end if
-        if (flag /= 0) then
-            ! ERROR: Incorrectly sized input arrays
-            if (present(err)) err = flag
-            return
-        end if
-
-        ! Process
-        if (.not.this%is_fcn_defined()) return
-        if (associated(this%m_cjac)) then
-            ! Workspace Query
-            if (present(olwork)) then
-                olwork = 0
-                return
-            end if
-
-            ! Call the user-defined Jacobian routine
-            call this%m_cjac(m, n, x, jac)
-        else
-            ! Compute the Jacobian via finite differences
-            if (present(fv)) then
-                lwork = m
-            else
-                lwork = 2 * m
-            end if
-
-            if (present(olwork)) then
-                ! The user is just making a workspace query.  Simply return the
-                ! workspace length, and exit the routine.
-                olwork = lwork
-                return
-            end if
-
-            ! Local Memory Allocation
-            if (present(work)) then
-                if (size(work) < lwork) then
-                    ! ERROR: Workspace is too small
-                    if (present(err)) err = 5
-                    return
-                end if
-                f1ptr => work(1:m)
-                if (present(fv)) then
-                    if (size(fv) < m) then
-                        ! ERROR: Function vector too small
-                        if (present(err)) err = 4
-                        return
-                    end if
-                    fptr => fv(1:m)
-                else
-                    fptr => work(m+1:2*m)
-                    call this%fcn(x, fptr)
-                end if
-            else
-                allocate(wrk(lwork), stat = flag)
-                if (flag /= 0) then
-                    ! ERROR: Memory issues
-                    if (present(err)) err = -1
-                    return
-                end if
-                f1ptr => wrk(1:m)
-                if (present(fv)) then
-                    fptr => fv(1:m)
-                else
-                    fptr => wrk(m+1:2*m)
-                    call this%fcn(x, fptr)
-                end if
-            end if
-
-            ! Establish step size factors
-            epsmch = epsilon(epsmch)
-            eps = sqrt(epsmch)
-
-            ! Compute the derivatives via finite differences
-            do j = 1, n
-                temp = x(j)
-                h = eps * abs(temp)
-                if (h == zero) h = eps
-                x(j) = temp + h
-                call this%fcn(x, f1ptr)
-                x(j) = temp
-                jac(:,j) = (f1ptr - fptr) / h
-            end do
-        end if
-    end subroutine
-
 ! ******************************************************************************
 ! CFCNNVAR_HELPER MEMBERS
 ! ------------------------------------------------------------------------------
@@ -542,85 +396,6 @@ contains
         logical :: x
         x = associated(this%m_cgrad)
     end function
-
-! ------------------------------------------------------------------------------
-    !> @brief Executes the routine containing the gradient, if supplied.  If not
-    !! supplied, the gradient is computed via finite differences.
-    !!
-    !! @param[in] this The cfcnnvar_helper object.
-    !! @param[in,out] x An N-element array containing the independent variables
-    !!  defining the point about which the derivatives will be calculated.  This
-    !!  array is restored upon output.
-    !! @param[out] g An N-element array where the gradient will be written upon
-    !!  output.
-    !! @param[in] fv An optional input providing the function value at @p x.
-    !! @param[out] err An optional integer output that can be used to determine
-    !!  error status.  If not used, and an error is encountered, the routine
-    !!  simply returns silently.  If used, the following error codes identify
-    !!  error status:
-    !!  - 0: No error has occurred.
-    !!  - n: A positive integer denoting the index of an invalid input.
-    subroutine cfnh_grad_fcn(this, x, g, fv, err)
-        ! Arguments
-        class(cfcnnvar_helper), intent(in) :: this
-        real(dp), intent(inout), dimension(:) :: x
-        real(dp), intent(out), dimension(:) :: g
-        real(dp), intent(in), optional :: fv
-        integer(i32), intent(out), optional :: err
-
-        ! Parameters
-        real(dp), parameter :: zero = 0.0d0
-
-        ! Local Variables
-        integer(i32) :: j, n, flag
-        real(dp) :: eps, epsmch, h, temp, f, f1
-
-        ! Initialization
-        if (present(err)) err = 0
-        n = this%get_variable_count()
-
-        ! Input Checking
-        flag = 0
-        if (size(x) /= n) then
-            flag = 2
-        else if (size(g) /= n) then
-            flag = 3
-        end if
-        if (flag /= 0) then
-            ! ERROR: Incorrectly sized input arrays
-            if (present(err)) err = flag
-            return
-        end if
-
-        ! Process
-        if (.not.this%is_fcn_defined()) return
-        if (this%is_gradient_defined()) then
-            ! Call the user-defined gradient routine
-            call this%m_cgrad(n, x, g)
-        else
-            ! Compute the gradient via finite differences
-            if (present(fv)) then
-                f = fv
-            else
-                f = this%fcn(x)
-            end if
-
-            ! Establish step size factors
-            epsmch = epsilon(epsmch)
-            eps = sqrt(epsmch)
-
-            ! Compute the derivatives
-            do j = 1, n
-                temp = x(j)
-                h = eps * abs(temp)
-                if (h == zero) h = eps
-                x(j) = temp + h
-                f1 = this%fcn(x)
-                x(j) = temp
-                g(j) = (f1 - f) / h
-            end do
-        end if
-    end subroutine
 
 ! ******************************************************************************
 ! SOLVER ROUTINES
