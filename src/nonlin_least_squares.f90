@@ -615,8 +615,8 @@ contains
         ! Initialize the iteration counter, evaluate the function at the origin,
         ! and test for acceptance of the Gauss-Newton direction.
         iter = 0
-        wa2 = diag * x
-        dxnorm = norm2(wa2)
+        wa2(1:n) = diag * x
+        dxnorm = norm2(wa2(1:n))
         fp = dxnorm - delta
         if (fp <= p1 * delta) then
             ! LINE 220
@@ -670,7 +670,7 @@ contains
             if (par == zero) par = max(dwarf, p001 * paru)
             temp = sqrt(par)
             wa1 = temp * diag
-            call lmsolve(r, ipvt, wa1, qtb, x, sdiag, wa2)
+            call lmsolve(r(1:n,1:n), ipvt, wa1, qtb, x, sdiag, wa2)
             wa2 = diag * x
             dxnorm = norm2(wa2)
             temp = fp
