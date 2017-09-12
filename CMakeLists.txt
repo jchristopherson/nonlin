@@ -5,7 +5,7 @@ project(nonlin C CXX Fortran)
 # Define version information
 set(nonlin_VERSION_MAJOR 1)
 set(nonlin_VERSION_MINOR 1)
-set(nonlin_VERSION_PATCH 2)
+set(nonlin_VERSION_PATCH 4)
 
 # Define output directories, if undefined
 if (NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
