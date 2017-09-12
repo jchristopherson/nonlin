@@ -157,9 +157,11 @@ set(nonlin_test_sources external/linalg/tests/test_core.f90
   tests/nonlin_test_optimize.f90)
 add_executable(nonlin_test ${nonlin_test_sources})
 target_link_libraries(nonlin_test nonlin)
-add_custom_command(OUTPUT nonlin_tests DEPENDS ${nonlin_test_sources}
-  COMMAND nonlin_test)
-add_custom_target(run_nonlin_tests ALL DEPENDS nonlin_tests)
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+  add_custom_command(OUTPUT nonlin_tests DEPENDS ${nonlin_test_sources}
+    COMMAND nonlin_test)
+  add_custom_target(run_nonlin_tests ALL DEPENDS nonlin_tests)
+endif()
 
 # C Test
 include_directories(${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/tests
@@ -170,6 +172,8 @@ set(c_nonlin_test_sources tests/nonlin_c_test.c tests/nonlin_c_test_solve.c
   external/linalg/tests/c_test_core.c tests/nonlin_c_test_poly.c)
 add_executable(nonlin_c_test ${c_nonlin_test_sources})
 target_link_libraries(nonlin_c_test nonlin m)
-add_custom_command(OUTPUT nonlin_c_tests DEPENDS ${c_nonlin_test_sources}
-  COMMAND nonlin_c_test)
-add_custom_target(run_nonlin_c_tests ALL DEPENDS nonlin_c_tests)
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+  add_custom_command(OUTPUT nonlin_c_tests DEPENDS ${c_nonlin_test_sources}
+    COMMAND nonlin_c_test)
+  add_custom_target(run_nonlin_c_tests ALL DEPENDS nonlin_c_tests)
+endif()
