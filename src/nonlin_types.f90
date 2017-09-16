@@ -7,7 +7,7 @@
 !! systems of nonlinear equations.
 !!
 !! @author Jason Christopherson
-!! @version 1.1.4
+!! @version 1.1.5
 
 !> @brief \b nonlin_types
 !!

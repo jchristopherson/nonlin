@@ -5,7 +5,7 @@ project(nonlin C CXX Fortran)
 # Define version information
 set(nonlin_VERSION_MAJOR 1)
 set(nonlin_VERSION_MINOR 1)
-set(nonlin_VERSION_PATCH 4)
+set(nonlin_VERSION_PATCH 5)
 
 # Define output directories, if undefined
 if (NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
@@ -58,7 +58,13 @@ get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # gfortran
   # Options: https://gcc.gnu.org/onlinedocs/gfortran/Option-Summary.html
-  set (CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3")
+  if (WIN32 AND NOT BUILD_SHARED_LIBS)
+    # For some reason higher than -O1 results in a segmentation fault on
+    # Windows 7 and on Windows 10 (64-bit versions)
+    set(CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O1")
+  else()
+    set(CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3")
+  endif()
   set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -Wall -Wno-c-binding-type")
 elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   # ifort (untested)
@@ -157,11 +163,9 @@ set(nonlin_test_sources external/linalg/tests/test_core.f90
   tests/nonlin_test_optimize.f90)
 add_executable(nonlin_test ${nonlin_test_sources})
 target_link_libraries(nonlin_test nonlin)
-if (CMAKE_BUILD_TYPE MATCHES Debug)
-  add_custom_command(OUTPUT nonlin_tests DEPENDS ${nonlin_test_sources}
-    COMMAND nonlin_test)
-  add_custom_target(run_nonlin_tests ALL DEPENDS nonlin_tests)
-endif()
+add_custom_command(OUTPUT nonlin_tests DEPENDS ${nonlin_test_sources}
+  COMMAND nonlin_test)
+add_custom_target(run_nonlin_tests ALL DEPENDS nonlin_tests)
 
 # C Test
 include_directories(${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/tests
@@ -172,8 +176,6 @@ set(c_nonlin_test_sources tests/nonlin_c_test.c tests/nonlin_c_test_solve.c
   external/linalg/tests/c_test_core.c tests/nonlin_c_test_poly.c)
 add_executable(nonlin_c_test ${c_nonlin_test_sources})
 target_link_libraries(nonlin_c_test nonlin m)
-if (CMAKE_BUILD_TYPE MATCHES Debug)
-  add_custom_command(OUTPUT nonlin_c_tests DEPENDS ${c_nonlin_test_sources}
-    COMMAND nonlin_c_test)
-  add_custom_target(run_nonlin_c_tests ALL DEPENDS nonlin_c_tests)
-endif()
+add_custom_command(OUTPUT nonlin_c_tests DEPENDS ${c_nonlin_test_sources}
+  COMMAND nonlin_c_test)
+add_custom_target(run_nonlin_c_tests ALL DEPENDS nonlin_c_tests)
