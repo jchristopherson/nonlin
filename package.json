@@ -1,0 +1,6 @@
+{
+    "name": "nonlin-jchristopherson"
+    "description": "A library that provides routines to compute the solutions to systems of nonlinear equations.",
+    "author": "Jason Christopherson",
+    "version": "1.2.0"
+}

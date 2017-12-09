@@ -40,7 +40,7 @@ latex/
 
 
 # CMake Stuff
-*.json
+.cmaketools.json
 CMakeCache.txt
 CMakeFiles
 CMakeScripts
