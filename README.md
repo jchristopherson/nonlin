@@ -1,6 +1,9 @@
 # nonlin
 A library that provides routines to compute the solutions to systems of nonlinear equations.
 
+## Status
+![Build Status](https://travis-ci.org/jchristopherson/nonlin.svg?branch=master)
+
 ## Example 1
 This example solves a set of two equations of two unknowns using a Quasi-Newton type solver.  In this example, the solver is left to compute the derivatives numerically.
 
