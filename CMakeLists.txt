@@ -57,14 +57,7 @@ get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 
 if (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   # gfortran
-  # Options: https://gcc.gnu.org/onlinedocs/gfortran/Option-Summary.html
-  if (WIN32 AND NOT BUILD_SHARED_LIBS)
-    # For some reason higher than -O1 results in a segmentation fault on
-    # Windows 7 and on Windows 10 (64-bit versions)
-    set(CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O1")
-  else()
-    set(CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3")
-  endif()
+  set(CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -Wall -Wno-c-binding-type")
 elseif (Fortran_COMPILER_NAME MATCHES "ifort.*")
   # ifort (untested)
@@ -78,47 +71,26 @@ else (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -Wall")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
-# Specify source files
-set(sources src/nonlin_types.f90 src/nonlin_solve.f90 src/nonlin_polynomials.f90
-  src/nonlin_optimize.f90 src/nonlin_linesearch.f90 src/nonlin_least_squares.f90
-  src/nonlin_c_binding.f90)
-
 # Define necessary CMake variables, and define the dependency.
-if (BUILD_SHARED_LIBS)
-  set(ExternalProjectCMakeArgs
-      -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
-      -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-      -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-      -CMAKE_Fortran_MODULE_DIRECTORY=${CMAKE_Fortran_MODULE_DIRECTORY}
-      -DCMAKE_INSTALL_PREFIX=${CMAKE_SOURCE_DIR}/external
-      -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER}
-      -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-      -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
-  add_subdirectory(external/linalg)
-else()
-  # Building a static library, simply add source code to this library
-  file(GLOB_RECURSE linalg_sources 
-    external/linalg/src/*.f90 
-    external/linalg/LAPACK/BLAS/src/*.f
-    external/linalg/LAPACK/src/*.f 
-    external/linalg/src/QRUPDATE/*.f
-    external/linalg/ferror/src/*.f90)
-  list(APPEND sources ${linalg_sources})
-endif()
+set(ExternalProjectCMakeArgs
+  -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
+  -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+  -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  -DCMAKE_Fortran_MODULE_DIRECTORY=${CMAKE_Fortran_MODULE_DIRECTORY}
+  -DCMAKE_INSTALL_PREFIX=${CMAKE_SOURCE_DIR}/external
+  -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER}
+  -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+  -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
 
-# If BUILD_SHARED_LIBS is defined, then a shared library (DLL) will be built;
-# else, a static library will be built.
-add_library(nonlin ${sources})
-if (BUILD_SHARED_LIBS)
-  target_link_libraries(nonlin linalg ferror)
-endif ()
+# Locate the source directory
+add_subdirectory(src)
 
 # ------------------------------------------------------------------------------
 # EXAMPLES
 # ------------------------------------------------------------------------------
-option(BUILD_EXAMPLES "Build examples?" OFF)
-if (BUILD_EXAMPLES)
+option(BUILD_NONLIN_EXAMPLES "Build NONLIN examples?" OFF)
+if (BUILD_NONLIN_EXAMPLES)
   # Inform the user we're building the examples
   message(STATUS "Building NONLIN examples.")
 
@@ -141,8 +113,8 @@ if (BUILD_EXAMPLES)
 
 # --------------------
   include_directories(${PROJECT_SOURCE_DIR}/include
-    ${PROJECT_SOURCE_DIR}/external/linalg/ferror/include
-    ${PROJECT_SOURCE_DIR}/external/linalg/include)
+    ${PROJECT_SOURCE_DIR}/src/external/linalg/src/external/ferror/include
+    ${PROJECT_SOURCE_DIR}/src/external/linalg/include)
   
   # C Quasi-Newton Example
   add_executable(nonlin_quasi_newton_c_example 
@@ -157,25 +129,33 @@ endif()
 # ------------------------------------------------------------------------------
 # TESTS
 # ------------------------------------------------------------------------------
-set(nonlin_test_sources external/linalg/tests/test_core.f90
-  tests/nonlin_test.f90 tests/nonlin_test_jacobian.f90
-  tests/nonlin_test_solve.f90 tests/nonlin_test_poly.f90
-  tests/nonlin_test_optimize.f90)
-add_executable(nonlin_test ${nonlin_test_sources})
-target_link_libraries(nonlin_test nonlin)
-add_custom_command(OUTPUT nonlin_tests DEPENDS ${nonlin_test_sources}
-  COMMAND nonlin_test)
-add_custom_target(run_nonlin_tests ALL DEPENDS nonlin_tests)
+option(BUILD_NONLIN_TESTS "Build NONLIN tests?" ON)
+if (BUILD_NONLIN_TESTS)
+  set(nonlin_test_sources src/external/linalg/tests/test_core.f90
+    tests/nonlin_test.f90 tests/nonlin_test_jacobian.f90
+    tests/nonlin_test_solve.f90 tests/nonlin_test_poly.f90
+    tests/nonlin_test_optimize.f90)
+  add_executable(nonlin_test ${nonlin_test_sources})
+  target_link_libraries(nonlin_test nonlin)
+  add_custom_command(OUTPUT nonlin_tests DEPENDS ${nonlin_test_sources}
+    COMMAND nonlin_test)
+  add_custom_target(run_nonlin_tests ALL DEPENDS nonlin_tests)
+endif()
 
 # C Test
-include_directories(${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/tests
-  ${PROJECT_SOURCE_DIR}/external/linalg/ferror/include
-  ${PROJECT_SOURCE_DIR}/external/linalg/tests 
-  ${PROJECT_SOURCE_DIR}/external/linalg/include)
-set(c_nonlin_test_sources tests/nonlin_c_test.c tests/nonlin_c_test_solve.c
-  external/linalg/tests/c_test_core.c tests/nonlin_c_test_poly.c)
-add_executable(nonlin_c_test ${c_nonlin_test_sources})
-target_link_libraries(nonlin_c_test nonlin m)
-add_custom_command(OUTPUT nonlin_c_tests DEPENDS ${c_nonlin_test_sources}
-  COMMAND nonlin_c_test)
-add_custom_target(run_nonlin_c_tests ALL DEPENDS nonlin_c_tests)
+option(BUILD_NONLIN_C_TESTS "Build NONLIN C API tests?" ON)
+if (BUILD_NONLIN_C_TESTS)
+  include_directories(
+    ${PROJECT_SOURCE_DIR}/include 
+    ${PROJECT_SOURCE_DIR}/tests
+    ${PROJECT_SOURCE_DIR}/src/external/linalg/src/external/ferror/include
+    ${PROJECT_SOURCE_DIR}/src/external/linalg/tests 
+    ${PROJECT_SOURCE_DIR}/src/external/linalg/include)
+  set(c_nonlin_test_sources tests/nonlin_c_test.c tests/nonlin_c_test_solve.c
+    src/external/linalg/tests/c_test_core.c tests/nonlin_c_test_poly.c)
+  add_executable(nonlin_c_test ${c_nonlin_test_sources})
+  target_link_libraries(nonlin_c_test nonlin m)
+  add_custom_command(OUTPUT nonlin_c_tests DEPENDS ${c_nonlin_test_sources}
+    COMMAND nonlin_c_test)
+  add_custom_target(run_nonlin_c_tests ALL DEPENDS nonlin_c_tests)
+endif()
