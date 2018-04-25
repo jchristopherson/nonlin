@@ -99,7 +99,7 @@ if (BUILD_NONLIN_EXAMPLES)
   target_link_libraries(quasi_newton_example nonlin)
 
   # Least-Squares Example
-  add_executable(least_squares_example 
+  add_executable(least_squares_example
     examples/nonlin_least_squares_example.f90)
   target_link_libraries(least_squares_example nonlin)
 
@@ -110,20 +110,6 @@ if (BUILD_NONLIN_EXAMPLES)
   # Nelder-Mead Example
   add_executable(nm_opt_example examples/nonlin_nm_opt_example.f90)
   target_link_libraries(nm_opt_example nonlin)
-
-# --------------------
-  include_directories(${PROJECT_SOURCE_DIR}/include
-    ${PROJECT_SOURCE_DIR}/src/external/linalg/src/external/ferror/include
-    ${PROJECT_SOURCE_DIR}/src/external/linalg/include)
-  
-  # C Quasi-Newton Example
-  add_executable(nonlin_quasi_newton_c_example 
-    examples/nonlin_quasi_newton_c_example.c)
-  target_link_libraries(nonlin_quasi_newton_c_example nonlin)
-
-  # C BFGS Example
-  add_executable(nonlin_bfgs_c_example examples/nonlin_bfgs_c_example.c)
-  target_link_libraries(nonlin_bfgs_c_example nonlin)
 endif()
 
 # ------------------------------------------------------------------------------
@@ -140,22 +126,4 @@ if (BUILD_NONLIN_TESTS)
   add_custom_command(OUTPUT nonlin_tests DEPENDS ${nonlin_test_sources}
     COMMAND nonlin_test)
   add_custom_target(run_nonlin_tests ALL DEPENDS nonlin_tests)
-endif()
-
-# C Test
-option(BUILD_NONLIN_C_TESTS "Build NONLIN C API tests?" ON)
-if (BUILD_NONLIN_C_TESTS)
-  include_directories(
-    ${PROJECT_SOURCE_DIR}/include 
-    ${PROJECT_SOURCE_DIR}/tests
-    ${PROJECT_SOURCE_DIR}/src/external/linalg/src/external/ferror/include
-    ${PROJECT_SOURCE_DIR}/src/external/linalg/tests 
-    ${PROJECT_SOURCE_DIR}/src/external/linalg/include)
-  set(c_nonlin_test_sources tests/nonlin_c_test.c tests/nonlin_c_test_solve.c
-    src/external/linalg/tests/c_test_core.c tests/nonlin_c_test_poly.c)
-  add_executable(nonlin_c_test ${c_nonlin_test_sources})
-  target_link_libraries(nonlin_c_test nonlin m)
-  add_custom_command(OUTPUT nonlin_c_tests DEPENDS ${c_nonlin_test_sources}
-    COMMAND nonlin_c_test)
-  add_custom_target(run_nonlin_c_tests ALL DEPENDS nonlin_c_tests)
 endif()
