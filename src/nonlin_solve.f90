@@ -6,12 +6,13 @@
 !! To provide various routines capapble of solving systems of nonlinear
 !! equations.
 module nonlin_solve
+    use, intrinsic :: iso_fortran_env, only : int32, real64
     use nonlin_types
     use nonlin_linesearch, only : line_search, limit_search_vector
     use ferror, only : errors
-    use linalg_factor, only : qr_factor, form_qr, qr_rank1_update, lu_factor
-    use linalg_core, only : rank1_update, mtx_mult, recip_mult_array
-    use linalg_solve, only : solve_triangular_system, solve_lu
+    use linalg_core, only : qr_factor, form_qr, qr_rank1_update, lu_factor, &
+        rank1_update, mtx_mult, recip_mult_array, solve_triangular_system, &
+        solve_lu
     implicit none
     private
     public :: line_search_solver
@@ -53,7 +54,7 @@ module nonlin_solve
     type, extends(line_search_solver) :: quasi_newton_solver
         private
         !> The number of iterations that may pass between Jacobian calculation.
-        integer(i32) :: m_jDelta = 5
+        integer(int32) :: m_jDelta = 5
     contains
         !> @brief Solves the system of equations.
         procedure, public :: solve => qns_solve
@@ -81,7 +82,7 @@ module nonlin_solve
         !> @brief Solves the equation.
         procedure, public :: solve => brent_solve
     end type
- 
+
 
 contains
 ! ******************************************************************************
@@ -203,7 +204,7 @@ contains
     !!     type(vecfcn_helper) :: obj
     !!     procedure(vecfcn), pointer :: fcn
     !!     type(quasi_newton_solver) :: solver
-    !!     real(dp) :: x(2), f(2)
+    !!     real(real64) :: x(2), f(2)
     !!
     !!     ! Set the initial conditions to [1, 1]
     !!     x = 1.0d0
@@ -228,8 +229,8 @@ contains
     !!     ! x = +/-5
     !!     ! y = +/-3
     !!     subroutine fcn1(x, f)
-    !!         real(dp), intent(in), dimension(:) :: x
-    !!         real(dp), intent(out), dimension(:) :: f
+    !!         real(real64), intent(in), dimension(:) :: x
+    !!         real(real64), intent(out), dimension(:) :: f
     !!         f(1) = x(1)**2 + x(2)**2 - 34.0d0
     !!         f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
     !!     end subroutine
@@ -249,25 +250,25 @@ contains
         ! Arguments
         class(quasi_newton_solver), intent(inout) :: this
         class(vecfcn_helper), intent(in) :: fcn
-        real(dp), intent(inout), dimension(:) :: x
-        real(dp), intent(out), dimension(:) :: fvec
+        real(real64), intent(inout), dimension(:) :: x
+        real(real64), intent(out), dimension(:) :: fvec
         type(iteration_behavior), optional :: ib
         class(errors), intent(inout), optional, target :: err
 
         ! Parameters
-        real(dp), parameter :: zero = 0.0d0
-        real(dp), parameter :: half = 0.5d0
-        real(dp), parameter :: one = 1.0d0
-        real(dp), parameter :: factor = 1.0d2
+        real(real64), parameter :: zero = 0.0d0
+        real(real64), parameter :: half = 0.5d0
+        real(real64), parameter :: one = 1.0d0
+        real(real64), parameter :: factor = 1.0d2
 
         ! Local Variables
         logical :: restart, xcnvrg, fcnvrg, gcnvrg, check
-        integer(i32) :: i, neqn, nvar, flag, lw1, lw2, lw3, neval, iter, &
+        integer(int32) :: i, neqn, nvar, flag, lw1, lw2, lw3, neval, iter, &
             maxeval, jcount, njac
-        real(dp), allocatable, dimension(:) :: work, tau, dx, df, fvold, &
+        real(real64), allocatable, dimension(:) :: work, tau, dx, df, fvold, &
             xold, s
-        real(dp), allocatable, dimension(:,:) :: q, r, b
-        real(dp) :: test, f, fold, temp, ftol, xtol, gtol, &
+        real(real64), allocatable, dimension(:,:) :: q, r, b
+        real(real64) :: test, f, fold, temp, ftol, xtol, gtol, &
             stpmax, x2, xnorm, fnorm
         type(iteration_behavior) :: lib
         class(errors), pointer :: errmgr
@@ -563,7 +564,7 @@ contains
     !! @return The number of iterations.
     pure function qns_get_jac_interval(this) result(n)
         class(quasi_newton_solver), intent(in) :: this
-        integer(i32) :: n
+        integer(int32) :: n
         n = this%m_jDelta
     end function
 
@@ -575,14 +576,14 @@ contains
     !! @param[in] n The number of iterations.
     subroutine qns_set_jac_interval(this, n)
         class(quasi_newton_solver), intent(inout) :: this
-        integer(i32), intent(in) :: n
+        integer(int32), intent(in) :: n
         this%m_jDelta = n
     end subroutine
 
 ! ******************************************************************************
 ! NEWTON_SOLVER MEMBERS
 ! ------------------------------------------------------------------------------
-    !> @brief Applies Newton's method in conjunction with a backtracking type 
+    !> @brief Applies Newton's method in conjunction with a backtracking type
     !! line search to solve N equations of N unknowns.
     !!
     !! @param[in,out] this The equation_solver-based object.
@@ -627,7 +628,7 @@ contains
     !!     type(vecfcn_helper) :: obj
     !!     procedure(vecfcn), pointer :: fcn
     !!     type(newton_solver) :: solver
-    !!     real(dp) :: x(2), f(2)
+    !!     real(real64) :: x(2), f(2)
     !!
     !!     ! Set the initial conditions to [1, 1]
     !!     x = 1.0d0
@@ -652,8 +653,8 @@ contains
     !!     ! x = +/-5
     !!     ! y = +/-3
     !!     subroutine fcn1(x, f)
-    !!         real(dp), intent(in), dimension(:) :: x
-    !!         real(dp), intent(out), dimension(:) :: f
+    !!         real(real64), intent(in), dimension(:) :: x
+    !!         real(real64), intent(out), dimension(:) :: f
     !!         f(1) = x(1)**2 + x(2)**2 - 34.0d0
     !!         f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
     !!     end subroutine
@@ -671,25 +672,25 @@ contains
         ! Arguments
         class(newton_solver), intent(inout) :: this
         class(vecfcn_helper), intent(in) :: fcn
-        real(dp), intent(inout), dimension(:) :: x
-        real(dp), intent(out), dimension(:) :: fvec
+        real(real64), intent(inout), dimension(:) :: x
+        real(real64), intent(out), dimension(:) :: fvec
         type(iteration_behavior), optional :: ib
         class(errors), intent(inout), optional, target :: err
 
         ! Parameters
-        real(dp), parameter :: zero = 0.0d0
-        real(dp), parameter :: half = 0.5d0
-        real(dp), parameter :: one = 1.0d0
-        real(dp), parameter :: mintol = 1.0d-12
-        real(dp), parameter :: factor = 1.0d2
+        real(real64), parameter :: zero = 0.0d0
+        real(real64), parameter :: half = 0.5d0
+        real(real64), parameter :: one = 1.0d0
+        real(real64), parameter :: mintol = 1.0d-12
+        real(real64), parameter :: factor = 1.0d2
 
         ! Local Variables
         logical :: check, xcnvrg, fcnvrg, gcnvrg
-        integer(i32) :: i, neqn, nvar, lwork, flag, neval, iter, maxeval, njac
-        integer(i32), allocatable, dimension(:) :: ipvt
-        real(dp), allocatable, dimension(:) :: dir, grad, xold, work
-        real(dp), allocatable, dimension(:,:) :: jac
-        real(dp) :: ftol, xtol, gtol, f, fold, stpmax, xnorm, fnorm, temp, test
+        integer(int32) :: i, neqn, nvar, lwork, flag, neval, iter, maxeval, njac
+        integer(int32), allocatable, dimension(:) :: ipvt
+        real(real64), allocatable, dimension(:) :: dir, grad, xold, work
+        real(real64), allocatable, dimension(:,:) :: jac
+        real(real64) :: ftol, xtol, gtol, f, fold, stpmax, xnorm, fnorm, temp, test
         type(iteration_behavior) :: lib
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
@@ -813,7 +814,7 @@ contains
                 call lu_factor(jac, ipvt, errmgr)
                 if (errmgr%has_warning_occurred()) then
                     ! The Jacobian is singular - warning was issued already, so
-                    ! simply exit the routine.  Do not return as a return at 
+                    ! simply exit the routine.  Do not return as a return at
                     ! this point would not allow for proper updating of the
                     ! iteration tracking parameters
                     exit
@@ -943,7 +944,7 @@ contains
     !!     type(fcn1var_helper) :: obj
     !!     procedure(fcn1var), pointer :: fcn
     !!     type(brent_solver) :: solver
-    !!     real(dp) :: x, f
+    !!     real(real64) :: x, f
     !!     type(value_pair) :: limits
     !!
     !!     ! Define the solution limits
@@ -963,8 +964,8 @@ contains
     !! contains
     !!     ! f(x) = sin(x) / x, SOLUTION: x = n * pi for n = 1, 2, 3, ...
     !!     function fcn1(x) result(f)
-    !!         real(dp), intent(in) :: x
-    !!         real(dp) :: f
+    !!         real(real64), intent(in) :: x
+    !!         real(real64) :: f
     !!         f = sin(x) / x
     !!     end function
     !! end program
@@ -980,29 +981,29 @@ contains
     !! - [Numerical Recipes](http://numerical.recipes/)
     !! - R.P. Brent, "Algorithms for Minimization without Derivatives,"
     !!      Dover Publications, January 2002. ISBN 0-486-41998-3.
-    !!      Further information available 
+    !!      Further information available
     !!      [here](https://maths-people.anu.edu.au/~brent/pub/pub011.html).
     subroutine brent_solve(this, fcn, x, lim, f, ib, err)
         ! Arguments
         class(brent_solver), intent(inout) :: this
         class(fcn1var_helper), intent(in) :: fcn
-        real(dp), intent(inout) :: x
+        real(real64), intent(inout) :: x
         type(value_pair), intent(in) :: lim
-        real(dp), intent(out), optional :: f
+        real(real64), intent(out), optional :: f
         type(iteration_behavior), optional :: ib
         class(errors), intent(inout), optional, target :: err
 
         ! Parameters
-        real(dp), parameter :: zero = 0.0d0
-        real(dp), parameter :: half = 0.5d0
-        real(dp), parameter :: one = 1.0d0
-        real(dp), parameter :: two = 2.0d0
-        real(dp), parameter :: three = 3.0d0
+        real(real64), parameter :: zero = 0.0d0
+        real(real64), parameter :: half = 0.5d0
+        real(real64), parameter :: one = 1.0d0
+        real(real64), parameter :: two = 2.0d0
+        real(real64), parameter :: three = 3.0d0
 
         ! Local Variables
         logical :: fcnvrg, xcnvrg
-        integer(i32) :: neval, maxeval, flag, iter
-        real(dp) :: ftol, xtol, a, b, c, fa, fb, fc, p, q, r, s, xm, e, d, &
+        integer(int32) :: neval, maxeval, flag, iter
+        real(real64) :: ftol, xtol, a, b, c, fa, fb, fc, p, q, r, s, xm, e, d, &
             mn1, mn2, eps, tol1, temp
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
@@ -1035,7 +1036,7 @@ contains
         else
             errmgr => deferr
         end if
-        
+
         ! Input Check
         if (.not.fcn%is_fcn_defined()) then
             ! ERROR: No function is defined
@@ -1207,20 +1208,20 @@ contains
     subroutine test_convergence(x, xo, f, g, lg, xtol, ftol, gtol, c, cx, cf, &
             cg, xnorm, fnorm)
         ! Arguments
-        real(dp), intent(in), dimension(:) :: x, xo, f, g
-        real(dp), intent(in) :: xtol, ftol, gtol
+        real(real64), intent(in), dimension(:) :: x, xo, f, g
+        real(real64), intent(in) :: xtol, ftol, gtol
         logical, intent(in) :: lg
         logical, intent(out) :: c, cx, cf, cg
-        real(dp), intent(out) :: xnorm, fnorm
+        real(real64), intent(out) :: xnorm, fnorm
 
         ! Parameters
-        real(dp), parameter :: zero = 0.0d0
-        real(dp), parameter :: one = 1.0d0
-        real(dp), parameter :: half = 0.5d0
+        real(real64), parameter :: zero = 0.0d0
+        real(real64), parameter :: one = 1.0d0
+        real(real64), parameter :: half = 0.5d0
 
         ! Local Variables
-        integer(i32) :: i, nvar, neqn
-        real(dp) :: test, dxmax, fc, den
+        integer(int32) :: i, nvar, neqn
+        real(real64) :: test, dxmax, fc, den
 
         ! Initialization
         nvar = size(x)

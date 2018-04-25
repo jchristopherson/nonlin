@@ -5,6 +5,7 @@
 !! @par Purpose
 !! To provide routines capable of solving the nonlinear least squares problem.
 module nonlin_least_squares
+    use, intrinsic :: iso_fortran_env, only : int32, real64
     use nonlin_types
     use ferror, only : errors
     implicit none
@@ -14,12 +15,12 @@ module nonlin_least_squares
 ! ******************************************************************************
 ! TYPES
 ! ------------------------------------------------------------------------------
-    !> @brief Defines a Levenberg-Marquardt based solver for unconstrained 
+    !> @brief Defines a Levenberg-Marquardt based solver for unconstrained
     !! least-squares problems.
     type, extends(equation_solver) :: least_squares_solver
         private
         !> Initial step bounding factor
-        real(dp) :: m_factor = 100.0d0
+        real(real64) :: m_factor = 100.0d0
     contains
         !> @brief Gets a factor used to scale the bounds on the initial step.
         procedure, public :: get_step_scaling_factor => lss_get_factor
@@ -46,7 +47,7 @@ contains
     !! is used.
     pure function lss_get_factor(this) result(x)
         class(least_squares_solver), intent(in) :: this
-        real(dp) :: x
+        real(real64) :: x
         x = this%m_factor
     end function
 
@@ -65,7 +66,7 @@ contains
     !! is used.
     subroutine lss_set_factor(this, x)
         class(least_squares_solver), intent(inout) :: this
-        real(dp), intent(in) :: x
+        real(real64), intent(in) :: x
         if (x < 0.1d0) then
             this%m_factor = 0.1d0
         else if (x > 1.0d2) then
@@ -122,7 +123,7 @@ contains
     !!     type(vecfcn_helper) :: obj
     !!     procedure(vecfcn), pointer :: fcn
     !!     type(least_squares_solver) :: solver
-    !!     real(dp) :: x(2), f(2)
+    !!     real(real64) :: x(2), f(2)
     !!
     !!     ! Set the initial conditions to [1, 1]
     !!     x = 1.0d0
@@ -147,8 +148,8 @@ contains
     !!     ! x = +/-5
     !!     ! y = +/-3
     !!     subroutine fcn1(x, f)
-    !!         real(dp), intent(in), dimension(:) :: x
-    !!         real(dp), intent(out), dimension(:) :: f
+    !!         real(real64), intent(in), dimension(:) :: x
+    !!         real(real64), intent(out), dimension(:) :: f
     !!         f(1) = x(1)**2 + x(2)**2 - 34.0d0
     !!         f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
     !!     end subroutine
@@ -172,7 +173,7 @@ contains
     !!     type(vecfcn_helper) :: obj
     !!     procedure(vecfcn), pointer :: fcn
     !!     type(least_squares_solver) :: solver
-    !!     real(dp) :: x(4), f(21) ! There are 4 coefficients and 21 data points
+    !!     real(real64) :: x(4), f(21) ! There are 4 coefficients and 21 data points
     !!
     !!     ! Locate the routine containing the equations to solve
     !!     fcn => fcns
@@ -195,11 +196,11 @@ contains
     !!     ! The function containing the data to fit
     !!     subroutine fcns(x, f)
     !!         ! Arguments
-    !!         real(dp), intent(in), dimension(:) :: x  ! Contains the coefficients
-    !!         real(dp), intent(out), dimension(:) :: f
+    !!         real(real64), intent(in), dimension(:) :: x  ! Contains the coefficients
+    !!         real(real64), intent(out), dimension(:) :: f
     !!
     !!         ! Local Variables
-    !!         real(dp), dimension(21) :: xp, yp
+    !!         real(real64), dimension(21) :: xp, yp
     !!
     !!         ! Data to fit (21 data points)
     !!         xp = [0.0d0, 0.1d0, 0.2d0, 0.3d0, 0.4d0, 0.5d0, 0.6d0, 0.7d0, 0.8d0, &
@@ -237,31 +238,31 @@ contains
         ! Arguments
         class(least_squares_solver), intent(inout) :: this
         class(vecfcn_helper), intent(in) :: fcn
-        real(dp), intent(inout), dimension(:) :: x
-        real(dp), intent(out), dimension(:) :: fvec
+        real(real64), intent(inout), dimension(:) :: x
+        real(real64), intent(out), dimension(:) :: fvec
         type(iteration_behavior), optional :: ib
         class(errors), intent(inout), optional, target :: err
 
         ! Parameters
-        real(dp), parameter :: zero = 0.0d0
-        real(dp), parameter :: p0001 = 1.0d-4
-        real(dp), parameter :: p1 = 0.1d0
-        real(dp), parameter :: qtr = 0.25d0
-        real(dp), parameter :: half = 0.5d0
-        real(dp), parameter :: p75 = 0.75d0
-        real(dp), parameter :: one = 1.0d0
-        real(dp), parameter :: hndrd = 1.0d2
+        real(real64), parameter :: zero = 0.0d0
+        real(real64), parameter :: p0001 = 1.0d-4
+        real(real64), parameter :: p1 = 0.1d0
+        real(real64), parameter :: qtr = 0.25d0
+        real(real64), parameter :: half = 0.5d0
+        real(real64), parameter :: p75 = 0.75d0
+        real(real64), parameter :: one = 1.0d0
+        real(real64), parameter :: hndrd = 1.0d2
 
         ! Local Variables
         logical :: xcnvrg, fcnvrg, gcnvrg
-        integer(i32) :: i, neqn, nvar, flag, neval, iter, j, l, maxeval, &
+        integer(int32) :: i, neqn, nvar, flag, neval, iter, j, l, maxeval, &
             njac, lwork
-        integer(i32), allocatable, dimension(:) :: jpvt
-        real(dp) :: ftol, xtol, gtol, fac, eps, fnorm, par, xnorm, delta, &
+        integer(int32), allocatable, dimension(:) :: jpvt
+        real(real64) :: ftol, xtol, gtol, fac, eps, fnorm, par, xnorm, delta, &
             sm, temp, gnorm, pnorm, fnorm1, actred, temp1, temp2, prered, &
             dirder, ratio
-        real(dp), allocatable, dimension(:,:) :: jac
-        real(dp), allocatable, dimension(:) :: diag, qtf, wa1, wa2, wa3, wa4, w
+        real(real64), allocatable, dimension(:,:) :: jac
+        real(real64), allocatable, dimension(:) :: diag, qtf, wa1, wa2, wa3, wa4, w
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
         character(len = 256) :: errmsg
@@ -565,21 +566,21 @@ contains
     !! This routines is based upon the MINPACK routine LMPAR.
     subroutine lmpar(r, ipvt, diag, qtb, delta, par, x, sdiag, wa1, wa2)
         ! Arguments
-        real(dp), intent(inout), dimension(:,:) :: r
-        integer(i32), intent(in), dimension(:) :: ipvt
-        real(dp), intent(in), dimension(:) :: diag, qtb
-        real(dp), intent(in) :: delta
-        real(dp), intent(inout) :: par
-        real(dp), intent(out), dimension(:) :: x, sdiag, wa1, wa2
+        real(real64), intent(inout), dimension(:,:) :: r
+        integer(int32), intent(in), dimension(:) :: ipvt
+        real(real64), intent(in), dimension(:) :: diag, qtb
+        real(real64), intent(in) :: delta
+        real(real64), intent(inout) :: par
+        real(real64), intent(out), dimension(:) :: x, sdiag, wa1, wa2
 
         ! Parameters
-        real(dp), parameter :: zero = 0.0d0
-        real(dp), parameter :: p001 = 1.0d-3
-        real(dp), parameter :: p1 = 0.1d0
+        real(real64), parameter :: zero = 0.0d0
+        real(real64), parameter :: p001 = 1.0d-3
+        real(real64), parameter :: p1 = 0.1d0
 
         ! Local Variables
         integer :: iter, j, jm1, jp1, k, l, nsing, n
-        real(dp) :: dxnorm, dwarf, fp, gnorm, parc, parl, paru, sm, temp
+        real(real64) :: dxnorm, dwarf, fp, gnorm, parc, parl, paru, sm, temp
 
         ! Initialization
         n = size(r, 2)  ! NOTE: R is M-by-N
@@ -732,19 +733,19 @@ contains
     !! This routines is based upon the MINPACK routine QRFAC.
     subroutine lmfactor(a, pivot, ipvt, rdiag, acnorm, wa)
         ! Arguments
-        real(dp), intent(inout), dimension(:,:) :: a
+        real(real64), intent(inout), dimension(:,:) :: a
         logical, intent(in) :: pivot
-        integer(i32), intent(out), dimension(:) :: ipvt
-        real(dp), intent(out), dimension(:) :: rdiag, acnorm, wa
+        integer(int32), intent(out), dimension(:) :: ipvt
+        real(real64), intent(out), dimension(:) :: rdiag, acnorm, wa
 
         ! Parameters
-        real(dp), parameter :: zero = 0.0d0
-        real(dp), parameter :: p05 = 5.0d-2
-        real(dp), parameter :: one = 1.0d0
+        real(real64), parameter :: zero = 0.0d0
+        real(real64), parameter :: p05 = 5.0d-2
+        real(real64), parameter :: one = 1.0d0
 
         ! Local Variables
-        integer(i32) :: m, n, i, j, jp1, k, kmax, minmn
-        real(dp) :: ajnorm, epsmch, sm, temp
+        integer(int32) :: m, n, i, j, jp1, k, kmax, minmn
+        real(real64) :: ajnorm, epsmch, sm, temp
 
         ! Initialization
         m = size(a, 1)
@@ -835,19 +836,19 @@ contains
     !! This routines is based upon the MINPACK routine QRSOLV.
     subroutine lmsolve(r, ipvt, diag, qtb, x, sdiag, wa)
         ! Arguments
-        real(dp), intent(inout), dimension(:,:) :: r
-        integer(i32), intent(in), dimension(:) :: ipvt
-        real(dp), intent(in), dimension(:) :: diag, qtb
-        real(dp), intent(out), dimension(:) :: x, sdiag, wa
+        real(real64), intent(inout), dimension(:,:) :: r
+        integer(int32), intent(in), dimension(:) :: ipvt
+        real(real64), intent(in), dimension(:) :: diag, qtb
+        real(real64), intent(out), dimension(:) :: x, sdiag, wa
 
         ! Parameters
-        real(dp), parameter :: zero = 0.0d0
-        real(dp), parameter :: qtr = 0.25d0
-        real(dp), parameter :: half = 0.5d0
+        real(real64), parameter :: zero = 0.0d0
+        real(real64), parameter :: qtr = 0.25d0
+        real(real64), parameter :: half = 0.5d0
 
         ! Local Variables
-        integer(i32) :: n, i, j, jp1, k, kp1, l, nsing
-        real(dp) :: cs, ctan, qtbpj, sn, sm, tn, temp
+        integer(int32) :: n, i, j, jp1, k, kp1, l, nsing
+        real(real64) :: cs, ctan, qtbpj, sn, sm, tn, temp
 
         ! Initialization
         n = size(r, 1)

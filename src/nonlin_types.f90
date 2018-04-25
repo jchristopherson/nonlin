@@ -3,7 +3,7 @@
 !> @mainpage
 !!
 !! @section intro_sec Introduction
-!! NONLIN is a library that provides routines to compute the solutions to 
+!! NONLIN is a library that provides routines to compute the solutions to
 !! systems of nonlinear equations.
 !!
 !! @author Jason Christopherson
@@ -21,8 +21,6 @@ module nonlin_types
         LA_INVALID_OPERATION_ERROR, LA_CONVERGENCE_ERROR
     implicit none
     private
-    public :: dp
-    public :: i32
     public :: vecfcn
     public :: fcn1var
     public :: fcnnvar
@@ -48,14 +46,6 @@ module nonlin_types
     public :: NL_DIVERGENT_BEHAVIOR_ERROR
     public :: NL_SPURIOUS_CONVERGENCE_ERROR
     public :: NL_TOLERANCE_TOO_SMALL_ERROR
-
-! ******************************************************************************
-! NUMERIC TYPE CONSTANTS
-! ------------------------------------------------------------------------------
-    !> @brief Defines a double-precision (64-bit) floating-point type.
-    integer, parameter :: dp = real64
-    !> @brief Defines a 32-bit signed integer type.
-    integer, parameter :: i32 = int32
 
 ! ******************************************************************************
 ! ERROR FLAGS
@@ -89,8 +79,8 @@ module nonlin_types
         !! @return The value of the function at @p x.
         function fcn1var(x) result(f)
             use linalg_constants, only : dp
-            real(dp), intent(in) :: x
-            real(dp) :: f
+            real(real64), intent(in) :: x
+            real(real64) :: f
         end function
 
         !> @brief Describes an M-element vector-valued function of N-variables.
@@ -100,8 +90,8 @@ module nonlin_types
         !!  of the M functions.
         subroutine vecfcn(x, f)
             use linalg_constants, only : dp
-            real(dp), intent(in), dimension(:) :: x
-            real(dp), intent(out), dimension(:) :: f
+            real(real64), intent(in), dimension(:) :: x
+            real(real64), intent(out), dimension(:) :: f
         end subroutine
 
         !> @brief Describes a routine capable of computing the Jacobian matrix
@@ -111,8 +101,8 @@ module nonlin_types
         !! @param[out] jac An M-by-N matrix where the Jacobian will be written.
         subroutine jacobianfcn(x, jac)
             use linalg_constants, only : dp
-            real(dp), intent(in), dimension(:) :: x
-            real(dp), intent(out), dimension(:,:) :: jac
+            real(real64), intent(in), dimension(:) :: x
+            real(real64), intent(out), dimension(:,:) :: jac
         end subroutine
 
         !> @brief Describes a function of N variables.
@@ -121,8 +111,8 @@ module nonlin_types
         !! @return The value of the function at @p x.
         function fcnnvar(x) result(f)
             use linalg_constants, only : dp
-            real(dp), intent(in), dimension(:) :: x
-            real(dp) :: f
+            real(real64), intent(in), dimension(:) :: x
+            real(real64) :: f
         end function
 
         !> @brief Describes a routine capable of computing the gradient vector
@@ -133,15 +123,15 @@ module nonlin_types
         !!  written as output.
         subroutine gradientfcn(x, g)
             use linalg_constants, only : dp
-            real(dp), intent(in), dimension(:) :: x
-            real(dp), intent(out), dimension(:) :: g
+            real(real64), intent(in), dimension(:) :: x
+            real(real64), intent(out), dimension(:) :: g
         end subroutine
     end interface
 
 ! ******************************************************************************
 ! TYPES
 ! ------------------------------------------------------------------------------
-    !> @brief Defines a type capable of encapsulating a system of nonlinear 
+    !> @brief Defines a type capable of encapsulating a system of nonlinear
     !! equations of the form: F(X) = 0.
     type vecfcn_helper
         private
@@ -150,16 +140,16 @@ module nonlin_types
         !> A pointer to the jacobian routine - null if no routine is supplied.
         procedure(jacobianfcn), pointer, nopass :: m_jac => null()
         !> The number of functions in m_fcn
-        integer(i32) :: m_nfcn = 0
+        integer(int32) :: m_nfcn = 0
         !> The number of variables in m_fcn
-        integer(i32) :: m_nvar = 0
+        integer(int32) :: m_nvar = 0
     contains
         !> @brief Establishes a pointer to the routine containing the system of
         !!  equations to solve.
         procedure, public :: set_fcn => vfh_set_fcn
-        !> @brief Establishes a pointer to the routine for computing the 
-        !! Jacobian matrix of the system of equations.  If no routine is 
-        !! defined, the Jacobian matrix will be computed numerically (this is 
+        !> @brief Establishes a pointer to the routine for computing the
+        !! Jacobian matrix of the system of equations.  If no routine is
+        !! defined, the Jacobian matrix will be computed numerically (this is
         !! the default state).
         procedure, public :: set_jacobian => vfh_set_jac
         !> @brief Tests if the pointer to the subroutine containing the system
@@ -169,11 +159,11 @@ module nonlin_types
         !! of equations to solve has been assigned.
         procedure, public :: is_jacobian_defined => vfh_is_jac_defined
         !> @brief Executes the routine containing the system of equations to
-        !! solve.  No action is taken if the pointer to the subroutine has not 
+        !! solve.  No action is taken if the pointer to the subroutine has not
         !! been defined.
         procedure, public :: fcn => vfh_fcn
-        !> @brief Executes the routine containing the Jacobian matrix if 
-        !! supplied.  If not supplied, the Jacobian is computed via finite 
+        !> @brief Executes the routine containing the Jacobian matrix if
+        !! supplied.  If not supplied, the Jacobian is computed via finite
         !! differences.
         procedure, public :: jacobian => vfh_jac_fcn
         !> @brief Gets the number of equations in this system.
@@ -183,7 +173,7 @@ module nonlin_types
     end type
 
 ! ------------------------------------------------------------------------------
-    !> @brief Defines a type capable of encapsulating an equation of one 
+    !> @brief Defines a type capable of encapsulating an equation of one
     !! variable of the form: f(x) = 0.
     type fcn1var_helper
         private
@@ -201,7 +191,7 @@ module nonlin_types
     end type
 
 ! ------------------------------------------------------------------------------
-    !> @brief Defines a type capable of encapsulating an equation of N 
+    !> @brief Defines a type capable of encapsulating an equation of N
     !! variables.
     type fcnnvar_helper
         private
@@ -210,7 +200,7 @@ module nonlin_types
         !> A pointer to the gradient routine.
         procedure(gradientfcn), pointer, nopass :: m_grad => null()
         !> The number of variables in m_fcn
-        integer(i32) :: m_nvar = 0
+        integer(int32) :: m_nvar = 0
     contains
         !> @brief Executes the routine containing the function to evaluate.
         procedure, public :: fcn => fnh_fcn
@@ -223,7 +213,7 @@ module nonlin_types
         !> @brief Establishes a pointer to the routine containing the gradient
         !! vector of the function.
         procedure, public :: set_gradient_fcn => fnh_set_grad
-        !> @brief Tests if the pointer to the routine containing the gradient 
+        !> @brief Tests if the pointer to the routine containing the gradient
         !! has been assigned.
         procedure, public :: is_gradient_defined => fnh_is_grad_defined
         !> @brief Computes the gradient of the function.
@@ -235,13 +225,13 @@ module nonlin_types
     !! iteration process.
     type, bind(c) :: iteration_behavior
         !> Specifies the number of iterations performed.
-        integer(i32) :: iter_count
+        integer(int32) :: iter_count
         !> Specifies the number of function evaluations performed.
-        integer(i32) :: fcn_count
+        integer(int32) :: fcn_count
         !> Specifies the number of Jacobian evaluations performed.
-        integer(i32) :: jacobian_count
+        integer(int32) :: jacobian_count
         !> Specifies the number of gradient vector evaluations performed.
-        integer(i32) :: gradient_count
+        integer(int32) :: gradient_count
         !> True if the solution converged as a result of a zero-valued
         !! function; else, false.
         logical(c_bool) :: converge_on_fcn
@@ -255,18 +245,18 @@ module nonlin_types
     end type
 
 ! ------------------------------------------------------------------------------
-    !> @brief A base class for various solvers of nonlinear systems of 
+    !> @brief A base class for various solvers of nonlinear systems of
     !! equations.
     type, abstract :: equation_solver
         private
         !> The maximum number of function evaluations allowed per solve.
-        integer(i32) :: m_maxEval = 100
+        integer(int32) :: m_maxEval = 100
         !> The convergence criteria on function values.
-        real(dp) :: m_fcnTol = 1.0d-8
+        real(real64) :: m_fcnTol = 1.0d-8
         !> The convergence criteria on change in variable values.
-        real(dp) :: m_xtol = 1.0d-12
+        real(real64) :: m_xtol = 1.0d-12
         !> The convergence criteria for the slope of the gradient vector.
-        real(dp) :: m_gtol = 1.0d-12
+        real(real64) :: m_gtol = 1.0d-12
         !> Set to true to print iteration status; else, false.
         logical :: m_printStatus = .false.
     contains
@@ -305,11 +295,11 @@ module nonlin_types
     type, abstract :: equation_solver_1var
         private
         !> The maximum number of function evaluations allowed per solve.
-        integer(i32) :: m_maxEval = 100
+        integer(int32) :: m_maxEval = 100
         !> The convergence criteria on function value.
-        real(dp) :: m_fcnTol = 1.0d-8
+        real(real64) :: m_fcnTol = 1.0d-8
         !> The convergence criteria on change in variable value.
-        real(dp) :: m_xtol = 1.0d-12
+        real(real64) :: m_xtol = 1.0d-12
         !> Set to true to print iteration status; else, false.
         logical :: m_printStatus = .false.
     contains
@@ -341,20 +331,20 @@ module nonlin_types
     !> @brief Defines a pair of numeric values.
     type, bind(c) :: value_pair
         !> Value 1.
-        real(dp) :: x1
+        real(real64) :: x1
         !> Value 2.
-        real(dp) :: x2
+        real(real64) :: x2
     end type
 
 ! ------------------------------------------------------------------------------
-    !> @brief A base class for optimization of an equation of multiple 
+    !> @brief A base class for optimization of an equation of multiple
     !! variables.
     type, abstract :: equation_optimizer
         private
         !> The maximum number of function evaluations allowed.
-        integer(i32) :: m_maxEval = 500
+        integer(int32) :: m_maxEval = 500
         !> The error tolerance used to determine convergence.
-        real(dp) :: m_tol = 1.0d-12
+        real(real64) :: m_tol = 1.0d-12
         !> Set to true to print iteration status; else, false.
         logical :: m_printStatus = .false.
     contains
@@ -407,8 +397,8 @@ module nonlin_types
             import iteration_behavior
             class(equation_solver), intent(inout) :: this
             class(vecfcn_helper), intent(in) :: fcn
-            real(dp), intent(inout), dimension(:) :: x
-            real(dp), intent(out), dimension(:) :: fvec
+            real(real64), intent(inout), dimension(:) :: x
+            real(real64), intent(out), dimension(:) :: fvec
             type(iteration_behavior), optional :: ib
             class(errors), intent(inout), optional, target :: err
         end subroutine
@@ -441,20 +431,20 @@ module nonlin_types
             import iteration_behavior
             class(equation_solver_1var), intent(inout) :: this
             class(fcn1var_helper), intent(in) :: fcn
-            real(dp), intent(inout) :: x
+            real(real64), intent(inout) :: x
             type(value_pair), intent(in) :: lim
-            real(dp), intent(out), optional :: f
+            real(real64), intent(out), optional :: f
             type(iteration_behavior), optional :: ib
             class(errors), intent(inout), optional, target :: err
         end subroutine
 
-        !> @brief Describes the interface of a routine for optimizing an 
+        !> @brief Describes the interface of a routine for optimizing an
         !! equation of N variables.
         !!
         !! @param[in,out] this The equation_optimizer-based object.
         !! @param[in] fcn The fcnnvar_helper object containing the equation to
         !!  optimize.
-        !! @param[in,out] x On input, the initial guess at the optimal point. 
+        !! @param[in,out] x On input, the initial guess at the optimal point.
         !!  On output, the updated optimal point estimate.
         !! @param[out] fout An optional output, that if provided, returns the
         !!  value of the function at @p x.
@@ -474,8 +464,8 @@ module nonlin_types
             import iteration_behavior
             class(equation_optimizer), intent(inout) :: this
             class(fcnnvar_helper), intent(in) :: fcn
-            real(dp), intent(inout), dimension(:) :: x
-            real(dp), intent(out), optional :: fout
+            real(real64), intent(inout), dimension(:) :: x
+            real(real64), intent(out), optional :: fout
             type(iteration_behavior), optional :: ib
             class(errors), intent(inout), optional, target :: err
         end subroutine
@@ -489,7 +479,7 @@ contains
 ! ------------------------------------------------------------------------------
     !> @brief Establishes a pointer to the routine containing the system of
     !!  equations to solve.
-    !! 
+    !!
     !! @param[in,out] this The vecfcn_helper object.
     !! @param[in] fcn The function pointer.
     !! @param[in] nfcn The number of functions.
@@ -497,7 +487,7 @@ contains
     subroutine vfh_set_fcn(this, fcn, nfcn, nvar)
         class(vecfcn_helper), intent(inout) :: this
         procedure(vecfcn), intent(in), pointer :: fcn
-        integer(i32), intent(in) :: nfcn, nvar
+        integer(int32), intent(in) :: nfcn, nvar
         this%m_fcn => fcn
         this%m_nfcn = nfcn
         this%m_nvar = nvar
@@ -529,7 +519,7 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Tests if the pointer to the subroutine containing the system of 
+    !> @brief Tests if the pointer to the subroutine containing the system of
     !! equations to solve has been assigned.
     !!
     !! @param[in] this The vecfcn_helper object.
@@ -550,8 +540,8 @@ contains
     !!  of the M functions.
     subroutine vfh_fcn(this, x, f)
         class(vecfcn_helper), intent(in) :: this
-        real(dp), intent(in), dimension(:) :: x
-        real(dp), intent(out), dimension(:) :: f
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(out), dimension(:) :: f
         if (this%is_fcn_defined()) then
             call this%m_fcn(x, f)
         end if
@@ -562,7 +552,7 @@ contains
     !! If not supplied, the Jacobian is computed via finite differences.
     !!
     !! @param[in] this The vecfcn_helper object.
-    !! @param[in] x An N-element array containing the independent variabls 
+    !! @param[in] x An N-element array containing the independent variabls
     !!  defining the point about which the derivatives will be calculated.
     !! @param[out] jac An M-by-N matrix where, on output, the Jacobian will
     !!  be written.
@@ -586,20 +576,20 @@ contains
     subroutine vfh_jac_fcn(this, x, jac, fv, work, olwork, err)
         ! Arguments
         class(vecfcn_helper), intent(in) :: this
-        real(dp), intent(inout), dimension(:) :: x
-        real(dp), intent(out), dimension(:,:) :: jac
-        real(dp), intent(in), dimension(:), optional, target :: fv
-        real(dp), intent(out), dimension(:), optional, target :: work
-        integer(i32), intent(out), optional :: olwork, err
+        real(real64), intent(inout), dimension(:) :: x
+        real(real64), intent(out), dimension(:,:) :: jac
+        real(real64), intent(in), dimension(:), optional, target :: fv
+        real(real64), intent(out), dimension(:), optional, target :: work
+        integer(int32), intent(out), optional :: olwork, err
 
         ! Parameters
-        real(dp), parameter :: zero = 0.0d0
+        real(real64), parameter :: zero = 0.0d0
 
         ! Local Variables
-        integer(i32) :: j, m, n, lwork, flag
-        real(dp) :: eps, epsmch, h, temp
-        real(dp), pointer, dimension(:) :: fptr, f1ptr
-        real(dp), allocatable, target, dimension(:) :: wrk
+        integer(int32) :: j, m, n, lwork, flag
+        real(real64) :: eps, epsmch, h, temp
+        real(real64), pointer, dimension(:) :: fptr, f1ptr
+        real(real64), allocatable, target, dimension(:) :: wrk
 
         ! Initialization
         if (present(err)) err = 0
@@ -706,7 +696,7 @@ contains
     !! @return The function count.
     pure function vfh_get_nfcn(this) result(n)
         class(vecfcn_helper), intent(in) :: this
-        integer(i32) :: n
+        integer(int32) :: n
         n = this%m_nfcn
     end function
 
@@ -717,7 +707,7 @@ contains
     !! @return The number of variables.
     pure function vfh_get_nvar(this) result(n)
         class(vecfcn_helper), intent(in) :: this
-        integer(i32) :: n
+        integer(int32) :: n
         n = this%m_nvar
     end function
 
@@ -732,15 +722,15 @@ contains
     !! @return The value of the function at @p x.
     function f1h_fcn(this, x) result(f)
         class(fcn1var_helper), intent(in) :: this
-        real(dp), intent(in) :: x
-        real(dp) :: f
+        real(real64), intent(in) :: x
+        real(real64) :: f
         if (associated(this%m_fcn)) then
             f = this%m_fcn(x)
         end if
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Tests if the pointer to the function containing the equation to 
+    !> @brief Tests if the pointer to the function containing the equation to
     !! solve has been assigned.
     !!
     !! @param[in] this The fcn1var_helper object.
@@ -752,9 +742,9 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Establishes a pointer to the routine containing the equations to 
+    !> @brief Establishes a pointer to the routine containing the equations to
     !! solve.
-    !! 
+    !!
     !! @param[in,out] this The fcn1var_helper object.
     !! @param[in] fcn The function pointer.
     subroutine f1h_set_fcn(this, fcn)
@@ -774,15 +764,15 @@ contains
     !! @return The value of the function at @p x.
     function fnh_fcn(this, x) result(f)
         class(fcnnvar_helper), intent(in) :: this
-        real(dp), intent(in), dimension(:) :: x
-        real(dp) :: f
+        real(real64), intent(in), dimension(:) :: x
+        real(real64) :: f
         if (associated(this%m_fcn)) then
             f = this%m_fcn(x)
         end if
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Tests if the pointer to the function containing the equation to 
+    !> @brief Tests if the pointer to the function containing the equation to
     !! solve has been assigned.
     !!
     !! @param[in] this The fcnnvar_helper object.
@@ -794,16 +784,16 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Establishes a pointer to the routine containing the equations to 
+    !> @brief Establishes a pointer to the routine containing the equations to
     !! solve.
-    !! 
+    !!
     !! @param[in,out] this The fcnnvar_helper object.
     !! @param[in] fcn The function pointer.
     !! @param[in] nvar The number of variables in the function.
     subroutine fnh_set_fcn(this, fcn, nvar)
         class(fcnnvar_helper), intent(inout) :: this
         procedure(fcnnvar), intent(in), pointer :: fcn
-        integer(i32), intent(in) :: nvar
+        integer(int32), intent(in) :: nvar
         this%m_fcn => fcn
         this%m_nvar = nvar
     end subroutine
@@ -815,7 +805,7 @@ contains
     !! @return The number of variables.
     pure function fnh_get_nvar(this) result(n)
         class(fcnnvar_helper), intent(in) :: this
-        integer(i32) :: n
+        integer(int32) :: n
         n = this%m_nvar
     end function
 
@@ -863,17 +853,17 @@ contains
     subroutine fnh_grad_fcn(this, x, g, fv, err)
         ! Arguments
         class(fcnnvar_helper), intent(in) :: this
-        real(dp), intent(inout), dimension(:) :: x
-        real(dp), intent(out), dimension(:) :: g
-        real(dp), intent(in), optional :: fv
-        integer(i32), intent(out), optional :: err
+        real(real64), intent(inout), dimension(:) :: x
+        real(real64), intent(out), dimension(:) :: g
+        real(real64), intent(in), optional :: fv
+        integer(int32), intent(out), optional :: err
 
         ! Parameters
-        real(dp), parameter :: zero = 0.0d0
+        real(real64), parameter :: zero = 0.0d0
 
         ! Local Variables
-        integer(i32) :: j, n, flag
-        real(dp) :: eps, epsmch, h, temp, f, f1
+        integer(int32) :: j, n, flag
+        real(real64) :: eps, epsmch, h, temp, f, f1
 
         ! Initialization
         if (present(err)) err = 0
@@ -933,7 +923,7 @@ contains
     !! @return The maximum number of function evaluations.
     pure function es_get_max_eval(this) result(n)
         class(equation_solver), intent(in) :: this
-        integer(i32) :: n
+        integer(int32) :: n
         n = this%m_maxEval
     end function
 
@@ -945,7 +935,7 @@ contains
     !! @param[in] n The maximum number of function evaluations.
     subroutine es_set_max_eval(this, n)
         class(equation_solver), intent(inout) :: this
-        integer(i32), intent(in) :: n
+        integer(int32), intent(in) :: n
         this%m_maxEval = n
     end subroutine
 
@@ -956,7 +946,7 @@ contains
     !! @return The tolerance value.
     pure function es_get_fcn_tol(this) result(x)
         class(equation_solver), intent(in) :: this
-        real(dp) :: x
+        real(real64) :: x
         x = this%m_fcnTol
     end function
 
@@ -967,7 +957,7 @@ contains
     !! @param[in] x The tolerance value.
     subroutine es_set_fcn_tol(this, x)
         class(equation_solver), intent(inout) :: this
-        real(dp), intent(in) :: x
+        real(real64), intent(in) :: x
         this%m_fcnTol = x
     end subroutine
 
@@ -978,7 +968,7 @@ contains
     !! @return The tolerance value.
     pure function es_get_var_tol(this) result(x)
         class(equation_solver), intent(in) :: this
-        real(dp) :: x
+        real(real64) :: x
         x = this%m_xtol
     end function
 
@@ -989,7 +979,7 @@ contains
     !! @param[in] x The tolerance value.
     subroutine es_set_var_tol(this, x)
         class(equation_solver), intent(inout) :: this
-        real(dp), intent(in) :: x
+        real(real64), intent(in) :: x
         this%m_xtol = x
     end subroutine
 
@@ -1000,7 +990,7 @@ contains
     !! @return The tolerance value.
     pure function es_get_grad_tol(this) result(x)
         class(equation_solver), intent(in) :: this
-        real(dp) :: x
+        real(real64) :: x
         x = this%m_gtol
     end function
 
@@ -1011,7 +1001,7 @@ contains
     !! @return The tolerance value.
     subroutine es_set_grad_tol(this, x)
         class(equation_solver), intent(inout) :: this
-        real(dp), intent(in) :: x
+        real(real64), intent(in) :: x
         this%m_gtol = x
     end subroutine
 
@@ -1049,7 +1039,7 @@ contains
     !! @return The maximum number of function evaluations.
     pure function es1_get_max_eval(this) result(n)
         class(equation_solver_1var), intent(in) :: this
-        integer(i32) :: n
+        integer(int32) :: n
         n = this%m_maxEval
     end function
 
@@ -1061,7 +1051,7 @@ contains
     !! @param[in] n The maximum number of function evaluations.
     subroutine es1_set_max_eval(this, n)
         class(equation_solver_1var), intent(inout) :: this
-        integer(i32), intent(in) :: n
+        integer(int32), intent(in) :: n
         this%m_maxEval = n
     end subroutine
 
@@ -1072,7 +1062,7 @@ contains
     !! @return The tolerance value.
     pure function es1_get_fcn_tol(this) result(x)
         class(equation_solver_1var), intent(in) :: this
-        real(dp) :: x
+        real(real64) :: x
         x = this%m_fcnTol
     end function
 
@@ -1083,7 +1073,7 @@ contains
     !! @param[in] x The tolerance value.
     subroutine es1_set_fcn_tol(this, x)
         class(equation_solver_1var), intent(inout) :: this
-        real(dp), intent(in) :: x
+        real(real64), intent(in) :: x
         this%m_fcnTol = x
     end subroutine
 
@@ -1094,7 +1084,7 @@ contains
     !! @return The tolerance value.
     pure function es1_get_var_tol(this) result(x)
         class(equation_solver_1var), intent(in) :: this
-        real(dp) :: x
+        real(real64) :: x
         x = this%m_xtol
     end function
 
@@ -1105,7 +1095,7 @@ contains
     !! @param[in] x The tolerance value.
     subroutine es1_set_var_tol(this, x)
         class(equation_solver_1var), intent(inout) :: this
-        real(dp), intent(in) :: x
+        real(real64), intent(in) :: x
         this%m_xtol = x
     end subroutine
 
@@ -1142,7 +1132,7 @@ contains
     !! @return The maximum number of function evaluations.
     pure function oe_get_max_eval(this) result(n)
         class(equation_optimizer), intent(in) :: this
-        integer(i32) :: n
+        integer(int32) :: n
         n = this%m_maxEval
     end function
 
@@ -1153,7 +1143,7 @@ contains
     !! @param[in] n The maximum number of function evaluations.
     subroutine oe_set_max_eval(this, n)
         class(equation_optimizer), intent(inout) :: this
-        integer(i32), intent(in) :: n
+        integer(int32), intent(in) :: n
         this%m_maxEval = n
     end subroutine
 
@@ -1164,7 +1154,7 @@ contains
     !! @return The convergence tolerance.
     pure function oe_get_tol(this) result(x)
         class(equation_optimizer), intent(in) :: this
-        real(dp) :: x
+        real(real64) :: x
         x = this%m_tol
     end function
 
@@ -1175,7 +1165,7 @@ contains
     !! @param[in] x The convergence tolerance.
     subroutine oe_set_tol(this, x)
         class(equation_optimizer), intent(inout) :: this
-        real(dp), intent(in) :: x
+        real(real64), intent(in) :: x
         this%m_tol = x
     end subroutine
 
@@ -1215,8 +1205,8 @@ contains
     !! @param[in] fnorm The residual.
     subroutine print_status(iter, nfeval, njaceval, xnorm, fnorm)
         ! Arguments
-        integer(i32), intent(in) :: iter, nfeval, njaceval
-        real(dp), intent(in) :: xnorm, fnorm
+        integer(int32), intent(in) :: iter, nfeval, njaceval
+        real(real64), intent(in) :: xnorm, fnorm
 
         ! Process
         print *, ""

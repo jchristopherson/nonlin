@@ -11,15 +11,15 @@
 !! @par Purpose
 !! To provide various optimization routines.
 module nonlin_optimize
+    use, intrinsic :: iso_fortran_env, only : int32, real64
     use linalg_constants, only : LA_MATRIX_FORMAT_ERROR
     use ferror, only : errors
-    use nonlin_types, only : dp, i32, fcnnvar_helper, equation_optimizer, &
+    use nonlin_types, only : fcnnvar_helper, equation_optimizer, &
         iteration_behavior, NL_OUT_OF_MEMORY_ERROR, NL_CONVERGENCE_ERROR, &
         NL_INVALID_INPUT_ERROR, NL_INVALID_OPERATION_ERROR
     use nonlin_linesearch, only : line_search, limit_search_vector
-    use linalg_core, only : rank1_update, tri_mtx_mult
-    use linalg_factor, only : cholesky_rank1_update, cholesky_rank1_downdate
-    use linalg_solve, only : solve_cholesky
+    use linalg_core, only : rank1_update, tri_mtx_mult, cholesky_rank1_update, &
+        cholesky_rank1_downdate, solve_cholesky
     implicit none
     private
     public :: nelder_mead
@@ -34,10 +34,10 @@ module nonlin_optimize
     type, extends(equation_optimizer) :: nelder_mead
         private
         !> The simplex vertices.
-        real(dp), allocatable, dimension(:,:) :: m_simplex
+        real(real64), allocatable, dimension(:,:) :: m_simplex
         !> A scaling parameter used to define the size of the simplex in each
         !! coordinate direction.
-        real(dp) :: m_initSize = 1.0d0
+        real(real64) :: m_initSize = 1.0d0
     contains
         !> @brief Optimizes the equation.
         procedure, public :: solve => nm_solve
@@ -68,7 +68,7 @@ module nonlin_optimize
         !! of m_lineSearch
         logical :: m_useLineSearch = .true.
         !> The convergence criteria on change in variable
-        real(dp) :: m_xtol = 1.0d-12
+        real(real64) :: m_xtol = 1.0d-12
     contains
         !> @brief Gets the line search module.
         procedure, public :: get_line_search => lso_get_line_search
@@ -91,7 +91,7 @@ module nonlin_optimize
     end type
 
 ! ------------------------------------------------------------------------------
-    !> @brief Defines a Broyden–Fletcher–Goldfarb–Shanno (BFGS) solver for 
+    !> @brief Defines a Broyden–Fletcher–Goldfarb–Shanno (BFGS) solver for
     !! minimization of functions of multiple variables.
     type, extends(line_search_optimizer) :: bfgs
     contains
@@ -142,7 +142,7 @@ contains
     !!     type(nelder_mead) :: solver
     !!     type(fcnnvar_helper) :: obj
     !!     procedure(fcnnvar), pointer :: fcn
-    !!     real(dp) :: x(2), fout
+    !!     real(real64) :: x(2), fout
     !!     type(iteration_behavior) :: ib
     !!
     !!     ! Initialization
@@ -163,8 +163,8 @@ contains
     !! contains
     !!     ! Rosenbrock's Function
     !!     function rosenbrock(x) result(f)
-    !!         real(dp), intent(in), dimension(:) :: x
-    !!         real(dp) :: f
+    !!         real(real64), intent(in), dimension(:) :: x
+    !!         real(real64) :: f
     !!         f = 1.0d2 * (x(2) - x(1)**2)**2 + (x(1) - 1.0d0)**2
     !!     end function
     !! end
@@ -178,16 +178,16 @@ contains
     !! @endcode
     !!
     !! @par Remarks
-    !! The implementation of the Nelder-Mead algorithm presented here is a 
-    !! slight modification of the original work of Nelder and Mead.  The 
+    !! The implementation of the Nelder-Mead algorithm presented here is a
+    !! slight modification of the original work of Nelder and Mead.  The
     !! Numerical Recipes implementation is also quite similar.  In fact, the
     !! Numerical Recipes section relating to reflection, contraction, etc.
     !! is leveraged for this implemetation.
     !!
     !! @par See Also
-    !!  - Nelder, John A.; R. Mead (1965). "A simplex method for function 
+    !!  - Nelder, John A.; R. Mead (1965). "A simplex method for function
     !!      minimization". Computer Journal. 7: 308–313.
-    !!  - [Gao, Fuchang, Han, Lixing (2010). "Implementing the Nelder-Mead 
+    !!  - [Gao, Fuchang, Han, Lixing (2010). "Implementing the Nelder-Mead
     !!      simplex algorithm with adaptive parameters."]
     !!      (http://www.webpages.uidaho.edu/~fuchang/res/ANMS.pdf)
     !!  - [Wikipedia](https://en.wikipedia.org/wiki/Nelder–Mead_method)
@@ -196,23 +196,23 @@ contains
         ! Arguments
         class(nelder_mead), intent(inout) :: this
         class(fcnnvar_helper), intent(in) :: fcn
-        real(dp), intent(inout), dimension(:) :: x
-        real(dp), intent(out), optional :: fout
+        real(real64), intent(inout), dimension(:) :: x
+        real(real64), intent(out), optional :: fout
         type(iteration_behavior), optional :: ib
         class(errors), intent(inout), optional, target :: err
 
         ! Parameters
-        real(dp), parameter :: zero = 0.0d0
-        real(dp), parameter :: negone = -1.0d0
-        real(dp), parameter :: half = 0.5d0
-        real(dp), parameter :: two = 2.0d0
+        real(real64), parameter :: zero = 0.0d0
+        real(real64), parameter :: negone = -1.0d0
+        real(real64), parameter :: half = 0.5d0
+        real(real64), parameter :: two = 2.0d0
 
         ! Local Variables
         logical :: buildSimplex, fcnvrg
-        integer(i32) :: i, ihi, ilo, ihi2, ndim, npts, flag, neval, iter, &
+        integer(int32) :: i, ihi, ilo, ihi2, ndim, npts, flag, neval, iter, &
             maxeval
-        real(dp) :: ftol, rtol, ftry, fsave, fval, swp
-        real(dp), allocatable, dimension(:) :: f, pcent, pmin, work
+        real(real64) :: ftol, rtol, ftry, fsave, fval, swp
+        real(real64), allocatable, dimension(:) :: f, pcent, pmin, work
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
         character(len = 256) :: errmsg
@@ -335,7 +335,7 @@ contains
 
             ! Check for convergence.  Nelder and Mead recommend using the
             ! following convergence test: sqrt(sum(f - favg)**2 / n); however,
-            ! it seems that a sufficient check may be made using only the 
+            ! it seems that a sufficient check may be made using only the
             ! extreme function values of the simplex (highest and lowest valued
             ! points).
             rtol = abs(f(ihi) - f(ilo))
@@ -447,19 +447,19 @@ contains
         ! Arguments
         class(nelder_mead), intent(inout) :: this
         class(fcnnvar_helper), intent(in) :: fcn
-        real(dp), intent(inout), dimension(:) :: y, pcent
-        integer(i32), intent(in) :: ihi
-        real(dp), intent(in) :: fac
-        integer(i32), intent(inout) :: neval
-        real(dp), intent(out), dimension(:) :: work
-        real(dp) :: ytry
+        real(real64), intent(inout), dimension(:) :: y, pcent
+        integer(int32), intent(in) :: ihi
+        real(real64), intent(in) :: fac
+        integer(int32), intent(inout) :: neval
+        real(real64), intent(out), dimension(:) :: work
+        real(real64) :: ytry
 
         ! Parameters
-        real(dp), parameter :: one = 1.0d0
+        real(real64), parameter :: one = 1.0d0
 
         ! Local Variables
-        integer(i32) :: i, ndim
-        real(dp) :: fac1, fac2
+        integer(int32) :: i, ndim
+        real(real64) :: fac1, fac2
 
         ! Initialization
         ndim = size(this%m_simplex, 1)
@@ -492,8 +492,8 @@ contains
     !!  simplex is stored as its own column of this matrix.
     pure function nm_get_simplex(this) result(p)
         class(nelder_mead), intent(in) :: this
-        real(dp), allocatable, dimension(:,:) :: p
-        integer(i32) :: m, n
+        real(real64), allocatable, dimension(:,:) :: p
+        integer(int32) :: m, n
         if (allocated(this%m_simplex)) then
             m = size(this%m_simplex, 1)
             n = size(this%m_simplex, 2)
@@ -504,7 +504,7 @@ contains
 
 ! --------------------
     !> @brief Sets an N-by-(N+1) matrix as the current simplex.  Notice, if this
-    !! matrix is different in size from the problem dimensionallity, the 
+    !! matrix is different in size from the problem dimensionallity, the
     !! Nelder-Mead routine will replace it with an appropriately sized matrix.
     !!
     !! @param[in,out] this The nelder_mead object.
@@ -512,8 +512,8 @@ contains
     !!  the coordinates of each vertex of the simplex.
     subroutine nm_set_simplex(this, x)
         class(nelder_mead), intent(inout) :: this
-        real(dp), dimension(:,:) :: x
-        integer(i32) :: m, n
+        real(real64), dimension(:,:) :: x
+        integer(int32) :: m, n
         m = size(x, 1)
         n = size(x, 2)
         if (allocated(this%m_simplex)) then
@@ -537,7 +537,7 @@ contains
     !! @return The size of the simplex (length of an edge).
     pure function nm_get_size(this) result(x)
         class(nelder_mead), intent(in) :: this
-        real(dp) :: x
+        real(real64) :: x
         x = this%m_initSize
     end function
 
@@ -550,7 +550,7 @@ contains
     !! @param[in] x The size of the simplex (length of an edge).
     subroutine nm_set_size(this, x)
         class(nelder_mead), intent(inout) :: this
-        real(dp), intent(in) :: x
+        real(real64), intent(in) :: x
         this%m_initSize = x
     end subroutine
 
@@ -631,7 +631,7 @@ contains
     !! @return The tolerance value.
     pure function lso_get_var_tol(this) result(x)
         class(line_search_optimizer), intent(in) :: this
-        real(dp) :: x
+        real(real64) :: x
         x = this%m_xtol
     end function
 
@@ -642,7 +642,7 @@ contains
     !! @param[in] x The tolerance value.
     subroutine lso_set_var_tol(this, x)
         class(line_search_optimizer), intent(inout) :: this
-        real(dp), intent(in) :: x
+        real(real64), intent(in) :: x
         this%m_xtol = x
     end subroutine
 
@@ -688,7 +688,7 @@ contains
     !!     type(bfgs) :: solver
     !!     type(fcnnvar_helper) :: obj
     !!     procedure(fcnnvar), pointer :: fcn
-    !!     real(dp) :: x(2), fout
+    !!     real(real64) :: x(2), fout
     !!     type(iteration_behavior) :: ib
     !!
     !!     ! Initialization
@@ -709,8 +709,8 @@ contains
     !! contains
     !!     ! Rosenbrock's Function
     !!     function rosenbrock(x) result(f)
-    !!         real(dp), intent(in), dimension(:) :: x
-    !!         real(dp) :: f
+    !!         real(real64), intent(in), dimension(:) :: x
+    !!         real(real64) :: f
     !!         f = 1.0d2 * (x(2) - x(1)**2)**2 + (x(1) - 1.0d0)**2
     !!     end function
     !! end
@@ -731,24 +731,24 @@ contains
         ! Arguments
         class(bfgs), intent(inout) :: this
         class(fcnnvar_helper), intent(in) :: fcn
-        real(dp), intent(inout), dimension(:) :: x
-        real(dp), intent(out), optional :: fout
+        real(real64), intent(inout), dimension(:) :: x
+        real(real64), intent(out), optional :: fout
         type(iteration_behavior), optional :: ib
         class(errors), intent(inout), optional, target :: err
 
         ! Parameters
-        real(dp), parameter :: zero = 0.0d0
-        real(dp), parameter :: one = 1.0d0
-        real(dp), parameter :: negone = -1.0d0
-        real(dp), parameter :: factor = 1.0d2
-        real(dp), parameter :: small = 1.0d-10
+        real(real64), parameter :: zero = 0.0d0
+        real(real64), parameter :: one = 1.0d0
+        real(real64), parameter :: negone = -1.0d0
+        real(real64), parameter :: factor = 1.0d2
+        real(real64), parameter :: small = 1.0d-10
 
         ! Local Variables
         logical :: xcnvrg, gcnvrg
-        integer(i32) :: i, n, maxeval, neval, ngrad, flag, iter
-        real(dp) :: xtol, gtol, fp, stpmax, fret, xtest, gtest, temp, ydx
-        real(dp), allocatable, dimension(:) :: g, dx, u, v, y, gold, xnew, bdx
-        real(dp), allocatable, dimension(:,:) :: b, r
+        integer(int32) :: i, n, maxeval, neval, ngrad, flag, iter
+        real(real64) :: xtol, gtol, fp, stpmax, fret, xtest, gtest, temp, ydx
+        real(real64), allocatable, dimension(:) :: g, dx, u, v, y, gold, xnew, bdx
+        real(real64), allocatable, dimension(:,:) :: b, r
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
         character(len = 256) :: errmsg
@@ -839,7 +839,7 @@ contains
                 ! Update the iteration counter
                 iter = iter + 1
 
-                ! Define the initial direction, and a limit on the line search 
+                ! Define the initial direction, and a limit on the line search
                 ! step
                 if (iter == 1) then
                     dx = -g
@@ -866,7 +866,7 @@ contains
                 end do
                 call fcn%gradient(x, g, fp)
                 ngrad = ngrad + 1
-                
+
                 ! Test for convergence on the change in X
                 xtest = zero
                 do i = 1, n
@@ -913,7 +913,7 @@ contains
                 ! Compute the solution to: B * dx = -g = (R**T * R) * dx
                 dx = -g
                 call solve_cholesky(.true., r, dx)
-                
+
                 ! Print iteration status
                 if (this%get_print_status()) then
                     print *, ""

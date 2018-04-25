@@ -1,6 +1,3 @@
-# Locate the dependencies
-add_subdirectory(external/linalg)
-
 # Define the NONLIN source files
 set(nonlin_sources
     nonlin_least_squares.f90
@@ -13,4 +10,4 @@ set(nonlin_sources
 
 # Build the library
 add_library(nonlin ${nonlin_sources})
-target_link_libraries(nonlin linalg)
+target_link_libraries(nonlin ${LINALG_LIBRARIES} ${FERROR_LIBRARIES})
