@@ -16,9 +16,7 @@
 !! nonlinear equations.
 module nonlin_types
     use, intrinsic :: iso_fortran_env, only : int32, real64
-    use, intrinsic :: iso_c_binding, only : c_bool
-    use linalg_constants, only : LA_OUT_OF_MEMORY_ERROR, &
-        LA_INVALID_OPERATION_ERROR, LA_CONVERGENCE_ERROR
+    use linalg_constants
     implicit none
     private
     public :: vecfcn
@@ -223,7 +221,7 @@ module nonlin_types
 ! ------------------------------------------------------------------------------
     !> @brief Defines a set of parameters that describe the behavior of the
     !! iteration process.
-    type, bind(c) :: iteration_behavior
+    type :: iteration_behavior
         !> Specifies the number of iterations performed.
         integer(int32) :: iter_count
         !> Specifies the number of function evaluations performed.
@@ -234,14 +232,14 @@ module nonlin_types
         integer(int32) :: gradient_count
         !> True if the solution converged as a result of a zero-valued
         !! function; else, false.
-        logical(c_bool) :: converge_on_fcn
+        logical :: converge_on_fcn
         !> True if the solution converged as a result of no appreciable
         !! change in solution points between iterations; else, false.
-        logical(c_bool) :: converge_on_chng
+        logical :: converge_on_chng
         !> True if the solution appears to have settled on a stationary
         !! point such that the gradient of the function is zero-valued; else,
         !! false.
-        logical(c_bool) :: converge_on_zero_diff
+        logical :: converge_on_zero_diff
     end type
 
 ! ------------------------------------------------------------------------------
@@ -329,7 +327,7 @@ module nonlin_types
 
 ! ------------------------------------------------------------------------------
     !> @brief Defines a pair of numeric values.
-    type, bind(c) :: value_pair
+    type :: value_pair
         !> Value 1.
         real(real64) :: x1
         !> Value 2.

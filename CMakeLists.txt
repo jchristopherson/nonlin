@@ -8,6 +8,17 @@ set(NONLIN_MINOR_VERSION 3)
 set(NONLIN_PATCH_VERSION 0)
 set(NONLIN_VERSION ${NONLIN_MAJOR_VERSION}.${NONLIN_MINOR_VERSION}.${NONLIN_PATCH_VERSION})
 
+# Set a default build type if none was specified
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to 'Release' as none was specified.")
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
+endif()
+
+# By default, shared library
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+
 # Locate Dependencies
 find_package(ferror 1.3.0)
 find_package(linalg 1.5.0)
