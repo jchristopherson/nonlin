@@ -1,6 +1,6 @@
 # Master CMAKE Build Script
 cmake_minimum_required(VERSION 3.7)
-project(nonlin C CXX Fortran)
+project(nonlin Fortran)
 
 # Define version information
 set(NONLIN_MAJOR_VERSION 1)
@@ -45,7 +45,7 @@ if (NOT ${linalg_FOUND})
     set(linalg_LibLocation ${linalg_BINARY_DIR})
 else()
     message(STATUS "An acceptable version of LINALG (v" ${linalg_VERSION} ") was found, and will be utilized.")
-    set(LINALG_LIBRARIES ferror)
+    set(LINALG_LIBRARIES linalg)
     get_target_property(linalg_LibLocation linalg LOCATION)
 endif()
 

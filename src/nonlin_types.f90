@@ -76,7 +76,7 @@ module nonlin_types
         !! @param[in] x The independent variable.
         !! @return The value of the function at @p x.
         function fcn1var(x) result(f)
-            use linalg_constants, only : dp
+            use, intrinsic :: iso_fortran_env, only : real64
             real(real64), intent(in) :: x
             real(real64) :: f
         end function
@@ -87,7 +87,7 @@ module nonlin_types
         !! @param[out] f An M-element array that, on output, contains the values
         !!  of the M functions.
         subroutine vecfcn(x, f)
-            use linalg_constants, only : dp
+            use, intrinsic :: iso_fortran_env, only : real64
             real(real64), intent(in), dimension(:) :: x
             real(real64), intent(out), dimension(:) :: f
         end subroutine
@@ -98,7 +98,7 @@ module nonlin_types
         !! @param[in] x An N-element array containing the independent variables.
         !! @param[out] jac An M-by-N matrix where the Jacobian will be written.
         subroutine jacobianfcn(x, jac)
-            use linalg_constants, only : dp
+            use, intrinsic :: iso_fortran_env, only : real64
             real(real64), intent(in), dimension(:) :: x
             real(real64), intent(out), dimension(:,:) :: jac
         end subroutine
@@ -108,7 +108,7 @@ module nonlin_types
         !! @param[in] x An N-element array containing the independent variables.
         !! @return The value of the function at @p x.
         function fcnnvar(x) result(f)
-            use linalg_constants, only : dp
+            use, intrinsic :: iso_fortran_env, only : real64
             real(real64), intent(in), dimension(:) :: x
             real(real64) :: f
         end function
@@ -120,7 +120,7 @@ module nonlin_types
         !! @param[out] g An N-element array where the gradient vector will be
         !!  written as output.
         subroutine gradientfcn(x, g)
-            use linalg_constants, only : dp
+            use, intrinsic :: iso_fortran_env, only : real64
             real(real64), intent(in), dimension(:) :: x
             real(real64), intent(out), dimension(:) :: g
         end subroutine
@@ -388,7 +388,7 @@ module nonlin_types
         !!  possible error codes returned will likely vary from solver to
         !!  solver.
         subroutine nonlin_solver(this, fcn, x, fvec, ib, err)
-            use linalg_constants, only : dp, i32
+            use, intrinsic :: iso_fortran_env, only : real64
             use ferror, only : errors
             import equation_solver
             import vecfcn_helper
@@ -421,7 +421,7 @@ module nonlin_types
         !!  possible error codes returned will likely vary from solver to
         !!  solver.
         subroutine nonlin_solver_1var(this, fcn, x, lim, f, ib, err)
-            use linalg_constants, only : dp, i32
+            use, intrinsic :: iso_fortran_env, only : real64
             use ferror, only : errors
             import equation_solver_1var
             import fcn1var_helper
@@ -455,7 +455,7 @@ module nonlin_types
         !!  possible error codes returned will likely vary from solver to
         !!  solver.
         subroutine nonlin_optimize(this, fcn, x, fout, ib, err)
-            use linalg_constants, only : dp, i32
+            use, intrinsic :: iso_fortran_env, only : real64
             use ferror, only : errors
             import equation_optimizer
             import fcnnvar_helper

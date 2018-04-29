@@ -384,7 +384,7 @@ contains
         flag = 0 ! Used to check for convergence errors
         if (.not.fcnvrg) then
             ! Determine the maximum line search step
-            stpmax = factor * max(norm2(x), real(nvar, dp))
+            stpmax = factor * max(norm2(x), real(nvar, real64))
 
             ! Main Iteration Loop
             do
@@ -794,7 +794,7 @@ contains
         flag = 0 ! Used to check for convergence errors
         if (.not.fcnvrg) then
             ! Compute the maximum step size for the line search process
-            stpmax = factor * max(norm2(x), real(nvar, dp))
+            stpmax = factor * max(norm2(x), real(nvar, real64))
 
             ! Main Iteration Loop
             do

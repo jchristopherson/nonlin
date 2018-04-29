@@ -843,7 +843,7 @@ contains
                 ! step
                 if (iter == 1) then
                     dx = -g
-                    stpmax = factor * max(norm2(x), real(n, dp))
+                    stpmax = factor * max(norm2(x), real(n, real64))
                 end if
 
                 ! Perform the line search
