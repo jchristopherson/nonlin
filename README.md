@@ -253,7 +253,7 @@ Function Evaluations: 101
 Notice, the convergence tolerance was set to its default value (1e-12).
 
 ## Documentation
-Documentation can be found [here](doc/refman.pdf)
+Documentation can be found [here](http://htmlpreview.github.io/?https://github.com/jchristopherson/nonlin/blob/master/doc/html/index.html).
 
 ## TO DO
 Additional items to accomplish:
