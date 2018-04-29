@@ -1,6 +1,7 @@
 ! nonlin_test_optimize.f90
 
 module nonlin_test_optimize
+    use iso_fortran_env
     use nonlin_optimize
     use nonlin_types
     use test_core
@@ -18,15 +19,15 @@ contains
 ! REF: https://en.wikipedia.org/wiki/Test_functions_for_optimization
 ! ------------------------------------------------------------------------------
     function rosenbrock(x) result(f)
-        real(dp), intent(in), dimension(:) :: x
-        real(dp) :: f
+        real(real64), intent(in), dimension(:) :: x
+        real(real64) :: f
         f = 1.0d2 * (x(2) - x(1)**2)**2 + (x(1) - 1.0d0)**2
     end function
 
 ! ------------------------------------------------------------------------------
     function beale(x) result(f)
-        real(dp), intent(in), dimension(:) :: x
-        real(dp) :: f
+        real(real64), intent(in), dimension(:) :: x
+        real(real64) :: f
         f = (1.5d0 - x(1) + x(1) * x(2))**2 + &
             (2.25d0 - x(1) + x(1) * x(2)**2)**2 + &
             (2.625d0 - x(1) + x(1) * x(2)**3)**2
@@ -37,13 +38,13 @@ contains
 ! ------------------------------------------------------------------------------
     function test_nelder_mead_1() result(check)
         ! Parameters
-        real(dp), parameter :: tol = 1.0d-6
+        real(real64), parameter :: tol = 1.0d-6
 
         ! Local Variables
         type(nelder_mead) :: solver
         type(fcnnvar_helper) :: obj
         procedure(fcnnvar), pointer :: fcn
-        real(dp) :: x(2), fout, xans(2)
+        real(real64) :: x(2), fout, xans(2)
         type(iteration_behavior) :: ib
         logical :: check
 
@@ -78,13 +79,13 @@ contains
 ! ------------------------------------------------------------------------------
     function test_nelder_mead_2() result(check)
         ! Parameters
-        real(dp), parameter :: tol = 1.0d-5
+        real(real64), parameter :: tol = 1.0d-5
 
         ! Local Variables
         type(nelder_mead) :: solver
         type(fcnnvar_helper) :: obj
         procedure(fcnnvar), pointer :: fcn
-        real(dp) :: x(2), fout, xans(2)
+        real(real64) :: x(2), fout, xans(2)
         type(iteration_behavior) :: ib
         logical :: check
 
@@ -113,13 +114,13 @@ contains
 ! ------------------------------------------------------------------------------
     function test_bfgs_1() result(check)
         ! Parameters
-        real(dp), parameter :: tol = 1.0d-5
+        real(real64), parameter :: tol = 1.0d-5
 
         ! Local Variables
         type(bfgs) :: solver
         type(fcnnvar_helper) :: obj
         procedure(fcnnvar), pointer :: fcn
-        real(dp) :: x(2), fout, xans(2)
+        real(real64) :: x(2), fout, xans(2)
         type(iteration_behavior) :: ib
         logical :: check
 
@@ -154,13 +155,13 @@ contains
 ! ------------------------------------------------------------------------------
     function test_bfgs_2() result(check)
         ! Parameters
-        real(dp), parameter :: tol = 1.0d-5
+        real(real64), parameter :: tol = 1.0d-5
 
         ! Local Variables
         type(bfgs) :: solver
         type(fcnnvar_helper) :: obj
         procedure(fcnnvar), pointer :: fcn
-        real(dp) :: x(2), fout, xans(2)
+        real(real64) :: x(2), fout, xans(2)
         type(iteration_behavior) :: ib
         logical :: check
 
