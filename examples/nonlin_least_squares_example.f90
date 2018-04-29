@@ -1,7 +1,8 @@
 ! nonlin_least_squares_example.f90
 
 program example
-    use nonlin_types, only : dp, i32, vecfcn_helper, vecfcn
+    use iso_fortran_env
+    use nonlin_types, only : vecfcn_helper, vecfcn
     use nonlin_least_squares, only : least_squares_solver
     implicit none
 
@@ -9,7 +10,7 @@ program example
     type(vecfcn_helper) :: obj
     procedure(vecfcn), pointer :: fcn
     type(least_squares_solver) :: solver
-    real(dp) :: x(4), f(21) ! There are 4 coefficients and 21 data points
+    real(real64) :: x(4), f(21) ! There are 4 coefficients and 21 data points
 
     ! Locate the routine containing the equations to solve
     fcn => fcns
@@ -32,11 +33,11 @@ contains
     ! The function containing the data to fit
     subroutine fcns(x, f)
         ! Arguments
-        real(dp), intent(in), dimension(:) :: x  ! Contains the coefficients
-        real(dp), intent(out), dimension(:) :: f
+        real(real64), intent(in), dimension(:) :: x  ! Contains the coefficients
+        real(real64), intent(out), dimension(:) :: f
 
         ! Local Variables
-        real(dp), dimension(21) :: xp, yp
+        real(real64), dimension(21) :: xp, yp
 
         ! Data to fit (21 data points)
         xp = [0.0d0, 0.1d0, 0.2d0, 0.3d0, 0.4d0, 0.5d0, 0.6d0, 0.7d0, 0.8d0, &

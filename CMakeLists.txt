@@ -127,22 +127,8 @@ if (BUILD_NONLIN_EXAMPLES)
   # Inform the user we're building the examples
   message(STATUS "Building NONLIN examples.")
 
-  # Quasi-Newton Example
-  add_executable(quasi_newton_example examples/nonlin_quasi_newton_example.f90)
-  target_link_libraries(quasi_newton_example nonlin)
-
-  # Least-Squares Example
-  add_executable(least_squares_example
-    examples/nonlin_least_squares_example.f90)
-  target_link_libraries(least_squares_example nonlin)
-
-  # Polynomial Fitting Example
-  add_executable(poly_fit_example examples/nonlin_poly_fit_example.f90)
-  target_link_libraries(poly_fit_example nonlin)
-
-  # Nelder-Mead Example
-  add_executable(nm_opt_example examples/nonlin_nm_opt_example.f90)
-  target_link_libraries(nm_opt_example nonlin)
+  # Build the examples
+  add_subdirectory(examples)
 endif()
 
 # ------------------------------------------------------------------------------

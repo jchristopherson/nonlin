@@ -1,7 +1,8 @@
 ! nonlin_quasi_newton_example.f90
 
 program  example
-    use nonlin_types, only : dp, i32, vecfcn_helper, vecfcn, iteration_behavior
+    use iso_fortran_env
+    use nonlin_types, only : vecfcn_helper, vecfcn, iteration_behavior
     use nonlin_solve, only : quasi_newton_solver
     implicit none
 
@@ -10,7 +11,7 @@ program  example
     procedure(vecfcn), pointer :: fcn
     type(iteration_behavior) :: ib
     type(quasi_newton_solver) :: solver
-    real(dp) :: x(2), f(2)
+    real(real64) :: x(2), f(2)
 
     ! Locate the routine containing the equations to solve
     fcn => fcns
@@ -51,8 +52,8 @@ contains
     ! x**2 + y**2 = 34
     ! x**2 - 2 * y**2 = 7
     subroutine fcns(x, f)
-        real(dp), intent(in), dimension(:) :: x
-        real(dp), intent(out), dimension(:) :: f
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(out), dimension(:) :: f
         f(1) = x(1)**2 + x(2)**2 - 34.0d0
         f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
     end subroutine

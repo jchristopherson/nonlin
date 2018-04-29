@@ -1,8 +1,9 @@
 ! nonlin_nm_opt_example.f90
 
 program example
+    use iso_fortran_env
     use nonlin_optimize, only : nelder_mead
-    use nonlin_types, only : dp, i32, fcnnvar, fcnnvar_helper, &
+    use nonlin_types, only : fcnnvar, fcnnvar_helper, &
         iteration_behavior
     implicit none
 
@@ -10,7 +11,7 @@ program example
     type(nelder_mead) :: solver
     type(fcnnvar_helper) :: obj
     procedure(fcnnvar), pointer :: fcn
-    real(dp) :: x(2), fout
+    real(real64) :: x(2), fout
     type(iteration_behavior) :: ib
 
     ! Initialization
@@ -31,8 +32,8 @@ program example
 contains
     ! Rosenbrock's Function
     function rosenbrock(x) result(f)
-        real(dp), intent(in), dimension(:) :: x
-        real(dp) :: f
+        real(real64), intent(in), dimension(:) :: x
+        real(real64) :: f
         f = 1.0d2 * (x(2) - x(1)**2)**2 + (x(1) - 1.0d0)**2
     end function
 end program
