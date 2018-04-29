@@ -9,7 +9,8 @@ This example solves a set of two equations of two unknowns using a Quasi-Newton 
 
 ```fortran
 program  example
-    use nonlin_types, only : dp, i32, vecfcn_helper, vecfcn, iteration_behavior
+    use iso_fortran_env
+    use nonlin_types, only : vecfcn_helper, vecfcn, iteration_behavior
     use nonlin_solve, only : quasi_newton_solver
     implicit none
 
@@ -18,7 +19,7 @@ program  example
     procedure(vecfcn), pointer :: fcn
     type(iteration_behavior) :: ib
     type(quasi_newton_solver) :: solver
-    real(dp) :: x(2), f(2)
+    real(real64) :: x(2), f(2)
 
     ! Locate the routine containing the equations to solve
     fcn => fcns
@@ -59,8 +60,8 @@ contains
     ! x**2 + y**2 = 34
     ! x**2 - 2 * y**2 = 7
     subroutine fcns(x, f)
-        real(dp), intent(in), dimension(:) :: x
-        real(dp), intent(out), dimension(:) :: f
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(out), dimension(:) :: f
         f(1) = x(1)**2 + x(2)**2 - 34.0d0
         f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
     end subroutine
@@ -80,7 +81,8 @@ This example uses a least-squares approach to determine the coefficients of a po
 
 ```fortran
 program example
-    use nonlin_types, only : dp, i32, vecfcn_helper, vecfcn
+    use iso_fortran_env
+    use nonlin_types, only : vecfcn_helper, vecfcn
     use nonlin_least_squares, only : least_squares_solver
     implicit none
 
@@ -88,7 +90,7 @@ program example
     type(vecfcn_helper) :: obj
     procedure(vecfcn), pointer :: fcn
     type(least_squares_solver) :: solver
-    real(dp) :: x(4), f(21) ! There are 4 coefficients and 21 data points
+    real(real64) :: x(4), f(21) ! There are 4 coefficients and 21 data points
 
     ! Locate the routine containing the equations to solve
     fcn => fcns
@@ -111,11 +113,11 @@ contains
     ! The function containing the data to fit
     subroutine fcns(x, f)
         ! Arguments
-        real(dp), intent(in), dimension(:) :: x  ! Contains the coefficients
-        real(dp), intent(out), dimension(:) :: f
+        real(real64), intent(in), dimension(:) :: x  ! Contains the coefficients
+        real(real64), intent(out), dimension(:) :: f
 
         ! Local Variables
-        real(dp), dimension(21) :: xp, yp
+        real(real64), dimension(21) :: xp, yp
 
         ! Data to fit (21 data points)
         xp = [0.0d0, 0.1d0, 0.2d0, 0.3d0, 0.4d0, 0.5d0, 0.6d0, 0.7d0, 0.8d0, &
@@ -153,14 +155,14 @@ The following graph illustrates the fit.
 This example utilizes the polynomial type to fit a polynomial to the data set utilized in Example 2.
 ```fortran
 program example
-    use nonlin_types, only : dp, i32
+    use iso_fortran_env
     use nonlin_polynomials
     implicit none
 
     ! Local Variables
-    integer(i32) :: i
-    real(dp), dimension(21) :: xp, yp, yf, yc, err
-    real(dp) :: res
+    integer(int32) :: i
+    real(real64), dimension(21) :: xp, yp, yf, yc, err
+    real(real64) :: res
     type(polynomial) :: p
 
     ! Data to fit
@@ -204,8 +206,9 @@ Notice, as expected, the results are very similar to the output of Example 2.
 This example uses the Nelder-Mead simplex method to find the minimum of the Rosenbrock function.
 ```fortran
 program example
+    use iso_fortran_env
     use nonlin_optimize, only : nelder_mead
-    use nonlin_types, only : dp, i32, fcnnvar, fcnnvar_helper, &
+    use nonlin_types, only : fcnnvar, fcnnvar_helper, &
         iteration_behavior
     implicit none
 
@@ -213,7 +216,7 @@ program example
     type(nelder_mead) :: solver
     type(fcnnvar_helper) :: obj
     procedure(fcnnvar), pointer :: fcn
-    real(dp) :: x(2), fout
+    real(real64) :: x(2), fout
     type(iteration_behavior) :: ib
 
     ! Initialization
@@ -234,8 +237,8 @@ program example
 contains
     ! Rosenbrock's Function
     function rosenbrock(x) result(f)
-        real(dp), intent(in), dimension(:) :: x
-        real(dp) :: f
+        real(real64), intent(in), dimension(:) :: x
+        real(real64) :: f
         f = 1.0d2 * (x(2) - x(1)**2)**2 + (x(1) - 1.0d0)**2
     end function
 end program
@@ -248,101 +251,6 @@ Iterations: 52
 Function Evaluations: 101
 ```
 Notice, the convergence tolerance was set to its default value (1e-12).
-
-# C API
-
-The following examples illustrate the use of the C API.
-
-## C Example 1
-This example illustrates the C equivalent to Example 1 from above.
-```c
-#include <stdio.h>
-#include "nonlin.h"
-
-#define SQR(x) ((x) * (x))
-void fcn(int neqn, int nvar, const double *x, double *f);
-
-int main() {
-    // Local Variables
-    solver_control tol;
-    line_search_control ls;
-    iteration_behavior ib;
-    double f[2], x[2] = {1.0, 1.0};
-
-    // Define tolerances - use default values
-    set_nonlin_defaults(&tol);
-    set_nonlin_ls_defaults(&ls);
-
-    // Compute the solution
-    solve_quasi_newton(fcn, NULL, 2, x, f, &tol, &ls, &ib, NULL);
-
-    // Display the results
-    printf("Solution: (%f, %f)\n", x[0], x[1]);
-    printf("Residual: (%e, %e)\n", f[0], f[1]);
-    printf("Iterations: %i\nFunction Evaluations: %i\nJacobian Evaluations: %i\n",
-        ib.iter_count, ib.fcn_count, ib.jacobian_count);
-
-    // End
-    return 0;
-}
-
-void fcn(int neqn, int nvar, const double *x, double *f) {
-    // x^2 + y^2 = 34
-    // x^2 - 2 * y^2 = 7
-    f[0] = SQR(x[0]) + SQR(x[1]) - 34.0;
-    f[1] = SQR(x[0]) - 2.0 * SQR(x[1]) - 7.0;
-}
-```
-The above program produces the following output:
-```text
-Solution: (5.000000, 3.000000)
-Residual: (6.038903e-011, 1.206786e-010)
-Iterations: 10
-Function Evaluations: 14
-Jacobian Evaluations: 2
-```
-Notice, this example allows the solver to reset its Jacobian estimate after 5 iterations (default behavior).  As such, the results differ slightly (number of iterations, residual, etc.) as compared with the Fortran based example from above in which the solver was not set to reset the Jacobian after so few iterations.
-
-## C Example 2
-This example illustrates the use of the BFGS routine to find the minimum of the Rosenbrock function.  The minimum is located at (1, 1), which yields a function value of 0.
-```c
-#include <stdio.h>
-#include "nonlin.h"
-
-#define SQR(x) ((x) * (x))
-double fcn(int nvar, const double *x);
-
-int main() {
-    // Local Variables
-    iteration_behavior ib;
-    solver_control tol;
-    line_search_control ls;
-    double f, x[2] = {0.0, 0.0};
-
-    // Define the default tolerances
-    set_nonlin_defaults(&tol);
-    set_nonlin_ls_defaults(&ls);
-
-    // Compute the solution.  Let the solver compute the gradient vector
-    // via numerical means.
-    bfgs(fcn, NULL, 2, x, &f, &tol, &ls, &ib, NULL);
-
-    // Display the results
-    printf("Solution: (%6.4f, %6.4f)\nFunction Value: %6.4f\nIterations: %i\n",
-        x[0], x[1], f, ib.iter_count);
-}
-
-// Rosenbrock's Function:
-double fcn(int nvar, const double *x) {
-    return 1.0e2 * SQR(x[1] - SQR(x[0])) + SQR(x[0] - 1.0);
-}
-```
-The above program produces the following output:
-```text
-Solution: (1.0000, 1.0000)
-Function Value: 0.0000
-Iterations: 24
-```
 
 ## Documentation
 Documentation can be found [here](doc/refman.pdf)
