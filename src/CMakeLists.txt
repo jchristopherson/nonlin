@@ -11,3 +11,69 @@ set(nonlin_sources
 # Build the library
 add_library(nonlin ${nonlin_sources})
 target_link_libraries(nonlin ${LINALG_LIBRARIES} ${FERROR_LIBRARIES})
+
+
+# ------------------------------------------------------------------------------
+# INSTALLATION INSTRUCTIONS
+# ------------------------------------------------------------------------------
+# Define target information
+set_property(TARGET nonlin PROPERTY VERSION ${NONLIN_VERSION})
+set_property(TARGET nonlin PROPERTY SOVERSION ${NONLIN_MAJOR_VERSION})
+set_property(TARGET nonlin PROPERTY INTERFACE_nonlin_MAJOR_VERSION ${NONLIN_MAJOR_VERSION})
+set_property(TARGET nonlin APPEND PROPERTY COMPATIBLE_INTERFACE_STRING nonlin_MAJOR_VERSION)
+
+# Locate the "include" directories
+set(nonlin_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/include)
+
+# Define the installation instructions
+install(TARGETS nonlin EXPORT nonlinTargets
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    CONFIGURATIONS Release
+    INCLUDES DESTINATION include
+)
+install(
+    DIRECTORY ${PROJECT_SOURCE_DIR}/include 
+    DESTINATION ${CMAKE_INSTALL_PREFIX}
+    COMPONENT Devel
+)
+
+# Include the documentation
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/html DESTINATION doc)
+install(FILES ${PROJECT_SOURCE_DIR}/doc/refman.pdf DESTINATION doc)
+
+# Define the version file
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    "${CMAKE_BINARY_DIR}/nonlinConfigVersion.cmake"
+    VERSION ${NONLIN_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
+
+export(EXPORT nonlinTargets
+    FILE "${CMAKE_BINARY_DIR}/nonlinTargets.cmake"
+)
+
+# Define the configuration file
+configure_file(
+    "${PROJECT_SOURCE_DIR}/nonlinConfig.cmake.in"
+    "${CMAKE_BINARY_DIR}/nonlinConfig.cmake"
+    COPYONLY
+)
+
+set(ConfigPackageLocation lib/cmake/nonlin)
+install(
+    EXPORT nonlinTargets
+    FILE nonlinTargets.cmake
+    DESTINATION ${ConfigPackageLocation}
+)
+install(
+    FILES
+        "${CMAKE_BINARY_DIR}/nonlinConfig.cmake"
+        "${CMAKE_BINARY_DIR}/nonlinConfigVersion.cmake"
+    DESTINATION
+        ${ConfigPackageLocation}
+    COMPONENT
+        Devel
+)
