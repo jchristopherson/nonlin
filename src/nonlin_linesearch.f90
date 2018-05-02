@@ -8,7 +8,8 @@
 !! iteration process.
 module nonlin_linesearch
     use, intrinsic :: iso_fortran_env, only : int32, real64
-    use nonlin_types
+    use nonlin_constants
+    use nonlin_core
     use ferror, only : errors
     implicit none
     private

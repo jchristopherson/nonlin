@@ -7,7 +7,8 @@
 !! equations.
 module nonlin_solve
     use, intrinsic :: iso_fortran_env, only : int32, real64
-    use nonlin_types
+    use nonlin_constants
+    use nonlin_core
     use nonlin_linesearch, only : line_search, limit_search_vector
     use ferror, only : errors
     use linalg_core, only : qr_factor, form_qr, qr_rank1_update, lu_factor, &

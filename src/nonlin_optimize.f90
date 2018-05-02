@@ -14,10 +14,9 @@ module nonlin_optimize
     use, intrinsic :: iso_fortran_env, only : int32, real64
     use linalg_constants, only : LA_MATRIX_FORMAT_ERROR
     use ferror, only : errors
-    use nonlin_types, only : fcnnvar_helper, equation_optimizer, &
-        iteration_behavior, NL_OUT_OF_MEMORY_ERROR, NL_CONVERGENCE_ERROR, &
-        NL_INVALID_INPUT_ERROR, NL_INVALID_OPERATION_ERROR
     use nonlin_linesearch, only : line_search, limit_search_vector
+    use nonlin_constants
+    use nonlin_core
     use linalg_core, only : rank1_update, tri_mtx_mult, cholesky_rank1_update, &
         cholesky_rank1_downdate, solve_cholesky
     implicit none

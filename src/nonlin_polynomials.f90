@@ -14,7 +14,7 @@ module nonlin_polynomials
     use, intrinsic :: iso_fortran_env, only : int32, real64
     use linalg_core, only : eigen, solve_least_squares
     use ferror, only : errors
-    use nonlin_types, only : NL_INVALID_INPUT_ERROR, NL_ARRAY_SIZE_ERROR, &
+    use nonlin_constants, only : NL_INVALID_INPUT_ERROR, NL_ARRAY_SIZE_ERROR, &
         NL_OUT_OF_MEMORY_ERROR
     implicit none
 

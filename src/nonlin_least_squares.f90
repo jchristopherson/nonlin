@@ -6,7 +6,8 @@
 !! To provide routines capable of solving the nonlinear least squares problem.
 module nonlin_least_squares
     use, intrinsic :: iso_fortran_env, only : int32, real64
-    use nonlin_types
+    use nonlin_constants
+    use nonlin_core
     use ferror, only : errors
     implicit none
     private

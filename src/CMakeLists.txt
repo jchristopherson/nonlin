@@ -5,7 +5,14 @@ set(nonlin_sources
     nonlin_optimize.f90
     nonlin_polynomials.f90
     nonlin_solve.f90
-    nonlin_types.f90
+    nonlin_constants.f90
+    nonlin_core.f90
+    nonlin_vecfcn_helper.f90
+    nonlin_fcn1var_helper.f90
+    nonlin_fcnnvar_helper.f90
+    nonlin_equation_solver.f90
+    nonlin_equation_solver_1var.f90
+    nonlin_equation_optimizer.f90
 )
 
 # Build the library
@@ -34,7 +41,7 @@ install(TARGETS nonlin EXPORT nonlinTargets
     INCLUDES DESTINATION include
 )
 install(
-    DIRECTORY ${PROJECT_SOURCE_DIR}/include 
+    DIRECTORY ${PROJECT_SOURCE_DIR}/include
     DESTINATION ${CMAKE_INSTALL_PREFIX}
     COMPONENT Devel
 )
