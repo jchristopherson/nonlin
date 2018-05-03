@@ -3,8 +3,7 @@
 program example
     use iso_fortran_env
     use nonlin_optimize, only : nelder_mead
-    use nonlin_types, only : fcnnvar, fcnnvar_helper, &
-        iteration_behavior
+    use nonlin_core
     implicit none
 
     ! Local Variables

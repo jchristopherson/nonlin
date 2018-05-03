@@ -2,7 +2,7 @@
 
 program example
     use iso_fortran_env
-    use nonlin_types, only : vecfcn_helper, vecfcn
+    use nonlin_core
     use nonlin_least_squares, only : least_squares_solver
     implicit none
 
