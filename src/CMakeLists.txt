@@ -13,6 +13,9 @@ set(nonlin_sources
     nonlin_equation_solver.f90
     nonlin_equation_solver_1var.f90
     nonlin_equation_optimizer.f90
+    nonlin_optimize_nelder_mead.f90
+    nonlin_optimize_line_search.f90
+    nonlin_optimize_bfgs.f90
 )
 
 # Build the library
