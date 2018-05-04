@@ -1,11 +1,11 @@
 var searchData=
 [
-  ['nl_5farray_5fsize_5ferror',['nl_array_size_error',['../namespacenonlin__types.html#a92adc732f312193c8f499225defe9fab',1,'nonlin_types']]],
-  ['nl_5fconvergence_5ferror',['nl_convergence_error',['../namespacenonlin__types.html#ae06eb182ad2d391fe7500b80d2064b7b',1,'nonlin_types']]],
-  ['nl_5fdivergent_5fbehavior_5ferror',['nl_divergent_behavior_error',['../namespacenonlin__types.html#a603eeae7a4ecc538b9ca496d15eb2a79',1,'nonlin_types']]],
-  ['nl_5finvalid_5finput_5ferror',['nl_invalid_input_error',['../namespacenonlin__types.html#a8b0122c36d0989e4eb654742bd9b9031',1,'nonlin_types']]],
-  ['nl_5finvalid_5foperation_5ferror',['nl_invalid_operation_error',['../namespacenonlin__types.html#a35ed383f829b2f394c162c5cdf9f19b1',1,'nonlin_types']]],
-  ['nl_5fout_5fof_5fmemory_5ferror',['nl_out_of_memory_error',['../namespacenonlin__types.html#aab10625adf882a3c0679c90495697e6a',1,'nonlin_types']]],
-  ['nl_5fspurious_5fconvergence_5ferror',['nl_spurious_convergence_error',['../namespacenonlin__types.html#a1fe7db58a23915ae31c5345fd56f8462',1,'nonlin_types']]],
-  ['nl_5ftolerance_5ftoo_5fsmall_5ferror',['nl_tolerance_too_small_error',['../namespacenonlin__types.html#a8a27330ec9c217ecf0e33c576055b5ca',1,'nonlin_types']]]
+  ['nl_5farray_5fsize_5ferror',['nl_array_size_error',['../namespacenonlin__constants.html#add76da4ff5b1fc228887cb442e1a909a',1,'nonlin_constants']]],
+  ['nl_5fconvergence_5ferror',['nl_convergence_error',['../namespacenonlin__constants.html#a6e7694d6d44ec6b988de8b6d91d93fd5',1,'nonlin_constants']]],
+  ['nl_5fdivergent_5fbehavior_5ferror',['nl_divergent_behavior_error',['../namespacenonlin__constants.html#a285bb54cb368551d46661f78d710e9e0',1,'nonlin_constants']]],
+  ['nl_5finvalid_5finput_5ferror',['nl_invalid_input_error',['../namespacenonlin__constants.html#aea9acca28551e2c88635255bfd2c3f2d',1,'nonlin_constants']]],
+  ['nl_5finvalid_5foperation_5ferror',['nl_invalid_operation_error',['../namespacenonlin__constants.html#acf8b68879c3414c4f328b0d692b9354d',1,'nonlin_constants']]],
+  ['nl_5fout_5fof_5fmemory_5ferror',['nl_out_of_memory_error',['../namespacenonlin__constants.html#a53c7cd0a6d2a68f37f4e92630af700e3',1,'nonlin_constants']]],
+  ['nl_5fspurious_5fconvergence_5ferror',['nl_spurious_convergence_error',['../namespacenonlin__constants.html#ad6c00f5fd3698a2418373ef56ba8f4f4',1,'nonlin_constants']]],
+  ['nl_5ftolerance_5ftoo_5fsmall_5ferror',['nl_tolerance_too_small_error',['../namespacenonlin__constants.html#a226aad58e61f8da6e0bf56163a761cd0',1,'nonlin_constants']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['gradientfcn',['gradientfcn',['../interfacenonlin__types_1_1gradientfcn.html',1,'nonlin_types']]]
+  ['gradientfcn',['gradientfcn',['../interfacenonlin__core_1_1gradientfcn.html',1,'nonlin_core']]]
 ];

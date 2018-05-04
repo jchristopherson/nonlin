@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['jacobian',['jacobian',['../structnonlin__types_1_1vecfcn__helper.html#a92b05b7e0f06cddd5b97b0730c7c6d0c',1,'nonlin_types::vecfcn_helper']]]
+  ['jacobian',['jacobian',['../structnonlin__core_1_1vecfcn__helper.html#abb314c2501d0e7a1c973999c204abf8a',1,'nonlin_core::vecfcn_helper']]]
 ];

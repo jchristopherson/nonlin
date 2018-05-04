@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['converge_5fon_5fchng',['converge_on_chng',['../structnonlin__types_1_1iteration__behavior.html#aed3f22687b1b47e9b30dcaa7a6207dbe',1,'nonlin_types::iteration_behavior']]],
-  ['converge_5fon_5ffcn',['converge_on_fcn',['../structnonlin__types_1_1iteration__behavior.html#a0f34068d731f5e49c1e2ee522a91aa28',1,'nonlin_types::iteration_behavior']]],
-  ['converge_5fon_5fzero_5fdiff',['converge_on_zero_diff',['../structnonlin__types_1_1iteration__behavior.html#a870a92f17684e6d2661018c64d373269',1,'nonlin_types::iteration_behavior']]]
+  ['converge_5fon_5fchng',['converge_on_chng',['../structnonlin__core_1_1iteration__behavior.html#a59717056c1bfebca82b41c613082abec',1,'nonlin_core::iteration_behavior']]],
+  ['converge_5fon_5ffcn',['converge_on_fcn',['../structnonlin__core_1_1iteration__behavior.html#a757c280d32ca19e94aae1e712967baf8',1,'nonlin_core::iteration_behavior']]],
+  ['converge_5fon_5fzero_5fdiff',['converge_on_zero_diff',['../structnonlin__core_1_1iteration__behavior.html#afd0d9d5f04d17bc9e3be467ebd93a1b1',1,'nonlin_core::iteration_behavior']]]
 ];

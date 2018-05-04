@@ -12,5 +12,5 @@ var searchData=
   ['poly_5fpoly_5fmult',['poly_poly_mult',['../interfacenonlin__polynomials_1_1operator_07_5_08.html#a7ae53843289e39b9c63cf368f2ed7389',1,'nonlin_polynomials::operator(*)::poly_poly_mult()'],['../namespacenonlin__polynomials.html#a4d5545f5e93658bc08e011ac13f4ad60',1,'nonlin_polynomials::poly_poly_mult()']]],
   ['poly_5fpoly_5fsubtract',['poly_poly_subtract',['../interfacenonlin__polynomials_1_1operator_07-_08.html#a6099c1ec4563719acc5fba0f94e35de3',1,'nonlin_polynomials::operator(-)::poly_poly_subtract()'],['../namespacenonlin__polynomials.html#aa7025bd3c2e6572fa6d5e1226c3b23cf',1,'nonlin_polynomials::poly_poly_subtract()']]],
   ['poly_5froots',['poly_roots',['../namespacenonlin__polynomials.html#add5d2b923b389d1b9b829255031a3343',1,'nonlin_polynomials']]],
-  ['print_5fstatus',['print_status',['../namespacenonlin__types.html#ab5a1a2a4d9c5dcd6f3b597cdab2d7d42',1,'nonlin_types']]]
+  ['print_5fstatus',['print_status',['../namespacenonlin__core.html#ac9637db13c24f15661e80eb42b225ea7',1,'nonlin_core']]]
 ];

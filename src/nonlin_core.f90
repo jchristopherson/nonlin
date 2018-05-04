@@ -13,6 +13,16 @@
 !!
 !! @par Purpose
 !! To provide various routines to solve equations of one or many variables.
+!! Actual solvers are located in the following modules.
+!! - Module: nonlin_solve
+!!  - quasi_newton_solver
+!!  - newton_solver
+!!  - brent_solver
+!! - Module: nonlin_least_squares
+!!  - least_squares_solver
+!! - Module: nonlin_optimize
+!!  - nelder_mead
+!!  - bfgs
 module nonlin_core
     use, intrinsic :: iso_fortran_env, only : real64, int32
     use nonlin_constants
@@ -134,7 +144,57 @@ module nonlin_core
 ! NONLIN_VECFCN_HELPER.F90
 ! ------------------------------------------------------------------------------
     !> @brief Defines a type capable of encapsulating a system of nonlinear
-    !! equations of the form: F(X) = 0.
+    !! equations of the form: F(X) = 0.  This type is used to establish the
+    !! system of equations to solve, and provides a means for computing
+    !! the Jacobian matrix for the system of equations, and any other
+    !! ancillary operations that may be needed by the solver.
+    !!
+    !! @par Example
+    !! The following example illustrates the most basic use of this type to
+    !! solve a system of 2 equations and 2 unknowns using Newton's method.
+    !! @code{.f90}
+    !! program example
+    !!     use iso_fortran_env
+    !!     use nonlin_core
+    !!     use nonlin_solve
+    !!     implicit none
+    !!
+    !!     ! Local Variables
+    !!     type(vecfcn_helper) :: obj
+    !!     procedure(vecfcn), pointer :: fcn
+    !!     type(newton_solver) :: solver
+    !!     real(real64) :: x(2), f(2)
+    !!
+    !!     ! Assign a pointer to the subroutine containing the equations to solve
+    !!     fcn => fcns
+    !!     call obj%set_fcn(fcn, 2, 2) ! There are 2 equations with 2 unknowns
+    !!
+    !!     ! Define an initial guess
+    !!     x = 1.0d0 ! Equivalent to x = [1.0d0, 1.0d0]
+    !!
+    !!     ! Solve the system of equations
+    !!     call solver%solve(obj, x, f)
+    !!
+    !!     ! Display the output
+    !!     print '(AF7.5AF7.5A)', "Solution: (", x(1), ", ", x(2), ")"
+    !!     print '(AE9.3AE9.3A)', "Residual: (", f(1), ", ", f(2), ")"
+    !! contains
+    !!     ! Define the routine containing the equations to solve.  The equations are:
+    !!     ! x**2 + y**2 = 34
+    !!     ! x**2 - 2 * y**2 = 7
+    !!     subroutine fcns(x, f)
+    !!         real(real64), intent(in), dimension(:) :: x
+    !!         real(real64), intent(out), dimension(:) :: f
+    !!         f(1) = x(1)**2 + x(2)**2 - 34.0d0
+    !!         f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
+    !!     end subroutine
+    !! end program
+    !! @endcode
+    !! The above program produces the following output.
+    !! @code{.txt}
+    !! Solution: (5.00000, 3.00000)
+    !! Residual: (0.000E+00, 0.000E+00)
+    !! @endcode
     type vecfcn_helper
         private
         !> A pointer to the target vecfcn routine.
