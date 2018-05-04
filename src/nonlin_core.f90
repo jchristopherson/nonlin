@@ -1085,10 +1085,6 @@ module nonlin_core
         !!
         !! @param[in] this The equation_solver object.
         !! @return The maximum number of function evaluations.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: get_max_fcn_evals => es_get_max_eval
         !> @brief Sets the maximum number of function evaluations allowed during
         !! a single solve.
@@ -1102,8 +1098,8 @@ module nonlin_core
         !! @param[in] n The maximum number of function evaluations.
         !!
         !! @par Example
-        !! @code{.f90}
-        !! @endcode
+        !! See the equation_solver type for an example on how to establish
+        !! the limit on number of function evaluations.
         procedure, public :: set_max_fcn_evals => es_set_max_eval
         !> @brief Gets the convergence on function value tolerance.
         !!
@@ -1114,10 +1110,6 @@ module nonlin_core
         !!
         !! @param[in] this The equation_solver object.
         !! @return The tolerance value.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: get_fcn_tolerance => es_get_fcn_tol
         !> @brief Sets the convergence on function value tolerance.
         !!
@@ -1130,8 +1122,8 @@ module nonlin_core
         !! @param[in] x The tolerance value.
         !!
         !! @par Example
-        !! @code{.f90}
-        !! @endcode
+        !! See the equation_solver type for an example on how to establish
+        !! the function value tolerance.
         procedure, public :: set_fcn_tolerance => es_set_fcn_tol
         !> @brief Gets the convergence on change in variable tolerance.
         !!
@@ -1142,10 +1134,6 @@ module nonlin_core
         !!
         !! @param[in] this The equation_solver object.
         !! @return The tolerance value.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: get_var_tolerance => es_get_var_tol
         !> @brief Sets the convergence on change in variable tolerance.
         !!
@@ -1158,8 +1146,8 @@ module nonlin_core
         !! @param[in] x The tolerance value.
         !!
         !! @par Example
-        !! @code{.f90}
-        !! @endcode
+        !! See the equation_solver type for an example on how to establish
+        !! the change in variable tolerance.
         procedure, public :: set_var_tolerance => es_set_var_tol
         !> @brief Gets the convergence on slope of the gradient vector
         !! tolerance.
@@ -1171,10 +1159,6 @@ module nonlin_core
         !!
         !! @param[in] this The equation_solver object.
         !! @return The tolerance value.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: get_gradient_tolerance => es_get_grad_tol
         !> @brief Sets the convergence on slope of the gradient vector
         !! tolerance.
@@ -1188,8 +1172,8 @@ module nonlin_core
         !! @param[in] x The tolerance value.
         !!
         !! @par Example
-        !! @code{.f90}
-        !! @endcode
+        !! See the equation_solver type for an example on how to establish
+        !! the gradient vector slope tolerance.
         procedure, public :: set_gradient_tolerance => es_set_grad_tol
         !> @brief Gets a logical value determining if iteration status should be
         !! printed.
@@ -1201,10 +1185,6 @@ module nonlin_core
         !!
         !! @param[in] this The equation_solver object.
         !! @return True if the iteration status should be printed; else, false.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: get_print_status => es_get_print_status
         !> @brief Sets a logical value determining if iteration status should be
         !! printed.
@@ -1218,18 +1198,14 @@ module nonlin_core
         !! @param[in] x True if the iteration status should be printed; else, false.
         !!
         !! @par Example
-        !! @code{.f90}
-        !! @endcode
+        !! See the equation_solver type for an example on how to enable
+        !! iteration update printing.
         procedure, public :: set_print_status => es_set_print_status
         !> @brief Solves the system of equations.
         !!
-        !! @par Syntax
-        !! @code{.f90}
-        !! @endcode
-        !!
         !! @par Example
-        !! @code{.f90}
-        !! @endcode
+        !! See the equation_solver type for an example on how to solve a
+        !! system of equations.
         procedure(nonlin_solver), deferred, public, pass :: solve
     end type
 
