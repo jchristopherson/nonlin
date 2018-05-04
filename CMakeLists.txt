@@ -23,6 +23,13 @@ option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 find_package(ferror 1.3.0)
 find_package(linalg 1.5.0)
 
+# If FERROR is not installed on the system, build the default implementation
+if (${ferror_FOUND})
+    message(STATUS "An acceptable version of FERROR (v" ${ferror_VERSION} ") was found, and will be utilized.")
+    set(FERROR_LIBRARIES ferror)
+    get_target_property(ferror_LibLocation ferror LOCATION)
+endif()
+
 # If LINALG is not installed on the system, build the default implementation
 if (${linalg_FOUND})
     message(STATUS "An acceptable version of LINALG (v" ${linalg_VERSION} ") was found, and will be utilized.")
@@ -38,25 +45,6 @@ else()
     else()
         set(FERROR_LIBRARIES linalg)
         get_target_property(linalg_LibLocation linalg LOCATION)
-    endif()
-endif()
-
-
-# If FERROR is not installed on the system, build the default implementation
-if (${ferror_FOUND})
-    message(STATUS "An acceptable version of FERROR (v" ${ferror_VERSION} ") was found, and will be utilized.")
-    set(FERROR_LIBRARIES ferror)
-    get_target_property(ferror_LibLocation ferror LOCATION)
-else()
-    if (NOT TARGET ferror)
-        message(STATUS "FERROR not found.  The default implementation will be used.")
-        add_subdirectory(src/external/ferror)
-        set(ferror_INCLUDE_DIRS src/external/ferror/include)
-        set(FERROR_LIBRARIES ferror)
-        set(ferror_LibLocation ${ferror_BINARY_DIR})
-    else()
-        set(FERROR_LIBRARIES ferror)
-        set(ferror_LibLocation ${ferror_BINARY_DIR})
     endif()
 endif()
 
