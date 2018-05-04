@@ -19,5 +19,5 @@ var searchData=
   ['m_5ftol',['m_tol',['../structnonlin__core_1_1equation__optimizer.html#a1a889674b291e7d94c94e00d1523b952',1,'nonlin_core::equation_optimizer']]],
   ['m_5fuselinesearch',['m_uselinesearch',['../structnonlin__optimize_1_1line__search__optimizer.html#a75bddfbd8f82e2d5077262ac5bc2487d',1,'nonlin_optimize::line_search_optimizer::m_uselinesearch()'],['../structnonlin__solve_1_1line__search__solver.html#a6735a9a827d5dcd253db2a701d0836bf',1,'nonlin_solve::line_search_solver::m_uselinesearch()']]],
   ['m_5fxtol',['m_xtol',['../structnonlin__core_1_1equation__solver.html#af02d0e834603736a0235f18c77cf12d2',1,'nonlin_core::equation_solver::m_xtol()'],['../structnonlin__core_1_1equation__solver__1var.html#ab60bc831b378afe7fed6d62d20232a8a',1,'nonlin_core::equation_solver_1var::m_xtol()'],['../structnonlin__optimize_1_1line__search__optimizer.html#a6a2fa9986135b7aba08a2437cd1663bc',1,'nonlin_optimize::line_search_optimizer::m_xtol()']]],
-  ['min_5fbacktrack_5fsearch',['min_backtrack_search',['../namespacenonlin__linesearch.html#aed7cac361c60774ac2c49a51a99741d0',1,'nonlin_linesearch']]]
+  ['min_5fbacktrack_5fsearch',['min_backtrack_search',['../namespacenonlin__linesearch.html#a54fc6b438dfa3acf4e4ca122737c3799',1,'nonlin_linesearch']]]
 ];

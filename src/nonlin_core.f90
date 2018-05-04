@@ -378,10 +378,6 @@ module nonlin_core
         !! @param[in] x An N-element array containing the independent variables.
         !! @param[out] f An M-element array that, on output, contains the values
         !!  of the M functions.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: fcn => vfh_fcn
         !> @brief Executes the routine containing the Jacobian matrix if
         !! supplied.  If not supplied, the Jacobian is computed via finite
@@ -417,10 +413,6 @@ module nonlin_core
         !!  - 0: No error has occurred.
         !!  - n: A positive integer denoting the index of an invalid input.
         !!  - -1: Indicates internal memory allocation failed.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: jacobian => vfh_jac_fcn
         !> @brief Gets the number of equations in this system.
         !!
@@ -431,10 +423,6 @@ module nonlin_core
         !!
         !! @param[in] this The vecfcn_helper object.
         !! @return The function count.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: get_equation_count => vfh_get_nfcn
         !> @brief Gets the number of variables in this system.
         !!
@@ -445,10 +433,6 @@ module nonlin_core
         !!
         !! @param[in] this The vecfcn_helper object.
         !! @return The number of variables.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: get_variable_count => vfh_get_nvar
     end type
 
@@ -506,6 +490,54 @@ module nonlin_core
 ! ------------------------------------------------------------------------------
     !> @brief Defines a type capable of encapsulating an equation of one
     !! variable of the form: f(x) = 0.
+    !!
+    !! @par Example
+    !! The following example illustrates the use of this type to solve an
+    !! equation using Brent's method.
+    !! @code{.f90}
+    !! program example
+    !!     use iso_fortran_env
+    !!     use nonlin_core
+    !!     use nonlin_solve
+    !!     implicit none
+    !!
+    !!     ! Local variables
+    !!     type(fcn1var_helper) :: obj
+    !!     procedure(fcn1var), pointer :: fcn
+    !!     type(brent_solver) :: solver
+    !!     real(real64) :: x, f
+    !!     type(value_pair) :: limits
+    !!
+    !!     ! Define the search limits
+    !!     limits%x1 = 1.5d0
+    !!     limits%x2 = 5.0d0
+    !!
+    !!     ! Establish the function
+    !!     fcn => fcn1
+    !!     call obj%set_fcn(fcn)
+    !!
+    !!     ! Solve the equation
+    !!     call solver%solve(obj, x, limits, f)
+    !!
+    !!     ! Print the output and the residual
+    !!     print '(AF7.5)', "The solution: ", x
+    !!     print '(AE10.3)', "The residual: ", f
+    !!
+    !! contains
+    !!     ! The function:
+    !!     ! f(x) = sin(x) / x, solution: x = x * pi for n = 1, 2, 3, ...
+    !!     function fcn1(x) result(f)
+    !!         real(real64), intent(in) :: x
+    !!         real(real64) :: f
+    !!         f = sin(x) / x
+    !!     end function
+    !! end program
+    !! @endcode
+    !! The above program produces the following output.
+    !! @code{.txt}
+    !! The solution: 3.14159
+    !! The residual: -0.751E-11
+    !! @endcode
     type fcn1var_helper
         private
         !> A pointer to the target fcn1var routine.
@@ -522,10 +554,6 @@ module nonlin_core
         !! @param[in] x The value of the independent variable at which the function
         !!  should be evaluated.
         !! @return The value of the function at @p x.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: fcn => f1h_fcn
         !> @brief Tests if the pointer to the function containing the equation
         !! to solve has been assigned.
@@ -537,10 +565,6 @@ module nonlin_core
         !!
         !! @param[in] this The fcn1var_helper object.
         !! @return Returns true if the pointer has been assigned; else, false.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: is_fcn_defined => f1h_is_fcn_defined
         !> @brief Establishes a pointer to the routine containing the equations
         !! to solve.
@@ -554,7 +578,52 @@ module nonlin_core
         !! @param[in] fcn The function pointer.
         !!
         !! @par Example
+        !! The following example illustrates how to use this routine to
+        !! inform the solver of the function to solve.  This particular
+        !! example utilizes Brent's method to compute the solution.
         !! @code{.f90}
+        !! program example
+        !!     use iso_fortran_env
+        !!     use nonlin_core
+        !!     use nonlin_solve
+        !!     implicit none
+        !!
+        !!     ! Local variables
+        !!     type(fcn1var_helper) :: obj
+        !!     procedure(fcn1var), pointer :: fcn
+        !!     type(brent_solver) :: solver
+        !!     real(real64) :: x, f
+        !!     type(value_pair) :: limits
+        !!
+        !!     ! Define the search limits
+        !!     limits%x1 = 1.5d0
+        !!     limits%x2 = 5.0d0
+        !!
+        !!     ! Establish the function
+        !!     fcn => fcn1
+        !!     call obj%set_fcn(fcn)
+        !!
+        !!     ! Solve the equation
+        !!     call solver%solve(obj, x, limits, f)
+        !!
+        !!     ! Print the output and the residual
+        !!     print '(AF7.5)', "The solution: ", x
+        !!     print '(AE10.3)', "The residual: ", f
+        !!
+        !! contains
+        !!     ! The function:
+        !!     ! f(x) = sin(x) / x, solution: x = x * pi for n = 1, 2, 3, ...
+        !!     function fcn1(x) result(f)
+        !!         real(real64), intent(in) :: x
+        !!         real(real64) :: f
+        !!         f = sin(x) / x
+        !!     end function
+        !! end program
+        !! @endcode
+        !! The above program produces the following output.
+        !! @code{.txt}
+        !! The solution: 3.14159
+        !! The residual: -0.751E-11
         !! @endcode
         procedure, public :: set_fcn => f1h_set_fcn
     end type
@@ -583,6 +652,52 @@ module nonlin_core
 ! ------------------------------------------------------------------------------
     !> @brief Defines a type capable of encapsulating an equation of N
     !! variables.
+    !!
+    !! @par Example
+    !! The following example illustrates how to use this type to find the
+    !! minimum of a function of multiple variables.  In this instance the
+    !! Nelder-Mead simplex method is utilized to minimize the Rosenbrock
+    !! function in two variables.
+    !! @code{.f90}
+    !! program example
+    !!     use iso_fortran_env
+    !!     use nonlin_optimize
+    !!     use nonlin_core
+    !!     implicit none
+    !!
+    !!     ! Local Variables
+    !!     type(nelder_mead) :: solver
+    !!     type(fcnnvar_helper) :: obj
+    !!     procedure(fcnnvar), pointer :: fcn
+    !!     real(real64) :: x(2), f
+    !!
+    !!     ! Initialization
+    !!     fcn => rosenbrock
+    !!     call obj%set_fcn(fcn, 2)
+    !!
+    !!     ! Define an initial guess - the solution is (1, 1)
+    !!     call random_number(x)
+    !!
+    !!     ! Call the solver
+    !!     call solver%solve(obj, x, f)
+    !!
+    !!      ! Display the output
+    !!      print '(AF7.5AF7.5A)', "Minimum: (", x(1), ", ", x(2), ")"
+    !!      print '(AE9.3)', "Function Value: ", f
+    !! contains
+    !!     ! Rosenbrock's Function
+    !!     function rosenbrock(x) result(f)
+    !!         real(real64), intent(in), dimension(:) :: x
+    !!         real(real64) :: f
+    !!         f = 1.0d2 * (x(2) - x(1)**2)**2 + (x(1) - 1.0d0)**2
+    !!     end function
+    !! end program
+    !! @endcode
+    !! The above program produces the following output.
+    !! @code{.txt}
+    !! Minimum: (1.00000, 1.00000)
+    !! Function Value: 0.213E-12
+    !! @endcode
     type fcnnvar_helper
         private
         !> A pointer to the target fcnnvar routine.
@@ -603,10 +718,6 @@ module nonlin_core
         !! @param[in] x The value of the independent variable at which the function
         !!  should be evaluated.
         !! @return The value of the function at @p x.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: fcn => fnh_fcn
         !> @brief Tests if the pointer to the function has been assigned.
         !!
@@ -617,10 +728,6 @@ module nonlin_core
         !!
         !! @param[in] this The fcnnvar_helper object.
         !! @return Returns true if the pointer has been assigned; else, false.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: is_fcn_defined => fnh_is_fcn_defined
         !> @brief Establishes a pointer to the routine containing the function.
         !!
@@ -634,7 +741,49 @@ module nonlin_core
         !! @param[in] nvar The number of variables in the function.
         !!
         !! @par Example
+        !! The following example illustrates how to use this routine to
+        !! inform the solver of the function to optimize.  This particular
+        !! example utilizes the Nelder-Mead simplex method to minimize the
+        !! function.
         !! @code{.f90}
+        !! program example
+        !!     use iso_fortran_env
+        !!     use nonlin_optimize
+        !!     use nonlin_core
+        !!     implicit none
+        !!
+        !!     ! Local Variables
+        !!     type(nelder_mead) :: solver
+        !!     type(fcnnvar_helper) :: obj
+        !!     procedure(fcnnvar), pointer :: fcn
+        !!     real(real64) :: x(2), f
+        !!
+        !!     ! Initialization
+        !!     fcn => rosenbrock
+        !!     call obj%set_fcn(fcn, 2)
+        !!
+        !!     ! Define an initial guess - the solution is (1, 1)
+        !!     call random_number(x)
+        !!
+        !!     ! Call the solver
+        !!     call solver%solve(obj, x, f)
+        !!
+        !!      ! Display the output
+        !!      print '(AF7.5AF7.5A)', "Minimum: (", x(1), ", ", x(2), ")"
+        !!      print '(AE9.3)', "Function Value: ", f
+        !! contains
+        !!     ! Rosenbrock's Function
+        !!     function rosenbrock(x) result(f)
+        !!         real(real64), intent(in), dimension(:) :: x
+        !!         real(real64) :: f
+        !!         f = 1.0d2 * (x(2) - x(1)**2)**2 + (x(1) - 1.0d0)**2
+        !!     end function
+        !! end program
+        !! @endcode
+        !! The above program produces the following output.
+        !! @code{.txt}
+        !! Minimum: (1.00000, 1.00000)
+        !! Function Value: 0.213E-12
         !! @endcode
         procedure, public :: set_fcn => fnh_set_fcn
         !> @brief Gets the number of variables in this system.
@@ -646,10 +795,6 @@ module nonlin_core
         !!
         !! @param[in] this The fcnnvar_helper object.
         !! @return The number of variables.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: get_variable_count => fnh_get_nvar
         !> @brief Establishes a pointer to the routine containing the gradient
         !! vector of the function.
@@ -663,7 +808,69 @@ module nonlin_core
         !! @param[in] fcn The pointer to the gradient routine.
         !!
         !! @par Example
+        !! The following example illustrates the use of a user-defined
+        !! gradient function.  This particular example utilizes the BFGS
+        !! method to minimize Beale's function.
         !! @code{.f90}
+        !! program example
+        !!     use iso_fortran_env
+        !!     use nonlin_core
+        !!     use nonlin_optimize
+        !!     implicit none
+        !!
+        !!     ! Local Variables
+        !!     type(bfgs) :: solver
+        !!     type(fcnnvar_helper) :: obj
+        !!     procedure(fcnnvar), pointer :: fcn
+        !!     procedure(gradientfcn), pointer :: grad
+        !!     real(real64) :: x(2), f
+        !!
+        !!     ! Tell the solver where to find the function
+        !!     fcn => beale
+        !!     grad => bealegrad
+        !!     call obj%set_fcn(fcn, 2)
+        !!     call obj%set_gradient_fcn(grad)
+        !!
+        !!     ! Define an initial guess
+        !!     x = 1.0d0
+        !!
+        !!     ! Compute the solution
+        !!     call solver%solve(obj, x, f)
+        !!
+        !!     ! Display the output
+        !!     print '(AF7.5AF7.5A)', "Minimum: (", x(1), ", ", x(2), ")"
+        !!     print '(AE9.3)', "Function Value: ", f
+        !! contains
+        !!     ! The Beale function:
+        !!     ! f(x) = (1.5 - x + xy)**2 + (2.25 - x + xy**2)**2 + (2.625 - x + xy**3)**2
+        !!     ! The minimum is at x = 3, y = 0.5, and f(3, 0.5) = 0
+        !!     function beale(x) result(f)
+        !!         real(real64), intent(in), dimension(:) :: x
+        !!         real(real64) :: f
+        !!         f = (1.5d0 - x(1) + x(1) * x(2))**2 + &
+        !!             (2.25d0 - x(1) + x(1) * x(2)**2)**2 + &
+        !!             (2.625d0 - x(1) + x(1) * x(2)**3)**2
+        !!     end function
+        !!
+        !!     ! The gradient
+        !!     subroutine bealegrad(x, g)
+        !!         real(real64), intent(in), dimension(:) :: x
+        !!         real(real64), intent(out), dimension(:) :: g
+        !!
+        !!         g(1) = 2.0d0 * (x(2)**3 - 1.0d0) * (x(1) * x(2)**3 - x(1) + 2.625d0) + &
+        !!             2.0d0 * (x(2)**2 - 1.0d0) * (x(1) * x(2)**2 - x(1) + 2.25d0) + &
+        !!             2.0d0 * (x(2) - 1.0d0) * (x(1) * x(2) - x(1) + 1.5d0)
+        !!
+        !!         g(2) = 6.0d0 * x(1) * x(2)**2 * (x(1) * x(2)**3 - x(1) + 2.625d0) + &
+        !!             4.0d0 * x(1) * x(2) * (x(1) * x(2)**2 - x(1) + 2.25d0) + &
+        !!             2.0d0 * x(1) * (x(1) * x(2) - x(1) + 1.5d0)
+        !!     end subroutine
+        !! end program
+        !! @endcode
+        !! The above program produces the following output.
+        !! @code{.txt}
+        !! Minimum: (3.00000, 0.50000)
+        !! Function Value: 0.999E-28
         !! @endcode
         procedure, public :: set_gradient_fcn => fnh_set_grad
         !> @brief Tests if the pointer to the routine containing the gradient
@@ -676,10 +883,6 @@ module nonlin_core
         !!
         !! @param[in] this The fcnnvar_helper object.
         !! @return Returns true if the pointer has been assigned; else, false.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: is_gradient_defined => fnh_is_grad_defined
         !> @brief Computes the gradient of the function.
         !!
@@ -703,10 +906,6 @@ module nonlin_core
         !!  error status:
         !!  - 0: No error has occurred.
         !!  - n: A positive integer denoting the index of an invalid input.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: gradient => fnh_grad_fcn
     end type
 
@@ -758,6 +957,111 @@ module nonlin_core
 ! ------------------------------------------------------------------------------
     !> @brief A base class for various solvers of nonlinear systems of
     !! equations.
+    !!
+    !! @par Example
+    !! The following example illustrates the use of the newton_solver type,
+    !! which includes this type in its inheritance chain, to solve a system
+    !! of equations.  Several options are utilized in the example to illustrate
+    !! much of the solver functionallity.  Notice, many of these options
+    !! are not necessary to compute the solution; however, they do provide
+    !! means of control over the solver.  For a more minimalistic example see
+    !! the vecfcn_helper type.
+    !! @code{.f90}
+    !! program example
+    !!     use iso_fortran_env
+    !!     use nonlin_core
+    !!     use nonlin_solve
+    !!     implicit none
+    !!
+    !!     ! Local Variables
+    !!     type(vecfcn_helper) :: obj
+    !!     procedure(vecfcn), pointer :: fcn
+    !!     type(newton_solver) :: solver
+    !!     real(real64) :: x(2), f(2)
+    !!     type(iteration_behavior) :: tracking
+    !!
+    !!     ! Assign a pointer to the subroutine containing the equations to solve
+    !!     fcn => fcns
+    !!     call obj%set_fcn(fcn, 2, 2) ! There are 2 equations with 2 unknowns
+    !!
+    !!     ! Set up solver parameters
+    !!     call solver%set_max_fcn_evals(1000) ! Specify the maximum number of function evaluations before iteration termination
+    !!     call solver%set_fcn_tolerance(1.0d-10)
+    !!     call solver%set_var_tolerance(1.0d-10)
+    !!     call solver%set_gradient_tolerance(1.0d-10)
+    !!
+    !!     ! Tell the solver to print out a status update at each iteration - the default behavior does not print updates
+    !!     call solver%set_print_status(.true.)
+    !!
+    !!     ! Define an initial guess
+    !!     x = 1.0d0 ! Equivalent to x = [1.0d0, 1.0d0]
+    !!
+    !!     ! Solve the system of equations, but include solver statistics tracking
+    !!     call solver%solve(obj, x, f, tracking)
+    !!
+    !!     ! Display the output
+    !!     print *, ""
+    !!     print '(AF7.5AF7.5A)', "Solution: (", x(1), ", ", x(2), ")"
+    !!     print '(AE9.3AE9.3A)', "Residual: (", f(1), ", ", f(2), ")"
+    !!     print '(AI0)', "Iteration Count: ", tracking%iter_count
+    !!     print '(AI0)', "Function Evaluations: ", tracking%fcn_count
+    !!     print '(AI0)', "Jacobian Evaluations: ", tracking%jacobian_count
+    !!     print '(AL1)', "Converge on Function Value: ", tracking%converge_on_fcn
+    !!     print '(AL1)', "Converge on Change in Variable: ", tracking%converge_on_chng
+    !!     print '(AL1)', "Converge on Zero Slope Gradient Vector: ", tracking%converge_on_zero_diff
+    !! contains
+    !!     ! Define the routine containing the equations to solve.  The equations are:
+    !!     ! x**2 + y**2 = 34
+    !!     ! x**2 - 2 * y**2 = 7
+    !!     subroutine fcns(x, f)
+    !!         real(real64), intent(in), dimension(:) :: x
+    !!         real(real64), intent(out), dimension(:) :: f
+    !!         f(1) = x(1)**2 + x(2)**2 - 34.0d0
+    !!         f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
+    !!     end subroutine
+    !! end program
+    !! @endcode
+    !! The above program produces the following output.
+    !! @code{.txt}
+    !! Iteration: 1
+    !! Function Evaluations: 3
+    !! Jacobian Evaluations: 1
+    !! Change in Variable: 0.545E+00
+    !! Residual: 0.272E+02
+    !!
+    !! Iteration: 2
+    !! Function Evaluations: 5
+    !! Jacobian Evaluations: 2
+    !! Change in Variable: 0.504E+00
+    !! Residual: 0.743E+01
+    !!
+    !! Iteration: 3
+    !! Function Evaluations: 6
+    !! Jacobian Evaluations: 3
+    !! Change in Variable: 0.132E+00
+    !! Residual: 0.522E+00
+    !!
+    !! Iteration: 4
+    !! Function Evaluations: 7
+    !! Jacobian Evaluations: 4
+    !! Change in Variable: 0.882E-02
+    !! Residual: 0.199E-02
+    !!
+    !! Iteration: 5
+    !! Function Evaluations: 8
+    !! Jacobian Evaluations: 5
+    !! Change in Variable: 0.389E-04
+    !! Residual: 0.302E-07
+    !!
+    !! Solution: (5.00000, 3.00000)
+    !! Residual: (0.000E+00, 0.000E+00)
+    !! Iteration Count: 6
+    !! Function Evaluations: 9
+    !! Jacobian Evaluations: 6
+    !! Converge on Function Value: T
+    !! Converge on Change in Variable: F
+    !! Converge on Zero Slope Gradient Vector: F
+    !! @endcode
     type, abstract :: equation_solver
         private
         !> The maximum number of function evaluations allowed per solve.

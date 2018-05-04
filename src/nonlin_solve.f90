@@ -949,7 +949,7 @@ contains
     !!     type(value_pair) :: limits
     !!
     !!     ! Define the solution limits
-    !!     lmiits%x1 = 1.5d0
+    !!     limits%x1 = 1.5d0
     !!     limits%x2 = 5.0d0
     !!
     !!     ! Define the function

@@ -22,6 +22,15 @@ target_link_libraries(newton_example nonlin)
 add_executable(newton_example_jacobian nonlin_newton_solve_jacobian.f90)
 target_link_libraries(newton_example_jacobian nonlin)
 
+# Brent Example
+add_executable(brent_example nonlin_brent_example.f90)
+target_link_libraries(brent_example nonlin)
+
+# BFGS Example
+add_executable(bfgs_example nonlin_bfgs_example.f90)
+target_link_libraries(bfgs_example nonlin)
+
+
 # Ensure LINALG, FERROR, and BLAS libraries are copied to the runtime directory
 get_target_property(ferror_LibLocation ferror LOCATION)
 add_custom_command(TARGET quasi_newton_example POST_BUILD

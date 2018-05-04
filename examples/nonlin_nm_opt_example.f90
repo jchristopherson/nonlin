@@ -2,7 +2,7 @@
 
 program example
     use iso_fortran_env
-    use nonlin_optimize, only : nelder_mead
+    use nonlin_optimize
     use nonlin_core
     implicit none
 
