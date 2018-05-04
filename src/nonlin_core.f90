@@ -220,7 +220,51 @@ module nonlin_core
         !! @param[in] nvar The number of variables.
         !!
         !! @par Example
+        !! The following example illustrates how to define the function to
+        !! solve.  Newton's method is being utilized via the newton_solver
+        !! type.
         !! @code{.f90}
+        !! program example
+        !!     use iso_fortran_env
+        !!     use nonlin_core
+        !!     use nonlin_solve
+        !!     implicit none
+        !!
+        !!     ! Local Variables
+        !!     type(vecfcn_helper) :: obj
+        !!     procedure(vecfcn), pointer :: fcn
+        !!     type(newton_solver) :: solver
+        !!     real(real64) :: x(2), f(2)
+        !!
+        !!     ! Assign a pointer to the subroutine containing the equations to solve
+        !!     fcn => fcns
+        !!     call obj%set_fcn(fcn, 2, 2) ! There are 2 equations with 2 unknowns
+        !!
+        !!     ! Define an initial guess
+        !!     x = 1.0d0 ! Equivalent to x = [1.0d0, 1.0d0]
+        !!
+        !!     ! Solve the system of equations
+        !!     call solver%solve(obj, x, f)
+        !!
+        !!     ! Display the output
+        !!     print '(AF7.5AF7.5A)', "Solution: (", x(1), ", ", x(2), ")"
+        !!     print '(AE9.3AE9.3A)', "Residual: (", f(1), ", ", f(2), ")"
+        !! contains
+        !!     ! Define the routine containing the equations to solve.  The equations are:
+        !!     ! x**2 + y**2 = 34
+        !!     ! x**2 - 2 * y**2 = 7
+        !!     subroutine fcns(x, f)
+        !!         real(real64), intent(in), dimension(:) :: x
+        !!         real(real64), intent(out), dimension(:) :: f
+        !!         f(1) = x(1)**2 + x(2)**2 - 34.0d0
+        !!         f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
+        !!     end subroutine
+        !! end program
+        !! @endcode
+        !! The above program produces the following output.
+        !! @code{.txt}
+        !! Solution: (5.00000, 3.00000)
+        !! Residual: (0.000E+00, 0.000E+00)
         !! @endcode
         procedure, public :: set_fcn => vfh_set_fcn
         !> @brief Establishes a pointer to the routine for computing the
@@ -237,7 +281,66 @@ module nonlin_core
         !! @param[in] jac The function pointer.
         !!
         !! @par Example
+        !! The following example utilizes Newton's method to solve a system of
+        !! 2 equations and 2 unknowns with a user-defined Jacobian.
         !! @code{.f90}
+        !! program example
+        !!     use iso_fortran_env
+        !!     use nonlin_core
+        !!     use nonlin_solve
+        !!     implicit none
+        !!
+        !!     ! Local Variables
+        !!     type(vecfcn_helper) :: obj
+        !!     procedure(vecfcn), pointer :: fcn
+        !!     procedure(jacobianfcn), pointer :: jac
+        !!     type(newton_solver) :: solver
+        !!     real(real64) :: x(2), f(2)
+        !!
+        !!     ! Assign the function and Jacobian routines
+        !!     fcn => fcns
+        !!     jac => fcnjac
+        !!     call obj%set_fcn(fcn, 2, 2)
+        !!     call obj%set_jacobian(jac)
+        !!
+        !!     ! Define an initial guess
+        !!     x = 1.0d0 ! Equivalent to x = [1.0d0, 1.0d0]
+        !!
+        !!     ! Solve the system of equations
+        !!     call solver%solve(obj, x, f)
+        !!
+        !!     ! Display the output
+        !!     print '(AF7.5AF7.5A)', "Solution: (", x(1), ", ", x(2), ")"
+        !!     print '(AE9.3AE9.3A)', "Residual: (", f(1), ", ", f(2), ")"
+        !! contains
+        !!     ! The system of equations (source: https://www.mathworks.com/help/optim/ug/fsolve.html)
+        !!     ! 2 * x1 - x2 = exp(-x1)
+        !!     ! -x1 + 2 * x2 = exp(-x2)
+        !!     subroutine fcns(x, f)
+        !!         real(real64), intent(in), dimension(:) :: x
+        !!         real(real64), intent(out), dimension(:) :: f
+        !!         f(1) = 2.0d0 * x(1) - x(2) - exp(-x(1))
+        !!         f(2) = -x(1) + 2.0d0 * x(2) - exp(-x(2))
+        !!     end subroutine
+        !!
+        !!     ! The Jacobian matrix:
+        !!     !     | exp(-x1) + 2          -1     |
+        !!     ! J = |                              |
+        !!     !     |     -1          exp(-x2) + 2 |
+        !!     subroutine fcnjac(x, jac)
+        !!         real(real64), intent(in), dimension(:) :: x
+        !!         real(real64), intent(out), dimension(:,:) :: jac
+        !!         jac(1,1) = exp(-x(1)) + 2.0d0
+        !!         jac(2,1) = -1.0d0
+        !!         jac(1,2) = -1.0d0
+        !!         jac(2,2) = exp(-x(2)) + 2.0d0
+        !!     end subroutine
+        !! end program
+        !! @endcode
+        !! The above program produces the following output.
+        !! @code{.txt}
+        !! Solution: (0.56714, 0.56714)
+        !! Residual: (-.693E-08, -.683E-08)
         !! @endcode
         procedure, public :: set_jacobian => vfh_set_jac
         !> @brief Tests if the pointer to the subroutine containing the system

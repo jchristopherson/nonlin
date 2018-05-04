@@ -18,6 +18,9 @@ target_link_libraries(nm_opt_example nonlin)
 add_executable(newton_example nonlin_newton_example.f90)
 target_link_libraries(newton_example nonlin)
 
+# Newton Example w/ Jacobian
+add_executable(newton_example_jacobian nonlin_newton_solve_jacobian.f90)
+target_link_libraries(newton_example_jacobian nonlin)
 
 # Ensure LINALG, FERROR, and BLAS libraries are copied to the runtime directory
 get_target_property(ferror_LibLocation ferror LOCATION)
