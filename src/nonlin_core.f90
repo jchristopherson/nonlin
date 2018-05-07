@@ -542,6 +542,8 @@ module nonlin_core
         private
         !> A pointer to the target fcn1var routine.
         procedure(fcn1var), pointer, nopass :: m_fcn => null()
+        !> A pointer to a function capable of computing the derivative of m_fcn.
+        procedure(fcn1var), pointer, nopass :: m_diff => null()
     contains
         !> @brief Executes the routine containing the function to evaluate.
         !!
@@ -626,6 +628,41 @@ module nonlin_core
         !! The residual: -0.751E-11
         !! @endcode
         procedure, public :: set_fcn => f1h_set_fcn
+        !> @brief Tests if the pointer to the function containing the
+        !! derivative of the function to solve is defined.
+        !!
+        !! @par Syntax
+        !! @code{.f90}
+        !! pure logical function is_derivative_defined(class(fcn1var_helper) this)
+        !! @endcode
+        !!
+        !! @param[in] this The fcn1var_helper object.
+        !! @return Returns true if the pointer has been assigned; else, false.
+        procedure, public :: is_derivative_defined => f1h_is_diff_defined
+        !> @brief Computes the derivative of the function.  If a routine for
+        !! computing the derivative is not defined, the derivative is estimated
+        !! via finite differences.
+        !!
+        !! @par Syntax
+        !! @code{.f90}
+        !! real(real64) function derivative(class(fcn1var_helper) this, real(real64) x, optional real(real64) f)
+        !! @endcode
+        !!
+        !! @param[in] this The fcn1var_helper object.
+        !! @param[in] x The value of the independent variable at which the derivative is to be computed.
+        !! @param[in] f An optional input specifying the function value at @p x.  If supplied, and the
+        !!  derivative is being estimated numerically, the function will not be evaluated at @p x.
+        procedure, public :: derivative => f1h_diff_fcn
+        !!
+        !! @par Syntax
+        !! @code{.f90}
+        !! subroutine set_diff(class(fcn1var_helper) this, procedure(fcn1var) pointer diff)
+        !! @endcode
+        !!
+        !! @param[in,out] this The fcn1var_helper object.
+        !! @param[in] diff A pointer to the function for computing the first
+        !!  derivative.
+        procedure, public :: set_diff => f1h_set_diff
     end type
 
 ! ------------------------------------------------------------------------------
@@ -644,6 +681,23 @@ module nonlin_core
         module subroutine f1h_set_fcn(this, fcn)
             class(fcn1var_helper), intent(inout) :: this
             procedure(fcn1var), intent(in), pointer :: fcn
+        end subroutine
+
+        pure module function f1h_is_diff_defined(this) result(x)
+            class(fcn1var_helper), intent(in) :: this
+            logical :: x
+        end function
+
+        module function f1h_diff_fcn(this, x, f) result(df)
+            class(fcn1var_helper), intent(in) :: this
+            real(real64), intent(in) :: x
+            real(real64), intent(in), optional :: f
+            real(real64) :: df
+        end function
+
+        module subroutine f1h_set_diff(this, diff)
+            class(fcn1var_helper), intent(inout) :: this
+            procedure(fcn1var), pointer, intent(in) :: diff
         end subroutine
     end interface
 
