@@ -1465,6 +1465,71 @@ module nonlin_core
 ! ------------------------------------------------------------------------------
     !> @brief A base class for optimization of an equation of multiple
     !! variables.
+    !!
+    !! @par Example
+    !! The following example illustrates how to find the minimum of a function
+    !! of multipler variables by means of the BFGS method.
+    !! @code{.f90}
+    !! program example
+    !!     use iso_fortran_env
+    !!     use nonlin_core
+    !!     use nonlin_optimize
+    !!     implicit none
+    !!
+    !!     ! Local Variables
+    !!     type(bfgs) :: solver
+    !!     type(fcnnvar_helper) :: obj
+    !!     procedure(fcnnvar), pointer :: fcn
+    !!     procedure(gradientfcn), pointer :: grad
+    !!     real(real64) :: x(2), f
+    !!
+    !!     ! Tell the solver where to find the function
+    !!     fcn => beale
+    !!     grad => bealegrad
+    !!     call obj%set_fcn(fcn, 2)
+    !!     call obj%set_gradient_fcn(grad)
+    !!
+    !!     ! Define an initial guess
+    !!     x = 1.0d0
+    !!
+    !!     ! Compute the solution
+    !!     call solver%solve(obj, x, f)
+    !!
+    !!     ! Display the output
+    !!     print '(AF7.5AF7.5A)', "Minimum: (", x(1), ", ", x(2), ")"
+    !!     print '(AE9.3)', "Function Value: ", f
+    !! contains
+    !!     ! The Beale function:
+    !!     ! f(x) = (1.5 - x + xy)**2 + (2.25 - x + xy**2)**2 + (2.625 - x + xy**3)**2
+    !!     ! The minimum is at x = 3, y = 0.5, and f(3, 0.5) = 0
+    !!     function beale(x) result(f)
+    !!         real(real64), intent(in), dimension(:) :: x
+    !!         real(real64) :: f
+    !!         f = (1.5d0 - x(1) + x(1) * x(2))**2 + &
+    !!             (2.25d0 - x(1) + x(1) * x(2)**2)**2 + &
+    !!             (2.625d0 - x(1) + x(1) * x(2)**3)**2
+    !!     end function
+    !!
+    !!     ! The gradient
+    !!     subroutine bealegrad(x, g)
+    !!         real(real64), intent(in), dimension(:) :: x
+    !!         real(real64), intent(out), dimension(:) :: g
+    !!
+    !!         g(1) = 2.0d0 * (x(2)**3 - 1.0d0) * (x(1) * x(2)**3 - x(1) + 2.625d0) + &
+    !!             2.0d0 * (x(2)**2 - 1.0d0) * (x(1) * x(2)**2 - x(1) + 2.25d0) + &
+    !!             2.0d0 * (x(2) - 1.0d0) * (x(1) * x(2) - x(1) + 1.5d0)
+    !!
+    !!         g(2) = 6.0d0 * x(1) * x(2)**2 * (x(1) * x(2)**3 - x(1) + 2.625d0) + &
+    !!             4.0d0 * x(1) * x(2) * (x(1) * x(2)**2 - x(1) + 2.25d0) + &
+    !!             2.0d0 * x(1) * (x(1) * x(2) - x(1) + 1.5d0)
+    !!     end subroutine
+    !! end program
+    !! @endcode
+    !! The above program produces the following output.
+    !! @code{.txt}
+    !! Minimum: (3.00000, 0.50000)
+    !! Function Value: 0.999E-28
+    !! @endcode
     type, abstract :: equation_optimizer
         private
         !> The maximum number of function evaluations allowed.
@@ -1483,10 +1548,6 @@ module nonlin_core
         !!
         !! @param[in] this The equation_optimizer object.
         !! @return The maximum number of function evaluations.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: get_max_fcn_evals => oe_get_max_eval
         !> @brief Sets the maximum number of function evaluations allowed.
         !!
@@ -1497,10 +1558,6 @@ module nonlin_core
         !!
         !! @param[in,out] this The equation_optimizer object.
         !! @param[in] n The maximum number of function evaluations.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: set_max_fcn_evals => oe_set_max_eval
         !> @brief Gets the tolerance on convergence.
         !!
@@ -1511,10 +1568,6 @@ module nonlin_core
         !!
         !! @param[in] this The equation_optimizer object.
         !! @return The convergence tolerance.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: get_tolerance => oe_get_tol
         !> @brief Sets the tolerance on convergence.
         !!
@@ -1525,10 +1578,6 @@ module nonlin_core
         !!
         !! @param[in,out] this The equation_optimizer object.
         !! @param[in] x The convergence tolerance.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: set_tolerance => oe_set_tol
         !> @brief Gets a logical value determining if iteration status should be
         !! printed.
@@ -1540,10 +1589,6 @@ module nonlin_core
         !!
         !! @param[in] this The equation_optimizer object.
         !! @return True if the iteration status should be printed; else, false.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: get_print_status => oe_get_print_status
         !> @brief Sets a logical value determining if iteration status should be
         !! printed.
@@ -1555,20 +1600,12 @@ module nonlin_core
         !!
         !! @param[in,out] this The equation_optimizer object.
         !! @param[in] x True if the iteration status should be printed; else, false.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: set_print_status => oe_set_print_status
         !> @brief Optimizes the equation.
         !!
-        !! @par Syntax
-        !! @code{.f90}
-        !! @endcode
-        !!
         !! @par Example
-        !! @code{.f90}
-        !! @endcode
+        !! See the equation_optimizer type for an example on how to solve a
+        !! system of equations.
         procedure(nonlin_optimize_fcn), deferred, public, pass :: solve
     end type
 

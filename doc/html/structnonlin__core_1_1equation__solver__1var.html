@@ -179,8 +179,9 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A base class for various solvers of equations of one variable. </p>
+<dl class="section user"><dt>Example</dt><dd>The following example illustrates the solution of an equation of one variable by means of Brent's method. <div class="fragment"><div class="line"><span class="keyword">program</span> example</div><div class="line">    <span class="keywordtype">use </span>iso_fortran_env</div><div class="line">    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__core.html">nonlin_core</a></div><div class="line">    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__solve.html">nonlin_solve</a></div><div class="line">    <span class="keywordtype">implicit none</span></div><div class="line"></div><div class="line">    <span class="comment">! Local variables</span></div><div class="line">    <span class="keywordtype">type</span>(<a class="code" href="structnonlin__core_1_1fcn1var__helper.html">fcn1var_helper</a>) :: obj</div><div class="line">    <span class="keywordtype">procedure</span>(<a class="code" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>), <span class="keywordtype">pointer</span> :: fcn</div><div class="line">    <span class="keywordtype">type</span>(<a class="code" href="structnonlin__solve_1_1brent__solver.html">brent_solver</a>) :: solver</div><div class="line">    <span class="keywordtype">real(real64)</span> :: x, f</div><div class="line">    <span class="keywordtype">type</span>(<a class="code" href="structnonlin__core_1_1value__pair.html">value_pair</a>) :: limits</div><div class="line"></div><div class="line">    <span class="comment">! Define the search limits</span></div><div class="line">    limits%x1 = 1.5d0</div><div class="line">    limits%x2 = 5.0d0</div><div class="line"></div><div class="line">    <span class="comment">! Establish the function</span></div><div class="line">    fcn =&gt; fcn1</div><div class="line">    <span class="keyword">call </span>obj%set_fcn(fcn)</div><div class="line"></div><div class="line">    <span class="comment">! Solve the equation</span></div><div class="line">    <span class="keyword">call </span>solver%solve(obj, x, limits, f)</div><div class="line"></div><div class="line">    <span class="comment">! Print the output and the residual</span></div><div class="line">    print <span class="stringliteral">&#39;(AF7.5)&#39;</span>, <span class="stringliteral">&quot;The solution: &quot;</span>, x</div><div class="line">    print <span class="stringliteral">&#39;(AE10.3)&#39;</span>, <span class="stringliteral">&quot;The residual: &quot;</span>, f</div><div class="line"></div><div class="line"><span class="keyword">contains</span></div><div class="line">    <span class="comment">! The function:</span></div><div class="line">    <span class="comment">! f(x) = sin(x) / x, solution: x = x * pi for n = 1, 2, 3, ...</span></div><div class="line"><span class="keyword">    function </span>fcn1(x) result(f)</div><div class="line">        <span class="keywordtype">real(real64)</span>, <span class="keywordtype">intent(in)</span> :: x</div><div class="line">        <span class="keywordtype">real(real64)</span> :: f</div><div class="line">        f = sin(x) / x</div><div class="line"><span class="keyword">    end function</span></div><div class="line"><span class="keyword">end program</span></div></div><!-- fragment --> The above program produces the following output. <div class="fragment"><div class="line">The solution: 3.15159</div><div class="line">The residual: -0.751E-11</div></div><!-- fragment --> </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01269">1269</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01317">1317</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 </div><h2 class="groupheader">Member Function/Subroutine Documentation</h2>
 <a class="anchor" id="a0b57aabf05b077747a8936874186f69b"></a>
 <div class="memitem">
@@ -203,10 +204,9 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The tolerance value.</dd></dl>
-<dl class="section user"><dt>Example</dt><dd><div class="fragment"></div><!-- fragment --> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The tolerance value. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01323">1323</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01359">1359</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -231,10 +231,9 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The maximum number of function evaluations.</dd></dl>
-<dl class="section user"><dt>Example</dt><dd><div class="fragment"></div><!-- fragment --> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The maximum number of function evaluations. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01294">1294</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01338">1338</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -259,10 +258,9 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>True if the iteration status should be printed; else, false.</dd></dl>
-<dl class="section user"><dt>Example</dt><dd><div class="fragment"></div><!-- fragment --> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>True if the iteration status should be printed; else, false. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01380">1380</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01400">1400</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -287,10 +285,9 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The tolerance value.</dd></dl>
-<dl class="section user"><dt>Example</dt><dd><div class="fragment"></div><!-- fragment --> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The tolerance value. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01351">1351</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01379">1379</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -312,13 +309,12 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">this</td><td>The <a class="el" href="structnonlin__core_1_1equation__solver__1var.html" title="A base class for various solvers of equations of one variable. ">equation_solver_1var</a> object. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>The tolerance value.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>The tolerance value. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section user"><dt>Example</dt><dd><div class="fragment"></div><!-- fragment --> </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01337">1337</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01369">1369</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -340,13 +336,12 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">this</td><td>The <a class="el" href="structnonlin__core_1_1equation__solver__1var.html" title="A base class for various solvers of equations of one variable. ">equation_solver_1var</a> object. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">n</td><td>The maximum number of function evaluations.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n</td><td>The maximum number of function evaluations. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section user"><dt>Example</dt><dd><div class="fragment"></div><!-- fragment --> </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01309">1309</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01349">1349</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -368,13 +363,12 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">this</td><td>The <a class="el" href="structnonlin__core_1_1equation__solver__1var.html" title="A base class for various solvers of equations of one variable. ">equation_solver_1var</a> object. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>True if the iteration status should be printed; else, false.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>True if the iteration status should be printed; else, false. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section user"><dt>Example</dt><dd><div class="fragment"></div><!-- fragment --> </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01395">1395</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01411">1411</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -396,13 +390,12 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">this</td><td>The <a class="el" href="structnonlin__core_1_1equation__solver__1var.html" title="A base class for various solvers of equations of one variable. ">equation_solver_1var</a> object. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>The tolerance value.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>The tolerance value. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section user"><dt>Example</dt><dd><div class="fragment"></div><!-- fragment --> </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01365">1365</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01389">1389</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -420,10 +413,9 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
 </div><div class="memdoc">
 
 <p>Solves the equation. </p>
-<dl class="section user"><dt>Syntax</dt><dd><div class="fragment"></div><!-- fragment --></dd></dl>
-<dl class="section user"><dt>Example</dt><dd><div class="fragment"></div><!-- fragment --> </dd></dl>
+<dl class="section user"><dt>Example</dt><dd>See the <a class="el" href="structnonlin__core_1_1equation__solver__1var.html" title="A base class for various solvers of equations of one variable. ">equation_solver_1var</a> type for an example on how to solve a system of equations. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01405">1405</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01417">1417</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>

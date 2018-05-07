@@ -73,9 +73,8 @@ module nonlin_optimize
         !! function using this Nelder-Mead solver.
         !! @code{.f90}
         !! program example
-        !!     use linalg_constants, only : dp, i32
         !!     use nonlin_optimize, only : nelder_mead
-        !!     use nonlin_types, only : fcnnvar, fcnnvar_helper, iteration_behavior
+        !!     use nonlin_core, only : fcnnvar, fcnnvar_helper, iteration_behavior
         !!     implicit none
         !!
         !!     ! Local Variables
@@ -440,9 +439,8 @@ module nonlin_optimize
         !! function using this BFGS solver.
         !! @code{.f90}
         !! program example
-        !!     use linalg_constants, only : dp, i32
         !!     use nonlin_optimize, only : bfgs
-        !!     use nonlin_types, only : fcnnvar, fcnnvar_helper, iteration_behavior
+        !!     use nonlin_core, only : fcnnvar, fcnnvar_helper, iteration_behavior
         !!     implicit none
         !!
         !!     ! Local Variables

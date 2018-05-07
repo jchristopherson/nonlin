@@ -16,12 +16,15 @@ set(nonlin_sources
     nonlin_optimize_nelder_mead.f90
     nonlin_optimize_line_search.f90
     nonlin_optimize_bfgs.f90
+    nonlin_solve_line_search.f90
+    nonlin_solve_quasi_newton.f90
+    nonlin_solve_newton.f90
+    nonlin_solve_brent.f90
 )
 
 # Build the library
 add_library(nonlin ${nonlin_sources})
 target_link_libraries(nonlin ${LINALG_LIBRARIES} ${FERROR_LIBRARIES})
-
 
 # ------------------------------------------------------------------------------
 # INSTALLATION INSTRUCTIONS

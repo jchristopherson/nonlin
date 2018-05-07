@@ -117,8 +117,7 @@ contains
     !! equations of N unknonwns using the Levenberg-Marquardt method.
     !! @code{.f90}
     !! program main
-    !!     use linalg_constants, only : dp
-    !!     use nonlin_types, only : vecfcn, vecfcn_helper
+    !!     use nonlin_core, only : vecfcn, vecfcn_helper
     !!     use nonlin_least_squares, only : least_squares_solver
     !!
     !!     type(vecfcn_helper) :: obj
@@ -165,8 +164,7 @@ contains
     !! @par Example 2
     !! @code{.f90}
     !! program example
-    !!     use linalg_constants, only : dp, i32
-    !!     use nonlin_types, only : vecfcn_helper, vecfcn
+    !!     use nonlin_core, only : vecfcn_helper, vecfcn
     !!     use nonlin_least_squares, only : least_squares_solver
     !!     implicit none
     !!
