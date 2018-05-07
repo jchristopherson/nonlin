@@ -1266,6 +1266,54 @@ module nonlin_core
 ! NONLIN_EQUATION_SOLVER_1VAR.F90
 ! ------------------------------------------------------------------------------
     !> @brief A base class for various solvers of equations of one variable.
+    !!
+    !! @par Example
+    !! The following example illustrates the solution of an equation of one
+    !! variable by means of Brent's method.
+    !! @code{.f90}
+    !! program example
+    !!     use iso_fortran_env
+    !!     use nonlin_core
+    !!     use nonlin_solve
+    !!     implicit none
+    !!
+    !!     ! Local variables
+    !!     type(fcn1var_helper) :: obj
+    !!     procedure(fcn1var), pointer :: fcn
+    !!     type(brent_solver) :: solver
+    !!     real(real64) :: x, f
+    !!     type(value_pair) :: limits
+    !!
+    !!     ! Define the search limits
+    !!     limits%x1 = 1.5d0
+    !!     limits%x2 = 5.0d0
+    !!
+    !!     ! Establish the function
+    !!     fcn => fcn1
+    !!     call obj%set_fcn(fcn)
+    !!
+    !!     ! Solve the equation
+    !!     call solver%solve(obj, x, limits, f)
+    !!
+    !!     ! Print the output and the residual
+    !!     print '(AF7.5)', "The solution: ", x
+    !!     print '(AE10.3)', "The residual: ", f
+    !!
+    !! contains
+    !!     ! The function:
+    !!     ! f(x) = sin(x) / x, solution: x = x * pi for n = 1, 2, 3, ...
+    !!     function fcn1(x) result(f)
+    !!         real(real64), intent(in) :: x
+    !!         real(real64) :: f
+    !!         f = sin(x) / x
+    !!     end function
+    !! end program
+    !! @endcode
+    !! The above program produces the following output.
+    !! @code{.txt}
+    !! The solution: 3.15159
+    !! The residual: -0.751E-11
+    !! @endcode
     type, abstract :: equation_solver_1var
         private
         !> The maximum number of function evaluations allowed per solve.
@@ -1287,10 +1335,6 @@ module nonlin_core
         !!
         !! @param[in] this The equation_solver_1var object.
         !! @return The maximum number of function evaluations.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: get_max_fcn_evals => es1_get_max_eval
         !> @brief Sets the maximum number of function evaluations allowed during
         !! a single solve.
@@ -1302,10 +1346,6 @@ module nonlin_core
         !!
         !! @param[in,out] this The equation_solver_1var object.
         !! @param[in] n The maximum number of function evaluations.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: set_max_fcn_evals => es1_set_max_eval
         !> @brief Gets the convergence on function value tolerance.
         !!
@@ -1316,10 +1356,6 @@ module nonlin_core
         !!
         !! @param[in] this The equation_solver_1var object.
         !! @return The tolerance value.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: get_fcn_tolerance => es1_get_fcn_tol
         !> @brief Sets the convergence on function value tolerance.
         !!
@@ -1330,10 +1366,6 @@ module nonlin_core
         !!
         !! @param[in,out] this The equation_solver_1var object.
         !! @param[in] x The tolerance value.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: set_fcn_tolerance => es1_set_fcn_tol
         !> @brief Gets the convergence on change in variable tolerance.
         !!
@@ -1344,10 +1376,6 @@ module nonlin_core
         !!
         !! @param[in] this The equation_solver_1var object.
         !! @return The tolerance value.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: get_var_tolerance => es1_get_var_tol
         !> @brief Sets the convergence on change in variable tolerance.
         !!
@@ -1358,10 +1386,6 @@ module nonlin_core
         !!
         !! @param[in,out] this The equation_solver_1var object.
         !! @param[in] x The tolerance value.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: set_var_tolerance => es1_set_var_tol
         !> @brief Gets a logical value determining if iteration status should be
         !! printed.
@@ -1373,10 +1397,6 @@ module nonlin_core
         !!
         !! @param[in] this The equation_solver_1var object.
         !! @return True if the iteration status should be printed; else, false.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: get_print_status => es1_get_print_status
         !> @brief Sets a logical value determining if iteration status should be
         !! printed.
@@ -1388,20 +1408,12 @@ module nonlin_core
         !!
         !! @param[in,out] this The equation_solver_1var object.
         !! @param[in] x True if the iteration status should be printed; else, false.
-        !!
-        !! @par Example
-        !! @code{.f90}
-        !! @endcode
         procedure, public :: set_print_status => es1_set_print_status
         !> @brief Solves the equation.
         !!
-        !! @par Syntax
-        !! @code{.f90}
-        !! @endcode
-        !!
         !! @par Example
-        !! @code{.f90}
-        !! @endcode
+        !! See the equation_solver_1var type for an example on how to solve a
+        !! system of equations.
         procedure(nonlin_solver_1var), deferred, public, pass :: solve
     end type
 
