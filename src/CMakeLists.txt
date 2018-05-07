@@ -20,6 +20,7 @@ set(nonlin_sources
     nonlin_solve_quasi_newton.f90
     nonlin_solve_newton.f90
     nonlin_solve_brent.f90
+    nonlin_solve_newton1var.f90
 )
 
 # Build the library

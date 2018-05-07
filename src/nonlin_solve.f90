@@ -491,6 +491,28 @@ module nonlin_solve
         end subroutine
     end interface
 
+! ******************************************************************************
+! NONLIN_SOLVE_NEWTON1VAR.F90
+! ------------------------------------------------------------------------------
+    !> @brief Defines a solver based upon Newtons's method for solving an
+    !! equation of one variable without using derivatives.
+    type, extends(equation_solver_1var) :: newton_1var_solver
+    contains
+        procedure, public :: solve => newt1var_solve
+    end type
+! ------------------------------------------------------------------------------
+    interface
+        module subroutine newt1var_solve(this, fcn, x, lim, f, ib, err)
+            class(newton_1var_solver), intent(inout) :: this
+            class(fcn1var_helper), intent(in) :: fcn
+            real(real64), intent(inout) :: x
+            type(value_pair), intent(in) :: lim
+            real(real64), intent(out), optional :: f
+            type(iteration_behavior), optional :: ib
+            class(errors), intent(inout), optional, target :: err
+        end subroutine
+    end interface
+
 contains
 ! ******************************************************************************
 ! GENERAL ROUTINES

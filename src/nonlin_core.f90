@@ -652,7 +652,7 @@ module nonlin_core
         !! @param[in] x The value of the independent variable at which the derivative is to be computed.
         !! @param[in] f An optional input specifying the function value at @p x.  If supplied, and the
         !!  derivative is being estimated numerically, the function will not be evaluated at @p x.
-        procedure, public :: derivative => f1h_diff_fcn
+        procedure, public :: diff => f1h_diff_fcn
         !!
         !! @par Syntax
         !! @code{.f90}
