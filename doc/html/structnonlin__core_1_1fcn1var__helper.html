@@ -130,6 +130,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae8e92bea80019e27bdea08ed600e6271"><td class="memItemLeft" align="right" valign="top">procedure, public&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnonlin__core_1_1fcn1var__helper.html#ae8e92bea80019e27bdea08ed600e6271">set_fcn</a> =&gt; f1h_set_fcn</td></tr>
 <tr class="memdesc:ae8e92bea80019e27bdea08ed600e6271"><td class="mdescLeft">&#160;</td><td class="mdescRight">Establishes a pointer to the routine containing the equations to solve.  <a href="#ae8e92bea80019e27bdea08ed600e6271">More...</a><br /></td></tr>
 <tr class="separator:ae8e92bea80019e27bdea08ed600e6271"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad27fa3d960ce7d5310a2be2d9b7f8d7c"><td class="memItemLeft" align="right" valign="top">procedure, public&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnonlin__core_1_1fcn1var__helper.html#ad27fa3d960ce7d5310a2be2d9b7f8d7c">is_derivative_defined</a> =&gt; f1h_is_diff_defined</td></tr>
+<tr class="memdesc:ad27fa3d960ce7d5310a2be2d9b7f8d7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tests if the pointer to the function containing the derivative of the function to solve is defined.  <a href="#ad27fa3d960ce7d5310a2be2d9b7f8d7c">More...</a><br /></td></tr>
+<tr class="separator:ad27fa3d960ce7d5310a2be2d9b7f8d7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a798d9b180392537c564ac69cc1b81952"><td class="memItemLeft" align="right" valign="top">procedure, public&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnonlin__core_1_1fcn1var__helper.html#a798d9b180392537c564ac69cc1b81952">diff</a> =&gt; f1h_diff_fcn</td></tr>
+<tr class="memdesc:a798d9b180392537c564ac69cc1b81952"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the derivative of the function. If a routine for computing the derivative is not defined, the derivative is estimated via finite differences.  <a href="#a798d9b180392537c564ac69cc1b81952">More...</a><br /></td></tr>
+<tr class="separator:a798d9b180392537c564ac69cc1b81952"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee47d4795f22dad4bbf602073e5abf4d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aee47d4795f22dad4bbf602073e5abf4d"></a>
+procedure, public&#160;</td><td class="memItemRight" valign="bottom"><b>set_diff</b> =&gt; f1h_set_diff</td></tr>
+<tr class="separator:aee47d4795f22dad4bbf602073e5abf4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -137,6 +146,10 @@ Private Attributes</h2></td></tr>
 procedure(<a class="el" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>), pointer, nopass&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnonlin__core_1_1fcn1var__helper.html#a77004284243a6f28ce78d908864e8da7">m_fcn</a> =&gt; null()</td></tr>
 <tr class="memdesc:a77004284243a6f28ce78d908864e8da7"><td class="mdescLeft">&#160;</td><td class="mdescRight">A pointer to the target <a class="el" href="interfacenonlin__core_1_1fcn1var.html" title="Describes a function of one variable. ">fcn1var</a> routine. <br /></td></tr>
 <tr class="separator:a77004284243a6f28ce78d908864e8da7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ac77259ff44c2c92cdd1f80b5b4421d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3ac77259ff44c2c92cdd1f80b5b4421d"></a>
+procedure(<a class="el" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>), pointer, nopass&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnonlin__core_1_1fcn1var__helper.html#a3ac77259ff44c2c92cdd1f80b5b4421d">m_diff</a> =&gt; null()</td></tr>
+<tr class="memdesc:a3ac77259ff44c2c92cdd1f80b5b4421d"><td class="mdescLeft">&#160;</td><td class="mdescRight">A pointer to a function capable of computing the derivative of m_fcn. <br /></td></tr>
+<tr class="separator:a3ac77259ff44c2c92cdd1f80b5b4421d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Defines a type capable of encapsulating an equation of one variable of the form: f(x) = 0. </p>
@@ -144,6 +157,34 @@ procedure(<a class="el" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>
 
 <p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00541">541</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 </div><h2 class="groupheader">Member Function/Subroutine Documentation</h2>
+<a class="anchor" id="a798d9b180392537c564ac69cc1b81952"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">procedure, public nonlin_core::fcn1var_helper::diff </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Computes the derivative of the function. If a routine for computing the derivative is not defined, the derivative is estimated via finite differences. </p>
+<dl class="section user"><dt>Syntax</dt><dd><div class="fragment"><div class="line"><span class="keyword">real(real64) </span><span class="keyword">function </span>derivative(class(fcn1var_helper) this, real(real64) x, optional real(real64) f)</div></div><!-- fragment --></dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">this</td><td>The <a class="el" href="structnonlin__core_1_1fcn1var__helper.html" title="Defines a type capable of encapsulating an equation of one variable of the form: f(x) = 0...">fcn1var_helper</a> object. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>The value of the independent variable at which the derivative is to be computed. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">f</td><td>An optional input specifying the function value at <code>x</code>. If supplied, and the derivative is being estimated numerically, the function will not be evaluated at <code>x</code>. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00655">655</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="aee8fdfd1502ae3c5b38b1ce96eb5ec93"></a>
 <div class="memitem">
 <div class="memproto">
@@ -168,7 +209,34 @@ procedure(<a class="el" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The value of the function at <code>x</code>. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00557">557</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00559">559</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ad27fa3d960ce7d5310a2be2d9b7f8d7c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">procedure, public nonlin_core::fcn1var_helper::is_derivative_defined </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Tests if the pointer to the function containing the derivative of the function to solve is defined. </p>
+<dl class="section user"><dt>Syntax</dt><dd><div class="fragment"><div class="line"><span class="keyword">pure logical </span><span class="keyword">function </span>is_derivative_defined(class(fcn1var_helper) this)</div></div><!-- fragment --></dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">this</td><td>The <a class="el" href="structnonlin__core_1_1fcn1var__helper.html" title="Defines a type capable of encapsulating an equation of one variable of the form: f(x) = 0...">fcn1var_helper</a> object. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Returns true if the pointer has been assigned; else, false. </dd></dl>
+
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00641">641</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -195,7 +263,7 @@ procedure(<a class="el" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns true if the pointer has been assigned; else, false. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00568">568</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00570">570</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -223,7 +291,7 @@ procedure(<a class="el" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>
 </dl>
 <dl class="section user"><dt>Example</dt><dd>The following example illustrates how to use this routine to inform the solver of the function to solve. This particular example utilizes Brent's method to compute the solution. <div class="fragment"><div class="line"><span class="keyword">program</span> example</div><div class="line">    <span class="keywordtype">use </span>iso_fortran_env</div><div class="line">    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__core.html">nonlin_core</a></div><div class="line">    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__solve.html">nonlin_solve</a></div><div class="line">    <span class="keywordtype">implicit none</span></div><div class="line"></div><div class="line">    <span class="comment">! Local variables</span></div><div class="line">    <span class="keywordtype">type</span>(<a class="code" href="structnonlin__core_1_1fcn1var__helper.html">fcn1var_helper</a>) :: obj</div><div class="line">    <span class="keywordtype">procedure</span>(<a class="code" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>), <span class="keywordtype">pointer</span> :: fcn</div><div class="line">    <span class="keywordtype">type</span>(<a class="code" href="structnonlin__solve_1_1brent__solver.html">brent_solver</a>) :: solver</div><div class="line">    <span class="keywordtype">real(real64)</span> :: x, f</div><div class="line">    <span class="keywordtype">type</span>(<a class="code" href="structnonlin__core_1_1value__pair.html">value_pair</a>) :: limits</div><div class="line"></div><div class="line">    <span class="comment">! Define the search limits</span></div><div class="line">    limits%x1 = 1.5d0</div><div class="line">    limits%x2 = 5.0d0</div><div class="line"></div><div class="line">    <span class="comment">! Establish the function</span></div><div class="line">    fcn =&gt; fcn1</div><div class="line">    <span class="keyword">call </span>obj%set_fcn(fcn)</div><div class="line"></div><div class="line">    <span class="comment">! Solve the equation</span></div><div class="line">    <span class="keyword">call </span>solver%solve(obj, x, limits, f)</div><div class="line"></div><div class="line">    <span class="comment">! Print the output and the residual</span></div><div class="line">    print <span class="stringliteral">&#39;(AF7.5)&#39;</span>, <span class="stringliteral">&quot;The solution: &quot;</span>, x</div><div class="line">    print <span class="stringliteral">&#39;(AE10.3)&#39;</span>, <span class="stringliteral">&quot;The residual: &quot;</span>, f</div><div class="line"></div><div class="line"><span class="keyword">contains</span></div><div class="line">    <span class="comment">! The function:</span></div><div class="line">    <span class="comment">! f(x) = sin(x) / x, solution: x = x * pi for n = 1, 2, 3, ...</span></div><div class="line"><span class="keyword">    function </span>fcn1(x) result(f)</div><div class="line">        <span class="keywordtype">real(real64)</span>, <span class="keywordtype">intent(in)</span> :: x</div><div class="line">        <span class="keywordtype">real(real64)</span> :: f</div><div class="line">        f = sin(x) / x</div><div class="line"><span class="keyword">    end function</span></div><div class="line"><span class="keyword">end program</span></div></div><!-- fragment --> The above program produces the following output. <div class="fragment"><div class="line">The solution: 3.14159</div><div class="line">The residual: -0.751E-11</div></div><!-- fragment --> </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00628">628</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00630">630</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>

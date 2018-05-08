@@ -15,5 +15,10 @@ var dir_68267d1309a1af8e8297ef4c3efbcdba =
     [ "nonlin_optimize_nelder_mead.f90", "nonlin__optimize__nelder__mead_8f90_source.html", null ],
     [ "nonlin_polynomials.f90", "nonlin__polynomials_8f90_source.html", null ],
     [ "nonlin_solve.f90", "nonlin__solve_8f90_source.html", null ],
+    [ "nonlin_solve_brent.f90", "nonlin__solve__brent_8f90_source.html", null ],
+    [ "nonlin_solve_line_search.f90", "nonlin__solve__line__search_8f90_source.html", null ],
+    [ "nonlin_solve_newton.f90", "nonlin__solve__newton_8f90_source.html", null ],
+    [ "nonlin_solve_newton1var.f90", "nonlin__solve__newton1var_8f90_source.html", null ],
+    [ "nonlin_solve_quasi_newton.f90", "nonlin__solve__quasi__newton_8f90_source.html", null ],
     [ "nonlin_vecfcn_helper.f90", "nonlin__vecfcn__helper_8f90_source.html", null ]
 ];

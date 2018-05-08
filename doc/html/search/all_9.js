@@ -17,12 +17,6 @@ var searchData=
   ['ls_5fset_5fmax_5feval',['ls_set_max_eval',['../namespacenonlin__linesearch.html#aeb9ded3f31ec2baad455218fa6b5e4fd',1,'nonlin_linesearch']]],
   ['ls_5fset_5fscale',['ls_set_scale',['../namespacenonlin__linesearch.html#afbc0daef332c32c1c93e08d5c8357a3b',1,'nonlin_linesearch']]],
   ['lss_5fget_5ffactor',['lss_get_factor',['../namespacenonlin__least__squares.html#a1e0b514919f21f9226c5ed69eee4018b',1,'nonlin_least_squares']]],
-  ['lss_5fget_5fline_5fsearch',['lss_get_line_search',['../namespacenonlin__solve.html#a637049975cd1ef4d23881eb918b33801',1,'nonlin_solve']]],
-  ['lss_5fget_5fuse_5fsearch',['lss_get_use_search',['../namespacenonlin__solve.html#a49080ad2fbe6dfeecb5020691e8a0950',1,'nonlin_solve']]],
-  ['lss_5fis_5fline_5fsearch_5fdefined',['lss_is_line_search_defined',['../namespacenonlin__solve.html#a704c14bbefeae4d35b78ce62db901c7f',1,'nonlin_solve']]],
-  ['lss_5fset_5fdefault',['lss_set_default',['../namespacenonlin__solve.html#aaa4f51b6de43c09141234ed8d5df4203',1,'nonlin_solve']]],
   ['lss_5fset_5ffactor',['lss_set_factor',['../namespacenonlin__least__squares.html#af93ae0c6697ce082b10c9577c17d35f2',1,'nonlin_least_squares']]],
-  ['lss_5fset_5fline_5fsearch',['lss_set_line_search',['../namespacenonlin__solve.html#a58e03d26102f04cd294d95e9342b2e0a',1,'nonlin_solve']]],
-  ['lss_5fset_5fuse_5fsearch',['lss_set_use_search',['../namespacenonlin__solve.html#abcda2d6cb8201db5d4aa1af930d06fd4',1,'nonlin_solve']]],
   ['lss_5fsolve',['lss_solve',['../namespacenonlin__least__squares.html#a974515039f6a26d25f774604eeaef992',1,'nonlin_least_squares']]]
 ];

@@ -37,7 +37,7 @@ program example
 
 contains
     ! The function:
-    ! f(x) = sin(x) / x, solution: x = x * pi for n = 1, 2, 3, ...
+    ! f(x) = sin(x) / x, solution: x = n * pi for n = 1, 2, 3, ...
     function fcn1(x) result(f)
         real(real64), intent(in) :: x
         real(real64) :: f

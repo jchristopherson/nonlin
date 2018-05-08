@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['brent_5fsolve',['brent_solve',['../namespacenonlin__solve.html#a0cdbe038bc0649ee6ed509e259e1a99b',1,'nonlin_solve']]]
+  ['companion_5fmtx',['companion_mtx',['../structnonlin__polynomials_1_1polynomial.html#aadbe3b5e2c3ca7df84bffeb71faa33fd',1,'nonlin_polynomials::polynomial']]]
 ];

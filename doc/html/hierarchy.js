@@ -15,7 +15,8 @@ var hierarchy =
       ] ]
     ] ],
     [ "nonlin_core::equation_solver_1var", "structnonlin__core_1_1equation__solver__1var.html", [
-      [ "nonlin_solve::brent_solver", "structnonlin__solve_1_1brent__solver.html", null ]
+      [ "nonlin_solve::brent_solver", "structnonlin__solve_1_1brent__solver.html", null ],
+      [ "nonlin_solve::newton_1var_solver", "structnonlin__solve_1_1newton__1var__solver.html", null ]
     ] ],
     [ "nonlin_core::fcn1var", "interfacenonlin__core_1_1fcn1var.html", null ],
     [ "nonlin_core::fcn1var_helper", "structnonlin__core_1_1fcn1var__helper.html", null ],

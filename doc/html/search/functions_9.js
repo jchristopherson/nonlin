@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['min_5fbacktrack_5fsearch',['min_backtrack_search',['../namespacenonlin__linesearch.html#a54fc6b438dfa3acf4e4ca122737c3799',1,'nonlin_linesearch']]]
+  ['order',['order',['../structnonlin__polynomials_1_1polynomial.html#aa08e7f997021e5fb2c5f51b70809e19a',1,'nonlin_polynomials::polynomial']]]
 ];

@@ -1,6 +1,7 @@
 var searchData=
 [
   ['nelder_5fmead',['nelder_mead',['../structnonlin__optimize_1_1nelder__mead.html',1,'nonlin_optimize']]],
+  ['newton_5f1var_5fsolver',['newton_1var_solver',['../structnonlin__solve_1_1newton__1var__solver.html',1,'nonlin_solve']]],
   ['newton_5fsolver',['newton_solver',['../structnonlin__solve_1_1newton__solver.html',1,'nonlin_solve']]],
   ['nl_5farray_5fsize_5ferror',['nl_array_size_error',['../namespacenonlin__constants.html#add76da4ff5b1fc228887cb442e1a909a',1,'nonlin_constants']]],
   ['nl_5fconvergence_5ferror',['nl_convergence_error',['../namespacenonlin__constants.html#a6e7694d6d44ec6b988de8b6d91d93fd5',1,'nonlin_constants']]],
@@ -19,6 +20,5 @@ var searchData=
   ['nonlin_5fpolynomials',['nonlin_polynomials',['../namespacenonlin__polynomials.html',1,'']]],
   ['nonlin_5fsolve',['nonlin_solve',['../namespacenonlin__solve.html',1,'']]],
   ['nonlin_5fsolver',['nonlin_solver',['../interfacenonlin__core_1_1nonlin__solver.html',1,'nonlin_core']]],
-  ['nonlin_5fsolver_5f1var',['nonlin_solver_1var',['../interfacenonlin__core_1_1nonlin__solver__1var.html',1,'nonlin_core']]],
-  ['ns_5fsolve',['ns_solve',['../namespacenonlin__solve.html#a200a467272edd173b292985a1632bff9',1,'nonlin_solve']]]
+  ['nonlin_5fsolver_5f1var',['nonlin_solver_1var',['../interfacenonlin__core_1_1nonlin__solver__1var.html',1,'nonlin_core']]]
 ];

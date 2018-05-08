@@ -2,6 +2,7 @@ var searchData=
 [
   ['get',['get',['../structnonlin__polynomials_1_1polynomial.html#acf1d9028ac1f3ee1832daf1297d65b4c',1,'nonlin_polynomials::polynomial']]],
   ['get_5fall',['get_all',['../structnonlin__polynomials_1_1polynomial.html#aa457fde9f1a8040f259115fc974cd620',1,'nonlin_polynomials::polynomial']]],
+  ['get_5fdiff_5ftolerance',['get_diff_tolerance',['../structnonlin__core_1_1equation__solver__1var.html#a0d88f798646df6e9ac00c87a42875e54',1,'nonlin_core::equation_solver_1var']]],
   ['get_5fdistance_5ffactor',['get_distance_factor',['../structnonlin__linesearch_1_1line__search.html#a29f8a78a487b327ec7e920b75cbd24bf',1,'nonlin_linesearch::line_search']]],
   ['get_5fequation_5fcount',['get_equation_count',['../structnonlin__core_1_1vecfcn__helper.html#ab7d7b04b2705a59abf9f3533f65b9982',1,'nonlin_core::vecfcn_helper']]],
   ['get_5ffcn_5ftolerance',['get_fcn_tolerance',['../structnonlin__core_1_1equation__solver.html#a0c51ee3aa81149bc42686cb09dbd1e33',1,'nonlin_core::equation_solver::get_fcn_tolerance()'],['../structnonlin__core_1_1equation__solver__1var.html#a0b57aabf05b077747a8936874186f69b',1,'nonlin_core::equation_solver_1var::get_fcn_tolerance()']]],

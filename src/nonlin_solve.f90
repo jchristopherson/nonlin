@@ -496,9 +496,98 @@ module nonlin_solve
 ! NONLIN_SOLVE_NEWTON1VAR.F90
 ! ------------------------------------------------------------------------------
     !> @brief Defines a solver based upon Newtons's method for solving an
-    !! equation of one variable without using derivatives.
+    !! equation of one variable.  The algorithm uses a bisection method in
+    !! conjunction with Newton's method in order to keep bounds upon the
+    !! Newton iterations.
     type, extends(equation_solver_1var) :: newton_1var_solver
     contains
+        !> @brief Solves the equation.
+        !!
+        !! @par Syntax
+        !! @code{.f90}
+        !! subroutine solve(class(newton_1var_solver) this, class(fcn1var_helper) fcn, real(real64) x, type(value_pair) lim, optional real(real64) f, optional type(iteration_behavior) ib, optional class(errors) err)
+        !! @endcode
+        !!
+        !! @param[in,out] this The brent_solver object.
+        !! @param[in] fcn The fcn1var_helper object containing the equation
+        !!  to solve.
+        !! @param[in,out] x A parameter used to return the solution.  Notice, any
+        !!  input value will be ignored as this routine relies upon the
+        !!  search limits in @p lim to provide a starting point.
+        !! @param[in] lim A value_pair object defining the search limits.
+        !! @param[out] f An optional parameter used to return the function
+        !!  residual as computed at @p x.
+        !! @param[out] ib An optional output, that if provided, allows the
+        !!  caller to obtain iteration performance statistics.
+        !! @param[out] err An optional errors-based object that if provided can be
+        !!  used to retrieve information relating to any errors encountered during
+        !!  execution.  If not provided, a default implementation of the errors
+        !!  class is used internally to provide error handling.  Possible errors and
+        !!  warning messages that may be encountered are as follows.
+        !!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+        !!  - NL_INVALID_INPUT_ERROR: Occurs if the number of equations is different
+        !!      than the number of variables.
+        !!  - NL_CONVERGENCE_ERROR: Occurs if the algorithm cannot converge within
+        !!      the allowed number of iterations.
+        !!
+        !! @par Example
+        !! @code{.f90}
+        !! program example
+        !!     use iso_fortran_env
+        !!     use nonlin_core
+        !!     use nonlin_solve
+        !!     implicit none
+        !!
+        !!     ! Local variables
+        !!     type(fcn1var_helper) :: obj
+        !!     procedure(fcn1var), pointer :: fcn
+        !!     type(newton_1var_solver) :: solver
+        !!     real(real64) :: x, f
+        !!     type(value_pair) :: limits
+        !!     type(iteration_behavior) :: tracking
+        !!
+        !!     ! Define the search limits
+        !!     limits%x1 = 1.5d0
+        !!     limits%x2 = 5.0d0
+        !!
+        !!     ! Establish the function
+        !!     fcn => fcn1
+        !!     call obj%set_fcn(fcn)
+        !!
+        !!     ! Solve the equation
+        !!     call solver%solve(obj, x, limits, f, ib = tracking)
+        !!
+        !!     ! Print the output and the residual
+        !!     print '(AF7.5)', "The solution: ", x
+        !!     print '(AE10.3)', "The residual: ", f
+        !!     print '(AI0)', "Iterations: ", tracking%iter_count
+        !!     print '(AI0)', "Function Evaluations: ", tracking%fcn_count
+        !!     print '(AI0)', "Derivative Evaluations: ", tracking%jacobian_count
+        !!     print '(AL1)', "Converge on Function Value: ", tracking%converge_on_fcn
+        !!     print '(AL1)', "Converge on Change in Variable: ", tracking%converge_on_chng
+        !!     print '(AL1)', "Converge on Derivative: ", tracking%converge_on_zero_diff
+        !!
+        !! contains
+        !!     ! The function:
+        !!     ! f(x) = sin(x) / x, solution: x = n * pi for n = 1, 2, 3, ...
+        !!     function fcn1(x) result(f)
+        !!         real(real64), intent(in) :: x
+        !!         real(real64) :: f
+        !!         f = sin(x) / x
+        !!     end function
+        !! end program
+        !! @endcode
+        !! The above program produces the following output.
+        !! @code{.txt}
+        !! The solution: 3.14159
+        !! The residual:  0.314E-11
+        !! Iterations: 3
+        !! Function Evaluations: 7
+        !! Derivative Evaluations: 4
+        !! Converge on Function Value: T
+        !! Converge on Change in Variable: F
+        !! Converge on Derivative: F
+        !! @endcode
         procedure, public :: solve => newt1var_solve
     end type
 ! ------------------------------------------------------------------------------

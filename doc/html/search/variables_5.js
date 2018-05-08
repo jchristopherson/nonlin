@@ -2,6 +2,8 @@ var searchData=
 [
   ['m_5falpha',['m_alpha',['../structnonlin__linesearch_1_1line__search.html#a100660d9d0f37b045266a270de161487',1,'nonlin_linesearch::line_search']]],
   ['m_5fcoeffs',['m_coeffs',['../structnonlin__polynomials_1_1polynomial.html#ae4d6fded19102bcf858d0d897dc74c27',1,'nonlin_polynomials::polynomial']]],
+  ['m_5fdiff',['m_diff',['../structnonlin__core_1_1fcn1var__helper.html#a3ac77259ff44c2c92cdd1f80b5b4421d',1,'nonlin_core::fcn1var_helper']]],
+  ['m_5fdifftol',['m_difftol',['../structnonlin__core_1_1equation__solver__1var.html#a4c54e1a0eb30fb732ae48b68f45b98f4',1,'nonlin_core::equation_solver_1var']]],
   ['m_5ffactor',['m_factor',['../structnonlin__least__squares_1_1least__squares__solver.html#a5808c315224ce879db756f284e9de26d',1,'nonlin_least_squares::least_squares_solver::m_factor()'],['../structnonlin__linesearch_1_1line__search.html#a1be1d8a24a1379fe9579ab0fe955b957',1,'nonlin_linesearch::line_search::m_factor()']]],
   ['m_5ffcn',['m_fcn',['../structnonlin__core_1_1vecfcn__helper.html#a1ad69c2d6a5b32c041c93eb9cc542109',1,'nonlin_core::vecfcn_helper::m_fcn()'],['../structnonlin__core_1_1fcn1var__helper.html#a77004284243a6f28ce78d908864e8da7',1,'nonlin_core::fcn1var_helper::m_fcn()'],['../structnonlin__core_1_1fcnnvar__helper.html#a08e6e6f24db4d2f971aae68cfa7fc031',1,'nonlin_core::fcnnvar_helper::m_fcn()']]],
   ['m_5ffcntol',['m_fcntol',['../structnonlin__core_1_1equation__solver.html#ad2db6e98fec5ac9de636310d41036fae',1,'nonlin_core::equation_solver::m_fcntol()'],['../structnonlin__core_1_1equation__solver__1var.html#ae3411b67af00133c791364e8c053774b',1,'nonlin_core::equation_solver_1var::m_fcntol()']]],

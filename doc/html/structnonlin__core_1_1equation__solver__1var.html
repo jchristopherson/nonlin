@@ -125,6 +125,7 @@ Inheritance diagram for nonlin_core::equation_solver_1var:</div>
   <img src="structnonlin__core_1_1equation__solver__1var.png" usemap="#nonlin_5Fcore::equation_5Fsolver_5F1var_map" alt=""/>
   <map id="nonlin_5Fcore::equation_5Fsolver_5F1var_map" name="nonlin_core::equation_solver_1var_map">
 <area href="structnonlin__solve_1_1brent__solver.html" title="Defines a solver based upon Brent&#39;s method for solving an equation of one variable without using deri..." alt="nonlin_solve::brent_solver" shape="rect" coords="0,56,207,80"/>
+<area href="structnonlin__solve_1_1newton__1var__solver.html" title="Defines a solver based upon Newtons&#39;s method for solving an equation of one variable. The algorithm uses a bisection method in conjunction with Newton&#39;s method in order to keep bounds upon the Newton iterations. " alt="nonlin_solve::newton_1var_solver" shape="rect" coords="217,56,424,80"/>
 </map>
  </div></div>
 <table class="memberdecls">
@@ -157,6 +158,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a683e1bf6bd5ef7fd05c338dad1dc96c9"><td class="memItemLeft" align="right" valign="top">procedure(<a class="el" href="interfacenonlin__core_1_1nonlin__solver__1var.html">nonlin_solver_1var</a>), deferred, pass, public&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnonlin__core_1_1equation__solver__1var.html#a683e1bf6bd5ef7fd05c338dad1dc96c9">solve</a></td></tr>
 <tr class="memdesc:a683e1bf6bd5ef7fd05c338dad1dc96c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solves the equation.  <a href="#a683e1bf6bd5ef7fd05c338dad1dc96c9">More...</a><br /></td></tr>
 <tr class="separator:a683e1bf6bd5ef7fd05c338dad1dc96c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d88f798646df6e9ac00c87a42875e54"><td class="memItemLeft" align="right" valign="top">procedure, public&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnonlin__core_1_1equation__solver__1var.html#a0d88f798646df6e9ac00c87a42875e54">get_diff_tolerance</a> =&gt; es1_get_diff_tol</td></tr>
+<tr class="memdesc:a0d88f798646df6e9ac00c87a42875e54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the convergence on slope of the function (derivative) tolerance.  <a href="#a0d88f798646df6e9ac00c87a42875e54">More...</a><br /></td></tr>
+<tr class="separator:a0d88f798646df6e9ac00c87a42875e54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a238e8bb1bd7c5b1f5c4b513b11ac4b20"><td class="memItemLeft" align="right" valign="top">procedure, public&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnonlin__core_1_1equation__solver__1var.html#a238e8bb1bd7c5b1f5c4b513b11ac4b20">set_diff_tolerance</a> =&gt; es1_set_diff_tol</td></tr>
+<tr class="memdesc:a238e8bb1bd7c5b1f5c4b513b11ac4b20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the convergence on slope of the function (derivative) tolerance.  <a href="#a238e8bb1bd7c5b1f5c4b513b11ac4b20">More...</a><br /></td></tr>
+<tr class="separator:a238e8bb1bd7c5b1f5c4b513b11ac4b20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -172,6 +179,10 @@ real(real64)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hr
 real(real64)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnonlin__core_1_1equation__solver__1var.html#ab60bc831b378afe7fed6d62d20232a8a">m_xtol</a> = 1.0d-12</td></tr>
 <tr class="memdesc:ab60bc831b378afe7fed6d62d20232a8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">The convergence criteria on change in variable value. <br /></td></tr>
 <tr class="separator:ab60bc831b378afe7fed6d62d20232a8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c54e1a0eb30fb732ae48b68f45b98f4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4c54e1a0eb30fb732ae48b68f45b98f4"></a>
+real(real64)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnonlin__core_1_1equation__solver__1var.html#a4c54e1a0eb30fb732ae48b68f45b98f4">m_difftol</a> = 1.0d-12</td></tr>
+<tr class="memdesc:a4c54e1a0eb30fb732ae48b68f45b98f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The convergence criteria on the slope of the function (derivative) <br /></td></tr>
+<tr class="separator:a4c54e1a0eb30fb732ae48b68f45b98f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a85f93d8fe4939cd7d7698fe137aa302f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a85f93d8fe4939cd7d7698fe137aa302f"></a>
 logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structnonlin__core_1_1equation__solver__1var.html#a85f93d8fe4939cd7d7698fe137aa302f">m_printstatus</a> = .false.</td></tr>
 <tr class="memdesc:a85f93d8fe4939cd7d7698fe137aa302f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set to true to print iteration status; else, false. <br /></td></tr>
@@ -181,8 +192,35 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
 <div class="textblock"><p>A base class for various solvers of equations of one variable. </p>
 <dl class="section user"><dt>Example</dt><dd>The following example illustrates the solution of an equation of one variable by means of Brent's method. <div class="fragment"><div class="line"><span class="keyword">program</span> example</div><div class="line">    <span class="keywordtype">use </span>iso_fortran_env</div><div class="line">    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__core.html">nonlin_core</a></div><div class="line">    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__solve.html">nonlin_solve</a></div><div class="line">    <span class="keywordtype">implicit none</span></div><div class="line"></div><div class="line">    <span class="comment">! Local variables</span></div><div class="line">    <span class="keywordtype">type</span>(<a class="code" href="structnonlin__core_1_1fcn1var__helper.html">fcn1var_helper</a>) :: obj</div><div class="line">    <span class="keywordtype">procedure</span>(<a class="code" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>), <span class="keywordtype">pointer</span> :: fcn</div><div class="line">    <span class="keywordtype">type</span>(<a class="code" href="structnonlin__solve_1_1brent__solver.html">brent_solver</a>) :: solver</div><div class="line">    <span class="keywordtype">real(real64)</span> :: x, f</div><div class="line">    <span class="keywordtype">type</span>(<a class="code" href="structnonlin__core_1_1value__pair.html">value_pair</a>) :: limits</div><div class="line"></div><div class="line">    <span class="comment">! Define the search limits</span></div><div class="line">    limits%x1 = 1.5d0</div><div class="line">    limits%x2 = 5.0d0</div><div class="line"></div><div class="line">    <span class="comment">! Establish the function</span></div><div class="line">    fcn =&gt; fcn1</div><div class="line">    <span class="keyword">call </span>obj%set_fcn(fcn)</div><div class="line"></div><div class="line">    <span class="comment">! Solve the equation</span></div><div class="line">    <span class="keyword">call </span>solver%solve(obj, x, limits, f)</div><div class="line"></div><div class="line">    <span class="comment">! Print the output and the residual</span></div><div class="line">    print <span class="stringliteral">&#39;(AF7.5)&#39;</span>, <span class="stringliteral">&quot;The solution: &quot;</span>, x</div><div class="line">    print <span class="stringliteral">&#39;(AE10.3)&#39;</span>, <span class="stringliteral">&quot;The residual: &quot;</span>, f</div><div class="line"></div><div class="line"><span class="keyword">contains</span></div><div class="line">    <span class="comment">! The function:</span></div><div class="line">    <span class="comment">! f(x) = sin(x) / x, solution: x = x * pi for n = 1, 2, 3, ...</span></div><div class="line"><span class="keyword">    function </span>fcn1(x) result(f)</div><div class="line">        <span class="keywordtype">real(real64)</span>, <span class="keywordtype">intent(in)</span> :: x</div><div class="line">        <span class="keywordtype">real(real64)</span> :: f</div><div class="line">        f = sin(x) / x</div><div class="line"><span class="keyword">    end function</span></div><div class="line"><span class="keyword">end program</span></div></div><!-- fragment --> The above program produces the following output. <div class="fragment"><div class="line">The solution: 3.15159</div><div class="line">The residual: -0.751E-11</div></div><!-- fragment --> </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01317">1317</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01371">1371</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 </div><h2 class="groupheader">Member Function/Subroutine Documentation</h2>
+<a class="anchor" id="a0d88f798646df6e9ac00c87a42875e54"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">procedure, public nonlin_core::equation_solver_1var::get_diff_tolerance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the convergence on slope of the function (derivative) tolerance. </p>
+<dl class="section user"><dt>Syntax</dt><dd><div class="fragment"><div class="line"><span class="keyword">pure real(real64) </span><span class="keyword">function </span>get_diff_tolerance(class(equation_solver_1var) this)</div></div><!-- fragment --></dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">this</td><td>The <a class="el" href="structnonlin__core_1_1equation__solver.html" title="A base class for various solvers of nonlinear systems of equations. ">equation_solver</a> object. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The tolerance value. </dd></dl>
+
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01484">1484</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a0b57aabf05b077747a8936874186f69b"></a>
 <div class="memitem">
 <div class="memproto">
@@ -206,7 +244,7 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The tolerance value. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01359">1359</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01415">1415</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -233,7 +271,7 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The maximum number of function evaluations. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01338">1338</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01394">1394</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -260,7 +298,7 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if the iteration status should be printed; else, false. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01400">1400</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01456">1456</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -287,7 +325,35 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The tolerance value. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01379">1379</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01435">1435</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a238e8bb1bd7c5b1f5c4b513b11ac4b20"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">procedure, public nonlin_core::equation_solver_1var::set_diff_tolerance </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets the convergence on slope of the function (derivative) tolerance. </p>
+<dl class="section user"><dt>Syntax</dt><dd><div class="fragment"><div class="line"><span class="keyword">subroutine </span>set_diff_tolerance(class(equation_solver_1var) this, real(real64) x)</div></div><!-- fragment --></dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">this</td><td>The <a class="el" href="structnonlin__core_1_1equation__solver.html" title="A base class for various solvers of nonlinear systems of equations. ">equation_solver</a> object. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>The tolerance value.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Example</dt><dd>See the <a class="el" href="structnonlin__core_1_1equation__solver.html" title="A base class for various solvers of nonlinear systems of equations. ">equation_solver</a> type for an example on how to establish the gradient vector slope tolerance. </dd></dl>
+
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01499">1499</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -314,7 +380,7 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01369">1369</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01425">1425</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -341,7 +407,7 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01349">1349</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01405">1405</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -368,7 +434,7 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01411">1411</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01467">1467</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -395,7 +461,7 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01389">1389</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01445">1445</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -415,7 +481,7 @@ logical&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
 <p>Solves the equation. </p>
 <dl class="section user"><dt>Example</dt><dd>See the <a class="el" href="structnonlin__core_1_1equation__solver__1var.html" title="A base class for various solvers of equations of one variable. ">equation_solver_1var</a> type for an example on how to solve a system of equations. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01417">1417</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l01473">1473</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
