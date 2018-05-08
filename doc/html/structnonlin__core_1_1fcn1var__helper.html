@@ -155,7 +155,7 @@ procedure(<a class="el" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>
 <div class="textblock"><p>Defines a type capable of encapsulating an equation of one variable of the form: f(x) = 0. </p>
 <dl class="section user"><dt>Example</dt><dd>The following example illustrates the use of this type to solve an equation using Brent's method. <div class="fragment"><div class="line"><span class="keyword">program</span> example</div><div class="line">    <span class="keywordtype">use </span>iso_fortran_env</div><div class="line">    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__core.html">nonlin_core</a></div><div class="line">    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__solve.html">nonlin_solve</a></div><div class="line">    <span class="keywordtype">implicit none</span></div><div class="line"></div><div class="line">    <span class="comment">! Local variables</span></div><div class="line">    <span class="keywordtype">type</span>(<a class="code" href="structnonlin__core_1_1fcn1var__helper.html">fcn1var_helper</a>) :: obj</div><div class="line">    <span class="keywordtype">procedure</span>(<a class="code" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>), <span class="keywordtype">pointer</span> :: fcn</div><div class="line">    <span class="keywordtype">type</span>(<a class="code" href="structnonlin__solve_1_1brent__solver.html">brent_solver</a>) :: solver</div><div class="line">    <span class="keywordtype">real(real64)</span> :: x, f</div><div class="line">    <span class="keywordtype">type</span>(<a class="code" href="structnonlin__core_1_1value__pair.html">value_pair</a>) :: limits</div><div class="line"></div><div class="line">    <span class="comment">! Define the search limits</span></div><div class="line">    limits%x1 = 1.5d0</div><div class="line">    limits%x2 = 5.0d0</div><div class="line"></div><div class="line">    <span class="comment">! Establish the function</span></div><div class="line">    fcn =&gt; fcn1</div><div class="line">    <span class="keyword">call </span>obj%set_fcn(fcn)</div><div class="line"></div><div class="line">    <span class="comment">! Solve the equation</span></div><div class="line">    <span class="keyword">call </span>solver%solve(obj, x, limits, f)</div><div class="line"></div><div class="line">    <span class="comment">! Print the output and the residual</span></div><div class="line">    print <span class="stringliteral">&#39;(AF7.5)&#39;</span>, <span class="stringliteral">&quot;The solution: &quot;</span>, x</div><div class="line">    print <span class="stringliteral">&#39;(AE10.3)&#39;</span>, <span class="stringliteral">&quot;The residual: &quot;</span>, f</div><div class="line"></div><div class="line"><span class="keyword">contains</span></div><div class="line">    <span class="comment">! The function:</span></div><div class="line">    <span class="comment">! f(x) = sin(x) / x, solution: x = x * pi for n = 1, 2, 3, ...</span></div><div class="line"><span class="keyword">    function </span>fcn1(x) result(f)</div><div class="line">        <span class="keywordtype">real(real64)</span>, <span class="keywordtype">intent(in)</span> :: x</div><div class="line">        <span class="keywordtype">real(real64)</span> :: f</div><div class="line">        f = sin(x) / x</div><div class="line"><span class="keyword">    end function</span></div><div class="line"><span class="keyword">end program</span></div></div><!-- fragment --> The above program produces the following output. <div class="fragment"><div class="line">The solution: 3.14159</div><div class="line">The residual: -0.751E-11</div></div><!-- fragment --> </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00541">541</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00542">542</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 </div><h2 class="groupheader">Member Function/Subroutine Documentation</h2>
 <a class="anchor" id="a798d9b180392537c564ac69cc1b81952"></a>
 <div class="memitem">
@@ -181,7 +181,7 @@ procedure(<a class="el" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00655">655</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00656">656</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -209,7 +209,7 @@ procedure(<a class="el" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The value of the function at <code>x</code>. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00559">559</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00560">560</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -236,7 +236,7 @@ procedure(<a class="el" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns true if the pointer has been assigned; else, false. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00641">641</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00642">642</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -263,7 +263,7 @@ procedure(<a class="el" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Returns true if the pointer has been assigned; else, false. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00570">570</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00571">571</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>
@@ -291,7 +291,7 @@ procedure(<a class="el" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>
 </dl>
 <dl class="section user"><dt>Example</dt><dd>The following example illustrates how to use this routine to inform the solver of the function to solve. This particular example utilizes Brent's method to compute the solution. <div class="fragment"><div class="line"><span class="keyword">program</span> example</div><div class="line">    <span class="keywordtype">use </span>iso_fortran_env</div><div class="line">    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__core.html">nonlin_core</a></div><div class="line">    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__solve.html">nonlin_solve</a></div><div class="line">    <span class="keywordtype">implicit none</span></div><div class="line"></div><div class="line">    <span class="comment">! Local variables</span></div><div class="line">    <span class="keywordtype">type</span>(<a class="code" href="structnonlin__core_1_1fcn1var__helper.html">fcn1var_helper</a>) :: obj</div><div class="line">    <span class="keywordtype">procedure</span>(<a class="code" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>), <span class="keywordtype">pointer</span> :: fcn</div><div class="line">    <span class="keywordtype">type</span>(<a class="code" href="structnonlin__solve_1_1brent__solver.html">brent_solver</a>) :: solver</div><div class="line">    <span class="keywordtype">real(real64)</span> :: x, f</div><div class="line">    <span class="keywordtype">type</span>(<a class="code" href="structnonlin__core_1_1value__pair.html">value_pair</a>) :: limits</div><div class="line"></div><div class="line">    <span class="comment">! Define the search limits</span></div><div class="line">    limits%x1 = 1.5d0</div><div class="line">    limits%x2 = 5.0d0</div><div class="line"></div><div class="line">    <span class="comment">! Establish the function</span></div><div class="line">    fcn =&gt; fcn1</div><div class="line">    <span class="keyword">call </span>obj%set_fcn(fcn)</div><div class="line"></div><div class="line">    <span class="comment">! Solve the equation</span></div><div class="line">    <span class="keyword">call </span>solver%solve(obj, x, limits, f)</div><div class="line"></div><div class="line">    <span class="comment">! Print the output and the residual</span></div><div class="line">    print <span class="stringliteral">&#39;(AF7.5)&#39;</span>, <span class="stringliteral">&quot;The solution: &quot;</span>, x</div><div class="line">    print <span class="stringliteral">&#39;(AE10.3)&#39;</span>, <span class="stringliteral">&quot;The residual: &quot;</span>, f</div><div class="line"></div><div class="line"><span class="keyword">contains</span></div><div class="line">    <span class="comment">! The function:</span></div><div class="line">    <span class="comment">! f(x) = sin(x) / x, solution: x = x * pi for n = 1, 2, 3, ...</span></div><div class="line"><span class="keyword">    function </span>fcn1(x) result(f)</div><div class="line">        <span class="keywordtype">real(real64)</span>, <span class="keywordtype">intent(in)</span> :: x</div><div class="line">        <span class="keywordtype">real(real64)</span> :: f</div><div class="line">        f = sin(x) / x</div><div class="line"><span class="keyword">    end function</span></div><div class="line"><span class="keyword">end program</span></div></div><!-- fragment --> The above program produces the following output. <div class="fragment"><div class="line">The solution: 3.14159</div><div class="line">The residual: -0.751E-11</div></div><!-- fragment --> </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00630">630</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__core_8f90_source.html#l00631">631</a> of file <a class="el" href="nonlin__core_8f90_source.html">nonlin_core.f90</a>.</p>
 
 </div>
 </div>

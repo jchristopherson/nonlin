@@ -18,6 +18,7 @@
 !!  - quasi_newton_solver
 !!  - newton_solver
 !!  - brent_solver
+!!  - newton_1var_solver
 !! - Module: nonlin_least_squares
 !!  - least_squares_solver
 !! - Module: nonlin_optimize
