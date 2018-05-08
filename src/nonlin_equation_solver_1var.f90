@@ -57,4 +57,18 @@ contains
         logical, intent(in) :: x
         this%m_printStatus = x
     end subroutine
+
+! ------------------------------------------------------------------------------
+    pure module function es1_get_diff_tol(this) result(x)
+        class(equation_solver_1var), intent(in) :: this
+        real(real64) :: x
+        x = this%m_difftol
+    end function
+
+! --------------------
+    module subroutine es1_set_diff_tol(this, x)
+        class(equation_solver_1var), intent(inout) :: this
+        real(real64), intent(in) :: x
+        this%m_difftol = x
+    end subroutine
 end submodule

@@ -20,6 +20,7 @@ module nonlin_solve
     public :: quasi_newton_solver
     public :: newton_solver
     public :: brent_solver
+    public :: newton_1var_solver
     public :: test_convergence
 
 ! ******************************************************************************

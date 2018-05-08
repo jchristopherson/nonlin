@@ -1376,6 +1376,8 @@ module nonlin_core
         real(real64) :: m_fcnTol = 1.0d-8
         !> The convergence criteria on change in variable value.
         real(real64) :: m_xtol = 1.0d-12
+        !> The convergence criteria on the slope of the function (derivative)
+        real(real64) :: m_difftol = 1.0d-12
         !> Set to true to print iteration status; else, false.
         logical :: m_printStatus = .false.
     contains
@@ -1469,6 +1471,32 @@ module nonlin_core
         !! See the equation_solver_1var type for an example on how to solve a
         !! system of equations.
         procedure(nonlin_solver_1var), deferred, public, pass :: solve
+        !> @brief Gets the convergence on slope of the function (derivative)
+        !! tolerance.
+        !!
+        !! @par Syntax
+        !! @code{.f90}
+        !! pure real(real64) function get_diff_tolerance(class(equation_solver_1var) this)
+        !! @endcode
+        !!
+        !! @param[in] this The equation_solver object.
+        !! @return The tolerance value.
+        procedure, public :: get_diff_tolerance => es1_get_diff_tol
+        !> @brief Sets the convergence on slope of the function (derivative)
+        !! tolerance.
+        !!
+        !! @par Syntax
+        !! @code{.f90}
+        !! subroutine set_diff_tolerance(class(equation_solver_1var) this, real(real64) x)
+        !! @endcode
+        !!
+        !! @param[in,out] this The equation_solver object.
+        !! @param[in] x The tolerance value.
+        !!
+        !! @par Example
+        !! See the equation_solver type for an example on how to establish
+        !! the gradient vector slope tolerance.
+        procedure, public :: set_diff_tolerance => es1_set_diff_tol
     end type
 
 ! ------------------------------------------------------------------------------
@@ -1511,6 +1539,17 @@ module nonlin_core
         module subroutine es1_set_print_status(this, x)
             class(equation_solver_1var), intent(inout) :: this
             logical, intent(in) :: x
+        end subroutine
+
+        pure module function es1_get_diff_tol(this) result(x)
+            class(equation_solver_1var), intent(in) :: this
+            real(real64) :: x
+        end function
+
+    ! --------------------
+        module subroutine es1_set_diff_tol(this, x)
+            class(equation_solver_1var), intent(inout) :: this
+            real(real64), intent(in) :: x
         end subroutine
     end interface
 

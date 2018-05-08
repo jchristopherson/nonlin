@@ -30,6 +30,10 @@ target_link_libraries(brent_example nonlin)
 add_executable(bfgs_example nonlin_bfgs_example.f90)
 target_link_libraries(bfgs_example nonlin)
 
+# 1D Newton Example
+add_executable(newton_1d_example nonlin_newton1d_example.f90)
+target_link_libraries(newton_1d_example nonlin)
+
 
 # Ensure LINALG, FERROR, and BLAS libraries are copied to the runtime directory
 get_target_property(ferror_LibLocation ferror LOCATION)
