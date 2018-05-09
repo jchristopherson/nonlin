@@ -2,7 +2,7 @@
 
 module nonlin_test_solve
     use iso_fortran_env
-    use nonlin_types
+    use nonlin_core
     use nonlin_solve
     use nonlin_least_squares
     use ferror, only : errors
@@ -110,7 +110,7 @@ contains
             3.412756702d0, 4.406137221d0, 4.567156645d0, 4.999550779d0, &
             5.652854194d0, 6.784320119d0, 8.307936836d0, 8.395126494d0, &
             10.30252404d0]
-        
+
         ! We'll apply a cubic polynomial model to this data:
         ! y = c1 * x**3 + c2 * x**2 + c3 * x + c4
         f = x(1) * xp**3 + x(2) * xp**2 + x(3) * xp + x(4) - yp
@@ -197,7 +197,7 @@ contains
 
         ! Turn off the line search - this set of functions is too poorly scaled
         ! for the current implementation of the line search algorithm to offer
-        ! much help.  This seems to indicate a need for improvement in the 
+        ! much help.  This seems to indicate a need for improvement in the
         ! line search code - perhaps variable scaling?
         call solver%set_use_line_search(.false.)
 
@@ -289,7 +289,7 @@ contains
 
         ! Turn off the line search - this set of functions is too poorly scaled
         ! for the current implementation of the line search algorithm to offer
-        ! much help.  This seems to indicate a need for improvement in the 
+        ! much help.  This seems to indicate a need for improvement in the
         ! line search code - perhaps variable scaling?
         call solver%set_use_line_search(.false.)
 
