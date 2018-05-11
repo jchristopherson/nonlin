@@ -24,6 +24,10 @@
 !! - Module: nonlin_optimize
 !!  - nelder_mead
 !!  - bfgs
+!!
+!! @par
+!! @code{.f90}
+!! @endcode
 module nonlin_core
     use, intrinsic :: iso_fortran_env, only : real64, int32
     use nonlin_constants
