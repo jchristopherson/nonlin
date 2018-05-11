@@ -172,9 +172,9 @@ contains
                 xh = x
             end if
 
-            ! Print iteration status
+            ! Print status
             if (this%get_print_status()) then
-                call print_status(iter, neval, 0, x, ff)
+                call print_status(iter, neval, ndiff, dx, ff)
             end if
 
             ! Ensure we haven't made too many function evaluations
