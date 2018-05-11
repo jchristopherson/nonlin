@@ -3,30 +3,15 @@
 !> @mainpage
 !!
 !! @section intro_sec Introduction
-!! NONLIN is a library that provides routines to compute the solutions to
-!! systems of nonlinear equations.
-!!
-!! @author Jason Christopherson
-!! @version 1.3.0
-
-!> @brief \b nonlin_core
-!!
-!! @par Purpose
-!! To provide various routines to solve equations of one or many variables.
-!! Actual solvers are located in the following modules.
-!! - Module: nonlin_solve
-!!  - quasi_newton_solver
-!!  - newton_solver
-!!  - brent_solver
-!!  - newton_1var_solver
-!! - Module: nonlin_least_squares
-!!  - least_squares_solver
-!! - Module: nonlin_optimize
-!!  - nelder_mead
-!!  - bfgs
+!! NONLIN is a library that provides routines for solving least squares
+!! problems, systems of equations, and single equations. The library provides
+!! function optimization routines.  There are also specific routines and data
+!! types optimized for operation on polynomials.
 !!
 !! @par
-!! The following example illustrates finding a zero of a cubic function.
+!! The example below illustrates two techniques of determining the roots of a
+!! polynomial using routines and data types provided by this library.
+!! @image html Cubic_Roots_Example.png
 !! @code{.f90}
 !! program example
 !!     use iso_fortran_env
@@ -56,7 +41,7 @@
 !!     ! Solve the equation
 !!     call solver%solve(obj, x, limits, f, ib = tracking)
 !!
-!!     ! Print the output and the residual
+!!     ! Print the output, residual, and details regarding the iteration
 !!     print *, ""
 !!     print '(AF7.5)', "The solution: ", x
 !!     print '(AE10.3)', "The residual: ", f
@@ -107,11 +92,11 @@
 !! Function Evaluations: 8
 !! Jacobian Evaluations: 6
 !! Change in Variable: 0.665E-01
-!1 Residual: 0.221E-01
+!! Residual: 0.221E-01
 !!
 !! Iteration: 6
 !! Function Evaluations: 9
-!1 Jacobian Evaluations: 7
+!! Jacobian Evaluations: 7
 !! Change in Variable: 0.375E-02
 !! Residual: 0.685E-04
 !!
@@ -121,7 +106,7 @@
 !! Function Evaluations: 11
 !! Derivative Evaluations: 8
 !! Converge on Function Value: T
-!1 Converge on Change in Variable: F
+!! Converge on Change in Variable: F
 !! Converge on Derivative: F
 !! @endcode
 !! @par
@@ -161,6 +146,24 @@
 !! Root 2 = (-0.618034,  0.000000)
 !! Root 3 = ( 1.618034,  0.000000)
 !! @endcode
+
+! ------------------------------------------------------------------------------
+
+!> @brief \b nonlin_core
+!!
+!! @par Purpose
+!! To provide various routines to solve equations of one or many variables.
+!! Actual solvers are located in the following modules.
+!! - Module: nonlin_solve
+!!  - quasi_newton_solver
+!!  - newton_solver
+!!  - brent_solver
+!!  - newton_1var_solver
+!! - Module: nonlin_least_squares
+!!  - least_squares_solver
+!! - Module: nonlin_optimize
+!!  - nelder_mead
+!!  - bfgs
 module nonlin_core
     use, intrinsic :: iso_fortran_env, only : real64, int32
     use nonlin_constants

@@ -139,6 +139,9 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memitem:a051f7aaa5a37feaf707cf0e7145c83ee"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenonlin__polynomials.html#a051f7aaa5a37feaf707cf0e7145c83ee">init_poly</a> (this, order, err)</td></tr>
 <tr class="memdesc:a051f7aaa5a37feaf707cf0e7145c83ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the polynomial instance, and sets all coefficients to zero.  <a href="#a051f7aaa5a37feaf707cf0e7145c83ee">More...</a><br /></td></tr>
 <tr class="separator:a051f7aaa5a37feaf707cf0e7145c83ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f23c7cc868232d6ebbe6b56df2762bf"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenonlin__polynomials.html#a3f23c7cc868232d6ebbe6b56df2762bf">init_poly_coeffs</a> (this, c, err)</td></tr>
+<tr class="memdesc:a3f23c7cc868232d6ebbe6b56df2762bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initializes the polynomial instance.  <a href="#a3f23c7cc868232d6ebbe6b56df2762bf">More...</a><br /></td></tr>
+<tr class="separator:a3f23c7cc868232d6ebbe6b56df2762bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a295cc8c0c018a44acbdec56b8b3360c6"><td class="memItemLeft" align="right" valign="top">pure integer(int32) function&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenonlin__polynomials.html#a295cc8c0c018a44acbdec56b8b3360c6">get_poly_order</a> (this)</td></tr>
 <tr class="memdesc:a295cc8c0c018a44acbdec56b8b3360c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the order of the polynomial object.  <a href="#a295cc8c0c018a44acbdec56b8b3360c6">More...</a><br /></td></tr>
 <tr class="separator:a295cc8c0c018a44acbdec56b8b3360c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -175,6 +178,9 @@ Functions/Subroutines</h2></td></tr>
 <tr class="memitem:a966529b4b45ad23dae7fe3b7e842ca08"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenonlin__polynomials.html#a966529b4b45ad23dae7fe3b7e842ca08">poly_dbl_equals</a> (x, y)</td></tr>
 <tr class="memdesc:a966529b4b45ad23dae7fe3b7e842ca08"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assigns a number to each coefficient of the polynomial.  <a href="#a966529b4b45ad23dae7fe3b7e842ca08">More...</a><br /></td></tr>
 <tr class="separator:a966529b4b45ad23dae7fe3b7e842ca08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad08d067c81615b63371e7aa5af22c949"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenonlin__polynomials.html#ad08d067c81615b63371e7aa5af22c949">poly_equals_array</a> (x, y)</td></tr>
+<tr class="memdesc:ad08d067c81615b63371e7aa5af22c949"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assigns the contents of an array as polynomial coefficients.  <a href="#ad08d067c81615b63371e7aa5af22c949">More...</a><br /></td></tr>
+<tr class="separator:ad08d067c81615b63371e7aa5af22c949"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae59f978dca8ab539ab458210e4a3fda2"><td class="memItemLeft" align="right" valign="top">type(<a class="el" href="structnonlin__polynomials_1_1polynomial.html">polynomial</a>) function&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenonlin__polynomials.html#ae59f978dca8ab539ab458210e4a3fda2">poly_poly_add</a> (x, y)</td></tr>
 <tr class="memdesc:ae59f978dca8ab539ab458210e4a3fda2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds two polynomials.  <a href="#ae59f978dca8ab539ab458210e4a3fda2">More...</a><br /></td></tr>
 <tr class="separator:ae59f978dca8ab539ab458210e4a3fda2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -237,7 +243,7 @@ Functions/Subroutines</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The resulting polynomial. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00931">931</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00989">989</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
@@ -293,7 +299,7 @@ Functions/Subroutines</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The requested coefficient. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00610">610</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00656">656</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
@@ -328,7 +334,7 @@ Functions/Subroutines</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The array of coefficients. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00653">653</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00699">699</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
@@ -363,7 +369,7 @@ Functions/Subroutines</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The order of the polynomial. Returns -1 in the event no polynomial coefficients have been defined. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00158">158</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00204">204</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
@@ -419,7 +425,63 @@ Functions/Subroutines</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00108">108</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00111">111</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a3f23c7cc868232d6ebbe6b56df2762bf"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine nonlin_polynomials::init_poly_coeffs </td>
+          <td>(</td>
+          <td class="paramtype">class(<a class="el" href="structnonlin__polynomials_1_1polynomial.html">polynomial</a>), intent(inout)&#160;</td>
+          <td class="paramname"><em>this</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">real(real64), dimension(:), intent(in)&#160;</td>
+          <td class="paramname"><em>c</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">class(errors), intent(inout), optional, target&#160;</td>
+          <td class="paramname"><em>err</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Initializes the polynomial instance. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">this</td><td>The polynomial object. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">c</td><td>The array of polynomial coefficients. The coefficients are established as follows: c(1) + c(2) * x + c(3) * x**2 + ... c(n) * x**n-1. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">err</td><td>An optional errors-based object that if provided can be used to retrieve information relating to any errors encountered during execution. If not provided, a default implementation of the errors class is used internally to provide error handling. Possible errors and warning messages that may be encountered are as follows.<ul>
+<li>NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order was specified.</li>
+<li>NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available. </li>
+</ul>
+</td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00168">168</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
@@ -459,7 +521,7 @@ Functions/Subroutines</h2></td></tr>
 </ul>
 </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00484">484</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00530">530</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
@@ -504,7 +566,7 @@ Functions/Subroutines</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00741">741</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00787">787</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
@@ -550,7 +612,7 @@ Functions/Subroutines</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The resulting polynomial. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00907">907</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00965">965</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
@@ -589,13 +651,58 @@ Functions/Subroutines</h2></td></tr>
 <p>Assigns the contents of one polynomial to another. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[out]</td><td class="paramname">x</td><td>The assignee. </td></tr>
-    <tr><td class="paramdir"></td><td class="paramname"></td><td></td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">x</td><td>The assignee. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>The polynomial to copy </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00720">720</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00766">766</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ad08d067c81615b63371e7aa5af22c949"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine nonlin_polynomials::poly_equals_array </td>
+          <td>(</td>
+          <td class="paramtype">class(<a class="el" href="structnonlin__polynomials_1_1polynomial.html">polynomial</a>), intent(inout)&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">real(real64), dimension(:), intent(in)&#160;</td>
+          <td class="paramname"><em>y</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Assigns the contents of an array as polynomial coefficients. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">x</td><td>The assignee. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">y</td><td>The coefficient array. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00807">807</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
@@ -641,7 +748,7 @@ Functions/Subroutines</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The value(s) of the polynomial at <code>x</code>. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00444">444</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00490">490</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
@@ -687,7 +794,7 @@ Functions/Subroutines</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The value(s) of the polynomial at <code>x</code>. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00407">407</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00453">453</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
@@ -759,7 +866,7 @@ Functions/Subroutines</h2></td></tr>
 </dl>
 <dl class="section user"><dt>Usage</dt><dd>The following code provides an example of how to fit a polynomial to a set of data. <div class="fragment"><div class="line"><span class="keyword">program</span> example</div><div class="line">    <span class="keywordtype">use </span>linalg_constants<span class="keywordtype">, only</span> : dp, i32</div><div class="line">    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__polynomials.html">nonlin_polynomials</a></div><div class="line"></div><div class="line">    <span class="comment">! Local Variables</span></div><div class="line">    <span class="keywordtype">real(real64)</span>, <span class="keywordtype">dimension(21)</span> :: xp, yp, yf, yc, err</div><div class="line">    <span class="keywordtype">real(real64)</span> :: res</div><div class="line">    <span class="keywordtype">type</span>(<a class="code" href="structnonlin__polynomials_1_1polynomial.html">polynomial</a>) :: p</div><div class="line"></div><div class="line">    <span class="comment">! Data to fit</span></div><div class="line">    xp = [0.0d0, 0.1d0, 0.2d0, 0.3d0, 0.4d0, 0.5d0, 0.6d0, 0.7d0, 0.8d0, &amp;</div><div class="line">        0.9d0, 1.0d0, 1.1d0, 1.2d0, 1.3d0, 1.4d0, 1.5d0, 1.6d0, 1.7d0, &amp;</div><div class="line">        1.8d0, 1.9d0, 2.0d0]</div><div class="line">    yp = [1.216737514d0, 1.250032542d0, 1.305579195d0, 1.040182335d0, &amp;</div><div class="line">        1.751867738d0, 1.109716707d0, 2.018141531d0, 1.992418729d0, &amp;</div><div class="line">        1.807916923d0, 2.078806005d0, 2.698801324d0, 2.644662712d0, &amp;</div><div class="line">        3.412756702d0, 4.406137221d0, 4.567156645d0, 4.999550779d0, &amp;</div><div class="line">        5.652854194d0, 6.784320119d0, 8.307936836d0, 8.395126494d0, &amp;</div><div class="line">        10.30252404d0]</div><div class="line"></div><div class="line">    <span class="comment">! Create a copy of yp as it will be overwritten in the fit command</span></div><div class="line">    yc = yp</div><div class="line"></div><div class="line">    <span class="comment">! Fit the polynomial</span></div><div class="line">    <span class="keyword">call </span>p%fit(xp, yp, 3)</div><div class="line"></div><div class="line">    <span class="comment">! Evaluate the polynomial at xp, and then determine the residual</span></div><div class="line">    yf = p%evaluate(xp)</div><div class="line">    err = abs(yf - yc)</div><div class="line">    res = maxval(err)</div><div class="line"></div><div class="line">    <span class="comment">! Print out the coefficients</span></div><div class="line">     print <span class="stringliteral">&#39;(A)&#39;</span>, <span class="stringliteral">&quot;Polynomial Coefficients (c0 + c1*x + c2*x**2 + c3*x**3):&quot;</span></div><div class="line">     <span class="keywordflow">do</span> i = 1, 4</div><div class="line">         print <span class="stringliteral">&#39;(AI0AF12.9)&#39;</span>, <span class="stringliteral">&quot;c&quot;</span>, i - 1, <span class="stringliteral">&quot; = &quot;</span>, p%get(i)</div><div class="line"><span class="keywordflow">     end do</span></div><div class="line">     print <span class="stringliteral">&#39;(AE9.4)&#39;</span>, <span class="stringliteral">&quot;Residual: &quot;</span>, res</div><div class="line"><span class="keyword">end program</span></div></div><!-- fragment --> The above program returns the following results. <div class="fragment"><div class="line">Polynomial Coefficients (c0 + c1*x + c2*x**2 + c3*x**3):</div><div class="line">c0 =  1.186614186</div><div class="line">c1 =  0.446613631</div><div class="line">c2 = -0.122320499</div><div class="line">c3 =  1.064762822</div><div class="line">Residual: .5064E+00</div></div><!-- fragment --> </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00239">239</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00285">285</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
@@ -830,7 +937,7 @@ Functions/Subroutines</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00330">330</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00376">376</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
@@ -876,7 +983,7 @@ Functions/Subroutines</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The resulting polynomial. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00763">763</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00821">821</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
@@ -922,7 +1029,7 @@ Functions/Subroutines</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The resulting polynomial. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00877">877</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00935">935</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
@@ -968,7 +1075,7 @@ Functions/Subroutines</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>The resulting polynomial. </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00820">820</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00878">878</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
@@ -1018,7 +1125,7 @@ Functions/Subroutines</h2></td></tr>
 </dl>
 <dl class="section user"><dt>Usage</dt><dd>The following code provides an example of how to compute the roots of a polynomial. This examples uses a tenth order polynomial; however, this process is applicable to any order. <div class="fragment"><div class="line"><span class="keyword">program</span> example</div><div class="line">    <span class="keywordtype">use </span>linalg_constants<span class="keywordtype">, only</span> : dp, i32</div><div class="line">    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__polynomials.html">nonlin_polynomials</a></div><div class="line"></div><div class="line">    <span class="comment">! Parameters</span></div><div class="line">    <span class="keywordtype">integer(int32)</span>, <span class="keywordtype">parameter</span> :: order = 10</div><div class="line"></div><div class="line">    <span class="comment">! Local Variables</span></div><div class="line">    <span class="keywordtype">integer(int32)</span> :: i</div><div class="line">    <span class="keywordtype">type</span>(<a class="code" href="structnonlin__polynomials_1_1polynomial.html">polynomial</a>) :: p</div><div class="line">    <span class="keywordtype">real(real64)</span>, <span class="keywordtype">dimension(order+1)</span> :: coeff</div><div class="line">    <span class="keywordtype">complex(real64)</span>, <span class="keywordtype">allocatable</span>, <span class="keywordtype">dimension(:)</span> :: rts, sol</div><div class="line"></div><div class="line">    <span class="comment">! Define the polynomial</span></div><div class="line">    <span class="keyword">call </span>random_number(coeff)</div><div class="line">    <span class="keyword">call </span>p%initialize(order)</div><div class="line">    <span class="keywordflow">do</span> i = 1, <span class="keyword">size</span>(coeff)</div><div class="line">        <span class="keyword">call </span>p%set(i, coeff(i))</div><div class="line"><span class="keywordflow">    end do</span></div><div class="line"></div><div class="line">    <span class="comment">! Compute the roots via the polynomial routine</span></div><div class="line">    rts = p%roots()</div><div class="line"></div><div class="line">    <span class="comment">! Compute the value of the polynomial at each root and ensure it</span></div><div class="line">    <span class="comment">! is sufficiently close to zero.</span></div><div class="line">    sol = p%evaluate(rts)</div><div class="line">    <span class="keywordflow">do</span> i = 1, <span class="keyword">size</span>(sol)</div><div class="line">        print <span class="stringliteral">&#39;(AE9.3AE9.3A)&#39;</span>, <span class="stringliteral">&quot;(&quot;</span>, <span class="keywordtype">real(sol(i))</span>, <span class="stringliteral">&quot;, &quot;</span>, aimag(sol(i)), <span class="stringliteral">&quot;)&quot;</span></div><div class="line"><span class="keywordflow">    end do</span></div><div class="line"><span class="keyword">end program</span></div></div><!-- fragment --> The above program returns the following results. <div class="fragment"><div class="line">(-.466E-14, -.161E-14)</div><div class="line">(-.466E-14, 0.161E-14)</div><div class="line">(-.999E-15, 0.211E-14)</div><div class="line">(-.999E-15, -.211E-14)</div><div class="line">(0.444E-15, 0.108E-14)</div><div class="line">(0.444E-15, -.108E-14)</div><div class="line">(-.144E-14, -.433E-14)</div><div class="line">(-.144E-14, 0.433E-14)</div><div class="line">(0.644E-14, -.100E-13)</div><div class="line">(0.644E-14, 0.100E-13)</div></div><!-- fragment --> </dd></dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00569">569</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00615">615</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
@@ -1080,7 +1187,7 @@ Functions/Subroutines</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00679">679</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
+<p>Definition at line <a class="el" href="nonlin__polynomials_8f90_source.html#l00725">725</a> of file <a class="el" href="nonlin__polynomials_8f90_source.html">nonlin_polynomials.f90</a>.</p>
 
 </div>
 </div>
