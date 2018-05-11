@@ -38,6 +38,10 @@ target_link_libraries(newton_1d_example nonlin)
 add_executable(newton_example_2 nonlin_newton_example_2.f90)
 target_link_libraries(newton_example_2 nonlin)
 
+# Polynomial Roots Example
+add_executable(polynomial_roots_example nonlin_poly_roots_example.f90)
+target_link_libraries(polynomial_roots_example nonlin)
+
 
 # Ensure LINALG, FERROR, and BLAS libraries are copied to the runtime directory
 get_target_property(ferror_LibLocation ferror LOCATION)

@@ -32,6 +32,7 @@ public :: operator(*)
 interface assignment(=)
     module procedure :: poly_equals
     module procedure :: poly_dbl_equals
+    module procedure :: poly_equals_array
 end interface
 
 !> @brief Defines polynomial addition.
@@ -62,7 +63,7 @@ private
     real(real64), allocatable, dimension(:) :: m_coeffs
 contains
     !> @brief Initializes the polynomial instance.
-    procedure, public :: initialize => init_poly
+    generic, public :: initialize => init_poly, init_poly_coeffs
     !> @brief Returns the order of the polynomial object.
     procedure, public :: order => get_poly_order
     !> @brief Fits a polynomial of the specified order to a data set.
@@ -85,6 +86,8 @@ contains
 
     procedure :: evaluate_real => poly_eval_double
     procedure :: evaluate_complex => poly_eval_complex
+    procedure :: init_poly
+    procedure :: init_poly_coeffs
 end type
 
 contains
@@ -145,6 +148,49 @@ contains
             return
         end if
         this%m_coeffs = zero
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Initializes the polynomial instance.
+    !!
+    !! @param[in,out] this The polynomial object.
+    !! @param[in] c The array of polynomial coefficients. The coefficients are
+    !!  established as follows: c(1) + c(2) * x + c(3) * x**2 + ... c(n) * x**n-1.
+    !! @param[out] err An optional errors-based object that if provided can be
+    !!  used to retrieve information relating to any errors encountered during
+    !!  execution.  If not provided, a default implementation of the errors
+    !!  class is used internally to provide error handling.  Possible errors and
+    !!  warning messages that may be encountered are as follows.
+    !!  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
+    !!      was specified.
+    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
+    subroutine init_poly_coeffs(this, c, err)
+        ! Arguments
+        class(polynomial), intent(inout) :: this
+        real(real64), intent(in), dimension(:) :: c
+        class(errors), intent(inout), optional, target :: err
+
+        ! Local Variables
+        integer(int32) :: i, n
+        class(errors), pointer :: errmgr
+        type(errors), target :: deferr
+
+        ! Initialization
+        n = size(c)
+        if (present(err)) then
+            errmgr => err
+        else
+            errmgr => deferr
+        end if
+
+        ! Initialize the polynomial
+        call init_poly(this, n - 1, errmgr)
+        if (errmgr%has_error_occurred()) return
+
+        ! Populate the polynomial coefficients
+        do i = 1, n
+            call this%set(i, c(i))
+        end do
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -714,8 +760,8 @@ contains
 ! ------------------------------------------------------------------------------
     !> @brief Assigns the contents of one polynomial to another.
     !!
-    !! @param[out] x The assignee.
-    !! @param[int] y The polynomial to copy
+    !! @param[in,out] x The assignee.
+    !! @param[in] y The polynomial to copy
     subroutine poly_equals(x, y)
         ! Arguments
         class(polynomial), intent(inout) :: x
@@ -750,6 +796,18 @@ contains
         do i = 1, ord + 1
             call x%set(i, y)
         end do
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Assigns the contents of an array as polynomial coefficients.
+    !!
+    !! @param[in,out] x The assignee.
+    !! @param[in] y The coefficient array.
+    subroutine poly_equals_array(x, y)
+        ! Arguments
+        class(polynomial), intent(inout) :: x
+        real(real64), intent(in), dimension(:) :: y
+        call x%initialize(y)
     end subroutine
 
 ! ------------------------------------------------------------------------------
