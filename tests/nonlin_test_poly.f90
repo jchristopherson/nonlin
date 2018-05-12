@@ -32,7 +32,7 @@ contains
 
         ! Create a copy of yp as it will be overwritten in the fit command
         yc = yp
-        
+
         ! Fit the polynomial
         call p%fit(xp, yp, 3)
 
@@ -53,7 +53,7 @@ contains
     ! Tests the polynomial root finding capabilities.
     function test_poly_roots() result(check)
         ! Parameters
-        real(real64), parameter :: tol = 1.0d-8
+        real(real64), parameter :: tol = 1.0d-6
         integer(int32), parameter :: order = 10
 
         ! Local Variables
@@ -73,7 +73,7 @@ contains
         ! Compute the roots via the polynomial routine
         rts = p%roots()
 
-        ! Compute the value of the polynomial at each root and ensure it 
+        ! Compute the value of the polynomial at each root and ensure it
         ! is sufficiently close to zero.
         sol = p%evaluate(rts)
         check = .true.

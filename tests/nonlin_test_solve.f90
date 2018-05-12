@@ -2,7 +2,7 @@
 
 module nonlin_test_solve
     use iso_fortran_env
-    use nonlin_types
+    use nonlin_core
     use nonlin_solve
     use nonlin_least_squares
     use ferror, only : errors
@@ -16,6 +16,8 @@ module nonlin_test_solve
     public :: test_least_squares_2
     public :: test_least_squares_3
     public :: test_brent_1
+    public :: test_newton_3
+    public :: test_quasinewton_3
 contains
 ! ******************************************************************************
 ! TEST FUNCTIONS
@@ -110,7 +112,7 @@ contains
             3.412756702d0, 4.406137221d0, 4.567156645d0, 4.999550779d0, &
             5.652854194d0, 6.784320119d0, 8.307936836d0, 8.395126494d0, &
             10.30252404d0]
-        
+
         ! We'll apply a cubic polynomial model to this data:
         ! y = c1 * x**3 + c2 * x**2 + c3 * x + c4
         f = x(1) * xp**3 + x(2) * xp**2 + x(3) * xp + x(4) - yp
@@ -197,7 +199,7 @@ contains
 
         ! Turn off the line search - this set of functions is too poorly scaled
         ! for the current implementation of the line search algorithm to offer
-        ! much help.  This seems to indicate a need for improvement in the 
+        ! much help.  This seems to indicate a need for improvement in the
         ! line search code - perhaps variable scaling?
         call solver%set_use_line_search(.false.)
 
@@ -289,7 +291,7 @@ contains
 
         ! Turn off the line search - this set of functions is too poorly scaled
         ! for the current implementation of the line search algorithm to offer
-        ! much help.  This seems to indicate a need for improvement in the 
+        ! much help.  This seems to indicate a need for improvement in the
         ! line search code - perhaps variable scaling?
         call solver%set_use_line_search(.false.)
 
@@ -442,7 +444,7 @@ contains
 
         ! Parameters
         real(real64), parameter :: pi = 3.141592653589793d0
-        real(real64), parameter :: tol = 1.0d-8
+        real(real64), parameter :: tol = 1.0d-6
 
         ! Initialization
         check = .true.
@@ -466,4 +468,85 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
+    function test_newton_3() result(check)
+        use powell_badly_scaled_module
+
+        ! Local Variables
+        logical :: check
+        type(newton_solver) :: solver
+        type(vecfcn_helper) :: obj
+        procedure(vecfcn), pointer :: fcn
+        procedure(jacobianfcn), pointer :: jac
+        real(real64), dimension(2) :: x, f, sol
+        integer(int32) :: i
+        real(real64), parameter :: tol = 1.0d-5
+
+        ! Initialization
+        check = .true.
+
+        ! Define the initial conditions
+        x = powell_badly_scaled_start()
+
+        ! Set up the solver
+        fcn => powell_badly_scaled
+        jac => powell_badly_scaled_jacobian
+        call obj%set_fcn(fcn, 2, 2)
+        call obj%set_jacobian(jac)
+
+        ! Solve
+        call solver%solve(obj, x, f)
+
+        ! Test the solution
+        sol = powell_badly_scaled_solution()
+        do i = 1, size(sol)
+            if (abs(x(i) - sol(i)) > tol) then
+                check = .false.
+                print '(A)', "Test Failed: Newton's Method, Test 3."
+                print '(AE12.5AI0AE12.5)', "Expected: ", sol(i), " for root ", &
+                    i, ", but found: ", x(i)
+            end if
+        end do
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_quasinewton_3() result(check)
+        use powell_badly_scaled_module
+
+        ! Local Variables
+        logical :: check
+        type(quasi_newton_solver) :: solver
+        type(vecfcn_helper) :: obj
+        procedure(vecfcn), pointer :: fcn
+        procedure(jacobianfcn), pointer :: jac
+        real(real64), dimension(2) :: x, f, sol
+        integer(int32) :: i
+        real(real64), parameter :: tol = 1.0d-5
+
+        ! Initialization
+        check = .true.
+
+        ! Define the initial conditions
+        x = powell_badly_scaled_start()
+
+        ! Set up the solver
+        fcn => powell_badly_scaled
+        jac => powell_badly_scaled_jacobian
+        call obj%set_fcn(fcn, 2, 2)
+        call obj%set_jacobian(jac)
+
+        ! Solve
+        call solver%set_print_status(.true.)
+        call solver%solve(obj, x, f)
+
+        ! Test the solution
+        sol = powell_badly_scaled_solution()
+        do i = 1, size(sol)
+            if (abs(x(i) - sol(i)) > tol) then
+                check = .false.
+                print '(A)', "Test Failed: Quasi-Newton's Method, Test 3."
+                print '(AE12.5AI0AE12.5)', "Expected: ", sol(i), " for root ", &
+                    i, ", but found: ", x(i)
+            end if
+        end do
+    end function
 end module

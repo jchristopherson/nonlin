@@ -3,7 +3,7 @@
 module nonlin_test_optimize
     use iso_fortran_env
     use nonlin_optimize
-    use nonlin_types
+    use nonlin_core
     use test_core
     implicit none
     private
