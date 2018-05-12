@@ -274,8 +274,16 @@ contains
                         end if
                     end if
                 else
-                    ! The solution has converged.  It's OK to exit
-                    exit
+                    ! If we've converged on the change in root, but not
+                    ! on the residual, consider an additional pass with
+                    ! an update to the Jacobian.  However, if we've already
+                    ! been down this road, exit.
+                    if (.not.restart .and. xcnvrg .and. .not.fcnvrg) then
+                        restart = .true.
+                    else
+                        ! The solution has converged.  It's OK to exit
+                        exit
+                    end if
                 end if
 
                 ! Print status
