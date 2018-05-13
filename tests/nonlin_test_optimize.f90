@@ -38,7 +38,7 @@ contains
 ! ------------------------------------------------------------------------------
     function test_nelder_mead_1() result(check)
         ! Parameters
-        real(real64), parameter :: tol = 1.0d-6
+        real(real64), parameter :: tol = 1.0d-5
 
         ! Local Variables
         type(nelder_mead) :: solver
