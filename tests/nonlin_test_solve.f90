@@ -536,6 +536,7 @@ contains
 
         ! Solve
         call solver%set_print_status(.true.)
+        call solver%set_use_line_search(.false.)
         call solver%solve(obj, x, f)
 
         ! Test the solution
