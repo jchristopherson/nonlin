@@ -41,21 +41,21 @@ set(nonlin_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/include)
 
 # Define the installation instructions
 install(TARGETS nonlin EXPORT nonlinTargets
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION nonlin/bin
+    LIBRARY DESTINATION nonlin/lib
+    ARCHIVE DESTINATION nonlin/lib
     CONFIGURATIONS Release
-    INCLUDES DESTINATION include
+    INCLUDES DESTINATION nonlin/include
 )
 install(
     DIRECTORY ${PROJECT_SOURCE_DIR}/include
-    DESTINATION ${CMAKE_INSTALL_PREFIX}
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/nonlin
     COMPONENT Devel
 )
 
 # Include the documentation
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/html DESTINATION doc)
-install(FILES ${PROJECT_SOURCE_DIR}/doc/refman.pdf DESTINATION doc)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/html DESTINATION nonlin/doc)
+install(FILES ${PROJECT_SOURCE_DIR}/doc/refman.pdf DESTINATION nonlin/doc)
 
 # Define the version file
 include(CMakePackageConfigHelpers)
