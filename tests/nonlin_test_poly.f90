@@ -2,7 +2,7 @@
 
 module nonlin_test_poly
     use iso_fortran_env
-    use nonlin_types
+    use nonlin_core
     use nonlin_polynomials
     use test_core
     implicit none
