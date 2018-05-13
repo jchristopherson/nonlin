@@ -69,8 +69,8 @@ program main
     rst = test_newton_3()
     if (.not.rst) overall = .false.
 
-    ! rst = test_quasinewton_3()
-    ! if (.not.rst) overall = .false.
+    rst = test_quasinewton_3()
+    if (.not.rst) overall = .false.
 
 
     ! End
