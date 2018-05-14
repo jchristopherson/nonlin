@@ -1,5 +1,9 @@
 ! nonlin_linesearch.f90
 
+! REFERENCES
+! - https://scicomp.stackexchange.com/questions/26330/backtracking-armijo-line-search-algorithm
+! - https://ctk.math.ncsu.edu/
+
 !> @brief \b nonlin_linesearch
 !!
 !! @par Purpose
