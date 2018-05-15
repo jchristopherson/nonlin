@@ -1,7 +1,8 @@
 ! nonlin_test_poly.f90
 
 module nonlin_test_poly
-    use nonlin_types, only : dp, i32
+    use iso_fortran_env
+    use nonlin_core
     use nonlin_polynomials
     use test_core
     implicit none
@@ -13,9 +14,9 @@ contains
     ! Levenberg-Marquardt curve fitting.
     subroutine test_poly_fit()
         ! Local Variables
-        ! integer(i32) :: i
-        real(dp), dimension(21) :: xp, yp, yf, yc, err
-        real(dp) :: res
+        ! integer(int32) :: i
+        real(real64), dimension(21) :: xp, yp, yf, yc, err
+        real(real64) :: res
         type(polynomial) :: p
 
         ! Data to fit
@@ -31,7 +32,7 @@ contains
 
         ! Create a copy of yp as it will be overwritten in the fit command
         yc = yp
-        
+
         ! Fit the polynomial
         call p%fit(xp, yp, 3)
 
@@ -52,14 +53,14 @@ contains
     ! Tests the polynomial root finding capabilities.
     function test_poly_roots() result(check)
         ! Parameters
-        real(dp), parameter :: tol = 1.0d-8
-        integer(i32), parameter :: order = 10
+        real(real64), parameter :: tol = 1.0d-6
+        integer(int32), parameter :: order = 10
 
         ! Local Variables
-        integer(i32) :: i
+        integer(int32) :: i
         type(polynomial) :: p
-        real(dp), dimension(order+1) :: coeff
-        complex(dp), allocatable, dimension(:) :: rts, sol
+        real(real64), dimension(order+1) :: coeff
+        complex(real64), allocatable, dimension(:) :: rts, sol
         logical :: check
 
         ! Define the polynomial
@@ -72,7 +73,7 @@ contains
         ! Compute the roots via the polynomial routine
         rts = p%roots()
 
-        ! Compute the value of the polynomial at each root and ensure it 
+        ! Compute the value of the polynomial at each root and ensure it
         ! is sufficiently close to zero.
         sol = p%evaluate(rts)
         check = .true.
@@ -89,16 +90,16 @@ contains
     ! Tests the polynomial addition routine
     function test_poly_add() result(check)
         ! Parameters
-        integer(i32), parameter :: order1 = 10
-        integer(i32), parameter :: order2 = 20
-        real(dp), parameter :: tol = 1.0d-8
+        integer(int32), parameter :: order1 = 10
+        integer(int32), parameter :: order2 = 20
+        real(real64), parameter :: tol = 1.0d-8
 
         ! Local Variables
-        integer(i32) :: i
+        integer(int32) :: i
         type(polynomial) :: p1, p2, p3
-        real(dp), dimension(order1+1) :: c1
-        real(dp), dimension(order2+1) :: c2
-        real(dp), allocatable, dimension(:) :: p
+        real(real64), dimension(order1+1) :: c1
+        real(real64), dimension(order2+1) :: c2
+        real(real64), allocatable, dimension(:) :: p
         logical :: check
 
         ! Define the polynomials
@@ -144,16 +145,16 @@ contains
     ! Tests the polynomial subtraction routine
     function test_poly_subtract() result(check)
         ! Parameters
-        integer(i32), parameter :: order1 = 10
-        integer(i32), parameter :: order2 = 20
-        real(dp), parameter :: tol = 1.0d-8
+        integer(int32), parameter :: order1 = 10
+        integer(int32), parameter :: order2 = 20
+        real(real64), parameter :: tol = 1.0d-8
 
         ! Local Variables
-        integer(i32) :: i
+        integer(int32) :: i
         type(polynomial) :: p1, p2, p3
-        real(dp), dimension(order1+1) :: c1
-        real(dp), dimension(order2+1) :: c2
-        real(dp), allocatable, dimension(:) :: p
+        real(real64), dimension(order1+1) :: c1
+        real(real64), dimension(order2+1) :: c2
+        real(real64), allocatable, dimension(:) :: p
         logical :: check
 
         ! Define the polynomials
@@ -204,8 +205,8 @@ contains
         ! Local Variables
         logical :: check
         type(polynomial) :: p1, p2, p3, ans
-        real(dp), allocatable, dimension(:) :: a, b
-        real(dp), parameter :: tol = 1.0d-8
+        real(real64), allocatable, dimension(:) :: a, b
+        real(real64), parameter :: tol = 1.0d-8
 
         ! Initialization
         call p1%initialize(3)

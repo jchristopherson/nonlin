@@ -1,0 +1,7 @@
+digraph "Graphical Class Hierarchy"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="nonlin_types::vecfcn",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$interfacenonlin__types_1_1vecfcn.html",tooltip="Describes an M-element vector-valued function of N-variables. "];
+}

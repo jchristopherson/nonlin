@@ -2,7 +2,8 @@
 
 ! Tests the Jacobian calculation utilities.
 module nonlin_test_jacobian
-    use nonlin_types
+    use iso_fortran_env
+    use nonlin_core
     use test_core
     implicit none
     private
@@ -16,9 +17,9 @@ contains
     ! x = r * cos(theta)
     ! y = r * sin(theta)
     subroutine fcn1(x, f)
-        real(dp), intent(in), dimension(:) :: x
-        real(dp), intent(out), dimension(:) :: f
-        real(dp) :: r, theta
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(out), dimension(:) :: f
+        real(real64) :: r, theta
         r = x(1)
         theta = x(2)
         f(1) = r * cos(theta)
@@ -30,9 +31,9 @@ contains
     ! J = |           |
     !     |sin   r*cos|
     subroutine jac1(x, jac)
-        real(dp), intent(in), dimension(:) :: x
-        real(dp), intent(out), dimension(:,:) :: jac
-        real(dp) :: r, theta
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(out), dimension(:,:) :: jac
+        real(real64) :: r, theta
         r = x(1)
         theta = x(2)
         jac = reshape(&
@@ -47,12 +48,12 @@ contains
         type(vecfcn_helper) :: obj
         procedure(vecfcn), pointer :: fcn
         procedure(jacobianfcn), pointer :: jac
-        real(dp) :: numjac(2, 2), exact(2, 2), x(2)
+        real(real64) :: numjac(2, 2), exact(2, 2), x(2)
         logical :: rst
-        integer(i32) :: i
+        integer(int32) :: i
 
         ! Parameters
-        real(dp), parameter :: tol = 1.0d-4
+        real(real64), parameter :: tol = 1.0d-4
 
         ! Initialization
         rst = .true.

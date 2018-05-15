@@ -11,11 +11,11 @@
 !! @par Purpose
 !! Provides a means of defining and operating on polynomials.
 module nonlin_polynomials
-    use linalg_eigen, only : eigen
-    use linalg_solve, only : solve_least_squares
+    use, intrinsic :: iso_fortran_env, only : int32, real64
+    use linalg_core, only : eigen, solve_least_squares
     use ferror, only : errors
-    use nonlin_types, only : NL_INVALID_INPUT_ERROR, NL_ARRAY_SIZE_ERROR, &
-        NL_OUT_OF_MEMORY_ERROR, dp, i32
+    use nonlin_constants, only : NL_INVALID_INPUT_ERROR, NL_ARRAY_SIZE_ERROR, &
+        NL_OUT_OF_MEMORY_ERROR
     implicit none
 
 private
@@ -32,6 +32,7 @@ public :: operator(*)
 interface assignment(=)
     module procedure :: poly_equals
     module procedure :: poly_dbl_equals
+    module procedure :: poly_equals_array
 end interface
 
 !> @brief Defines polynomial addition.
@@ -59,10 +60,10 @@ end interface
 type polynomial
 private
     !> An array that contains the polynomial coefficients in ascending order.
-    real(dp), allocatable, dimension(:) :: m_coeffs
+    real(real64), allocatable, dimension(:) :: m_coeffs
 contains
     !> @brief Initializes the polynomial instance.
-    procedure, public :: initialize => init_poly
+    generic, public :: initialize => init_poly, init_poly_coeffs
     !> @brief Returns the order of the polynomial object.
     procedure, public :: order => get_poly_order
     !> @brief Fits a polynomial of the specified order to a data set.
@@ -85,6 +86,8 @@ contains
 
     procedure :: evaluate_real => poly_eval_double
     procedure :: evaluate_complex => poly_eval_complex
+    procedure :: init_poly
+    procedure :: init_poly_coeffs
 end type
 
 contains
@@ -107,14 +110,14 @@ contains
     subroutine init_poly(this, order, err)
         ! Arguments
         class(polynomial), intent(inout) :: this
-        integer(i32), intent(in) :: order
+        integer(int32), intent(in) :: order
         class(errors), intent(inout), optional, target :: err
 
         ! Parameters
-        real(dp), parameter :: zero = 0.0d0
+        real(real64), parameter :: zero = 0.0d0
 
         ! Local Variables
-        integer(i32) :: n, istat
+        integer(int32) :: n, istat
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
 
@@ -148,6 +151,49 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
+    !> @brief Initializes the polynomial instance.
+    !!
+    !! @param[in,out] this The polynomial object.
+    !! @param[in] c The array of polynomial coefficients. The coefficients are
+    !!  established as follows: c(1) + c(2) * x + c(3) * x**2 + ... c(n) * x**n-1.
+    !! @param[out] err An optional errors-based object that if provided can be
+    !!  used to retrieve information relating to any errors encountered during
+    !!  execution.  If not provided, a default implementation of the errors
+    !!  class is used internally to provide error handling.  Possible errors and
+    !!  warning messages that may be encountered are as follows.
+    !!  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
+    !!      was specified.
+    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
+    subroutine init_poly_coeffs(this, c, err)
+        ! Arguments
+        class(polynomial), intent(inout) :: this
+        real(real64), intent(in), dimension(:) :: c
+        class(errors), intent(inout), optional, target :: err
+
+        ! Local Variables
+        integer(int32) :: i, n
+        class(errors), pointer :: errmgr
+        type(errors), target :: deferr
+
+        ! Initialization
+        n = size(c)
+        if (present(err)) then
+            errmgr => err
+        else
+            errmgr => deferr
+        end if
+
+        ! Initialize the polynomial
+        call init_poly(this, n - 1, errmgr)
+        if (errmgr%has_error_occurred()) return
+
+        ! Populate the polynomial coefficients
+        do i = 1, n
+            call this%set(i, c(i))
+        end do
+    end subroutine
+
+! ------------------------------------------------------------------------------
     !> @brief Returns the order of the polynomial object.
     !!
     !! @param[in] this The polynomial object.
@@ -156,7 +202,7 @@ contains
     !! polynomial coefficients have been defined.
     pure function get_poly_order(this) result(n)
         class(polynomial), intent(in) :: this
-        integer(i32) :: n
+        integer(int32) :: n
         if (.not.allocated(this%m_coeffs)) then
             n = -1
         else
@@ -192,8 +238,8 @@ contains
     !!     use nonlin_polynomials
     !!
     !!     ! Local Variables
-    !!     real(dp), dimension(21) :: xp, yp, yf, yc, err
-    !!     real(dp) :: res
+    !!     real(real64), dimension(21) :: xp, yp, yf, yc, err
+    !!     real(real64) :: res
     !!     type(polynomial) :: p
     !!
     !!     ! Data to fit
@@ -238,17 +284,17 @@ contains
     subroutine poly_fit(this, x, y, order, err)
         ! Arguments
         class(polynomial), intent(inout) :: this
-        real(dp), intent(in), dimension(:) :: x
-        real(dp), intent(inout), dimension(:) :: y
-        integer(i32), intent(in) :: order
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(inout), dimension(:) :: y
+        integer(int32), intent(in) :: order
         class(errors), intent(inout), optional, target :: err
 
         ! Parameters
-        real(dp), parameter :: one = 1.0d0
+        real(real64), parameter :: one = 1.0d0
 
         ! Local Variables
-        integer(i32):: j, n, ncols, flag
-        real(dp), pointer, dimension(:,:) :: a
+        integer(int32):: j, n, ncols, flag
+        real(real64), pointer, dimension(:,:) :: a
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
 
@@ -269,7 +315,7 @@ contains
             return
         else if (order >= n .or. order < 1) then
             ! ERROR: Requested order does not make sense
-            call errmgr%report_error("polynomial_fit", "The requested " // & 
+            call errmgr%report_error("polynomial_fit", "The requested " // &
                 "polynomial order is not valid for this data set.", &
                 NL_INVALID_INPUT_ERROR)
             return
@@ -329,17 +375,17 @@ contains
     subroutine poly_fit_thru_zero(this, x, y, order, err)
         ! Arguments
         class(polynomial), intent(inout) :: this
-        real(dp), intent(in), dimension(:) :: x
-        real(dp), intent(inout), dimension(:) :: y
-        integer(i32), intent(in) :: order
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(inout), dimension(:) :: y
+        integer(int32), intent(in) :: order
         class(errors), intent(inout), optional, target :: err
 
         ! Parameters
-        real(dp), parameter :: zero = 0.0d0
+        real(real64), parameter :: zero = 0.0d0
 
         ! Local Variables
-        integer(i32):: j, n, ncols, flag
-        real(dp), pointer, dimension(:,:) :: a
+        integer(int32):: j, n, ncols, flag
+        real(real64), pointer, dimension(:,:) :: a
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
 
@@ -406,14 +452,14 @@ contains
     elemental function poly_eval_double(this, x) result(y)
         ! Arguments
         class(polynomial), intent(in) :: this
-        real(dp), intent(in) :: x
-        real(dp) :: y
+        real(real64), intent(in) :: x
+        real(real64) :: y
 
         ! Parameters
-        real(dp), parameter :: zero = 0.0d0
+        real(real64), parameter :: zero = 0.0d0
 
         ! Local Variables
-        integer(i32) :: j, order, n
+        integer(int32) :: j, order, n
 
         ! Initialization
         order = this%order()
@@ -443,14 +489,14 @@ contains
     elemental function poly_eval_complex(this, x) result(y)
         ! Arguments
         class(polynomial), intent(in) :: this
-        complex(dp), intent(in) :: x
-        complex(dp) :: y
+        complex(real64), intent(in) :: x
+        complex(real64) :: y
 
         ! Parameters
-        complex(dp), parameter :: zero = (0.0d0, 0.0d0)
+        complex(real64), parameter :: zero = (0.0d0, 0.0d0)
 
         ! Local Variables
-        integer(i32) :: j, order, n
+        integer(int32) :: j, order, n
 
         ! Initialization
         order = this%order()
@@ -483,14 +529,14 @@ contains
     pure function poly_companion_mtx(this) result(c)
         ! Arguments
         class(polynomial), intent(in) :: this
-        real(dp), dimension(this%order(), this%order()) :: c
+        real(real64), dimension(this%order(), this%order()) :: c
 
         ! Parameters
-        real(dp), parameter :: zero = 0.0d0
-        real(dp), parameter :: one = 1.0d0
+        real(real64), parameter :: zero = 0.0d0
+        real(real64), parameter :: one = 1.0d0
 
         ! Local Variables
-        integer(i32) :: i, n
+        integer(int32) :: i, n
 
         ! Process
         n = this%order()
@@ -524,26 +570,26 @@ contains
     !! program example
     !!     use linalg_constants, only : dp, i32
     !!     use nonlin_polynomials
-    !! 
+    !!
     !!     ! Parameters
-    !!     integer(i32), parameter :: order = 10
-    !! 
+    !!     integer(int32), parameter :: order = 10
+    !!
     !!     ! Local Variables
-    !!     integer(i32) :: i
+    !!     integer(int32) :: i
     !!     type(polynomial) :: p
-    !!     real(dp), dimension(order+1) :: coeff
-    !!     complex(dp), allocatable, dimension(:) :: rts, sol
-    !! 
+    !!     real(real64), dimension(order+1) :: coeff
+    !!     complex(real64), allocatable, dimension(:) :: rts, sol
+    !!
     !!     ! Define the polynomial
     !!     call random_number(coeff)
     !!     call p%initialize(order)
     !!     do i = 1, size(coeff)
     !!         call p%set(i, coeff(i))
     !!     end do
-    !! 
+    !!
     !!     ! Compute the roots via the polynomial routine
     !!     rts = p%roots()
-    !! 
+    !!
     !!     ! Compute the value of the polynomial at each root and ensure it
     !!     ! is sufficiently close to zero.
     !!     sol = p%evaluate(rts)
@@ -568,12 +614,12 @@ contains
     function poly_roots(this, err) result(z)
         ! Arguments
         class(polynomial), intent(in) :: this
-        complex(dp), dimension(this%order()) :: z
+        complex(real64), dimension(this%order()) :: z
         class(errors), intent(inout), optional, target :: err
 
         ! Local Variables
-        integer(i32) :: n
-        real(dp), allocatable, dimension(:,:) :: c
+        integer(int32) :: n
+        real(real64), allocatable, dimension(:,:) :: c
 
         ! Initialization
         n = this%order()
@@ -609,9 +655,9 @@ contains
     function get_poly_coefficient(this, ind, err) result(c)
         ! Arguments
         class(polynomial), intent(in) :: this
-        integer(i32), intent(in) :: ind
+        integer(int32), intent(in) :: ind
         class(errors), intent(inout), optional, target :: err
-        real(dp) :: c
+        real(real64) :: c
 
         ! Local Variables
         class(errors), pointer :: errmgr
@@ -652,7 +698,7 @@ contains
     pure function get_poly_coefficients(this) result(c)
         ! Arguments
         class(polynomial), intent(in) :: this
-        real(dp), dimension(this%order() + 1) :: c
+        real(real64), dimension(this%order() + 1) :: c
 
         ! Process
         if (this%order() == -1) return
@@ -678,8 +724,8 @@ contains
     subroutine set_poly_coefficient(this, ind, c, err)
         ! Arguments
         class(polynomial), intent(inout) :: this
-        integer(i32), intent(in) :: ind
-        real(dp), intent(in) :: c
+        integer(int32), intent(in) :: ind
+        real(real64), intent(in) :: c
         class(errors), intent(inout), optional, target :: err
 
         ! Local Variables
@@ -714,15 +760,15 @@ contains
 ! ------------------------------------------------------------------------------
     !> @brief Assigns the contents of one polynomial to another.
     !!
-    !! @param[out] x The assignee.
-    !! @param[int] y The polynomial to copy
+    !! @param[in,out] x The assignee.
+    !! @param[in] y The polynomial to copy
     subroutine poly_equals(x, y)
         ! Arguments
         class(polynomial), intent(inout) :: x
         class(polynomial), intent(in) :: y
 
         ! Local Variables
-        integer(i32) :: i, ord
+        integer(int32) :: i, ord
 
         ! Process
         ord = y%order()
@@ -740,16 +786,28 @@ contains
     subroutine poly_dbl_equals(x, y)
         ! Arguments
         class(polynomial), intent(inout) :: x
-        real(dp), intent(in) :: y
+        real(real64), intent(in) :: y
 
         ! Local Variables
-        integer(i32) :: i, ord
+        integer(int32) :: i, ord
 
         ! Process
         ord = x%order()
         do i = 1, ord + 1
             call x%set(i, y)
         end do
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Assigns the contents of an array as polynomial coefficients.
+    !!
+    !! @param[in,out] x The assignee.
+    !! @param[in] y The coefficient array.
+    subroutine poly_equals_array(x, y)
+        ! Arguments
+        class(polynomial), intent(inout) :: x
+        real(real64), intent(in), dimension(:) :: y
+        call x%initialize(y)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -765,7 +823,7 @@ contains
         type(polynomial) :: z
 
         ! Local Variables
-        integer(i32) :: i, max_ord, x_ord, y_ord
+        integer(int32) :: i, max_ord, x_ord, y_ord
 
         ! Initialization
         x_ord = x%order()
@@ -822,7 +880,7 @@ contains
         type(polynomial) :: z
 
         ! Local Variables
-        integer(i32) :: i, max_ord, x_ord, y_ord
+        integer(int32) :: i, max_ord, x_ord, y_ord
 
         ! Initialization
         x_ord = x%order()
@@ -879,8 +937,8 @@ contains
         type(polynomial) :: z
 
         ! Local Variables
-        integer(i32) :: i, j, m, n
-        real(dp) :: val
+        integer(int32) :: i, j, m, n
+        real(real64) :: val
 
         ! Initialization
         n = x%order() + 1
@@ -901,16 +959,16 @@ contains
     !!
     !! @param[in] x The polynomial.
     !! @param[in] y The scalar value.
-    !! 
+    !!
     !! @return The resulting polynomial.
     function poly_dbl_mult(x, y) result(z)
         ! Arguments
         class(polynomial), intent(in) :: x
-        real(dp), intent(in) :: y
+        real(real64), intent(in) :: y
         type(polynomial) :: z
 
         ! Local Variables
-        integer(i32) :: i, ord
+        integer(int32) :: i, ord
 
         ! Process
         ord = x%order()
@@ -925,16 +983,16 @@ contains
     !!
     !! @param[in] x The scalar value.
     !! @param[in] y The polynomial.
-    !! 
+    !!
     !! @return The resulting polynomial.
     function dbl_poly_mult(x, y) result(z)
         ! Arguments
-        real(dp), intent(in) :: x
+        real(real64), intent(in) :: x
         class(polynomial), intent(in) :: y
         type(polynomial) :: z
 
         ! Local Variables
-        integer(i32) :: i, ord
+        integer(int32) :: i, ord
 
         ! Process
         ord = y%order()

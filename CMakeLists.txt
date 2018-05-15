@@ -1,56 +1,96 @@
 # Master CMAKE Build Script
-cmake_minimum_required(VERSION 3.0)
-project(nonlin C CXX Fortran)
+cmake_minimum_required(VERSION 3.7)
+project(nonlin Fortran)
 
 # Define version information
-set(nonlin_VERSION_MAJOR 1)
-set(nonlin_VERSION_MINOR 2)
-set(nonlin_VERSION_PATCH 0)
+set(NONLIN_MAJOR_VERSION 1)
+set(NONLIN_MINOR_VERSION 3)
+set(NONLIN_PATCH_VERSION 0)
+set(NONLIN_VERSION ${NONLIN_MAJOR_VERSION}.${NONLIN_MINOR_VERSION}.${NONLIN_PATCH_VERSION})
+
+# Set a default build type if none was specified
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to 'Release' as none was specified.")
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
+endif()
+
+# By default, shared library
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+
+# Locate Dependencies
+find_package(ferror 1.3.0)
+find_package(linalg 1.5.0)
+
+# If FERROR is not installed on the system, build the default implementation
+if (${ferror_FOUND})
+    message(STATUS "An acceptable version of FERROR (v" ${ferror_VERSION} ") was found, and will be utilized.")
+    set(FERROR_LIBRARIES ferror)
+    get_target_property(ferror_LibLocation ferror LOCATION)
+endif()
+
+# If LINALG is not installed on the system, build the default implementation
+if (${linalg_FOUND})
+    message(STATUS "An acceptable version of LINALG (v" ${linalg_VERSION} ") was found, and will be utilized.")
+    set(LINALG_LIBRARIES linalg)
+    get_target_property(linalg_LibLocation linalg LOCATION)
+else()
+    message(STATUS "LINALG not found.  The default implementation will be used.")
+    add_subdirectory(src/external/linalg)
+    set(linalg_INCLUDE_DIRS src/external/linalg/include)
+    set(LINALG_LIBRARIES linalg)
+    set(linalg_LibLocation ${linalg_BINARY_DIR})
+    include_directories(src/external/linalg/src/external/ferror/include)
+endif()
+
+# Include the dependency module files
+include_directories(${linalg_INCLUDE_DIRS} ${ferror_INCLUDE_DIRS})
+
+# Export all symbols on Windows when building shared libraries
+SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+
+# Locate the module files
+set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/include)
 
 # Define output directories, if undefined
 if (NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
-  message(STATUS "Library output directories undefined.  Using default directories.")
-  if (CMAKE_BUILD_TYPE MATCHES Debug)
-    # Debug Build
-    if (BUILD_SHARED_LIBS)
-      set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
-      set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
-      set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
-      set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug/mod)
+    message(STATUS "NONLIN library output directories undefined.  Using default directories.")
+    if (CMAKE_BUILD_TYPE MATCHES Debug)
+        # Debug Build
+        if (BUILD_SHARED_LIBS)
+            set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
+            set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
+            set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
+        else()
+            set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
+            set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
+            set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
+        endif()
+    elseif (CMAKE_BUILD_TYPE MATCHES Release)
+        # Release Build
+        if (BUILD_SHARED_LIBS)
+            set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Release)
+            set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Release)
+            set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Release)
+        else()
+            set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Release)
+            set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Release)
+            set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Release)
+        endif()
     else()
-      set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
-      set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
-      set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
-      set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug/mod)
-    endif ()
-  elseif (CMAKE_BUILD_TYPE MATCHES Release)
-    # Release Build
-    if (BUILD_SHARED_LIBS)
-      set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Release)
-      set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Release)
-      set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Release)
-      set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Release/mod)
-    else()
-      set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Release)
-      set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Release)
-      set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Release)
-      set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Release/mod)
-    endif ()
-  else ()
-    # Default Condition
-    if (BUILD_SHARED_LIBS)
-      set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
-      set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
-      set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
-      set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug/mod)
-    else()
-      set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
-      set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
-      set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
-      set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug/mod)
-    endif ()
-  endif ()
-endif ()
+        # Default Condition
+        if (BUILD_SHARED_LIBS)
+            set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
+            set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
+            set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/Debug)
+        else()
+            set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
+            set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
+            set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/Debug)
+        endif()
+    endif()
+endif()
 
 # FFLAGS depend on the compiler
 get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
@@ -71,18 +111,6 @@ else (Fortran_COMPILER_NAME MATCHES "gfortran.*")
   set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -Wall")
 endif (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
-# Define necessary CMake variables, and define the dependency.
-set(ExternalProjectCMakeArgs
-  -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
-  -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-  -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  -DCMAKE_Fortran_MODULE_DIRECTORY=${CMAKE_Fortran_MODULE_DIRECTORY}
-  -DCMAKE_INSTALL_PREFIX=${CMAKE_SOURCE_DIR}/external
-  -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER}
-  -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-  -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
-
 # Locate the source directory
 add_subdirectory(src)
 
@@ -94,68 +122,18 @@ if (BUILD_NONLIN_EXAMPLES)
   # Inform the user we're building the examples
   message(STATUS "Building NONLIN examples.")
 
-  # Quasi-Newton Example
-  add_executable(quasi_newton_example examples/nonlin_quasi_newton_example.f90)
-  target_link_libraries(quasi_newton_example nonlin)
-
-  # Least-Squares Example
-  add_executable(least_squares_example 
-    examples/nonlin_least_squares_example.f90)
-  target_link_libraries(least_squares_example nonlin)
-
-  # Polynomial Fitting Example
-  add_executable(poly_fit_example examples/nonlin_poly_fit_example.f90)
-  target_link_libraries(poly_fit_example nonlin)
-
-  # Nelder-Mead Example
-  add_executable(nm_opt_example examples/nonlin_nm_opt_example.f90)
-  target_link_libraries(nm_opt_example nonlin)
-
-# --------------------
-  include_directories(${PROJECT_SOURCE_DIR}/include
-    ${PROJECT_SOURCE_DIR}/src/external/linalg/src/external/ferror/include
-    ${PROJECT_SOURCE_DIR}/src/external/linalg/include)
-  
-  # C Quasi-Newton Example
-  add_executable(nonlin_quasi_newton_c_example 
-    examples/nonlin_quasi_newton_c_example.c)
-  target_link_libraries(nonlin_quasi_newton_c_example nonlin)
-
-  # C BFGS Example
-  add_executable(nonlin_bfgs_c_example examples/nonlin_bfgs_c_example.c)
-  target_link_libraries(nonlin_bfgs_c_example nonlin)
+  # Build the examples
+  add_subdirectory(examples)
 endif()
 
 # ------------------------------------------------------------------------------
 # TESTS
 # ------------------------------------------------------------------------------
-option(BUILD_NONLIN_TESTS "Build NONLIN tests?" ON)
+option(BUILD_NONLIN_TESTS "Build NONLIN tests?" OFF)
 if (BUILD_NONLIN_TESTS)
-  set(nonlin_test_sources src/external/linalg/tests/test_core.f90
-    tests/nonlin_test.f90 tests/nonlin_test_jacobian.f90
-    tests/nonlin_test_solve.f90 tests/nonlin_test_poly.f90
-    tests/nonlin_test_optimize.f90)
-  add_executable(nonlin_test ${nonlin_test_sources})
-  target_link_libraries(nonlin_test nonlin)
-  add_custom_command(OUTPUT nonlin_tests DEPENDS ${nonlin_test_sources}
-    COMMAND nonlin_test)
-  add_custom_target(run_nonlin_tests ALL DEPENDS nonlin_tests)
-endif()
+    # Inform the user we're building the tests
+    message(STATUS "Building NONLIN tests.")
 
-# C Test
-option(BUILD_NONLIN_C_TESTS "Build NONLIN C API tests?" ON)
-if (BUILD_NONLIN_C_TESTS)
-  include_directories(
-    ${PROJECT_SOURCE_DIR}/include 
-    ${PROJECT_SOURCE_DIR}/tests
-    ${PROJECT_SOURCE_DIR}/src/external/linalg/src/external/ferror/include
-    ${PROJECT_SOURCE_DIR}/src/external/linalg/tests 
-    ${PROJECT_SOURCE_DIR}/src/external/linalg/include)
-  set(c_nonlin_test_sources tests/nonlin_c_test.c tests/nonlin_c_test_solve.c
-    src/external/linalg/tests/c_test_core.c tests/nonlin_c_test_poly.c)
-  add_executable(nonlin_c_test ${c_nonlin_test_sources})
-  target_link_libraries(nonlin_c_test nonlin m)
-  add_custom_command(OUTPUT nonlin_c_tests DEPENDS ${c_nonlin_test_sources}
-    COMMAND nonlin_c_test)
-  add_custom_target(run_nonlin_c_tests ALL DEPENDS nonlin_c_tests)
+    # Build the tests
+    add_subdirectory(tests)
 endif()

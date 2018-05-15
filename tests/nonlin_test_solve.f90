@@ -1,7 +1,8 @@
 ! nonlin_test_solve.f90
 
 module nonlin_test_solve
-    use nonlin_types
+    use iso_fortran_env
+    use nonlin_core
     use nonlin_solve
     use nonlin_least_squares
     use ferror, only : errors
@@ -15,6 +16,8 @@ module nonlin_test_solve
     public :: test_least_squares_2
     public :: test_least_squares_3
     public :: test_brent_1
+    public :: test_newton_3
+    public :: test_quasinewton_3
 contains
 ! ******************************************************************************
 ! TEST FUNCTIONS
@@ -28,8 +31,8 @@ contains
     ! x = +/-5
     ! y = +/-3
     subroutine fcn1(x, f)
-        real(dp), intent(in), dimension(:) :: x
-        real(dp), intent(out), dimension(:) :: f
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(out), dimension(:) :: f
         f(1) = x(1)**2 + x(2)**2 - 34.0d0
         f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
     end subroutine
@@ -40,18 +43,18 @@ contains
     ! J = |        |
     !     | 2x  -4y|
     subroutine jac1(x, j)
-        real(dp), intent(in), dimension(:) :: x
-        real(dp), intent(out), dimension(:,:) :: j
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(out), dimension(:,:) :: j
         j = 2.0d0 * reshape([x(1), x(1), x(2), -2.0d0 * x(2)], [2, 2])
     end subroutine
 
     pure function is_ans_1(x, tol) result(c)
-        real(dp), intent(in), dimension(:) :: x
-        real(dp), intent(in) :: tol
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(in) :: tol
         logical :: c
-        real(dp), parameter :: x1 = 5.0d0
-        real(dp), parameter :: x2 = 3.0d0
-        real(dp) :: ax1, ax2
+        real(real64), parameter :: x1 = 5.0d0
+        real(real64), parameter :: x2 = 3.0d0
+        real(real64) :: ax1, ax2
         c = .true.
         ax1 = abs(x(1)) - x1
         ax2 = abs(x(2)) - x2
@@ -69,19 +72,19 @@ contains
     ! x1 = 5e3
     ! x2 = 10
     subroutine fcn2(x, f)
-        real(dp), intent(in), dimension(:) :: x
-        real(dp), intent(out), dimension(:) :: f
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(out), dimension(:) :: f
         f(1) = x(2) - 10.0d0
         f(2) = x(1) * x(2) - 5e4
     end subroutine
 
     pure function is_ans_2(x, tol) result(c)
-        real(dp), intent(in), dimension(:) :: x
-        real(dp), intent(in) :: tol
-        real(dp) :: ax1, ax2
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(in) :: tol
+        real(real64) :: ax1, ax2
         logical :: c
-        real(dp), parameter :: x1 = 5.0d3
-        real(dp), parameter :: x2 = 1.0d1
+        real(real64), parameter :: x1 = 5.0d3
+        real(real64), parameter :: x2 = 1.0d1
         c = .true.
         ax1 = abs(x(1)) - x1
         ax2 = abs(x(2)) - x2
@@ -93,11 +96,11 @@ contains
 ! ------------------------------------------------------------------------------
     subroutine lsfcn1(x, f)
         ! Arguments
-        real(dp), intent(in), dimension(:) :: x
-        real(dp), intent(out), dimension(:) :: f
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(out), dimension(:) :: f
 
         ! Local Variables
-        real(dp), dimension(21) :: xp, yp
+        real(real64), dimension(21) :: xp, yp
 
         ! Data to fit
         xp = [0.0d0, 0.1d0, 0.2d0, 0.3d0, 0.4d0, 0.5d0, 0.6d0, 0.7d0, 0.8d0, &
@@ -109,7 +112,7 @@ contains
             3.412756702d0, 4.406137221d0, 4.567156645d0, 4.999550779d0, &
             5.652854194d0, 6.784320119d0, 8.307936836d0, 8.395126494d0, &
             10.30252404d0]
-        
+
         ! We'll apply a cubic polynomial model to this data:
         ! y = c1 * x**3 + c2 * x**2 + c3 * x + c4
         f = x(1) * xp**3 + x(2) * xp**2 + x(3) * xp + x(4) - yp
@@ -123,8 +126,8 @@ contains
 ! ------------------------------------------------------------------------------
     ! f(x) = sin(x) / x, SOLUTION: x = n * pi for n = 0, 1, 2, 3, ...
     function f1var_1(x) result(f)
-        real(dp), intent(in) :: x
-        real(dp) :: f
+        real(real64), intent(in) :: x
+        real(real64) :: f
         f = sin(x) / x
     end function
 
@@ -138,8 +141,8 @@ contains
         procedure(jacobianfcn), pointer :: jac
         type(quasi_newton_solver) :: solver
         type(iteration_behavior) :: ib
-        real(dp) :: x(2), f(2), ic(10, 2)
-        integer(i32) :: i
+        real(real64) :: x(2), f(2), ic(10, 2)
+        integer(int32) :: i
         logical :: check
 
         ! Initialization
@@ -182,8 +185,8 @@ contains
         procedure(vecfcn), pointer :: fcn
         type(quasi_newton_solver) :: solver
         type(iteration_behavior) :: ib
-        real(dp) :: x(2), f(2), ic(10, 2)
-        integer(i32) :: i
+        real(real64) :: x(2), f(2), ic(10, 2)
+        integer(int32) :: i
         logical :: check
 
         ! Initialization
@@ -196,7 +199,7 @@ contains
 
         ! Turn off the line search - this set of functions is too poorly scaled
         ! for the current implementation of the line search algorithm to offer
-        ! much help.  This seems to indicate a need for improvement in the 
+        ! much help.  This seems to indicate a need for improvement in the
         ! line search code - perhaps variable scaling?
         call solver%set_use_line_search(.false.)
 
@@ -230,8 +233,8 @@ contains
         procedure(jacobianfcn), pointer :: jac
         type(newton_solver) :: solver
         type(iteration_behavior) :: ib
-        real(dp) :: x(2), f(2), ic(10, 2)
-        integer(i32) :: i
+        real(real64) :: x(2), f(2), ic(10, 2)
+        integer(int32) :: i
         logical :: check
 
         ! Initialization
@@ -274,8 +277,8 @@ contains
         procedure(vecfcn), pointer :: fcn
         type(newton_solver) :: solver
         type(iteration_behavior) :: ib
-        real(dp) :: x(2), f(2), ic(10, 2)
-        integer(i32) :: i
+        real(real64) :: x(2), f(2), ic(10, 2)
+        integer(int32) :: i
         logical :: check
 
         ! Initialization
@@ -288,7 +291,7 @@ contains
 
         ! Turn off the line search - this set of functions is too poorly scaled
         ! for the current implementation of the line search algorithm to offer
-        ! much help.  This seems to indicate a need for improvement in the 
+        ! much help.  This seems to indicate a need for improvement in the
         ! line search code - perhaps variable scaling?
         call solver%set_use_line_search(.false.)
 
@@ -322,8 +325,8 @@ contains
         procedure(jacobianfcn), pointer :: jac
         type(least_squares_solver) :: solver
         type(iteration_behavior) :: ib
-        real(dp) :: x(2), f(2), ic(10, 2)
-        integer(i32) :: i
+        real(real64) :: x(2), f(2), ic(10, 2)
+        integer(int32) :: i
         logical :: check
 
         ! Initialization
@@ -366,8 +369,8 @@ contains
         procedure(vecfcn), pointer :: fcn
         type(least_squares_solver) :: solver
         type(iteration_behavior) :: ib
-        real(dp) :: x(2), f(2), ic(10, 2)
-        integer(i32) :: i
+        real(real64) :: x(2), f(2), ic(10, 2)
+        integer(int32) :: i
         logical :: check
         type(errors) :: errmgr
 
@@ -415,7 +418,7 @@ contains
         type(vecfcn_helper) :: obj
         procedure(vecfcn), pointer :: fcn
         type(least_squares_solver) :: solver
-        real(dp) :: x(4), f(21) ! There are 4 coefficients and 21 data points
+        real(real64) :: x(4), f(21) ! There are 4 coefficients and 21 data points
 
         ! Initialization
         fcn => lsfcn1
@@ -435,13 +438,13 @@ contains
         type(brent_solver) :: solver
         type(fcn1var_helper) :: obj
         procedure(fcn1var), pointer :: fcn
-        real(dp) :: x, f
+        real(real64) :: x, f
         type(value_pair) :: limits
         logical :: check
 
         ! Parameters
-        real(dp), parameter :: pi = 3.141592653589793d0
-        real(dp), parameter :: tol = 1.0d-8
+        real(real64), parameter :: pi = 3.141592653589793d0
+        real(real64), parameter :: tol = 1.0d-6
 
         ! Initialization
         check = .true.
@@ -465,4 +468,86 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
+    function test_newton_3() result(check)
+        use powell_badly_scaled_module
+
+        ! Local Variables
+        logical :: check
+        type(newton_solver) :: solver
+        type(vecfcn_helper) :: obj
+        procedure(vecfcn), pointer :: fcn
+        procedure(jacobianfcn), pointer :: jac
+        real(real64), dimension(2) :: x, f, sol
+        integer(int32) :: i
+        real(real64), parameter :: tol = 1.0d-5
+
+        ! Initialization
+        check = .true.
+
+        ! Define the initial conditions
+        x = powell_badly_scaled_start()
+
+        ! Set up the solver
+        fcn => powell_badly_scaled
+        jac => powell_badly_scaled_jacobian
+        call obj%set_fcn(fcn, 2, 2)
+        call obj%set_jacobian(jac)
+
+        ! Solve
+        call solver%solve(obj, x, f)
+
+        ! Test the solution
+        sol = powell_badly_scaled_solution()
+        do i = 1, size(sol)
+            if (abs(x(i) - sol(i)) > tol) then
+                check = .false.
+                print '(A)', "Test Failed: Newton's Method, Test 3."
+                print '(AE12.5AI0AE12.5)', "Expected: ", sol(i), " for root ", &
+                    i, ", but found: ", x(i)
+            end if
+        end do
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_quasinewton_3() result(check)
+        use powell_badly_scaled_module
+
+        ! Local Variables
+        logical :: check
+        type(quasi_newton_solver) :: solver
+        type(vecfcn_helper) :: obj
+        procedure(vecfcn), pointer :: fcn
+        procedure(jacobianfcn), pointer :: jac
+        real(real64), dimension(2) :: x, f, sol
+        integer(int32) :: i
+        real(real64), parameter :: tol = 1.0d-5
+
+        ! Initialization
+        check = .true.
+
+        ! Define the initial conditions
+        x = powell_badly_scaled_start()
+
+        ! Set up the solver
+        fcn => powell_badly_scaled
+        jac => powell_badly_scaled_jacobian
+        call obj%set_fcn(fcn, 2, 2)
+        call obj%set_jacobian(jac)
+
+        ! Solve - Do not use line search as the line search will fail on this
+        ! problem.
+        call solver%set_use_line_search(.false.)
+        call solver%solve(obj, x, f)
+
+        ! Test the solution
+        sol = powell_badly_scaled_solution()
+        do i = 1, size(sol)
+            if (abs(x(i) - sol(i)) > tol) then
+                check = .false.
+                print '(A)', "Test Failed: Quasi-Newton's Method, Test 3."
+                print '(AE12.5AI0AE12.5)', "Expected: ", sol(i), " for root ", &
+                    i, ", but found: ", x(i)
+            end if
+        end do
+    end function
 end module

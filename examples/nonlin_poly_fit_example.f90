@@ -1,14 +1,14 @@
 ! nonlin_poly_fit_example.f90
 
 program example
-    use nonlin_types, only : dp, i32
+    use iso_fortran_env
     use nonlin_polynomials
     implicit none
 
     ! Local Variables
-    integer(i32) :: i
-    real(dp), dimension(21) :: xp, yp, yf, yc, err
-    real(dp) :: res
+    integer(int32) :: i
+    real(real64), dimension(21) :: xp, yp, yf, yc, err
+    real(real64) :: res
     type(polynomial) :: p
 
     ! Data to fit
