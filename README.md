@@ -10,7 +10,7 @@ This example solves a set of two equations of two unknowns using a Quasi-Newton 
 ```fortran
 program  example
     use iso_fortran_env
-    use nonlin_types, only : vecfcn_helper, vecfcn, iteration_behavior
+    use nonlin_core
     use nonlin_solve, only : quasi_newton_solver
     implicit none
 
@@ -82,7 +82,7 @@ This example uses a least-squares approach to determine the coefficients of a po
 ```fortran
 program example
     use iso_fortran_env
-    use nonlin_types, only : vecfcn_helper, vecfcn
+    use nonlin_core
     use nonlin_least_squares, only : least_squares_solver
     implicit none
 
@@ -208,8 +208,7 @@ This example uses the Nelder-Mead simplex method to find the minimum of the Rose
 program example
     use iso_fortran_env
     use nonlin_optimize, only : nelder_mead
-    use nonlin_types, only : fcnnvar, fcnnvar_helper, &
-        iteration_behavior
+    use nonlin_core
     implicit none
 
     ! Local Variables
