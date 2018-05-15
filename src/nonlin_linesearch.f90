@@ -334,8 +334,20 @@ contains
 
             ! Check the step
             if (alam < alamin) then
-                ! The change in X between steps is sufficiently small to
-                ! consider the iteration converged
+                ! Either the solution has converged due to negligible change in
+                ! the root values, or the line search may have fully
+                ! backtracked.  In the event the solution fully backtracked,
+                ! we'll issue a warning to inform the user of the potential
+                ! issue.
+                if (norm2(x - xold) == zero) then
+                    ! The line search fully backtracked
+                    call errmgr%report_warning("ls_search_mimo", &
+                        "The line search appears to have fully " // &
+                        "backtracked.  As such, check results carefully, " // &
+                        "and/or consider attempting the solve without " // &
+                        "the line search.", &
+                        NL_CONVERGENCE_ERROR)
+                end if
                 x = xold
                 xcnvrg = .true.
                 exit
@@ -532,8 +544,20 @@ contains
 
             ! Check the step
             if (alam < alamin) then
-                ! The change in X between steps is sufficiently small to
-                ! consider the iteration converged
+                ! Either the solution has converged due to negligible change in
+                ! the root values, or the line search may have fully
+                ! backtracked.  In the event the solution fully backtracked,
+                ! we'll issue a warning to inform the user of the potential
+                ! issue.
+                if (norm2(x - xold) == zero) then
+                    ! The line search fully backtracked
+                    call errmgr%report_warning("ls_search_miso", &
+                        "The line search appears to have fully " // &
+                        "backtracked.  As such, check results carefully, " // &
+                        "and/or consider attempting the solve without " // &
+                        "the line search.", &
+                        NL_CONVERGENCE_ERROR)
+                end if
                 x = xold
                 xcnvrg = .true.
                 exit
