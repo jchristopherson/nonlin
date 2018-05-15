@@ -534,8 +534,8 @@ contains
         call obj%set_fcn(fcn, 2, 2)
         call obj%set_jacobian(jac)
 
-        ! Solve
-        call solver%set_print_status(.true.)
+        ! Solve - Do not use line search as the line search will fail on this
+        ! problem.
         call solver%set_use_line_search(.false.)
         call solver%solve(obj, x, f)
 
