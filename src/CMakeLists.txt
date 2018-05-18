@@ -76,7 +76,7 @@ configure_file(
     COPYONLY
 )
 
-set(ConfigPackageLocation lib/cmake/nonlin)
+set(ConfigPackageLocation nonlin/lib/cmake/nonlin)
 install(
     EXPORT nonlinTargets
     FILE nonlinTargets.cmake
