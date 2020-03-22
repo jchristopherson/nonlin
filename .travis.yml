@@ -54,7 +54,10 @@ install:
   # Install git
   - sudo apt install git
 
-  # Download and install CMake
+  # Use the default version of CMake to build a newer version
+  - sudo apt install cmake
+
+  # Download and install a newer version of CMake
   - sudo git clone https://github.com/Kitware/CMake.git
   - pushd CMake
   - sudo mkdir build
