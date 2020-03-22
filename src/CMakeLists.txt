@@ -25,7 +25,7 @@ set(nonlin_sources
 
 # Build the library
 add_library(nonlin ${nonlin_sources})
-target_link_libraries(nonlin ${LINALG_LIBRARIES} ${FERROR_LIBRARIES})
+target_link_libraries(nonlin ${linalg_LIBRARIES} ${ferror_LIBRARIES})
 
 # ------------------------------------------------------------------------------
 # INSTALLATION INSTRUCTIONS
