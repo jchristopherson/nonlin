@@ -19,7 +19,7 @@ int main() {
     iteration_controls cntrls;
     iteration_process stats;
 
-    // Defin the iteration controls - use defaults
+    // Define the iteration controls - use defaults
     c_set_default_solver_settings(&cntrls);
 
     // Define an initial guess

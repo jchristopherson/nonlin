@@ -10,6 +10,7 @@ module nonlin_c_api
     use nonlin_solve
     use nonlin_least_squares
     use nonlin_linesearch
+    use nonlin_optimize
     implicit none
 
     interface
@@ -155,7 +156,7 @@ contains
         type(iteration_controls), intent(out) :: x
 
         ! Process
-        x%max_function_evals = 100
+        x%max_function_evals = 500
         x%function_tolerance = 1.0d-8
         x%solution_tolerance = 1.0d-12
         x%gradient_tolerance = 1.0d-12
@@ -652,8 +653,185 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
+    !> @brief Utilizes Nelder and Mead's simplex algorithm to minimize a
+    !! function of N variables.
+    !!
+    !! @param[in] fcn The function to minimize.
+    !! @param[in] n The number of variables.
+    !! @param[in,out] x On input, an N-element array containing an initial
+    !!  estimate to the solution.  On output, the updated solution estimate.
+    !! @param[out] f On output, the value of the function at @p x.
+    !! @param[in] cntrls The iteration controls.
+    !! @param[out] stats The iteration status.
+    !!
+    !! @return An error flag with the following possible values.
+    !! - NL_NO_ERROR: No error has occurred - successful execution.
+    !! - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+    !! - NL_INVALID_INPUT_ERROR: Occurs if @p x is not appropriately sized for
+    !!      the problem as defined in @p fcn.
+    !! - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+    !!      available.
+    !! - NL_CONVERGENCE_ERROR: Occurs if the algorithm cannot converge within
+    !!      the allowed number of iterations.
+    function c_solver_nelder_mead(fcn, n, x, f, cntrls, stats) &
+            bind(C, name = "c_solver_nelder_mead") result(flag)
+        ! Arguments
+        type(c_funptr), intent(in), value :: fcn
+        integer(c_int), intent(in), value :: n
+        real(c_double), intent(inout) :: x(n)
+        real(c_double), intent(out) :: f
+        type(iteration_controls), intent(in) :: cntrls
+        type(iteration_process), intent(out) :: stats
+        integer(c_int) :: flag
+
+        ! Local Variables
+        type(errors) :: err
+        type(fcnnvar_helper) :: obj
+        procedure(c_fcnnvar), pointer :: cfptr
+        procedure(fcnnvar), pointer :: fptr
+        type(iteration_behavior) :: tracking
+        type(nelder_mead) :: solver
+
+        ! Initialization
+        flag = NL_NO_ERROR
+        call err%set_exit_on_error(.false.)
+        call c_f_procpointer(fcn, cfptr)
+        fptr => fun
+        call obj%set_fcn(fptr, n)
+
+        ! Set solver parameters
+        call solver%set_max_fcn_evals(cntrls%max_function_evals)
+        call solver%set_tolerance(cntrls%function_tolerance)
+        call solver%set_print_status(logical(cntrls%print_status))
+
+        ! Solve
+        call solver%solve(obj, x, f, tracking, err)
+
+        ! Retrieve the ieration status
+        stats%iteration_count = tracking%iter_count
+        stats%function_eval_count = tracking%fcn_count
+        stats%jacobian_eval_count = tracking%jacobian_count
+        stats%gradient_eval_count = tracking%gradient_count
+        stats%converge_on_function = logical(tracking%converge_on_fcn, c_bool)
+        stats%converge_on_solution_change = logical(tracking%converge_on_chng, c_bool)
+        stats%converge_on_gradient = logical(tracking%converge_on_zero_diff, c_bool)
+
+        ! Check for errors
+        if (err%has_error_occurred()) then
+            flag = err%get_error_flag()
+            return
+        end if
+    contains
+        function fun(xx) result(fx)
+            real(real64), intent(in), dimension(:) :: xx
+            real(real64) :: fx
+            fx = cfptr(n, xx)
+        end function
+    end function
 
 ! ------------------------------------------------------------------------------
+    !> @brief Utilizes a Broyden–Fletcher–Goldfarb–Shanno (BFGS) algorithm to 
+    !! minimize a function of N variables.
+    !!
+    !! @param[in] fcn The function to minimize.
+    !! @param[in] grad A function for evaluating the gradiant.  If null, the
+    !!  gradient is estimated numerically.
+    !! @param[in] n The number of variables.
+    !! @param[in,out] x On input, an N-element array containing an initial
+    !!  estimate to the solution.  On output, the updated solution estimate.
+    !! @param[out] f On output, the value of the function at @p x.
+    !! @param[in] cntrls The iteration controls.
+    !! @param[in] ls The line search controls.
+    !! @param[out] stats The iteration status.
+    !!
+    !! @return An error flag with the following possible values.
+    !! - NL_NO_ERROR: No error has occurred - successful execution.
+    !! - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+    !! - NL_INVALID_INPUT_ERROR: Occurs if @p x is not appropriately sized for
+    !!      the problem as defined in @p fcn.
+    !! - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+    !!      available.
+    !! - NL_CONVERGENCE_ERROR: Occurs if the algorithm cannot converge within
+    !!      the allowed number of iterations.
+    function c_solver_bfgs(fcn, grad, n, x, f, cntrls, ls, stats) &
+            bind(C, name = "c_solver_bfgs") result(flag)
+        ! Arguments
+        type(c_funptr), intent(in), value :: fcn, grad
+        integer(c_int), intent(in), value :: n
+        real(c_double), intent(inout) :: x(n)
+        real(c_double), intent(out) :: f
+        type(iteration_controls), intent(in) :: cntrls
+        type(line_search_controls), intent(in) :: ls
+        type(iteration_process), intent(out) :: stats
+        integer(c_int) :: flag
+
+        ! Local Variables
+        type(errors) :: err
+        type(fcnnvar_helper) :: obj
+        procedure(c_fcnnvar), pointer :: cfptr
+        procedure(fcnnvar), pointer :: fptr
+        procedure(c_gradientfcn), pointer :: cgptr
+        procedure(gradientfcn), pointer :: gptr
+        type(iteration_behavior) :: tracking
+        type(bfgs) :: solver
+        type(line_search) :: search
+
+        ! Initialization
+        flag = NL_NO_ERROR
+        call err%set_exit_on_error(.false.)
+        call c_f_procpointer(fcn, cfptr)
+        fptr => fun
+        call obj%set_fcn(fptr, n)
+        if (c_associated(grad)) then
+            call c_f_procpointer(grad, cgptr)
+            gptr => grd
+            call obj%set_gradient_fcn(gptr)
+        end if
+
+        ! Set the solver parameters
+        call solver%set_max_fcn_evals(cntrls%max_function_evals)
+        call solver%set_tolerance(cntrls%function_tolerance)
+        call solver%set_print_status(logical(cntrls%print_status))
+
+        ! Set line search parameters
+        call solver%set_use_line_search(logical(ls%enable))
+        if (ls%enable) then
+            call search%set_max_fcn_evals(ls%max_function_evals)
+            call search%set_scaling_factor(ls%alpha)
+            call search%set_distance_factor(ls%factor)
+            call solver%set_line_search(search)
+        end if
+
+        ! Solve
+        call solver%solve(obj, x, f, tracking, err)
+
+        ! Retrieve the ieration status
+        stats%iteration_count = tracking%iter_count
+        stats%function_eval_count = tracking%fcn_count
+        stats%jacobian_eval_count = tracking%jacobian_count
+        stats%gradient_eval_count = tracking%gradient_count
+        stats%converge_on_function = logical(tracking%converge_on_fcn, c_bool)
+        stats%converge_on_solution_change = logical(tracking%converge_on_chng, c_bool)
+        stats%converge_on_gradient = logical(tracking%converge_on_zero_diff, c_bool)
+
+        ! Check for errors
+        if (err%has_error_occurred()) then
+            flag = err%get_error_flag()
+            return
+        end if
+    contains
+        function fun(xx) result(fx)
+            real(real64), intent(in), dimension(:) :: xx
+            real(real64) :: fx
+            fx = cfptr(n, xx)
+        end function
+
+        subroutine grd(xx, gx)
+            real(real64), intent(in), dimension(:) :: xx
+            real(real64), intent(out), dimension(:) :: gx
+            call cgptr(n, xx, gx)
+        end subroutine
+    end function
 
 ! ------------------------------------------------------------------------------
 

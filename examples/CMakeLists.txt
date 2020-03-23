@@ -62,3 +62,11 @@ target_link_libraries(c_newton_example nonlin)
 # C API - Least Squares Example
 add_executable(c_least_squares_example nonlin_c_least_squares_example.c)
 target_link_libraries(c_least_squares_example nonlin)
+
+# C API - Nelder-Mead Example
+add_executable(c_nelder_mead_example nonlin_c_nelder_mead_example.c)
+target_link_libraries(c_nelder_mead_example nonlin)
+
+# C API - BFGS Example
+add_executable(c_bfgs_example nonlin_c_bfgs_example.c)
+target_link_libraries(c_bfgs_example nonlin)

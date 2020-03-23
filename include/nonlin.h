@@ -309,6 +309,60 @@ int c_solver_least_squares(vecfcn fcn, jacobianfcn jac, int neqn, int nvar,
     double *x, double *f, const iteration_controls *cntrls, 
     iteration_process *stats);
 
+/**
+ * Utilizes Nelder and Mead's simplex algorithm to minimize a
+ * function of N variables.
+ *
+ * @param fcn The function to minimize.
+ * @param n The number of variables.
+ * @param x On input, an N-element array containing an initial
+ *  estimate to the solution.  On output, the updated solution estimate.
+ * @param f On output, the value of the function at @p x.
+ * @param cntrls The iteration controls.
+ * @param stats The iteration status.
+ *
+ * @return An error flag with the following possible values.
+ * - NL_NO_ERROR: No error has occurred - successful execution.
+ * - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+ * - NL_INVALID_INPUT_ERROR: Occurs if @p x is not appropriately sized for
+ *      the problem as defined in @p fcn.
+ * - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+ *      available.
+ * - NL_CONVERGENCE_ERROR: Occurs if the algorithm cannot converge within
+ *      the allowed number of iterations.
+ */
+int c_solver_nelder_mead(fcnnvar fcn, int n, double *x, double *f, 
+    const iteration_controls *cntrls, iteration_process *stats);
+
+/**
+ * Utilizes a Broyden–Fletcher–Goldfarb–Shanno (BFGS) algorithm to 
+ * minimize a function of N variables.
+ *
+ * @param fcn The function to minimize.
+ * @param grad A function for evaluating the gradiant.  If null, the
+ *  gradient is estimated numerically.
+ * @param n The number of variables.
+ * @param x On input, an N-element array containing an initial
+ *  estimate to the solution.  On output, the updated solution estimate.
+ * @param f On output, the value of the function at @p x.
+ * @param cntrls The iteration controls.
+ * @param ls The line search controls.
+ * @param stats The iteration status.
+ *
+ * @return An error flag with the following possible values.
+ * - NL_NO_ERROR: No error has occurred - successful execution.
+ * - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+ * - NL_INVALID_INPUT_ERROR: Occurs if @p x is not appropriately sized for
+ *      the problem as defined in @p fcn.
+ * - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+ *      available.
+ * - NL_CONVERGENCE_ERROR: Occurs if the algorithm cannot converge within
+ *      the allowed number of iterations.
+ */
+int c_solver_bfgs(fcnnvar fcn, gradientfcn grad, int n, double *x, double *f,
+    const iteration_controls *cntrls, const line_search_controls *ls,
+    iteration_process *stats);
+
 #ifdef __cplusplus
 }
 #endif
