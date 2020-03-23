@@ -21,12 +21,12 @@ set(nonlin_sources
     nonlin_solve_newton.f90
     nonlin_solve_brent.f90
     nonlin_solve_newton1var.f90
+    nonlin_c_api.f90
 )
 
 # Build the library
 add_library(nonlin ${nonlin_sources})
-# target_link_libraries(nonlin ${linalg_LIBRARIES} ${ferror_LIBRARIES})
-target_link_libraries(nonlin linalg ferror)
+target_link_libraries(nonlin ${linalg_LIBRARIES} ${ferror_LIBRARIES})
 
 # ------------------------------------------------------------------------------
 # INSTALLATION INSTRUCTIONS
