@@ -42,24 +42,15 @@ target_link_libraries(newton_example_2 nonlin)
 add_executable(polynomial_roots_example nonlin_poly_roots_example.f90)
 target_link_libraries(polynomial_roots_example nonlin)
 
+# C API - 1D Newton Example
+include_directories(${PROJECT_SOURCE_DIR}/include)
+add_executable(c_newton_1d_example nonlin_c_newton_1d_example.c)
+target_link_libraries(c_newton_1d_example nonlin)
 
-# Ensure LINALG, FERROR, and BLAS libraries are copied to the runtime directory
-if (WIN32)
-    get_target_property(ferror_LibLocation ferror LOCATION)
-    add_custom_command(TARGET quasi_newton_example POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${ferror_LibLocation} $<TARGET_FILE_DIR:quasi_newton_example>
-    )
+# C API - 1D Brent Example
+add_executable(c_brent_1d_example nonlin_c_brent_1d_example.c)
+target_link_libraries(c_brent_1d_example nonlin)
 
-    get_target_property(linalg_LibLocation linalg LOCATION)
-    add_custom_command(TARGET quasi_newton_example POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${linalg_LibLocation} $<TARGET_FILE_DIR:quasi_newton_example>
-    )
-
-    get_target_property(blas_LibLocation blas LOCATION)
-    add_custom_command(TARGET quasi_newton_example POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${blas_LibLocation} $<TARGET_FILE_DIR:quasi_newton_example>
-    )
-endif()
+# C API - Quasi-Newton Example
+add_executable(c_quasi_newton_example nonlin_c_quasi_newton_example.c)
+target_link_libraries(c_quasi_newton_example nonlin)

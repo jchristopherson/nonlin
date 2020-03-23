@@ -1,6 +1,6 @@
 # Master CMAKE Build Script
 cmake_minimum_required(VERSION 3.7)
-project(nonlin Fortran)
+project(nonlin C CXX Fortran)
 
 # Define version information
 set(NONLIN_MAJOR_VERSION 1)
