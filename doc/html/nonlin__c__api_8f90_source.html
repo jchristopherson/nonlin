@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.16"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>nonlin: C:/Users/jchri/Documents/github/nonlin/src/nonlin_constants.f90 Source File</title>
+<title>nonlin: C:/Users/jchri/Documents/github/nonlin/src/nonlin_c_api.f90 Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -68,7 +68,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
-$(document).ready(function(){initNavTree('nonlin__constants_8f90_source.html','');});
+$(document).ready(function(){initNavTree('nonlin__c__api_8f90_source.html','');});
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -88,36 +88,31 @@ $(document).ready(function(){initNavTree('nonlin__constants_8f90_source.html',''
 
 <div class="header">
   <div class="headertitle">
-<div class="title">nonlin_constants.f90</div>  </div>
+<div class="title">nonlin_c_api.f90</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">! nonlin_constants.f90</span></div>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">! nonlin_c_api.f90</span></div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160; </div>
-<div class="line"><a name="l00007"></a><span class="lineno"><a class="line" href="namespacenonlin__constants.html">    7</a></span>&#160;<span class="keyword">module</span> <a class="code" href="namespacenonlin__constants.html">nonlin_constants</a></div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;    use, <span class="keywordtype">intrinsic</span> :: iso_fortran_env, only : int32</div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;    <span class="keywordtype">use </span>linalg_constants</div>
+<div class="line"><a name="l00004"></a><span class="lineno"><a class="line" href="namespacenonlin__c__api.html">    4</a></span>&#160;<span class="keyword">module</span> <a class="code" href="namespacenonlin__c__api.html">nonlin_c_api</a></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;    <span class="keywordtype">use </span>iso_c_binding</div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__constants.html">nonlin_constants</a></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__core.html">nonlin_core</a></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__solve.html">nonlin_solve</a></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__least__squares.html">nonlin_least_squares</a></div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;    <span class="keywordtype">implicit none</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160; </div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment">! ******************************************************************************</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment">! ERROR FLAGS</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment">! ------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno"><a class="line" href="namespacenonlin__constants.html#aea9acca28551e2c88635255bfd2c3f2d">   16</a></span>&#160;    <span class="keywordtype">integer(int32)</span>, <span class="keywordtype">parameter</span> :: nl_invalid_input_error = 201</div>
-<div class="line"><a name="l00018"></a><span class="lineno"><a class="line" href="namespacenonlin__constants.html#add76da4ff5b1fc228887cb442e1a909a">   18</a></span>&#160;    <span class="keywordtype">integer(int32)</span>, <span class="keywordtype">parameter</span> :: nl_array_size_error = 202</div>
-<div class="line"><a name="l00020"></a><span class="lineno"><a class="line" href="namespacenonlin__constants.html#a53c7cd0a6d2a68f37f4e92630af700e3">   20</a></span>&#160;    <span class="keywordtype">integer(int32)</span>, <span class="keywordtype">parameter</span> :: nl_out_of_memory_error = la_out_of_memory_error</div>
-<div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="namespacenonlin__constants.html#acf8b68879c3414c4f328b0d692b9354d">   22</a></span>&#160;    <span class="keywordtype">integer(int32)</span>, <span class="keywordtype">parameter</span> :: nl_invalid_operation_error = &amp;</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;        la_invalid_operation_error</div>
-<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="namespacenonlin__constants.html#a6e7694d6d44ec6b988de8b6d91d93fd5">   25</a></span>&#160;    <span class="keywordtype">integer(int32)</span>, <span class="keywordtype">parameter</span> :: nl_convergence_error = la_convergence_error</div>
-<div class="line"><a name="l00027"></a><span class="lineno"><a class="line" href="namespacenonlin__constants.html#a285bb54cb368551d46661f78d710e9e0">   27</a></span>&#160;    <span class="keywordtype">integer(int32)</span>, <span class="keywordtype">parameter</span> :: nl_divergent_behavior_error = 206</div>
-<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="namespacenonlin__constants.html#ad6c00f5fd3698a2418373ef56ba8f4f4">   29</a></span>&#160;    <span class="keywordtype">integer(int32)</span>, <span class="keywordtype">parameter</span> :: nl_spurious_convergence_error = 207</div>
-<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="namespacenonlin__constants.html#a226aad58e61f8da6e0bf56163a761cd0">   32</a></span>&#160;    <span class="keywordtype">integer(int32)</span>, <span class="keywordtype">parameter</span> :: nl_tolerance_too_small_error = 208</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="keyword">end module</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keyword">contains</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="keyword">end module</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
+<div class="ttc" id="anamespacenonlin__solve_html"><div class="ttname"><a href="namespacenonlin__solve.html">nonlin_solve</a></div><div class="ttdoc">nonlin_solve</div><div class="ttdef"><b>Definition:</b> <a href="nonlin__solve_8f90_source.html#l00008">nonlin_solve.f90:8</a></div></div>
+<div class="ttc" id="anamespacenonlin__c__api_html"><div class="ttname"><a href="namespacenonlin__c__api.html">nonlin_c_api</a></div><div class="ttdoc">Defines a C-friendly API to the NONLIN library.</div><div class="ttdef"><b>Definition:</b> <a href="nonlin__c__api_8f90_source.html#l00004">nonlin_c_api.f90:4</a></div></div>
+<div class="ttc" id="anamespacenonlin__least__squares_html"><div class="ttname"><a href="namespacenonlin__least__squares.html">nonlin_least_squares</a></div><div class="ttdoc">nonlin_least_squares</div><div class="ttdef"><b>Definition:</b> <a href="nonlin__least__squares_8f90_source.html#l00007">nonlin_least_squares.f90:7</a></div></div>
+<div class="ttc" id="anamespacenonlin__core_html"><div class="ttname"><a href="namespacenonlin__core.html">nonlin_core</a></div><div class="ttdoc">nonlin_core</div><div class="ttdef"><b>Definition:</b> <a href="nonlin__core_8f90_source.html#l00167">nonlin_core.f90:167</a></div></div>
 <div class="ttc" id="anamespacenonlin__constants_html"><div class="ttname"><a href="namespacenonlin__constants.html">nonlin_constants</a></div><div class="ttdoc">nonlin_constants</div><div class="ttdef"><b>Definition:</b> <a href="nonlin__constants_8f90_source.html#l00007">nonlin_constants.f90:7</a></div></div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><b>nonlin_constants.f90</b></li>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><b>nonlin_c_api.f90</b></li>
     <li class="footer">Generated by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.16 </li>

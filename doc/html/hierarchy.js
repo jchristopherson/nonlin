@@ -1,6 +1,6 @@
 var hierarchy =
 [
-    [ "nonlin_polynomials::assignment(=)", "interfacenonlin__polynomials_1_1assignment_07_0A_08.html", null ],
+    [ "nonlin_polynomials::assignment(=)", "interfacenonlin__polynomials_1_1assignment_07_0a_08.html", null ],
     [ "nonlin_core::equation_optimizer", "structnonlin__core_1_1equation__optimizer.html", [
       [ "nonlin_optimize::line_search_optimizer", "structnonlin__optimize_1_1line__search__optimizer.html", [
         [ "nonlin_optimize::bfgs", "structnonlin__optimize_1_1bfgs.html", null ]

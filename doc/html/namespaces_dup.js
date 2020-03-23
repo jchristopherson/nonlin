@@ -1,5 +1,6 @@
 var namespaces_dup =
 [
+    [ "nonlin_c_api", "namespacenonlin__c__api.html", null ],
     [ "nonlin_constants", "namespacenonlin__constants.html", null ],
     [ "nonlin_core", "namespacenonlin__core.html", null ],
     [ "nonlin_least_squares", "namespacenonlin__least__squares.html", null ],
