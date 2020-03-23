@@ -84,18 +84,8 @@ else (Fortran_COMPILER_NAME MATCHES "gfortran.*")
 endif ()
 
 # Locate Dependencies
-# find_package(BLAS)
-# find_package(LAPACK)
 find_package(ferror 1.3.0)
 find_package(linalg 1.6.0)
-
-# if (BLAS_FOUND)
-#   message(STATUS "BLAS library found.")
-# endif()
-
-# if (LAPACK_FOUND)
-#   message(STATUS "LAPACK library found.")
-# endif()
 
 if (ferror_FOUND)
   message(STATUS "FERROR library found.")
@@ -106,9 +96,6 @@ if (linalg_FOUND)
     message(STATUS "LINALG library found.")
     set(linalg_LIBRARIES linalg)
 endif()
-
-# Include the dependency module files
-# include_directories(${linalg_INCLUDE_DIRS} ${ferror_INCLUDE_DIRS})
 
 # Locate the source directory
 add_subdirectory(src)
