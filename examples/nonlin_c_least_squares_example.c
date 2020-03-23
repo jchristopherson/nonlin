@@ -9,6 +9,7 @@
 
 void fun(int neqn, int nvar, const double *x, double *f);
 
+// This example fits data to an equation.
 int main() {
     // Local Variables
     const int neqn = 21;
@@ -56,6 +57,7 @@ void fun(int neqn, int nvar, const double *x, double *f) {
     int i;
 
     // Apply the cubic polynomial to each equation
+    // f(x) = c0 * x^3 + c1 * x^2 + c2 * x + c3
     for (i = 0; i < neqn; ++i) {
         f[i] = x[0] * CUBE(xp[i]) + 
             x[1] * SQR(xp[i]) + 
