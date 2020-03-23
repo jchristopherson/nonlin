@@ -385,7 +385,7 @@ contains
         call err%set_exit_on_error(.false.)
         call c_f_procpointer(fcn, cfptr)
         fptr => fun
-        call obj%set_fcn(fptr, 2, 2)
+        call obj%set_fcn(fptr, n, n)
         if (c_associated(jac)) then
             call c_f_procpointer(jac, cjptr)
             jptr => jacfun
@@ -440,8 +440,216 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
+    !> @brief Utilizes Newton's method to solve a system of N equations of N 
+    !! unknowns in conjuction with a backtracking type line search.
+    !!
+    !! @param[in] fcn The function to solve.
+    !! @param[in] jac A function for evaluating the Jacobian.  If null, the
+    !!  Jacobian is estimated numerically.
+    !! @param[in] n The number of equations.
+    !! @param[in,out] x On input, an N-element array containing an initial
+    !!  estimate to the solution.  On output, the updated solution estimate.
+    !! @param[out] f An N-element array that, on output, will contain
+    !!  the values of each equation as evaluated at the variable values
+    !!  given in @p x.
+    !! @param[in] cntrls The iteration controls.
+    !! @param[in] ls The line search controls.
+    !! @param[out] stats The iteration status.
+    !!
+    !! @return An error flag with the following possible values.
+    !! - NL_NO_ERROR: No error has occurred - successful execution.
+    !! - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+    !!  - NL_ARRAY_SIZE_ERROR: Occurs if any of the input arrays are not sized
+    !!      correctly.
+    !! - NL_DIVERGENT_BEHAVIOR_ERROR: Occurs if the direction vector is
+    !!      pointing in an apparent uphill direction.
+    !! - NL_CONVERGENCE_ERROR: Occurs if the line search cannot converge within
+    !!      the allowed number of iterations.
+    !! - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+    !!      available.
+    !! - NL_SPURIOUS_CONVERGENCE_ERROR: Occurs as a warning if the slope of the
+    !!      gradient vector becomes sufficiently close to zero.
+    function c_solver_newton(fcn, jac, n, x, f, cntrls, ls, stats) &
+            bind(C, name = "c_solver_newton") result(flag)
+        ! Arguments
+        type(c_funptr), intent(in), value :: fcn, jac
+        integer(c_int), intent(in), value :: n
+        real(c_double), intent(inout) :: x(n)
+        real(c_double), intent(out) :: f(n)
+        type(iteration_controls), intent(in) :: cntrls
+        type(line_search_controls), intent(in) :: ls
+        type(iteration_process), intent(out) :: stats
+        integer(c_int) :: flag
+
+        ! Local Variables
+        type(errors) :: err
+        type(vecfcn_helper) :: obj
+        procedure(c_vecfcn), pointer :: cfptr
+        procedure(vecfcn), pointer :: fptr
+        procedure(c_jacobianfcn), pointer :: cjptr
+        procedure(jacobianfcn), pointer :: jptr
+        type(iteration_behavior) :: tracking
+        type(newton_solver) :: solver
+        type(line_search) :: search
+        
+        ! Initialization
+        flag = NL_NO_ERROR
+        call err%set_exit_on_error(.false.)
+        call c_f_procpointer(fcn, cfptr)
+        fptr => fun
+        call obj%set_fcn(fptr, n, n)
+        if (c_associated(jac)) then
+            call c_f_procpointer(jac, cjptr)
+            jptr => jacfun
+            call obj%set_jacobian(jptr)
+        end if
+
+        ! Set the solver parameters
+        call solver%set_max_fcn_evals(cntrls%max_function_evals)
+        call solver%set_fcn_tolerance(cntrls%function_tolerance)
+        call solver%set_var_tolerance(cntrls%solution_tolerance)
+        call solver%set_gradient_tolerance(cntrls%gradient_tolerance)
+        call solver%set_print_status(logical(cntrls%print_status))
+
+        ! Set line search parameters
+        call solver%set_use_line_search(logical(ls%enable))
+        if (ls%enable) then
+            call search%set_max_fcn_evals(ls%max_function_evals)
+            call search%set_scaling_factor(ls%alpha)
+            call search%set_distance_factor(ls%factor)
+            call solver%set_line_search(search)
+        end if
+
+        ! Solve
+        call solver%solve(obj, x, f, ib = tracking, err = err)
+
+        ! Retrieve the ieration status
+        stats%iteration_count = tracking%iter_count
+        stats%function_eval_count = tracking%fcn_count
+        stats%jacobian_eval_count = tracking%jacobian_count
+        stats%gradient_eval_count = tracking%gradient_count
+        stats%converge_on_function = logical(tracking%converge_on_fcn, c_bool)
+        stats%converge_on_solution_change = logical(tracking%converge_on_chng, c_bool)
+        stats%converge_on_gradient = logical(tracking%converge_on_zero_diff, c_bool)
+
+        ! Check for errors
+        if (err%has_error_occurred()) then
+            flag = err%get_error_flag()
+            return
+        end if
+    contains
+        subroutine fun(xx, fx)
+            real(real64), intent(in), dimension(:) :: xx
+            real(real64), intent(out), dimension(:) :: fx
+            call cfptr(n, n, xx, fx)
+        end subroutine
+
+        subroutine jacfun(xx, jx)
+            real(real64), intent(in), dimension(:) :: xx
+            real(real64), intent(out), dimension(:,:) :: jx
+            call cjptr(n, n, xx, jx)
+        end subroutine
+    end function
 
 ! ------------------------------------------------------------------------------
+    !> @brief Utilizes the Levenberg-Marquardt method to solve a least-squares
+    !! problem of M equations of N unknowns.  There must be at least as many
+    !! equations as unknowns for this solver.
+    !!
+    !! @param[in] fcn The function to solve.
+    !! @param[in] jac A function for evaluating the Jacobian.  If null, the
+    !!  Jacobian is estimated numerically.
+    !! @param[in] neqn The number of equations.
+    !! @param[in] nvar The number of variables.
+    !! @param[in,out] x On input, an NVAR element array containing the initial 
+    !!  estimate to the solution.  On output, the solution.
+    !! @param[out] f An NEQN-element array that, on output, will contain the
+    !!  values of each equation as evaluated at the output solution given in
+    !!  @p x.
+    !! @param[in] cntrls The iteration controls.
+    !! @param[out] stats The iteration status.
+    !!
+    !! @return An error flag with the following possible values.
+    !! - NL_NO_ERROR: No error has occurred - successful execution.
+    !! - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+    !! - NL_INVALID_INPUT_ERROR: Occurs if the number of equations is less than
+    !!      than the number of variables.
+    !! - NL_CONVERGENCE_ERROR: Occurs if the line search cannot converge within
+    !!      the allowed number of iterations.
+    !! - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+    !!      available.
+    !! - NL_TOLERANCE_TOO_SMALL_ERROR: Occurs if the requested tolerance is
+    !!      to small to be practical for the problem at hand.
+    function c_solver_least_squares(fcn, jac, neqn, nvar, x, f, cntrls, stats) &
+            bind(C, name = "c_solver_least_squares") result(flag)
+        ! Arguments
+        type(c_funptr), intent(in), value :: fcn, jac
+        integer(c_int), intent(in), value :: neqn, nvar
+        real(c_double), intent(inout) :: x(nvar)
+        real(c_double), intent(out) :: f(neqn)
+        type(iteration_controls), intent(in) :: cntrls
+        type(iteration_process), intent(out) :: stats
+        integer(c_int) :: flag
+
+        ! Local Variables
+        type(errors) :: err
+        type(vecfcn_helper) :: obj
+        procedure(c_vecfcn), pointer :: cfptr
+        procedure(vecfcn), pointer :: fptr
+        procedure(c_jacobianfcn), pointer :: cjptr
+        procedure(jacobianfcn), pointer :: jptr
+        type(iteration_behavior) :: tracking
+        type(least_squares_solver) :: solver
+        
+        ! Initialization
+        flag = NL_NO_ERROR
+        call err%set_exit_on_error(.false.)
+        call c_f_procpointer(fcn, cfptr)
+        fptr => fun
+        call obj%set_fcn(fptr, neqn, nvar)
+        if (c_associated(jac)) then
+            call c_f_procpointer(jac, cjptr)
+            jptr => jacfun
+            call obj%set_jacobian(jptr)
+        end if
+
+        ! Set the solver parameters
+        call solver%set_max_fcn_evals(cntrls%max_function_evals)
+        call solver%set_fcn_tolerance(cntrls%function_tolerance)
+        call solver%set_var_tolerance(cntrls%solution_tolerance)
+        call solver%set_gradient_tolerance(cntrls%gradient_tolerance)
+        call solver%set_print_status(logical(cntrls%print_status))
+
+        ! Solve
+        call solver%solve(obj, x, f, ib = tracking, err = err)
+
+        ! Retrieve the ieration status
+        stats%iteration_count = tracking%iter_count
+        stats%function_eval_count = tracking%fcn_count
+        stats%jacobian_eval_count = tracking%jacobian_count
+        stats%gradient_eval_count = tracking%gradient_count
+        stats%converge_on_function = logical(tracking%converge_on_fcn, c_bool)
+        stats%converge_on_solution_change = logical(tracking%converge_on_chng, c_bool)
+        stats%converge_on_gradient = logical(tracking%converge_on_zero_diff, c_bool)
+
+        ! Check for errors
+        if (err%has_error_occurred()) then
+            flag = err%get_error_flag()
+            return
+        end if
+    contains
+        subroutine fun(xx, fx)
+            real(real64), intent(in), dimension(:) :: xx
+            real(real64), intent(out), dimension(:) :: fx
+            call cfptr(neqn, nvar, xx, fx)
+        end subroutine
+
+        subroutine jacfun(xx, jx)
+            real(real64), intent(in), dimension(:) :: xx
+            real(real64), intent(out), dimension(:,:) :: jx
+            call cjptr(neqn, nvar, xx, jx)
+        end subroutine
+    end function
 
 ! ------------------------------------------------------------------------------
 

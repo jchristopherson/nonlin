@@ -240,6 +240,75 @@ int c_solver_quasi_newton(vecfcn fcn, jacobianfcn jac, int n, double *x,
     double *f, const iteration_controls *cntrls, const line_search_controls *ls,
     iteration_process *stats);
 
+/**
+ * Utilizes Newton's method to solve a system of N equations of N 
+ * unknowns in conjuction with a backtracking type line search.
+ *
+ * @param fcn The function to solve.
+ * @param jac A function for evaluating the Jacobian.  If null, the
+ *  Jacobian is estimated numerically.
+ * @param n The number of equations.
+ * @param x On input, an N-element array containing an initial
+ *  estimate to the solution.  On output, the updated solution estimate.
+ * @param f An N-element array that, on output, will contain
+ *  the values of each equation as evaluated at the variable values
+ *  given in @p x.
+ * @param cntrls The iteration controls.
+ * @param ls The line search controls.
+ * @param stats The iteration status.
+ *
+ * @return An error flag with the following possible values.
+ * - NL_NO_ERROR: No error has occurred - successful execution.
+ * - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+ *  - NL_ARRAY_SIZE_ERROR: Occurs if any of the input arrays are not sized
+ *      correctly.
+ * - NL_DIVERGENT_BEHAVIOR_ERROR: Occurs if the direction vector is
+ *      pointing in an apparent uphill direction.
+ * - NL_CONVERGENCE_ERROR: Occurs if the line search cannot converge within
+ *      the allowed number of iterations.
+ * - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+ *      available.
+ * - NL_SPURIOUS_CONVERGENCE_ERROR: Occurs as a warning if the slope of the
+ *      gradient vector becomes sufficiently close to zero.
+ */
+int c_solver_newton(vecfcn fcn, jacobianfcn jac, int n, double *x, double *f, 
+    const iteration_controls *cntrls, const line_search_controls *ls,
+    iteration_process *stats);
+
+/**
+ * Utilizes the Levenberg-Marquardt method to solve a least-squares
+ * problem of M equations of N unknowns.  There must be at least as many
+ * equations as unknowns for this solver.
+ *
+ * @param fcn The function to solve.
+ * @param jac A function for evaluating the Jacobian.  If null, the
+ *  Jacobian is estimated numerically.
+ * @param neqn The number of equations.
+ * @param nvar The number of variables.
+ * @param x On input, an NVAR element array containing the initial 
+ *  estimate to the solution.  On output, the solution.
+ * @param f An NEQN-element array that, on output, will contain the
+ *  values of each equation as evaluated at the output solution given in
+ *  @p x.
+ * @param cntrls The iteration controls.
+ * @param stats The iteration status.
+ *
+ * @return An error flag with the following possible values.
+ * - NL_NO_ERROR: No error has occurred - successful execution.
+ * - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
+ * - NL_INVALID_INPUT_ERROR: Occurs if the number of equations is less than
+ *      than the number of variables.
+ * - NL_CONVERGENCE_ERROR: Occurs if the line search cannot converge within
+ *      the allowed number of iterations.
+ * - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
+ *      available.
+ * - NL_TOLERANCE_TOO_SMALL_ERROR: Occurs if the requested tolerance is
+ *      to small to be practical for the problem at hand.
+ */
+int c_solver_least_squares(vecfcn fcn, jacobianfcn jac, int neqn, int nvar,
+    double *x, double *f, const iteration_controls *cntrls, 
+    iteration_process *stats);
+
 #ifdef __cplusplus
 }
 #endif

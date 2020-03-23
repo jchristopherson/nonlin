@@ -1,4 +1,4 @@
-// nonlin_c_quasi_newton_example.c
+// nonlin_c_newton_example.c
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,7 +19,7 @@ int main() {
     line_search_controls linesearch;
     iteration_process stats;
 
-    // Define the iteration and line search controls - use defaults
+    // Defin the iteration and line search controls - use defaults
     c_set_default_solver_settings(&cntrls);
     c_set_default_line_search_settings(&linesearch);
 
@@ -28,7 +28,7 @@ int main() {
     x[1] = 1.0;
 
     // Compute the solution - analytical Jacobian
-    flag = c_solver_quasi_newton(eqns, jacobian, n, x, f, &cntrls, 
+    flag = c_solver_newton(eqns, jacobian, n, x, f, &cntrls, 
         &linesearch, &stats);
     printf("Analytical Jacobian Results:\n");
     printf("Solution: (%f, %f)\n", x[0], x[1]);
@@ -41,7 +41,7 @@ int main() {
     x[1] = 1.0;
 
     // Compute the solution - numerical Jacobian
-    flag = c_solver_quasi_newton(eqns, NULL, n, x, f, &cntrls, 
+    flag = c_solver_newton(eqns, NULL, n, x, f, &cntrls, 
         &linesearch, &stats);
     printf("\nNumerical Jacobian Results:\n");
     printf("Solution: (%f, %f)\n", x[0], x[1]);

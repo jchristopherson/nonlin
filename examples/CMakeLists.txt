@@ -54,3 +54,11 @@ target_link_libraries(c_brent_1d_example nonlin)
 # C API - Quasi-Newton Example
 add_executable(c_quasi_newton_example nonlin_c_quasi_newton_example.c)
 target_link_libraries(c_quasi_newton_example nonlin)
+
+# C API - Newton Example
+add_executable(c_newton_example nonlin_c_newton_example.c)
+target_link_libraries(c_newton_example nonlin)
+
+# C API - Least Squares Example
+add_executable(c_least_squares_example nonlin_c_least_squares_example.c)
+target_link_libraries(c_least_squares_example nonlin)
