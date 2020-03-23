@@ -12,6 +12,8 @@ module nonlin_constants
 ! ******************************************************************************
 ! ERROR FLAGS
 ! ------------------------------------------------------------------------------
+    !> A flag denoting no error.
+    integer(int32), parameter :: NL_NO_ERROR = 0
     !> An error flag denoting an invalid input.
     integer(int32), parameter :: NL_INVALID_INPUT_ERROR = 201
     !> An error flag denoting an improperly sized array.
