@@ -2,6 +2,7 @@
 #define NONLIN_H_
 
 #include <stdbool.h>
+#include <complex.h>
 
 #define NL_NO_ERROR                     0
 #define NL_INVALID_INPUT_ERROR          201
@@ -428,6 +429,66 @@ int c_get_polynomial_order(const c_polynomial *poly);
  */
 int c_fit_polynomial(c_polynomial *poly, int n, const double *x, 
     const double *y, bool zero);
+
+/**
+ * Gets an array containing the polynomial coefficients in ascending
+ * order such that f(x) = c0 + c1 * x + c2 * x**2 .... + cN * x**N.
+ *
+ * @param poly The polynomial object.
+ * @param nc The number of elements in @p c.  Ideally, this value is
+ *  one greater than the order of the polynomial.
+ * @param c An NC-element array where the coefficients will be written.
+ *
+ * @return An error flag with the following possible values.
+ * - NL_NO_ERROR: No error has occurred - successful execution.
+ * - NL_INVALID_INPUT_ERROR: Occurs if @p nc is smaller than one greater 
+ *      than the order of the polynomial.
+ */
+int c_get_polynomial_coefficients(const c_polynomial *poly, int nc, double *c);
+
+/**
+ * Sets the coefficients of the polynomial by using an array 
+ * containing the polynomial coefficients in ascending order such that
+ * f(x) = c0 + c1 * x + c2 * x**2 .... + cN * x**N.
+ *
+ * @param poly The polynomial object.
+ * @param nc The number of elements in @P c.  This value must be 
+ *  one greater than the order of the polynomial.
+ * @param c The NC-element array containing the new polynomial 
+ *  coefficients in ascending order.
+ *
+ * @return An error flag with the following possible values.
+ * - NL_NO_ERROR: No error has occurred - successful execution.
+ * - NL_INVALID_INPUT_ERROR: Occurs if @p nc is not equal to than one
+ *      greater than the order of the polynomial.
+ */
+int c_set_polynomial_coefficients(c_polynomial *poly, int nc, const double *c);
+
+/**
+ * Evaluates the polynomial at the specified values.
+!!
+!! @param poly The polynomial object.
+!! @param n The number of points at which to evaluate the polynomial.
+!! @param x An N-element array containing the values at which to
+!!  evaluate the polynomial.
+!! @param y An N-element array where the results of the polynomial
+!!  evaluation will be written.
+ */
+void c_evaluate_polynomial_real(const c_polynomial *poly, int n, 
+    const double *x, double *y);
+
+/**
+ * Evaluates the polynomial at the specified values.
+!!
+!! @param poly The polynomial object.
+!! @param n The number of points at which to evaluate the polynomial.
+!! @param x An N-element array containing the values at which to
+!!  evaluate the polynomial.
+!! @param y An N-element array where the results of the polynomial
+!!  evaluation will be written.
+ */
+void c_evaluate_polynomial_complex(const c_polynomial *poly, int n, 
+    const double complex *x, double complex *y);
 
 #ifdef __cplusplus
 }

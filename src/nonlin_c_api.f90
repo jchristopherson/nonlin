@@ -984,6 +984,7 @@ contains
         real(real64), allocatable, dimension(:) :: ycopy
 
         ! Initialization
+        flag = NL_NO_ERROR
         call err%set_exit_on_error(.false.)
         ycopy = y   ! Prevents overwritting of y
 
@@ -1023,9 +1024,20 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    ! get coefficients array
+    !> @brief Gets an array containing the polynomial coefficients in ascending
+    !! order such that f(x) = c0 + c1 * x + c2 * x**2 .... + cN * x**N.
+    !!
+    !! @param[in] poly The polynomial object.
+    !! @param[in] nc The number of elements in @p c.  Ideally, this value is
+    !!  one greater than the order of the polynomial.
+    !! @param[out] c An NC-element array where the coefficients will be written.
+    !!
+    !! @return An error flag with the following possible values.
+    !! - NL_NO_ERROR: No error has occurred - successful execution.
+    !! - NL_INVALID_INPUT_ERROR: Occurs if @p nc is smaller than one greater 
+    !!      than the order of the polynomial.
     function c_get_polynomial_coefficients(poly, nc, c) &
-            bind(C, name = "") result(flag)
+            bind(C, name = "c_get_polynomial_coefficients") result(flag)
         ! Arguments
         type(c_polynomial), intent(in) :: poly
         integer(c_int), intent(in), value :: nc
@@ -1033,25 +1045,186 @@ contains
         integer(c_int) :: flag
 
         ! Local Variables
+        type(errors) :: err
+        integer(int32) :: i, order, n
+        integer(int8), pointer, dimension(:) :: map
+        type(polynomial) :: fpoly
+
+        ! Initialization
+        flag = NL_NO_ERROR
+        call err%set_exit_on_error(.false.)
+
+        ! Ensure there's something to work with
+        if (.not.c_associated(poly%ptr) .or. poly%size_in_bytes == 0) return
+
+        ! Obtain the pointer
+        call c_f_pointer(poly%ptr, map, [poly%size_in_bytes])
+        if (.not.associated(map)) return
+
+        ! Reconstruct the Fortran polynomial object
+        fpoly = transfer(map, fpoly)
+
+        ! Get the order of the polynomial, and then copy over the coefficients
+        order = fpoly%order()
+        n = order + 1
+        if (nc < n) then
+            flag = NL_INVALID_INPUT_ERROR
+            return
+        end if
+        do i = 1, n
+            c(i) = fpoly%get(i)
+        end do
     end function
 
 ! ------------------------------------------------------------------------------
-    ! set coefficients array
+    !> @brief Sets the coefficients of the polynomial by using an array 
+    !! containing the polynomial coefficients in ascending order such that
+    !! f(x) = c0 + c1 * x + c2 * x**2 .... + cN * x**N.
+    !!
+    !! @param[in,out] poly The polynomial object.
+    !! @param[in] nc The number of elements in @P c.  This value must be 
+    !!  one greater than the order of the polynomial.
+    !! @param[in] c The NC-element array containing the new polynomial 
+    !!  coefficients in ascending order.
+    !!
+    !! @return An error flag with the following possible values.
+    !! - NL_NO_ERROR: No error has occurred - successful execution.
+    !! - NL_INVALID_INPUT_ERROR: Occurs if @p nc is not equal to than one
+    !!      greater than the order of the polynomial.
+    function c_set_polynomial_coefficients(poly, nc, c) &
+            bind(C, name = "c_set_polynomial_coefficients") result(flag)
+        ! Arguments
+        type(c_polynomial), intent(inout) :: poly
+        integer(c_int), intent(in), value :: nc
+        real(c_double) :: c(nc)
+        integer(c_int) :: flag
+
+        ! Local Variables
+        type(errors) :: err
+        integer(int32) :: i, order, n
+        integer(int8), pointer, dimension(:) :: map
+        integer(int8), allocatable, dimension(:) :: buffer
+        type(polynomial) :: fpoly
+
+        ! Initialization
+        flag = NL_NO_ERROR
+        call err%set_exit_on_error(.false.)
+
+        ! Ensure there's something to work with
+        if (.not.c_associated(poly%ptr) .or. poly%size_in_bytes == 0) return
+
+        ! Obtain the pointer
+        call c_f_pointer(poly%ptr, map, [poly%size_in_bytes])
+        if (.not.associated(map)) return
+
+        ! Reconstruct the Fortran polynomial object
+        fpoly = transfer(map, fpoly)
+
+        ! Get the order of the polynomial, and then copy over the coefficients
+        order = fpoly%order()
+        n = order + 1
+        if (nc /= n) then
+            flag = NL_INVALID_INPUT_ERROR
+            return
+        end if
+        do i = 1, n
+            call fpoly%set(i, c(i))
+        end do
+
+        ! Reconstruct the C polynomial type
+        deallocate(map)
+        buffer = transfer(fpoly, buffer)
+        allocate(map(size(buffer)))
+        do i = 1, size(buffer)
+            map(i) = buffer(i)
+        end do
+
+        ! Store the results
+        poly%size_in_bytes = size(map)
+        poly%ptr = c_loc(map)
+    end function
 
 ! ------------------------------------------------------------------------------
-    ! evaluate - real valued
+    !> @brief Evaluates the polynomial at the specified values.
+    !!
+    !! @param[in] poly The polynomial object.
+    !! @param[in] n The number of points at which to evaluate the polynomial.
+    !! @param[in] x An N-element array containing the values at which to
+    !!  evaluate the polynomial.
+    !! @param[out] y An N-element array where the results of the polynomial
+    !!  evaluation will be written.
+    subroutine c_evaluate_polynomial_real(poly, n, x, y) &
+            bind(C, name = "c_evaluate_polynomial_real")
+        ! Arguments
+        type(c_polynomial), intent(in) :: poly
+        integer(c_int), intent(in), value :: n
+        real(c_double), intent(in) :: x(n)
+        real(c_double), intent(out) :: y(n)
+
+        ! Local Variables
+        integer(int8), pointer, dimension(:) :: map
+        type(polynomial) :: fpoly
+
+        ! Ensure there's something to work with
+        if (.not.c_associated(poly%ptr) .or. poly%size_in_bytes == 0) return
+
+        ! Obtain the pointer
+        call c_f_pointer(poly%ptr, map, [poly%size_in_bytes])
+        if (.not.associated(map)) return
+
+        ! Reconstruct the Fortran polynomial object
+        fpoly = transfer(map, fpoly)
+
+        ! Evaluate the polynomial at X
+        y = fpoly%evaluate(x)
+    end subroutine
 
 ! ------------------------------------------------------------------------------
-    ! evaluate - complex-valued
+    !> @brief Evaluates the polynomial at the specified values.
+    !!
+    !! @param[in] poly The polynomial object.
+    !! @param[in] n The number of points at which to evaluate the polynomial.
+    !! @param[in] x An N-element array containing the values at which to
+    !!  evaluate the polynomial.
+    !! @param[out] y An N-element array where the results of the polynomial
+    !!  evaluation will be written.
+    subroutine c_evaluate_polynomial_complex(poly, n, x, y) &
+            bind(C, name = "c_evaluate_polynomial_complex")
+        ! Arguments
+        type(c_polynomial), intent(in) :: poly
+        integer(c_int), intent(in), value :: n
+        complex(c_double), intent(in) :: x(n)
+        complex(c_double), intent(out) :: y(n)
+
+        ! Local Variables
+        integer(int8), pointer, dimension(:) :: map
+        type(polynomial) :: fpoly
+
+        ! Ensure there's something to work with
+        if (.not.c_associated(poly%ptr) .or. poly%size_in_bytes == 0) return
+
+        ! Obtain the pointer
+        call c_f_pointer(poly%ptr, map, [poly%size_in_bytes])
+        if (.not.associated(map)) return
+
+        ! Reconstruct the Fortran polynomial object
+        fpoly = transfer(map, fpoly)
+
+        ! Evaluate the polynomial at X
+        y = fpoly%evaluate(x)
+    end subroutine
 
 ! ------------------------------------------------------------------------------
     ! roots
 
 ! ------------------------------------------------------------------------------
+    ! addition
 
 ! ------------------------------------------------------------------------------
+    ! subtraction
 
 ! ------------------------------------------------------------------------------
+    ! multiplication
 
 ! ------------------------------------------------------------------------------
 end module

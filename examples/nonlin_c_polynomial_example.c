@@ -6,8 +6,10 @@
 int main() {
     // Local Variables
     const int neqn = 21;
+    const int norder = 3;
     c_polynomial poly;
-    int flag;
+    int i, flag;
+    double coeffs[4], y[21];
     double xp[] = {
         0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 
         0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 
@@ -23,7 +25,7 @@ int main() {
     };
 
     // Create a new third order polynomial
-    flag = c_init_polynomial(3, &poly);
+    flag = c_init_polynomial(norder, &poly);
     if (flag != NL_NO_ERROR) printf("Error Code: %i\n", flag);
 
     // Check the polynomial order
@@ -34,6 +36,14 @@ int main() {
     flag = c_fit_polynomial(&poly, neqn, xp, yp, false);
 
     // Print out the coefficients
+    flag = c_get_polynomial_coefficients(&poly, norder + 1, coeffs);
+    for (i = 0; i <= norder; ++i) printf("c[%i] = %f\n", i, coeffs[i]);
+
+    // Evaluate the fitted polynomial and compare to the actual values
+    c_evaluate_polynomial_real(&poly, neqn, xp, y);
+    printf("\n");
+    for (i = 0; i < neqn; ++i) 
+    printf("Actual: %f\tFitted: %f\n", yp[i], y[i]);
 
     // End
     c_free_polynomial(&poly);
