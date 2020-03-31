@@ -11,6 +11,7 @@ module nonlin_c_api
     use nonlin_least_squares
     use nonlin_linesearch
     use nonlin_optimize
+    use nonlin_polynomials
     implicit none
 
     interface
@@ -143,6 +144,15 @@ module nonlin_c_api
         !! considerations, the minimum value should be limited to 0.1 such that 
         !! the value must exist on the set [0.1, 1).
         real(c_double) :: factor
+    end type
+
+    !> @brief A type for representing a polynomial in C that is compatible with
+    !! the polynomial type in this library.
+    type, bind(C) :: c_polynomial
+        !> @brief The size of the polynomial object, in bytes.
+        integer(c_int) :: size_in_bytes
+        !> @brief A pointer to the underlying Fortran polynomial object.
+        type(c_ptr) :: ptr
     end type
 
 contains
@@ -832,6 +842,210 @@ contains
             call cgptr(n, xx, gx)
         end subroutine
     end function
+
+! ******************************************************************************
+! POLYNOMIAL SUPPORT
+! ------------------------------------------------------------------------------
+    !> @brief Initializes a new C-compatible polynomial object.
+    !!
+    !! @param[in] order The order of the polynomial.  This must be at least 1.
+    !! @param[out] poly A pointer to the polynomial object.
+    !!
+    !! @return An error flag with the following possible values.
+    !! - NL_NO_ERROR: No error has occurred - successful execution.
+    !!  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
+    !!      was specified.
+    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
+    function c_init_polynomial(order, poly) &
+            bind(C, name = "c_init_polynomial") result(flag)
+        ! Arguments
+        integer(c_int), intent(in), value :: order
+        type(c_polynomial), intent(out) :: poly
+        integer(c_int) :: flag
+
+        ! Local Variables
+        integer(int32) :: i
+        type(errors) :: err
+        type(polynomial) :: fpoly
+        integer(int8), pointer, dimension(:) :: map
+        integer(int8), allocatable, dimension(:) :: buffer
+
+        ! Initialization
+        call err%set_exit_on_error(.false.)
+        flag = NL_NO_ERROR
+
+        ! Initialize the Fortran polynomial
+        call fpoly%initialize(order, err = err)
+        if (err%has_error_occurred()) then
+            flag = err%get_error_flag()
+            return
+        end if
+
+        ! Initialize the pointer
+        buffer = transfer(fpoly, buffer)
+        allocate(map(size(buffer)))
+        do i = 1, size(buffer)
+            map(i) = buffer(i)
+        end do
+
+        ! Store the results
+        poly%size_in_bytes = size(map)
+        poly%ptr = c_loc(map)
+    end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Frees memory allocated for the polynomial object.
+    !!
+    !! @param[in,out] poly The polynomial object to free.
+    subroutine c_free_polynomial(poly) bind(C, name = "c_free_polynomial")
+        ! Arguments
+        type(c_polynomial), intent(inout) :: poly
+
+        ! Local Variables
+        integer(int8), pointer, dimension(:) :: map
+
+        ! Ensure there's something to work with
+        if (.not.c_associated(poly%ptr) .or. poly%size_in_bytes == 0) return
+
+        ! Obtain the pointer
+        call c_f_pointer(poly%ptr, map, [poly%size_in_bytes])
+        if (.not.associated(map)) return
+
+        ! Free memory
+        deallocate(map)
+
+        ! Make the C pointer NULL
+        poly%ptr = c_null_ptr
+        poly%size_in_bytes = 0
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    !> @brief Gets the order of the polynomial.
+    !!
+    !! @param[in] poly The polynomial object.
+    !! @return The order of the polynomial.
+    function c_get_polynomial_order(poly) &
+            bind(C, name = "c_get_polynomial_order") result(n)
+        ! Arguments
+        type(c_polynomial), intent(in) :: poly
+        integer(c_int) :: n
+
+        ! Local Variables
+        integer(int8), pointer, dimension(:) :: map
+        type(polynomial) :: fpoly
+
+        ! Initialization
+        n = 0
+        
+        ! Ensure there's something to work with
+        if (.not.c_associated(poly%ptr) .or. poly%size_in_bytes == 0) return
+
+        ! Obtain the pointer
+        call c_f_pointer(poly%ptr, map, [poly%size_in_bytes])
+        if (.not.associated(map)) return
+
+        ! Reconstruct the Fortran polynomial object
+        fpoly = transfer(map, fpoly)
+
+        ! Obtain the polynomial order
+        n = fpoly%order()
+    end function
+
+! ------------------------------------------------------------------------------
+    !> @brief Fits a data set to the polynomial.
+    !!
+    !! @param[in,out] poly The polynomial object.
+    !! @param[in] n The number of data points to fit.
+    !! @param[in] x An N-element array of the independent variable data points.
+    !! @param[in] y An N-element array of the dependent variable data points.
+    !! @param[in] zero Set to true to force the fit thru zero; else, set to
+    !!  false.
+    !!
+    !! @return An error flag with the following possible values.
+    !! - NL_NO_ERROR: No error has occurred - successful execution.
+    !!  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
+    !!      was specified, or if order is too large for the data set.
+    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
+    function c_fit_polynomial(poly, n, x, y, zero) &
+            bind(C, name = "c_fit_polynomial") result(flag)
+        ! Arguments
+        type(c_polynomial), intent(inout) :: poly
+        integer(c_int), intent(in), value :: n
+        real(c_double), intent(in) :: x(n), y(n)
+        logical(c_bool), intent(in), value :: zero
+        integer(c_int) :: flag
+
+        ! Local Variables
+        type(errors) :: err
+        integer(int32) :: i, order
+        integer(int8), pointer, dimension(:) :: map
+        integer(int8), allocatable, dimension(:) :: buffer
+        type(polynomial) :: fpoly
+        real(real64), allocatable, dimension(:) :: ycopy
+
+        ! Initialization
+        call err%set_exit_on_error(.false.)
+        ycopy = y   ! Prevents overwritting of y
+
+        ! Ensure there's something to work with
+        if (.not.c_associated(poly%ptr) .or. poly%size_in_bytes == 0) return
+
+        ! Obtain the pointer
+        call c_f_pointer(poly%ptr, map, [poly%size_in_bytes])
+        if (.not.associated(map)) return
+
+        ! Reconstruct the Fortran polynomial object
+        fpoly = transfer(map, fpoly)
+
+        ! Fit the data
+        order = fpoly%order()
+        if (zero) then
+            call fpoly%fit_thru_zero(x, ycopy, order, err)
+        else
+            call fpoly%fit(x, ycopy, order, err)
+        end if
+        if (err%has_error_occurred()) then
+            flag = err%get_error_flag()
+            return
+        end if
+
+        ! Reconstruct the C polynomial type
+        deallocate(map)
+        buffer = transfer(fpoly, buffer)
+        allocate(map(size(buffer)))
+        do i = 1, size(buffer)
+            map(i) = buffer(i)
+        end do
+
+        ! Store the results
+        poly%size_in_bytes = size(map)
+        poly%ptr = c_loc(map)
+    end function
+
+! ------------------------------------------------------------------------------
+    ! get coefficients array
+    function c_get_polynomial_coefficients(poly, nc, c) &
+            bind(C, name = "") result(flag)
+        ! Arguments
+        type(c_polynomial), intent(in) :: poly
+        integer(c_int), intent(in), value :: nc
+        real(c_double), intent(out) :: c(nc)
+        integer(c_int) :: flag
+
+        ! Local Variables
+    end function
+
+! ------------------------------------------------------------------------------
+    ! set coefficients array
+
+! ------------------------------------------------------------------------------
+    ! evaluate - real valued
+
+! ------------------------------------------------------------------------------
+    ! evaluate - complex-valued
+
+! ------------------------------------------------------------------------------
+    ! roots
 
 ! ------------------------------------------------------------------------------
 

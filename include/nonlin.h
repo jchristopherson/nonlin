@@ -154,6 +154,14 @@ typedef void (*gradientfcn)(int n, const double *x, double *g);
  */
 typedef void (*jacobianfcn)(int neqn, int nvar, const double *x, double *jac);
 
+/** Provides a container for the underlying Fortran polynomial type. */
+typedef struct {
+    /** The size of the underlying Fortran polynomial object in bytes. */
+    int size_in_bytes;
+    /** A pointer to the underlying Fortran polynomial object. */
+    void* ptr;
+} c_polynomial;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -372,6 +380,54 @@ int c_solver_nelder_mead(fcnnvar fcn, int n, double *x, double *f,
 int c_solver_bfgs(fcnnvar fcn, gradientfcn grad, int n, double *x, double *f,
     const iteration_controls *cntrls, const line_search_controls *ls,
     iteration_process *stats);
+
+/**
+ * Initializes a new C-compatible polynomial object.
+ *
+ * @param order The order of the polynomial.  This must be at least 1.
+ * @param poly A pointer to the polynomial object.
+ *
+ * @return An error flag with the following possible values.
+ * - NL_NO_ERROR: No error has occurred - successful execution.
+ *  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
+ *      was specified.
+ *  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
+ */
+int c_init_polynomial(int order, c_polynomial *poly);
+
+/**
+ * Frees memory allocated for the polynomial object.
+ *
+ * @param poly The polynomial object to free.
+ */
+void c_free_polynomial(c_polynomial *poly);
+
+/**
+ * Gets the order of the polynomial.
+ *
+ * @param poly The polynomial object.
+ * @return The order of the polynomial.
+ */
+int c_get_polynomial_order(const c_polynomial *poly);
+
+/**
+ * Fits a data set to the polynomial.
+ *
+ * @param poly The polynomial object.
+ * @param n The number of data points to fit.
+ * @param x An N-element array of the independent variable data points.
+ * @param y An N-element array of the dependent variable data points.
+ * @param zero Set to true to force the fit thru zero; else, set to
+ *  false.
+ *
+ * @return An error flag with the following possible values.
+ * - NL_NO_ERROR: No error has occurred - successful execution.
+ *  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
+ *      was specified, or if order is too large for the data set.
+ *  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
+ */
+int c_fit_polynomial(c_polynomial *poly, int n, const double *x, 
+    const double *y, bool zero);
 
 #ifdef __cplusplus
 }

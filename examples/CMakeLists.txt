@@ -70,3 +70,7 @@ target_link_libraries(c_nelder_mead_example nonlin)
 # C API - BFGS Example
 add_executable(c_bfgs_example nonlin_c_bfgs_example.c)
 target_link_libraries(c_bfgs_example nonlin)
+
+# C API - POLYNOMIAL Example
+add_executable(c_polynomial_example nonlin_c_polynomial_example.c)
+target_link_libraries(c_polynomial_example nonlin)
