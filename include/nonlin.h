@@ -3,6 +3,16 @@
 
 #include <stdbool.h>
 
+#define NL_NO_ERROR                     0
+#define NL_INVALID_INPUT_ERROR          201
+#define NL_ARRAY_SIZE_ERROR             202
+#define NL_OUT_OF_MEMORY_ERROR          105
+#define NL_INVALID_OPERATION_ERROR      107
+#define NL_CONVERGENCE_ERROR            106
+#define NL_DIVERGENT_BEHAVIOR_ERROR     206
+#define NL_SPURIOUS_CONVERGENCE_ERROR   207
+#define NL_TOLERANCE_TOO_SMALL_ERROR    208
+
 /** A type for providing a set of iteration control parameters. */
 typedef struct {
     /** Defines the maximum number of allowable function evaluations. */
