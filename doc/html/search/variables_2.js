@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['gradient_5fcount',['gradient_count',['../structnonlin__core_1_1iteration__behavior.html#aac568ba1c2a03d5b59faf7765f686105',1,'nonlin_core::iteration_behavior']]]
+  ['enable_386',['enable',['../structnonlin__c__api_1_1line__search__controls.html#a67df936d4e89d2fd2292f9d0ce6f559b',1,'nonlin_c_api::line_search_controls::enable()'],['../structline__search__controls.html#a011d44e850183280119f0aa06af6d83a',1,'line_search_controls::enable()']]]
 ];

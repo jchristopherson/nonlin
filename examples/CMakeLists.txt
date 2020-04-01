@@ -42,24 +42,35 @@ target_link_libraries(newton_example_2 nonlin)
 add_executable(polynomial_roots_example nonlin_poly_roots_example.f90)
 target_link_libraries(polynomial_roots_example nonlin)
 
+# C API - 1D Newton Example
+include_directories(${PROJECT_SOURCE_DIR}/include)
+add_executable(c_newton_1d_example nonlin_c_newton_1d_example.c)
+target_link_libraries(c_newton_1d_example nonlin)
 
-# Ensure LINALG, FERROR, and BLAS libraries are copied to the runtime directory
-if (WIN32)
-    get_target_property(ferror_LibLocation ferror LOCATION)
-    add_custom_command(TARGET quasi_newton_example POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${ferror_LibLocation} $<TARGET_FILE_DIR:quasi_newton_example>
-    )
+# C API - 1D Brent Example
+add_executable(c_brent_1d_example nonlin_c_brent_1d_example.c)
+target_link_libraries(c_brent_1d_example nonlin)
 
-    get_target_property(linalg_LibLocation linalg LOCATION)
-    add_custom_command(TARGET quasi_newton_example POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${linalg_LibLocation} $<TARGET_FILE_DIR:quasi_newton_example>
-    )
+# C API - Quasi-Newton Example
+add_executable(c_quasi_newton_example nonlin_c_quasi_newton_example.c)
+target_link_libraries(c_quasi_newton_example nonlin)
 
-    get_target_property(blas_LibLocation blas LOCATION)
-    add_custom_command(TARGET quasi_newton_example POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${blas_LibLocation} $<TARGET_FILE_DIR:quasi_newton_example>
-    )
-endif()
+# C API - Newton Example
+add_executable(c_newton_example nonlin_c_newton_example.c)
+target_link_libraries(c_newton_example nonlin)
+
+# C API - Least Squares Example
+add_executable(c_least_squares_example nonlin_c_least_squares_example.c)
+target_link_libraries(c_least_squares_example nonlin)
+
+# C API - Nelder-Mead Example
+add_executable(c_nelder_mead_example nonlin_c_nelder_mead_example.c)
+target_link_libraries(c_nelder_mead_example nonlin)
+
+# C API - BFGS Example
+add_executable(c_bfgs_example nonlin_c_bfgs_example.c)
+target_link_libraries(c_bfgs_example nonlin)
+
+# C API - POLYNOMIAL Example
+add_executable(c_polynomial_example nonlin_c_polynomial_example.c)
+target_link_libraries(c_polynomial_example nonlin)

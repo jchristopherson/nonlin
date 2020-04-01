@@ -7,8 +7,63 @@ before_install:
   - sudo apt-get update -qq
 
 install:
+  # Install gfortran
   - sudo apt-get install -qq gfortran-7
   - sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-7 90
+
+  # Install git
+  - sudo apt install git
+
+  # Use the default version of CMake to build a newer version
+  - sudo apt install cmake
+
+  # Download and install a newer version of CMake
+  - sudo git clone https://github.com/Kitware/CMake.git
+  - pushd CMake
+  - sudo mkdir build
+  - pushd build
+  - sudo cmake -DCMAKE_INSTALL_LIBDIR=$HOME/.local/CMake ..
+  - sudo cmake
+  - sudo make
+  - sudo make install
+  - popd
+  - popd
+
+  # Download and install LAPACK
+  - sudo git clone https://github.com/Reference-LAPACK/lapack.git
+  - pushd lapack
+  - sudo mkdir build
+  - pushd build
+  - sudo cmake -DCMAKE_INSTALL_LIBDIR=$HOME/.local/lapack ..
+  - sudo cmake
+  - sudo make
+  - sudo make install
+  - popd
+  - popd
+
+  # Download and install FERROR
+  - sudo git clone https://github.com/jchristopherson/ferror.git
+  - pushd ferror
+  - sudo mkdir build
+  - pushd build
+  - sudo cmake -DCMAKE_INSTALL_LIBDIR=$HOME/.local/ferror ..
+  - sudo cmake
+  - sudo make
+  - sudo make install
+  - popd
+  - popd
+
+  # Download and install LINALG
+  - sudo git clone https://github.com/jchristopherson/linalg.git
+  - pushd linalg
+  - sudo mkdir build
+  - pushd build
+  - sudo cmake -DCMAKE_INSTALL_LIBDIR=$HOME/.local/linalg ..
+  - sudo cmake
+  - sudo make
+  - sudo make install
+  - popd
+  - popd
 
 before_script:
     - mkdir build

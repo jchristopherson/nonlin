@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['iteration_5fbehavior',['iteration_behavior',['../structnonlin__core_1_1iteration__behavior.html',1,'nonlin_core']]]
+  ['gradientfcn_233',['gradientfcn',['../interfacenonlin__core_1_1gradientfcn.html',1,'nonlin_core']]]
 ];

@@ -400,7 +400,7 @@ contains
     !! minimization problems.
     !!
     !! @param[in] this The line_search object.
-    !! @param[in] fcn A vecfcn_helper object containing the system of equations.
+    !! @param[in] fcn A fcnnvar_helper object containing the system of equations.
     !! @param[in] xold An N-element array defining the initial point, where N
     !!  is the number of variables.
     !! @param[in] grad An N-element array defining the gradient of @p fcn

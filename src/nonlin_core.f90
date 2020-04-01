@@ -274,7 +274,7 @@ module nonlin_core
 
 ! ------------------------------------------------------------------------------
     !> @brief Defines a pair of numeric values.
-    type :: value_pair
+    type, bind(C) :: value_pair
         !> Value 1.
         real(real64) :: x1
         !> Value 2.
