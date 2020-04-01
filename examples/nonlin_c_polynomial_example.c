@@ -10,6 +10,7 @@ int main() {
     c_polynomial poly;
     int i, flag;
     double coeffs[4], y[21];
+    double complex rts[3];
     double xp[] = {
         0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 
         0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 
@@ -41,9 +42,15 @@ int main() {
 
     // Evaluate the fitted polynomial and compare to the actual values
     c_evaluate_polynomial_real(&poly, neqn, xp, y);
-    printf("\n");
+    printf("\nEvaluation Test:\n");
     for (i = 0; i < neqn; ++i) 
     printf("Actual: %f\tFitted: %f\n", yp[i], y[i]);
+
+    // Compute the roots of the polynomial
+    printf("\nRoots:\n");
+    flag = c_polynomial_roots(&poly, norder, rts);
+    for (i = 0; i < norder; ++i)
+        printf("Root %i: (%f, %f)\n", i + 1, creal(rts[i]), cimag(rts[i]));
 
     // End
     c_free_polynomial(&poly);

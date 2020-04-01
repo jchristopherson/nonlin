@@ -1215,16 +1215,63 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    ! roots
+    !> @brief Computes the roots of the polynomial.
+    !!
+    !! @param[in] poly The polynomial object.
+    !! @param[in] n THe size of @p rts.  This must be equal to the order of the
+    !!  polynomial.
+    !! @param[out] rts An N-element array where the roots of the polynomial will
+    !!  be written.
+    !!
+    !! @return An error flag with the following possible values.
+    !! - NL_NO_ERROR: No error has occurred - successful execution.
+    !! - NL_INVALID_INPUT_ERROR: Occurs if @p n is not equal to the order of
+    !!      the polynomial.
+    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if local memory must be allocated, and
+    !!      there is insufficient memory available.
+    !!  - NL_CONVERGENCE_ERROR: Occurs if the algorithm failed to converge.
+    function c_polynomial_roots(poly, n, rts) &
+            bind(C, name = "c_polynomial_roots") result(flag)
+        ! Arguments
+        type(c_polynomial), intent(in) :: poly
+        integer(c_int), intent(in), value :: n
+        complex(c_double), intent(out) :: rts(n)
+        integer(c_int) :: flag
 
-! ------------------------------------------------------------------------------
-    ! addition
+        ! Local Variables
+        type(errors) :: err
+        integer(int8), pointer, dimension(:) :: map
+        type(polynomial) :: fpoly
+        integer(int32) :: order
 
-! ------------------------------------------------------------------------------
-    ! subtraction
+        ! Initialization
+        flag = NL_NO_ERROR
+        call err%set_exit_on_error(.false.)
 
-! ------------------------------------------------------------------------------
-    ! multiplication
+        ! Ensure there's something to work with
+        if (.not.c_associated(poly%ptr) .or. poly%size_in_bytes == 0) return
+
+        ! Obtain the pointer
+        call c_f_pointer(poly%ptr, map, [poly%size_in_bytes])
+        if (.not.associated(map)) return
+
+        ! Reconstruct the Fortran polynomial object
+        fpoly = transfer(map, fpoly)
+
+        ! Ensure the output array is properly sized
+        order = fpoly%order()
+        if (n /= order) then
+            flag = NL_INVALID_INPUT_ERROR
+            return
+        end if
+
+        ! Compute the polynomial roots
+        rts = fpoly%roots(err)
+        if (err%has_error_occurred()) then
+            flag = err%get_error_flag()
+            return
+        end if
+    end function
 
 ! ------------------------------------------------------------------------------
 end module

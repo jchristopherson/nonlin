@@ -466,29 +466,48 @@ int c_set_polynomial_coefficients(c_polynomial *poly, int nc, const double *c);
 
 /**
  * Evaluates the polynomial at the specified values.
-!!
-!! @param poly The polynomial object.
-!! @param n The number of points at which to evaluate the polynomial.
-!! @param x An N-element array containing the values at which to
-!!  evaluate the polynomial.
-!! @param y An N-element array where the results of the polynomial
-!!  evaluation will be written.
+ *
+ * @param poly The polynomial object.
+ * @param n The number of points at which to evaluate the polynomial.
+ * @param x An N-element array containing the values at which to
+ *  evaluate the polynomial.
+ * @param y An N-element array where the results of the polynomial
+ *  evaluation will be written.
  */
 void c_evaluate_polynomial_real(const c_polynomial *poly, int n, 
     const double *x, double *y);
 
 /**
  * Evaluates the polynomial at the specified values.
-!!
-!! @param poly The polynomial object.
-!! @param n The number of points at which to evaluate the polynomial.
-!! @param x An N-element array containing the values at which to
-!!  evaluate the polynomial.
-!! @param y An N-element array where the results of the polynomial
-!!  evaluation will be written.
+ *
+ * @param poly The polynomial object.
+ * @param n The number of points at which to evaluate the polynomial.
+ * @param x An N-element array containing the values at which to
+ *  evaluate the polynomial.
+ * @param y An N-element array where the results of the polynomial
+ *  evaluation will be written.
  */
 void c_evaluate_polynomial_complex(const c_polynomial *poly, int n, 
     const double complex *x, double complex *y);
+
+/**
+ * Computes the roots of the polynomial.
+ *
+ * @param poly The polynomial object.
+ * @param n THe size of @p rts.  This must be equal to the order of the
+ *  polynomial.
+ * @param rts An N-element array where the roots of the polynomial will
+ *  be written.
+ *
+ * @return An error flag with the following possible values.
+ * - NL_NO_ERROR: No error has occurred - successful execution.
+ * - NL_INVALID_INPUT_ERROR: Occurs if @p n is not equal to the order of
+ *      the polynomial.
+ *  - NL_OUT_OF_MEMORY_ERROR: Occurs if local memory must be allocated, and
+ *      there is insufficient memory available.
+ *  - NL_CONVERGENCE_ERROR: Occurs if the algorithm failed to converge.
+ */
+int c_polynomial_roots(const c_polynomial *poly, int n, double complex *rts);
 
 #ifdef __cplusplus
 }
