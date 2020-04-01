@@ -175,7 +175,7 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">this</td><td>The <a class="el" href="structnonlin__solve_1_1brent__solver.html" title="Defines a solver based upon Brent&#39;s method for solving an equation of one variable without using deri...">brent_solver</a> object. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">fcn</td><td>The fcn1var_helper object containing the equation to solve. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">x</td><td>A parameter used to return the solution. Notice, any input value will be ignored as this routine relies upon the search limits in <code>lim</code> to provide a starting point. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">lim</td><td>A value_pair object defining the search limits. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">lim</td><td>A <a class="el" href="structvalue__pair.html">value_pair</a> object defining the search limits. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">f</td><td>An optional parameter used to return the function residual as computed at <code>x</code>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">ib</td><td>An optional output, that if provided, allows the caller to obtain iteration performance statistics. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">err</td><td>An optional errors-based object that if provided can be used to retrieve information relating to any errors encountered during execution. If not provided, a default implementation of the errors class is used internally to provide error handling. Possible errors and warning messages that may be encountered are as follows.<ul>
@@ -188,7 +188,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section user"><dt>Example</dt><dd>The following code provides an example of how to solve an equation of one variable using Brent's method. <div class="fragment"><div class="line"><span class="keyword">program</span> main</div>
-<div class="line">    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__core.html">nonlin_core</a>, <span class="keywordtype">only</span> : <a class="code" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>, <a class="code" href="structnonlin__core_1_1fcn1var__helper.html">fcn1var_helper</a>, <a class="code" href="structnonlin__core_1_1value__pair.html">value_pair</a></div>
+<div class="line">    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__core.html">nonlin_core</a>, <span class="keywordtype">only</span> : <a class="code" href="interfacenonlin__core_1_1fcn1var.html">fcn1var</a>, <a class="code" href="structnonlin__core_1_1fcn1var__helper.html">fcn1var_helper</a>, <a class="code" href="structvalue__pair.html">value_pair</a></div>
 <div class="line">    <span class="keywordtype">use </span><a class="code" href="namespacenonlin__solve.html">nonlin_solve</a>, <span class="keywordtype">only</span> : <a class="code" href="structnonlin__solve_1_1brent__solver.html">brent_solver</a></div>
 <div class="line"> </div>
 <div class="line">    <span class="keywordtype">type</span>(fcn1var_helper) :: obj</div>
@@ -239,7 +239,7 @@ Public Member Functions</h2></td></tr>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <div class="ttc" id="anamespacenonlin__solve_html"><div class="ttname"><a href="namespacenonlin__solve.html">nonlin_solve</a></div><div class="ttdoc">nonlin_solve</div><div class="ttdef"><b>Definition:</b> <a href="nonlin__solve_8f90_source.html#l00008">nonlin_solve.f90:8</a></div></div>
-<div class="ttc" id="astructnonlin__core_1_1value__pair_html"><div class="ttname"><a href="structnonlin__core_1_1value__pair.html">nonlin_core::value_pair</a></div><div class="ttdoc">Defines a pair of numeric values.</div><div class="ttdef"><b>Definition:</b> <a href="nonlin__core_8f90_source.html#l00277">nonlin_core.f90:277</a></div></div>
+<div class="ttc" id="astructvalue__pair_html"><div class="ttname"><a href="structvalue__pair.html">value_pair</a></div><div class="ttdef"><b>Definition:</b> <a href="nonlin_8h_source.html#l00098">nonlin.h:98</a></div></div>
 <div class="ttc" id="ainterfacenonlin__core_1_1fcn1var_html"><div class="ttname"><a href="interfacenonlin__core_1_1fcn1var.html">nonlin_core::fcn1var</a></div><div class="ttdoc">Describes a function of one variable.</div><div class="ttdef"><b>Definition:</b> <a href="nonlin__core_8f90_source.html#l00198">nonlin_core.f90:198</a></div></div>
 <div class="ttc" id="astructnonlin__core_1_1fcn1var__helper_html"><div class="ttname"><a href="structnonlin__core_1_1fcn1var__helper.html">nonlin_core::fcn1var_helper</a></div><div class="ttdoc">Defines a type capable of encapsulating an equation of one variable of the form: f(x) = 0.</div><div class="ttdef"><b>Definition:</b> <a href="nonlin__core_8f90_source.html#l00682">nonlin_core.f90:682</a></div></div>
 <div class="ttc" id="anamespacenonlin__core_html"><div class="ttname"><a href="namespacenonlin__core.html">nonlin_core</a></div><div class="ttdoc">nonlin_core</div><div class="ttdef"><b>Definition:</b> <a href="nonlin__core_8f90_source.html#l00167">nonlin_core.f90:167</a></div></div>
