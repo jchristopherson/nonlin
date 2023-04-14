@@ -4,6 +4,7 @@ program example
     use iso_fortran_env
     use nonlin_core
     use nonlin_solve
+    use example_problems
     implicit none
 
     ! Local Variables
@@ -14,8 +15,8 @@ program example
     real(real64) :: x(2), f(2)
 
     ! Assign the function and Jacobian routines
-    fcn => fcns
-    jac => fcnjac
+    fcn => misc_2fcn_01
+    jac => misc_2fcn_01_jac
     call obj%set_fcn(fcn, 2, 2)
     call obj%set_jacobian(jac)
 
@@ -26,29 +27,10 @@ program example
     call solver%solve(obj, x, f)
 
     ! Display the output
-    print '(AF7.5AF7.5A)', "Solution: (", x(1), ", ", x(2), ")"
-    print '(AE9.3AE9.3A)', "Residual: (", f(1), ", ", f(2), ")"
-contains
-    ! The system of equations (source: https://www.mathworks.com/help/optim/ug/fsolve.html)
-    ! 2 * x1 - x2 = exp(-x1)
-    ! -x1 + 2 * x2 = exp(-x2)
-    subroutine fcns(x, f)
-        real(real64), intent(in), dimension(:) :: x
-        real(real64), intent(out), dimension(:) :: f
-        f(1) = 2.0d0 * x(1) - x(2) - exp(-x(1))
-        f(2) = -x(1) + 2.0d0 * x(2) - exp(-x(2))
-    end subroutine
+    print 100, "Solution: (", x(1), ", ", x(2), ")"
+    print 101, "Residual: (", f(1), ", ", f(2), ")"
 
-    ! The Jacobian matrix:
-    !     | exp(-x1) + 2          -1     |
-    ! J = |                              |
-    !     |     -1          exp(-x2) + 2 |
-    subroutine fcnjac(x, jac)
-        real(real64), intent(in), dimension(:) :: x
-        real(real64), intent(out), dimension(:,:) :: jac
-        jac(1,1) = exp(-x(1)) + 2.0d0
-        jac(2,1) = -1.0d0
-        jac(1,2) = -1.0d0
-        jac(2,2) = exp(-x(2)) + 2.0d0
-    end subroutine
+    ! Formatting
+100 format(A, F7.5, A, F7.5, A)
+101 format(A, E9.3, A, E9.3, A)
 end program

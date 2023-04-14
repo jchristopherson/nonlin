@@ -4,6 +4,7 @@ program example
     use iso_fortran_env
     use nonlin_optimize
     use nonlin_core
+    use example_problems
     implicit none
 
     ! Local Variables
@@ -24,15 +25,13 @@ program example
     call solver%solve(obj, x, fout, ib)
 
      ! Display the output
-     print '(AF7.5AF7.5A)', "Minimum: (", x(1), ", ", x(2), ")"
-     print '(AE9.3)', "Function Value: ", fout
-     print '(AI0)', "Iterations: ", ib%iter_count
-     print '(AI0)', "Function Evaluations: ", ib%fcn_count
-contains
-    ! Rosenbrock's Function
-    function rosenbrock(x) result(f)
-        real(real64), intent(in), dimension(:) :: x
-        real(real64) :: f
-        f = 1.0d2 * (x(2) - x(1)**2)**2 + (x(1) - 1.0d0)**2
-    end function
+     print 100, "Minimum: (", x(1), ", ", x(2), ")"
+     print 101, "Function Value: ", fout
+     print 102, "Iterations: ", ib%iter_count
+     print 102, "Function Evaluations: ", ib%fcn_count
+
+    ! Formatting
+100 format(A, F7.5, A, F7.5, A)
+101 format(A, E9.3)
+102 format(A, I0)
 end program

@@ -4,6 +4,7 @@ program example
     use iso_fortran_env
     use nonlin_core
     use nonlin_solve
+    use example_problems
     implicit none
 
     ! Local variables
@@ -18,22 +19,17 @@ program example
     limits%x2 = 5.0d0
 
     ! Establish the function
-    fcn => fcn1
+    fcn => sinx_div_x
     call obj%set_fcn(fcn)
 
     ! Solve the equation
     call solver%solve(obj, x, limits, f)
 
     ! Print the output and the residual
-    print '(AF7.5)', "The solution: ", x
-    print '(AE10.3)', "The residual: ", f
+    print 100, "The solution: ", x
+    print 101, "The residual: ", f
 
-contains
-    ! The function:
-    ! f(x) = sin(x) / x, solution: x = x * pi for n = 1, 2, 3, ...
-    function fcn1(x) result(f)
-        real(real64), intent(in) :: x
-        real(real64) :: f
-        f = sin(x) / x
-    end function
+    ! Formatting
+100 format(A, F7.5)
+101 format(A, E10.3)
 end program

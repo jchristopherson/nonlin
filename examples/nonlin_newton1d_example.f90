@@ -4,6 +4,7 @@ program example
     use iso_fortran_env
     use nonlin_core
     use nonlin_solve
+    use example_problems
     implicit none
 
     ! Local variables
@@ -19,7 +20,7 @@ program example
     limits%x2 = -2.0d0
 
     ! Establish the function
-    fcn => fcn1
+    fcn => fcn_1var
     call obj%set_fcn(fcn)
 
     ! Allow the solver to print out updates at each iteration
@@ -30,21 +31,18 @@ program example
 
     ! Print the output and the residual
     print *, ""
-    print '(AF7.5)', "The solution: ", x
-    print '(AE10.3)', "The residual: ", f
-    print '(AI0)', "Iterations: ", tracking%iter_count
-    print '(AI0)', "Function Evaluations: ", tracking%fcn_count
-    print '(AI0)', "Derivative Evaluations: ", tracking%jacobian_count
-    print '(AL1)', "Converge on Function Value: ", tracking%converge_on_fcn
-    print '(AL1)', "Converge on Change in Variable: ", tracking%converge_on_chng
-    print '(AL1)', "Converge on Derivative: ", tracking%converge_on_zero_diff
+    print 100, "The solution: ", x
+    print 101, "The residual: ", f
+    print 102, "Iterations: ", tracking%iter_count
+    print 102, "Function Evaluations: ", tracking%fcn_count
+    print 102, "Derivative Evaluations: ", tracking%jacobian_count
+    print 103, "Converge on Function Value: ", tracking%converge_on_fcn
+    print 103, "Converge on Change in Variable: ", tracking%converge_on_chng
+    print 103, "Converge on Derivative: ", tracking%converge_on_zero_diff
 
-contains
-    ! The function:
-    ! f(x) = x**3 - 2 * x - 1
-    function fcn1(x) result(f)
-        real(real64), intent(in) :: x
-        real(real64) :: f
-        f = x**3 - 2.0d0 * x - 1.0d0
-    end function
+    ! Formatting
+100 format(A, F7.5)
+101 format(A, E10.3)
+102 format(A, I0)
+103 format(A, L1)
 end program
