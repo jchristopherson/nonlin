@@ -100,8 +100,6 @@ function rosenbrock(x) result(f)
 end function
 
 ! ------------------------------------------------------------------------------
-
-! ------------------------------------------------------------------------------
 ! Least-Squares Polynomial Fitting Function
 subroutine lsq_poly_fit_fcn(x, f)
     ! Arguments
