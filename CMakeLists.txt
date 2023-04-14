@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.24)
 project(
     nonlin
-    LANGUAGES Fortran
+    LANGUAGES Fortran C CXX
     VERSION 1.5.0
 )
 
@@ -38,4 +38,11 @@ message(STATUS "Build tests: ${BUILD_TESTING}")
 if (BUILD_TESTING)
   enable_testing()
   add_subdirectory(tests)
+endif()
+
+# Examples
+option(BUILD_NONLIN_EXAMPLES "Build nonlin examples")
+message(STATUS "Build nonlin examples: ${BUILD_NONLIN_EXAMPLES}")
+if (BUILD_NONLIN_EXAMPLES)
+  add_subdirectory(examples)
 endif()
