@@ -4,7 +4,7 @@
 module nonlin_test_jacobian
     use iso_fortran_env
     use nonlin_core
-    use test_core
+    use fortran_test_helper
     implicit none
     private
     public :: test_jacobian_1
@@ -65,7 +65,7 @@ contains
         x = 0.0d0
         call obj%jacobian(x, numjac)
         call jac(x, exact)
-        if (.not.is_mtx_equal(numjac, exact, tol)) then
+        if (.not.assert(numjac, exact, tol)) then
             rst = .false.
             print '(A)', "Test Failed: Jacobian Test 1A"
             print '(A)', "Expected:"
@@ -82,7 +82,7 @@ contains
         x = [1.0d0, 0.0d0]
         call obj%jacobian(x, numjac)
         call jac(x, exact)
-        if (.not.is_mtx_equal(numjac, exact, tol)) then
+        if (.not.assert(numjac, exact, tol)) then
             rst = .false.
             print '(A)', "Test Failed: Jacobian Test 1B"
             print '(A)', "Expected:"
@@ -99,7 +99,7 @@ contains
         x = [0.0d0, 1.0d0]
         call obj%jacobian(x, numjac)
         call jac(x, exact)
-        if (.not.is_mtx_equal(numjac, exact, tol)) then
+        if (.not.assert(numjac, exact, tol)) then
             rst = .false.
             print '(A)', "Test Failed: Jacobian Test 1C"
             print '(A)', "Expected:"
@@ -116,7 +116,7 @@ contains
         x = [0.5d0, -0.5d0]
         call obj%jacobian(x, numjac)
         call jac(x, exact)
-        if (.not.is_mtx_equal(numjac, exact, tol)) then
+        if (.not.assert(numjac, exact, tol)) then
             rst = .false.
             print '(A)', "Test Failed: Jacobian Test 1D"
             print '(A)', "Expected:"

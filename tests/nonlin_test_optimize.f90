@@ -4,7 +4,7 @@ module nonlin_test_optimize
     use iso_fortran_env
     use nonlin_optimize
     use nonlin_core
-    use test_core
+    use fortran_test_helper
     implicit none
     private
     public :: test_nelder_mead_1
@@ -60,7 +60,7 @@ contains
 
         ! Test
         xans = 1.0d0
-        if (is_mtx_equal(x, xans, tol)) then
+        if (assert(x, xans, tol)) then
             check = .true.
         else
             check = .false.
@@ -101,7 +101,7 @@ contains
 
         ! Test
         xans = [3.0d0, 0.5d0]
-        if (is_mtx_equal(x, xans, tol)) then
+        if (assert(x, xans, tol)) then
             check = .true.
         else
             check = .false.
@@ -136,7 +136,7 @@ contains
 
         ! Test
         xans = 1.0d0
-        if (is_mtx_equal(x, xans, tol)) then
+        if (assert(x, xans, tol)) then
             check = .true.
         else
             check = .false.
@@ -177,7 +177,7 @@ contains
 
         ! Test
         xans = [3.0d0, 0.5d0]
-        if (is_mtx_equal(x, xans, tol)) then
+        if (assert(x, xans, tol)) then
             check = .true.
         else
             check = .false.
