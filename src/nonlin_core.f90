@@ -1999,10 +1999,14 @@ contains
 
         ! Process
         print *, ""
-        print '(AI0)', "Iteration: ", iter
-        print '(AI0)', "Function Evaluations: ", nfeval
-        if (njaceval > 0) print '(AI0)', "Jacobian Evaluations: ", njaceval
-        print '(AE9.3)', "Change in Variable: ", xnorm
-        print '(AE9.3)', "Residual: ", fnorm
+        print 100, "Iteration: ", iter
+        print 100, "Function Evaluations: ", nfeval
+        if (njaceval > 0) print 100, "Jacobian Evaluations: ", njaceval
+        print 101, "Change in Variable: ", xnorm
+        print 101, "Residual: ", fnorm
+
+        ! Formatting
+100     format(A, I0)
+101     format(A, E9.3)
     end subroutine
 end module
