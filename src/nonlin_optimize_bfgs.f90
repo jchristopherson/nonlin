@@ -69,7 +69,7 @@ contains
             return
         end if
         if (size(x) /= n) then
-            write(errmsg, '(AI0AI0A)') &
+            write(errmsg, 100) &
                 "It was expected to receive a coordinate vector of length ", &
                 n, " , but a vector of length ", size(x), " was received."
             call errmgr%report_error("bfgs_solve", trim(errmsg), &
@@ -192,11 +192,11 @@ contains
                 ! Print iteration status
                 if (this%get_print_status()) then
                     print *, ""
-                    print '(AI0)', "Iteration: ", iter
-                    print '(AI0)', "Function Evaluations: ", neval
-                    print '(AE8.3)', "Function Value: ", fp
-                    print '(AE8.3)', "Change in Variable: ", xtest
-                    print '(AE8.3)', "Gradient: ", gtest
+                    print 101, "Iteration: ", iter
+                    print 101, "Function Evaluations: ", neval
+                    print 102, "Function Value: ", fp
+                    print 102, "Change in Variable: ", xtest
+                    print 102, "Gradient: ", gtest
                 end if
 
                 ! Ensure we haven't made too many function evaluations
@@ -223,7 +223,7 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, '(AI0AE8.3AE8.3AE8.3)') &
+            write(errmsg, 103) &
                 "The algorithm failed to converge." // new_line('c') // &
                 "Function evaluations performed: ", neval, new_line('c') // &
                 "Function Value: ", fp, new_line('c') // &
@@ -232,5 +232,11 @@ contains
             call errmgr%report_error("bfgs_solve", trim(errmsg), &
                 NL_CONVERGENCE_ERROR)
         end if
+
+        ! Formatting
+100     format(A, I0, A, I0, A)
+101     format(A, I0)
+102     format(A, E8.3)
+103     format(A, I0, A, E8.3, A, E8.3, A, E8.3)
     end subroutine
 end submodule

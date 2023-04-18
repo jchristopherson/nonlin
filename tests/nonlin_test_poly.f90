@@ -4,7 +4,7 @@ module nonlin_test_poly
     use iso_fortran_env
     use nonlin_core
     use nonlin_polynomials
-    use test_core
+    use fortran_test_helper
     implicit none
 contains
 ! ******************************************************************************
@@ -122,19 +122,19 @@ contains
         check = .true.
         if (size(c1) > size(c2)) then
             ! Use C1 to store the solution
-            do i = 1, size(c2)
+            do i = 1, min(size(c1), size(c2))
                 c1(i) = c1(i) + c2(i)
             end do
-            if (.not.is_mtx_equal(p, c1, tol)) then
+            if (.not.assert(p, c1, tol)) then
                 check = .false.
                 print '(A)', "Test Failed: Polynomial Addition Test 1"
             end if
         else
             ! Use C2 to store the solution
-            do i = 1, size(c1)
+            do i = 1, min(size(c1), size(c2))
                 c2(i) = c2(i) + c1(i)
             end do
-            if (.not.is_mtx_equal(p, c2, tol)) then
+            if (.not.assert(p, c2, tol)) then
                 check = .false.
                 print '(A)', "Test Failed: Polynomial Addition Test 1"
             end if
@@ -177,22 +177,22 @@ contains
         check = .true.
         if (size(c1) > size(c2)) then
             ! Use C1 to store the solution
-            do i = 1, size(c2)
+            do i = 1, min(size(c1), size(c2))
                 c1(i) = c1(i) - c2(i)
             end do
-            if (.not.is_mtx_equal(p, c1, tol)) then
+            if (.not.assert(p, c1, tol)) then
                 check = .false.
                 print '(A)', "Test Failed: Polynomial Subtraction Test 1"
             end if
         else
             ! Use C2 to store the solution
-            do i = 1, size(c1)
+            do i = 1, min(size(c1), size(c2))
                 c2(i) = c1(i) - c2(i)
             end do
             do i = size(c1) + 1, size(c2)
                 c2(i) = -c2(i)
             end do
-            if (.not.is_mtx_equal(p, c2, tol)) then
+            if (.not.assert(p, c2, tol)) then
                 check = .false.
                 print '(A)', "Test Failed: Polynomial Subtraction Test 1"
             end if
@@ -238,7 +238,7 @@ contains
         ! Test
         a = p3%get_all()
         b = ans%get_all()
-        if (.not.is_mtx_equal(a, b, tol)) then
+        if (.not.assert(a, b, tol)) then
             check = .false.
             print '(A)', "Test Failed: Polynomial Multiplication"
             print '(A)', "Expected:"

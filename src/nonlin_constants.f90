@@ -6,7 +6,7 @@
 !! To provide various constants used by the NONLIN library.
 module nonlin_constants
     use, intrinsic :: iso_fortran_env, only : int32
-    use linalg_constants
+    use linalg
     implicit none
 
 ! ******************************************************************************

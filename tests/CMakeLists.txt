@@ -1,6 +1,8 @@
+include("${PROJECT_SOURCE_DIR}/cmake/helper.cmake")
+add_subdirectory(fortran_test_helper)
+
 # Define the source files
 set(nonlin_test_sources
-    ${PROJECT_SOURCE_DIR}/src/external/linalg/tests/test_core.f90
     nonlin_test.f90
     nonlin_test_jacobian.f90
     nonlin_test_solve.f90
@@ -9,35 +11,11 @@ set(nonlin_test_sources
     powell_badly_scaled.f90
 )
 
-# Build the executable
 add_executable(nonlin_test ${nonlin_test_sources})
-target_link_libraries(nonlin_test nonlin)
-
-# Run the tests
-add_custom_command(
-    OUTPUT nonlin_tests
-    DEPENDS ${nonlin_test_sources}
-    COMMAND nonlin_test
+link_library(nonlin_test ${PROJECT_NAME} ${PROJECT_INCLUDE_DIR})
+link_library(nonlin_test ${fortran_test_helper_LIBRARY} ${fortran_test_helper_INCLUDE_DIR})
+add_test(
+    NAME nonlin_test
+    WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+    COMMAND $<TARGET_FILE:nonlin_test>
 )
-add_custom_target(run_nonlin_tests ALL DEPENDS nonlin_tests)
-
-# Ensure LINALG, FERROR, and BLAS libraries are copied to the runtime directory
-if (WIN32)
-get_target_property(ferror_LibLocation ferror LOCATION)
-    add_custom_command(TARGET nonlin_test POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${ferror_LibLocation} $<TARGET_FILE_DIR:nonlin_test>
-    )
-
-    get_target_property(linalg_LibLocation linalg LOCATION)
-    add_custom_command(TARGET nonlin_test POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${linalg_LibLocation} $<TARGET_FILE_DIR:nonlin_test>
-    )
-
-    get_target_property(blas_LibLocation blas LOCATION)
-    add_custom_command(TARGET nonlin_test POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${blas_LibLocation} $<TARGET_FILE_DIR:nonlin_test>
-    )
-endif()

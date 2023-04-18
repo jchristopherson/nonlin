@@ -4,6 +4,7 @@ program example
     use iso_fortran_env
     use nonlin_core
     use nonlin_optimize
+    use example_problems
     implicit none
 
     ! Local Variables
@@ -26,31 +27,10 @@ program example
     call solver%solve(obj, x, f)
 
     ! Display the output
-    print '(AF7.5AF7.5A)', "Minimum: (", x(1), ", ", x(2), ")"
-    print '(AE9.3)', "Function Value: ", f
-contains
-    ! The Beale function:
-    ! f(x) = (1.5 - x + xy)**2 + (2.25 - x + xy**2)**2 + (2.625 - x + xy**3)**2
-    ! The minimum is at x = 3, y = 0.5, and f(3, 0.5) = 0
-    function beale(x) result(f)
-        real(real64), intent(in), dimension(:) :: x
-        real(real64) :: f
-        f = (1.5d0 - x(1) + x(1) * x(2))**2 + &
-            (2.25d0 - x(1) + x(1) * x(2)**2)**2 + &
-            (2.625d0 - x(1) + x(1) * x(2)**3)**2
-    end function
+    print 100, "Minimum: (", x(1), ", ", x(2), ")"
+    print 101, "Function Value: ", f
 
-    ! The gradient
-    subroutine bealegrad(x, g)
-        real(real64), intent(in), dimension(:) :: x
-        real(real64), intent(out), dimension(:) :: g
-
-        g(1) = 2.0d0 * (x(2)**3 - 1.0d0) * (x(1) * x(2)**3 - x(1) + 2.625d0) + &
-            2.0d0 * (x(2)**2 - 1.0d0) * (x(1) * x(2)**2 - x(1) + 2.25d0) + &
-            2.0d0 * (x(2) - 1.0d0) * (x(1) * x(2) - x(1) + 1.5d0)
-
-        g(2) = 6.0d0 * x(1) * x(2)**2 * (x(1) * x(2)**3 - x(1) + 2.625d0) + &
-            4.0d0 * x(1) * x(2) * (x(1) * x(2)**2 - x(1) + 2.25d0) + &
-            2.0d0 * x(1) * (x(1) * x(2) - x(1) + 1.5d0)
-    end subroutine
+    ! Formatting
+100 format(A, F7.5, A, F7.5, A)
+101 format(A, E9.3)
 end program

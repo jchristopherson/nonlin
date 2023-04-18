@@ -11,7 +11,7 @@ module nonlin_solve
     use nonlin_core
     use nonlin_linesearch, only : line_search, limit_search_vector
     use ferror, only : errors
-    use linalg_core, only : qr_factor, form_qr, qr_rank1_update, lu_factor, &
+    use linalg, only : qr_factor, form_qr, qr_rank1_update, lu_factor, &
         rank1_update, mtx_mult, recip_mult_array, solve_triangular_system, &
         solve_lu
     implicit none

@@ -12,13 +12,12 @@
 !! To provide various optimization routines.
 module nonlin_optimize
     use, intrinsic :: iso_fortran_env, only : int32, real64
-    use linalg_constants, only : LA_MATRIX_FORMAT_ERROR
     use ferror, only : errors
     use nonlin_linesearch, only : line_search, limit_search_vector
     use nonlin_constants
     use nonlin_core
-    use linalg_core, only : rank1_update, tri_mtx_mult, cholesky_rank1_update, &
-        cholesky_rank1_downdate, solve_cholesky
+    use linalg, only : rank1_update, tri_mtx_mult, cholesky_rank1_update, &
+        cholesky_rank1_downdate, solve_cholesky, LA_MATRIX_FORMAT_ERROR
     implicit none
     private
     public :: nelder_mead

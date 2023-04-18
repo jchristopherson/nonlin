@@ -4,6 +4,7 @@ program  example
     use iso_fortran_env
     use nonlin_core
     use nonlin_solve, only : quasi_newton_solver
+    use example_problems
     implicit none
 
     ! Local Variables
@@ -14,7 +15,7 @@ program  example
     real(real64) :: x(2), f(2)
 
     ! Locate the routine containing the equations to solve
-    fcn => fcns
+    fcn => misc_2fcn
     call obj%set_fcn(fcn, 2, 2)
 
     ! Define an initial guess
@@ -41,20 +42,14 @@ program  example
     call solver%solve(obj, x, f, ib)
 
     ! Display the output
-    print '(AF7.5AF7.5A)', "Solution: (", x(1), ", ", x(2), ")"
-    print '(AE9.3AE9.3A)', "Residual: (", f(1), ", ", f(2), ")"
-    print '(AI0)', "Iterations: ", ib%iter_count
-    print '(AI0)', "Function Evaluations: ", ib%fcn_count
-    print '(AI0)', "Jacobian Evaluations: ", ib%jacobian_count
+    print 100, "Solution: (", x(1), ", ", x(2), ")"
+    print 101, "Residual: (", f(1), ", ", f(2), ")"
+    print 102, "Iterations: ", ib%iter_count
+    print 102, "Function Evaluations: ", ib%fcn_count
+    print 102, "Jacobian Evaluations: ", ib%jacobian_count
 
-contains
-    ! Define the routine containing the equations to solve.  The equations are:
-    ! x**2 + y**2 = 34
-    ! x**2 - 2 * y**2 = 7
-    subroutine fcns(x, f)
-        real(real64), intent(in), dimension(:) :: x
-        real(real64), intent(out), dimension(:) :: f
-        f(1) = x(1)**2 + x(2)**2 - 34.0d0
-        f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
-    end subroutine
+    ! Formatting
+100 format(A, F7.5, A, F7.5, A)
+101 format(A, E9.3, A, E9.3, A)
+102 format(A, I0)
 end program
