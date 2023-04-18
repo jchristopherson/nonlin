@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.24)
 project(
     nonlin
-    LANGUAGES Fortran C CXX
+    LANGUAGES Fortran
     VERSION 1.5.0
 )
 

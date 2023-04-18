@@ -257,5 +257,3 @@ Documentation can be found [here](http://htmlpreview.github.io/?https://github.c
 ## TO DO
 Additional items to accomplish:
 - Constrained optimization routines.
-- Add additional test cases.
-- Investigate and implement homotopy methods (ref HOMPACK).  This likely means a rewrite of at least parts of the HOMPACK or HOMPACK90 code in order to conform with the object-oriented style implemented by the other solvers in this library.

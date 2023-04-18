@@ -24,6 +24,5 @@ set(NONLIN_SOURCES
     ${dir}/nonlin_solve_newton.f90
     ${dir}/nonlin_solve_brent.f90
     ${dir}/nonlin_solve_newton1var.f90
-    ${dir}/nonlin_c_api.f90
 )
 set(NONLIN_SOURCES ${NONLIN_SOURCES} PARENT_SCOPE)
