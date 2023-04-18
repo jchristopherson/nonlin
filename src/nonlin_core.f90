@@ -2007,6 +2007,6 @@ contains
 
         ! Formatting
 100     format(A, I0)
-101     format(A, E9.3)
+101     format(A, E10.3)
     end subroutine
 end module

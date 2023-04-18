@@ -240,8 +240,8 @@ contains
         ! Formatting
 100     format(A, I0, A, I0, A)
 101     format(A, I0)
-102     format(A, E8.3)
-103     format(A, I0, A, E8.3, A, E8.3)
+102     format(A, E10.3)
+103     format(A, I0, A, E10.3, A, E10.3)
     end subroutine
 
 ! ------------------------------------------------------------------------------

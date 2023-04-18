@@ -213,7 +213,7 @@ contains
         end if
 
         ! Format
-100     format(A, E8.3, A, E8.3)
-101     format(A, I0, A, E8.3, A, E8.3)
+100     format(A, E10.3, A, E10.3)
+101     format(A, I0, A, E10.3, A, E10.3)
     end subroutine
 end submodule

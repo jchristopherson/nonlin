@@ -12,7 +12,7 @@
 !! To provide various optimization routines.
 module nonlin_optimize
     use, intrinsic :: iso_fortran_env, only : int32, real64
-    use ferror, only : errors
+    use ferror
     use nonlin_linesearch, only : line_search, limit_search_vector
     use nonlin_constants
     use nonlin_core

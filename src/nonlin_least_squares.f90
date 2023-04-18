@@ -535,7 +535,7 @@ contains
 
         ! Formatting
 100     format(A, I0, A)
-101     format(A, I0, A, E8.3, A, E8.3)
+101     format(A, I0, A, E10.3, A, E10.3)
     end subroutine
 
 ! ------------------------------------------------------------------------------
