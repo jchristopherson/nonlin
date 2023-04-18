@@ -1,6 +1,7 @@
 var searchData=
 [
-  ['equation_5foptimizer_226',['equation_optimizer',['../structnonlin__core_1_1equation__optimizer.html',1,'nonlin_core']]],
-  ['equation_5fsolver_227',['equation_solver',['../structnonlin__core_1_1equation__solver.html',1,'nonlin_core']]],
-  ['equation_5fsolver_5f1var_228',['equation_solver_1var',['../structnonlin__core_1_1equation__solver__1var.html',1,'nonlin_core']]]
+  ['fcn1var_0',['fcn1var',['../interfacenonlin__core_1_1fcn1var.html',1,'nonlin_core']]],
+  ['fcn1var_5fhelper_1',['fcn1var_helper',['../structnonlin__core_1_1fcn1var__helper.html',1,'nonlin_core']]],
+  ['fcnnvar_2',['fcnnvar',['../interfacenonlin__core_1_1fcnnvar.html',1,'nonlin_core']]],
+  ['fcnnvar_5fhelper_3',['fcnnvar_helper',['../structnonlin__core_1_1fcnnvar__helper.html',1,'nonlin_core']]]
 ];

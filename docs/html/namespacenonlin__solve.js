@@ -4,5 +4,6 @@ var namespacenonlin__solve =
     [ "line_search_solver", "structnonlin__solve_1_1line__search__solver.html", "structnonlin__solve_1_1line__search__solver" ],
     [ "newton_1var_solver", "structnonlin__solve_1_1newton__1var__solver.html", "structnonlin__solve_1_1newton__1var__solver" ],
     [ "newton_solver", "structnonlin__solve_1_1newton__solver.html", "structnonlin__solve_1_1newton__solver" ],
-    [ "quasi_newton_solver", "structnonlin__solve_1_1quasi__newton__solver.html", "structnonlin__solve_1_1quasi__newton__solver" ]
+    [ "quasi_newton_solver", "structnonlin__solve_1_1quasi__newton__solver.html", "structnonlin__solve_1_1quasi__newton__solver" ],
+    [ "test_convergence", "namespacenonlin__solve.html#a7f189a8566c3ad7dcdecebe7d3f17456", null ]
 ];
