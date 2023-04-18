@@ -13,7 +13,7 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    pure module function f1h_is_fcn_defined(this) result(x)
+    module function f1h_is_fcn_defined(this) result(x)
         class(fcn1var_helper), intent(in) :: this
         logical :: x
         x = associated(this%m_fcn)
@@ -27,7 +27,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    pure module function f1h_is_diff_defined(this) result(x)
+    module function f1h_is_diff_defined(this) result(x)
         class(fcn1var_helper), intent(in) :: this
         logical :: x
         x = associated(this%m_diff)

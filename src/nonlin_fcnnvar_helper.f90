@@ -13,7 +13,7 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    pure module function fnh_is_fcn_defined(this) result(x)
+    module function fnh_is_fcn_defined(this) result(x)
         class(fcnnvar_helper), intent(in) :: this
         logical :: x
         x = associated(this%m_fcn)
@@ -29,7 +29,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    pure module function fnh_get_nvar(this) result(n)
+    module function fnh_get_nvar(this) result(n)
         class(fcnnvar_helper), intent(in) :: this
         integer(int32) :: n
         n = this%m_nvar
@@ -43,7 +43,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    pure module function fnh_is_grad_defined(this) result(x)
+     module function fnh_is_grad_defined(this) result(x)
         class(fcnnvar_helper), intent(in) :: this
         logical :: x
         x = associated(this%m_grad)

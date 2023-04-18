@@ -20,14 +20,14 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    pure module function vfh_is_fcn_defined(this) result(x)
+    module function vfh_is_fcn_defined(this) result(x)
         class(vecfcn_helper), intent(in) :: this
         logical :: x
         x = associated(this%m_fcn)
     end function
 
 ! ------------------------------------------------------------------------------
-    pure module function vfh_is_jac_defined(this) result(x)
+    module function vfh_is_jac_defined(this) result(x)
         class(vecfcn_helper), intent(in) :: this
         logical :: x
         x = associated(this%m_jac)
@@ -161,14 +161,14 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    pure module function vfh_get_nfcn(this) result(n)
+    module function vfh_get_nfcn(this) result(n)
         class(vecfcn_helper), intent(in) :: this
         integer(int32) :: n
         n = this%m_nfcn
     end function
 
 ! ------------------------------------------------------------------------------
-    pure module function vfh_get_nvar(this) result(n)
+    module function vfh_get_nvar(this) result(n)
         class(vecfcn_helper), intent(in) :: this
         integer(int32) :: n
         n = this%m_nvar

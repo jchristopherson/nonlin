@@ -489,7 +489,7 @@ module nonlin_core
         !!
         !! @par Syntax
         !! @code{.f90}
-        !! pure logical function is_fcn_defined(class(vecfcn_helper) this)
+        !! logical function is_fcn_defined(class(vecfcn_helper) this)
         !! @endcode
         !!
         !! @param[in] this The vecfcn_helper object.
@@ -500,7 +500,7 @@ module nonlin_core
         !!
         !! @par Syntax
         !! @code{.f90}
-        !! pure logical function is_jacobian_defined(class(vecfcn_helper) this)
+        !! logical function is_jacobian_defined(class(vecfcn_helper) this)
         !! @endcode
         !!
         !! @param[in] this The vecfcn_helper object.
@@ -559,7 +559,7 @@ module nonlin_core
         !!
         !! @par Syntax
         !! @code{.f90}
-        !! pure integer(int32) get_equation_count(class(vecfcn_helper) this)
+        !! integer(int32) get_equation_count(class(vecfcn_helper) this)
         !! @endcode
         !!
         !! @param[in] this The vecfcn_helper object.
@@ -569,7 +569,7 @@ module nonlin_core
         !!
         !! @par Syntax
         !! @code{.f90}
-        !! pure integer(int32) get_variable_count(class(vecfcn_helper) this)
+        !! integer(int32) get_variable_count(class(vecfcn_helper) this)
         !! @endcode
         !!
         !! @param[in] this The vecfcn_helper object.
@@ -590,12 +590,12 @@ module nonlin_core
             procedure(jacobianfcn), intent(in), pointer :: jac
         end subroutine
 
-        pure module function vfh_is_fcn_defined(this) result(x)
+        module function vfh_is_fcn_defined(this) result(x)
             class(vecfcn_helper), intent(in) :: this
             logical :: x
         end function
 
-        pure module function vfh_is_jac_defined(this) result(x)
+        module function vfh_is_jac_defined(this) result(x)
             class(vecfcn_helper), intent(in) :: this
             logical :: x
         end function
@@ -615,12 +615,12 @@ module nonlin_core
             integer(int32), intent(out), optional :: olwork, err
         end subroutine
 
-        pure module function vfh_get_nfcn(this) result(n)
+        module function vfh_get_nfcn(this) result(n)
             class(vecfcn_helper), intent(in) :: this
             integer(int32) :: n
         end function
 
-        pure module function vfh_get_nvar(this) result(n)
+        module function vfh_get_nvar(this) result(n)
             class(vecfcn_helper), intent(in) :: this
             integer(int32) :: n
         end function
@@ -703,7 +703,7 @@ module nonlin_core
         !!
         !! @par Syntax
         !! @code{.f90}
-        !! pure logical function is_fcn_defined(class(fcn1var_helper) this)
+        !! logical function is_fcn_defined(class(fcn1var_helper) this)
         !! @endcode
         !!
         !! @param[in] this The fcn1var_helper object.
@@ -774,7 +774,7 @@ module nonlin_core
         !!
         !! @par Syntax
         !! @code{.f90}
-        !! pure logical function is_derivative_defined(class(fcn1var_helper) this)
+        !! logical function is_derivative_defined(class(fcn1var_helper) this)
         !! @endcode
         !!
         !! @param[in] this The fcn1var_helper object.
@@ -814,7 +814,7 @@ module nonlin_core
             real(real64) :: f
         end function
 
-        pure module function f1h_is_fcn_defined(this) result(x)
+        module function f1h_is_fcn_defined(this) result(x)
             class(fcn1var_helper), intent(in) :: this
             logical :: x
         end function
@@ -824,7 +824,7 @@ module nonlin_core
             procedure(fcn1var), intent(in), pointer :: fcn
         end subroutine
 
-        pure module function f1h_is_diff_defined(this) result(x)
+        module function f1h_is_diff_defined(this) result(x)
             class(fcn1var_helper), intent(in) :: this
             logical :: x
         end function
@@ -918,7 +918,7 @@ module nonlin_core
         !!
         !! @par Syntax
         !! @code{.f90}
-        !! pure logical function is_fcn_defined(class(fcnnvar_helper) this)
+        !! logical function is_fcn_defined(class(fcnnvar_helper) this)
         !! @endcode
         !!
         !! @param[in] this The fcnnvar_helper object.
@@ -985,7 +985,7 @@ module nonlin_core
         !!
         !! @par Syntax
         !! @code{.f90}
-        !! pure integer(int32) function get_variable_count(class(fcnnvar_helper) this)
+        !! integer(int32) function get_variable_count(class(fcnnvar_helper) this)
         !! @endcode
         !!
         !! @param[in] this The fcnnvar_helper object.
@@ -1073,7 +1073,7 @@ module nonlin_core
         !!
         !! @par Syntax
         !! @code{.f90}
-        !! pure logical function is_gradient_defined(class(fcnnvar_helper) this)
+        !! logical function is_gradient_defined(class(fcnnvar_helper) this)
         !! @endcode
         !!
         !! @param[in] this The fcnnvar_helper object.
@@ -1112,7 +1112,7 @@ module nonlin_core
             real(real64) :: f
         end function
 
-        pure module function fnh_is_fcn_defined(this) result(x)
+        module function fnh_is_fcn_defined(this) result(x)
             class(fcnnvar_helper), intent(in) :: this
             logical :: x
         end function
@@ -1123,7 +1123,7 @@ module nonlin_core
             integer(int32), intent(in) :: nvar
         end subroutine
 
-        pure module function fnh_get_nvar(this) result(n)
+        module function fnh_get_nvar(this) result(n)
             class(fcnnvar_helper), intent(in) :: this
             integer(int32) :: n
         end function
@@ -1133,7 +1133,7 @@ module nonlin_core
             procedure(gradientfcn), pointer, intent(in) :: fcn
         end subroutine
 
-        pure module function fnh_is_grad_defined(this) result(x)
+        module function fnh_is_grad_defined(this) result(x)
             class(fcnnvar_helper), intent(in) :: this
             logical :: x
         end function
