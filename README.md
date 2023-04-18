@@ -2,7 +2,10 @@
 A library that provides routines to compute the solutions to systems of nonlinear equations.
 
 ## Status
-![Build Status](https://travis-ci.org/jchristopherson/nonlin.svg?branch=master)
+[![CMake](https://github.com/jchristopherson/nonlin/actions/workflows/cmake.yml/badge.svg)](https://github.com/jchristopherson/nonlin/actions/workflows/cmake.yml)
+
+## Documentation
+Documentation can be found [here](https://jchristopherson.github.io/nonlin/)
 
 ## Example 1
 This example solves a set of two equations of two unknowns using a Quasi-Newton type solver.  In this example, the solver is left to compute the derivatives numerically.
@@ -250,9 +253,6 @@ Iterations: 52
 Function Evaluations: 101
 ```
 Notice, the convergence tolerance was set to its default value (1e-12).
-
-## Documentation
-Documentation can be found [here](http://htmlpreview.github.io/?https://github.com/jchristopherson/nonlin/blob/master/doc/html/index.html)
 
 ## TO DO
 Additional items to accomplish:
