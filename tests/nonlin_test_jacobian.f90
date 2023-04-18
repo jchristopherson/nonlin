@@ -67,12 +67,12 @@ contains
         call jac(x, exact)
         if (.not.assert(numjac, exact, tol)) then
             rst = .false.
-            print '(A)', "Test Failed: Jacobian Test 1A"
-            print '(A)', "Expected:"
+            print 100, "Test Failed: Jacobian Test 1A"
+            print 100, "Expected:"
             do i = 1, size(exact, 1)
                 print *, exact(i,:)
             end do
-            print '(A)', "Found:"
+            print 100, "Found:"
             do i = 1, size(exact, 1)
                 print *, numjac(i,:)
             end do
@@ -84,12 +84,12 @@ contains
         call jac(x, exact)
         if (.not.assert(numjac, exact, tol)) then
             rst = .false.
-            print '(A)', "Test Failed: Jacobian Test 1B"
-            print '(A)', "Expected:"
+            print 100, "Test Failed: Jacobian Test 1B"
+            print 100, "Expected:"
             do i = 1, size(exact, 1)
                 print *, exact(i,:)
             end do
-            print '(A)', "Found:"
+            print 100, "Found:"
             do i = 1, size(exact, 1)
                 print *, numjac(i,:)
             end do
@@ -101,12 +101,12 @@ contains
         call jac(x, exact)
         if (.not.assert(numjac, exact, tol)) then
             rst = .false.
-            print '(A)', "Test Failed: Jacobian Test 1C"
-            print '(A)', "Expected:"
+            print 100, "Test Failed: Jacobian Test 1C"
+            print 100, "Expected:"
             do i = 1, size(exact, 1)
                 print *, exact(i,:)
             end do
-            print '(A)', "Found:"
+            print 100, "Found:"
             do i = 1, size(exact, 1)
                 print *, numjac(i,:)
             end do
@@ -118,16 +118,19 @@ contains
         call jac(x, exact)
         if (.not.assert(numjac, exact, tol)) then
             rst = .false.
-            print '(A)', "Test Failed: Jacobian Test 1D"
-            print '(A)', "Expected:"
+            print 100, "Test Failed: Jacobian Test 1D"
+            print 100, "Expected:"
             do i = 1, size(exact, 1)
                 print *, exact(i,:)
             end do
-            print '(A)', "Found:"
+            print 100, "Found:"
             do i = 1, size(exact, 1)
                 print *, numjac(i,:)
             end do
         end if
+
+        ! Formatting
+100     format(A)
     end function
 
 ! ------------------------------------------------------------------------------

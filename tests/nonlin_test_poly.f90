@@ -42,7 +42,7 @@ contains
         res = maxval(err)
 
         ! Print out the coefficients
-        ! print '(A)', "Polynomial Coefficients (c0 + c1*x + c2*x**2 + c3*x**3):"
+        ! print 100, "Polynomial Coefficients (c0 + c1*x + c2*x**2 + c3*x**3):"
         ! do i = 1, 4
         !     print '(AI0AF12.9)', "c", i - 1, " = ", p%get(i)
         ! end do
@@ -80,10 +80,13 @@ contains
         do i = 1, size(sol)
             if (abs(sol(i)) > tol) then
                 check = .false.
-                print '(A)', "Test Failed: Polynomial Roots Test 1"
+                print 100, "Test Failed: Polynomial Roots Test 1"
                 exit
             end if
         end do
+
+        ! Formatting
+100     format(A)
     end function
 
 ! ------------------------------------------------------------------------------
@@ -127,7 +130,7 @@ contains
             end do
             if (.not.assert(p, c1, tol)) then
                 check = .false.
-                print '(A)', "Test Failed: Polynomial Addition Test 1"
+                print 100, "Test Failed: Polynomial Addition Test 1"
             end if
         else
             ! Use C2 to store the solution
@@ -136,9 +139,12 @@ contains
             end do
             if (.not.assert(p, c2, tol)) then
                 check = .false.
-                print '(A)', "Test Failed: Polynomial Addition Test 1"
+                print 100, "Test Failed: Polynomial Addition Test 1"
             end if
         end if
+
+        ! Formatting
+100     format(A)
     end function
 
 ! ------------------------------------------------------------------------------
@@ -182,7 +188,7 @@ contains
             end do
             if (.not.assert(p, c1, tol)) then
                 check = .false.
-                print '(A)', "Test Failed: Polynomial Subtraction Test 1"
+                print 100, "Test Failed: Polynomial Subtraction Test 1"
             end if
         else
             ! Use C2 to store the solution
@@ -194,9 +200,12 @@ contains
             end do
             if (.not.assert(p, c2, tol)) then
                 check = .false.
-                print '(A)', "Test Failed: Polynomial Subtraction Test 1"
+                print 100, "Test Failed: Polynomial Subtraction Test 1"
             end if
         end if
+
+        ! Formatting
+100     format(A)
     end function
 
 ! ------------------------------------------------------------------------------
@@ -240,14 +249,17 @@ contains
         b = ans%get_all()
         if (.not.assert(a, b, tol)) then
             check = .false.
-            print '(A)', "Test Failed: Polynomial Multiplication"
-            print '(A)', "Expected:"
+            print 100, "Test Failed: Polynomial Multiplication"
+            print 100, "Expected:"
             print *, b
-            print '(A)', "Computed:"
+            print 100, "Computed:"
             print *, a
         else
             check = .true.
         end if
+
+        ! Formatting
+100     format(A)
     end function
 
 ! ------------------------------------------------------------------------------

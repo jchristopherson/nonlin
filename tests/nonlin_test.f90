@@ -74,9 +74,5 @@ program main
 
 
     ! End
-    if (overall) then
-        print '(A)', "NONLIN TEST STATUS: PASS"
-    else
-        print '(A)', "NONLIN TEST STATUS: FAILED"
-    end if
+    if (.not.overall) stop -1
 end program

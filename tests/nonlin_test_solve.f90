@@ -162,20 +162,25 @@ contains
             call solver%solve(obj, x, f, ib)
             if (.not.is_ans_1(x, 1.0d-6)) then
                 check = .false.
-                print '(AI0)', "Quasi-Newton Solver Failed: Test 1-", i
-                print '(AF9.5AF9.5)', "Initial Condition: ", ic(i,1), ", ", &
+                print 100, "Quasi-Newton Solver Failed: Test 1-", i
+                print 101, "Initial Condition: ", ic(i,1), ", ", &
                     ic(i,2)
-                print '(AF9.5AF9.5)', "Solution:", x(1), ", ", x(2)
-                print '(AF9.5AF9.5)', "Residual:", f(1), ", ", f(2)
-                print '(AL)', "Converged on residual: ", ib%converge_on_fcn
-                print '(AL)', "Converged on solution change: ", &
+                print 101, "Solution:", x(1), ", ", x(2)
+                print 101, "Residual:", f(1), ", ", f(2)
+                print 102, "Converged on residual: ", ib%converge_on_fcn
+                print 102, "Converged on solution change: ", &
                     ib%converge_on_chng
-                print '(AL)', "Converge on zero gradient: ", &
+                print 102, "Converge on zero gradient: ", &
                     ib%converge_on_zero_diff
-                print '(AI0)', "Iterations: ", ib%iter_count
-                print '(AI0)', "Function Evaluations: ", ib%fcn_count
+                print 100, "Iterations: ", ib%iter_count
+                print 100, "Function Evaluations: ", ib%fcn_count
             end if
         end do
+
+        ! Formatting
+100     format(A, I0)
+101     format(A, F9.5, A, F9.5)
+102     format(A, L)
     end function
 
 ! ------------------------------------------------------------------------------
@@ -209,20 +214,25 @@ contains
             call solver%solve(obj, x, f, ib)
             if (.not.is_ans_2(x, 1.0d-6)) then
                 check = .false.
-                print '(AI0)', "Quasi-Newton Solver Failed: Test 2-", i
-                print '(AF9.5AF9.5)', "Initial Condition: ", ic(i,1), ", ", &
+                print 100, "Quasi-Newton Solver Failed: Test 2-", i
+                print 101, "Initial Condition: ", ic(i,1), ", ", &
                     ic(i,2)
-                print '(AF9.5AF9.5)', "Solution:", x(1), ", ", x(2)
-                print '(AF9.5AF9.5)', "Residual:", f(1), ", ", f(2)
-                print '(AL)', "Converged on residual: ", ib%converge_on_fcn
-                print '(AL)', "Converged on solution change: ", &
+                print 101, "Solution:", x(1), ", ", x(2)
+                print 101, "Residual:", f(1), ", ", f(2)
+                print 102, "Converged on residual: ", ib%converge_on_fcn
+                print 102, "Converged on solution change: ", &
                     ib%converge_on_chng
-                print '(AL)', "Converge on zero gradient: ", &
+                print 102, "Converge on zero gradient: ", &
                     ib%converge_on_zero_diff
-                print '(AI0)', "Iterations: ", ib%iter_count
-                print '(AI0)', "Function Evaluations: ", ib%fcn_count
+                print 100, "Iterations: ", ib%iter_count
+                print 100, "Function Evaluations: ", ib%fcn_count
             end if
         end do
+
+        ! Formatting
+100     format(A, I0)
+101     format(A, F9.5, A, F9.5)
+102     format(A, L)
     end function
 
 ! ------------------------------------------------------------------------------
@@ -254,20 +264,25 @@ contains
             call solver%solve(obj, x, f, ib)
             if (.not.is_ans_1(x, 1.0d-6)) then
                 check = .false.
-                print '(AI0)', "Newton Solver Failed: Test 1-", i
-                print '(AF9.5AF9.5)', "Initial Condition: ", ic(i,1), ", ", &
+                print 100, "Newton Solver Failed: Test 1-", i
+                print 101, "Initial Condition: ", ic(i,1), ", ", &
                     ic(i,2)
-                print '(AF9.5AF9.5)', "Solution:", x(1), ", ", x(2)
-                print '(AF9.5AF9.5)', "Residual:", f(1), ", ", f(2)
-                print '(AL)', "Converged on residual: ", ib%converge_on_fcn
-                print '(AL)', "Converged on solution change: ", &
+                print 101, "Solution:", x(1), ", ", x(2)
+                print 101, "Residual:", f(1), ", ", f(2)
+                print 102, "Converged on residual: ", ib%converge_on_fcn
+                print 102, "Converged on solution change: ", &
                     ib%converge_on_chng
-                print '(AL)', "Converge on zero gradient: ", &
+                print 102, "Converge on zero gradient: ", &
                     ib%converge_on_zero_diff
-                print '(AI0)', "Iterations: ", ib%iter_count
-                print '(AI0)', "Function Evaluations: ", ib%fcn_count
+                print 100, "Iterations: ", ib%iter_count
+                print 100, "Function Evaluations: ", ib%fcn_count
             end if
         end do
+
+        ! Formatting
+100     format(A, I0)
+101     format(A, F9.5, A, F9.5)
+102     format(A, L)
     end function
 
 ! ------------------------------------------------------------------------------
@@ -301,20 +316,25 @@ contains
             call solver%solve(obj, x, f, ib)
             if (.not.is_ans_2(x, 1.0d-6)) then
                 check = .false.
-                print '(AI0)', "Newton Solver Failed: Test 2-", i
-                print '(AF9.5AF9.5)', "Initial Condition: ", ic(i,1), ", ", &
+                print 100, "Newton Solver Failed: Test 2-", i
+                print 101, "Initial Condition: ", ic(i,1), ", ", &
                     ic(i,2)
-                print '(AF9.5AF9.5)', "Solution:", x(1), ", ", x(2)
-                print '(AF9.5AF9.5)', "Residual:", f(1), ", ", f(2)
-                print '(AL)', "Converged on residual: ", ib%converge_on_fcn
-                print '(AL)', "Converged on solution change: ", &
+                print 101, "Solution:", x(1), ", ", x(2)
+                print 101, "Residual:", f(1), ", ", f(2)
+                print 102, "Converged on residual: ", ib%converge_on_fcn
+                print 102, "Converged on solution change: ", &
                     ib%converge_on_chng
-                print '(AL)', "Converge on zero gradient: ", &
+                print 102, "Converge on zero gradient: ", &
                     ib%converge_on_zero_diff
-                print '(AI0)', "Iterations: ", ib%iter_count
-                print '(AI0)', "Function Evaluations: ", ib%fcn_count
+                print 100, "Iterations: ", ib%iter_count
+                print 100, "Function Evaluations: ", ib%fcn_count
             end if
         end do
+
+        ! Formatting
+100     format(A, I0)
+101     format(A, F9.5, A, F9.5)
+102     format(A, L)
     end function
 
 ! ------------------------------------------------------------------------------
@@ -346,20 +366,25 @@ contains
             call solver%solve(obj, x, f, ib)
             if (.not.is_ans_1(x, 1.0d-6)) then
                 check = .false.
-                print '(AI0)', "Least Squares Solver Failed: Test 1-", i
-                print '(AF9.5AF9.5)', "Initial Condition: ", ic(i,1), ", ", &
+                print 100, "Least Squares Solver Failed: Test 1-", i
+                print 101, "Initial Condition: ", ic(i,1), ", ", &
                     ic(i,2)
-                print '(AF9.5AF9.5)', "Solution:", x(1), ", ", x(2)
-                print '(AF9.5AF9.5)', "Residual:", f(1), ", ", f(2)
-                print '(AL)', "Converged on residual: ", ib%converge_on_fcn
-                print '(AL)', "Converged on solution change: ", &
+                print 101, "Solution:", x(1), ", ", x(2)
+                print 101, "Residual:", f(1), ", ", f(2)
+                print 102, "Converged on residual: ", ib%converge_on_fcn
+                print 102, "Converged on solution change: ", &
                     ib%converge_on_chng
-                print '(AL)', "Converge on zero gradient: ", &
+                print 102, "Converge on zero gradient: ", &
                     ib%converge_on_zero_diff
-                print '(AI0)', "Iterations: ", ib%iter_count
-                print '(AI0)', "Function Evaluations: ", ib%fcn_count
+                print 100, "Iterations: ", ib%iter_count
+                print 100, "Function Evaluations: ", ib%fcn_count
             end if
         end do
+
+        ! Formatting
+100     format(A, I0)
+101     format(A, F9.5, A, F9.5)
+102     format(A, L)
     end function
 
 ! ------------------------------------------------------------------------------
@@ -396,20 +421,25 @@ contains
             call solver%solve(obj, x, f, ib, err = errmgr)
             if (.not.is_ans_2(x, 1.0d-6)) then
                 check = .false.
-                print '(AI0)', "Least Squares Solver Failed: Test 2-", i
-                print '(AF9.5AF9.5)', "Initial Condition: ", ic(i,1), ", ", &
+                print 100, "Least Squares Solver Failed: Test 2-", i
+                print 101, "Initial Condition: ", ic(i,1), ", ", &
                     ic(i,2)
-                print '(AF9.5AF9.5)', "Solution:", x(1), ", ", x(2)
-                print '(AF9.5AF9.5)', "Residual:", f(1), ", ", f(2)
-                print '(AL)', "Converged on residual: ", ib%converge_on_fcn
-                print '(AL)', "Converged on solution change: ", &
+                print 101, "Solution:", x(1), ", ", x(2)
+                print 101, "Residual:", f(1), ", ", f(2)
+                print 102, "Converged on residual: ", ib%converge_on_fcn
+                print 102, "Converged on solution change: ", &
                     ib%converge_on_chng
-                print '(AL)', "Converge on zero gradient: ", &
+                print 102, "Converge on zero gradient: ", &
                     ib%converge_on_zero_diff
-                print '(AI0)', "Iterations: ", ib%iter_count
-                print '(AI0)', "Function Evaluations: ", ib%fcn_count
+                print 100, "Iterations: ", ib%iter_count
+                print 100, "Function Evaluations: ", ib%fcn_count
             end if
         end do
+
+        ! Formatting
+100     format(A, I0)
+101     format(A, F9.5, A, F9.5)
+102     format(A, L)
     end function
 
 ! ------------------------------------------------------------------------------
@@ -461,10 +491,13 @@ contains
         ! The solution on this interval should be: pi
         if (abs(x - pi) > tol) then
             check = .false.
-            print '(AF8.5AF8.5)', &
+            print 100, &
                 "Test Failed: Brent's Method Test 1.  Expected: ", pi, &
                 ", Found: ", x
         end if
+
+        ! Formatting
+100     format(A, F8.5, A, F8.5)
     end function
 
 ! ------------------------------------------------------------------------------
@@ -501,11 +534,15 @@ contains
         do i = 1, size(sol)
             if (abs(x(i) - sol(i)) > tol) then
                 check = .false.
-                print '(A)', "Test Failed: Newton's Method, Test 3."
-                print '(AE12.5AI0AE12.5)', "Expected: ", sol(i), " for root ", &
+                print 100, "Test Failed: Newton's Method, Test 3."
+                print 101, "Expected: ", sol(i), " for root ", &
                     i, ", but found: ", x(i)
             end if
         end do
+
+        ! Formatting
+100     format(A)
+101     format(A, E12.5, A, I0, A, E12.5)
     end function
 
 ! ------------------------------------------------------------------------------
@@ -544,10 +581,14 @@ contains
         do i = 1, size(sol)
             if (abs(x(i) - sol(i)) > tol) then
                 check = .false.
-                print '(A)', "Test Failed: Quasi-Newton's Method, Test 3."
-                print '(AE12.5AI0AE12.5)', "Expected: ", sol(i), " for root ", &
+                print 100, "Test Failed: Quasi-Newton's Method, Test 3."
+                print 101, "Expected: ", sol(i), " for root ", &
                     i, ", but found: ", x(i)
             end if
         end do
+
+        ! Formatting
+100     format(A)
+101     format(A, E12.5, A, I0, A, E12.5)
     end function
 end module
