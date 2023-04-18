@@ -67,7 +67,7 @@ contains
         end if
         if (abs(a - b) < eps) then
             ! ERROR: Search limits are too tight
-            write(errmsg, '(AE8.3AE8.3)') "Search limits have no " // &
+            write(errmsg, 100) "Search limits have no " // &
                 "appreciable difference between them.  Lower Limit: ", a, &
                 ", Upper Limit: ", b
             call errmgr%report_error("brent_solve", trim(errmsg), &
@@ -193,12 +193,16 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, '(AI0AE8.3AE8.3)') "The algorithm failed to " // &
+            write(errmsg, 101) "The algorithm failed to " // &
                 "converge.  Function evaluations performed: ", neval, &
                 "." // new_line('c') // "Change in Variable: ", xm, &
                 new_line('c') // "Residual: ", fb
             call errmgr%report_error("brent_solve", trim(errmsg), &
                 NL_CONVERGENCE_ERROR)
         end if
+
+        ! Formatting
+100     format(A, E8.3, A, E8.3)
+101     format(A, I0, A, E8.3, A, E8.3)
     end subroutine
 end submodule

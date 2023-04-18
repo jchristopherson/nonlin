@@ -319,7 +319,7 @@ contains
         end if
         if (flag /= 0) then
             ! One of the input arrays is not sized correctly
-            write(errmsg, '(AI0A)') "Input number ", flag, &
+            write(errmsg, 100) "Input number ", flag, &
                 " is not sized correctly."
             call errmgr%report_error("lss_solve", trim(errmsg), &
                 NL_ARRAY_SIZE_ERROR)
@@ -525,13 +525,17 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, '(AI0AE8.3AE8.3)') "The algorithm failed to " // &
+            write(errmsg, 101) "The algorithm failed to " // &
                 "converge.  Function evaluations performed: ", neval, &
                 "." // new_line('c') // "Change in Variable: ", xnorm, &
                 new_line('c') // "Residual: ", fnorm
             call errmgr%report_error("lss_solve", trim(errmsg), &
                 flag)
         end if
+
+        ! Formatting
+100     format(A, I0, A)
+101     format(A, I0, A, E8.3, A, E8.3)
     end subroutine
 
 ! ------------------------------------------------------------------------------

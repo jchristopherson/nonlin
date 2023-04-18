@@ -285,7 +285,7 @@ contains
         end if
         if (flag /= 0) then
             ! One of the input arrays is not sized correctly
-            write(errmsg, '(AI0A)') "Input number ", flag, &
+            write(errmsg, 100) "Input number ", flag, &
                 " is not sized correctly."
             call errmgr%report_error("ls_search_mimo", trim(errmsg), &
                 NL_ARRAY_SIZE_ERROR)
@@ -387,11 +387,14 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, '(AI0A)') "The line search failed to " // &
+            write(errmsg, 100) "The line search failed to " // &
                 "converge.  Function evaluations performed: ", neval, "."
             call errmgr%report_error("ls_search_mimo", trim(errmsg), &
                 NL_CONVERGENCE_ERROR)
         end if
+
+        ! Formatting
+100     format(A, I0, A)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -497,7 +500,7 @@ contains
         end if
         if (flag /= 0) then
             ! One of the input arrays is not sized correctly
-            write(errmsg, '(AI0A)') "Input number ", flag, &
+            write(errmsg, 100) "Input number ", flag, &
                 " is not sized correctly."
             call errmgr%report_error("ls_search_miso", trim(errmsg), &
                 NL_ARRAY_SIZE_ERROR)
@@ -597,11 +600,14 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, '(AI0A)') "The line search failed to " // &
+            write(errmsg, 100) "The line search failed to " // &
                 "converge.  Function evaluations performed: ", neval, "."
             call errmgr%report_error("ls_search_miso", trim(errmsg), &
                 NL_CONVERGENCE_ERROR)
         end if
+
+        ! Formatting
+100     format(A, I0, A)
     end subroutine
 
 ! ------------------------------------------------------------------------------

@@ -77,7 +77,7 @@ contains
         end if
         if (nvar /= neqn) then
             ! ERROR: # of equations doesn't match # of variables
-            write(errmsg, '(AI0AI0A)') "The number of equations (", neqn, &
+            write(errmsg, 100) "The number of equations (", neqn, &
                 ") does not match the number of unknowns (", nvar, ")."
             call errmgr%report_error("qns_solve", trim(errmsg), &
                 NL_INVALID_INPUT_ERROR)
@@ -91,7 +91,7 @@ contains
         end if
         if (flag /= 0) then
             ! One of the input arrays is not sized correctly
-            write(errmsg, '(AI0A)') "Input number ", flag, &
+            write(errmsg, 101) "Input number ", flag, &
                 " is not sized correctly."
             call errmgr%report_error("qns_solve", trim(errmsg), &
                 NL_ARRAY_SIZE_ERROR)
@@ -246,7 +246,7 @@ contains
                         if (restart) then
                             ! We've already tried recalculating a new Jacobian,
                             ! issue a warning
-                            write(errmsg, '(AI0AE8.3AE8.3)') &
+                            write(errmsg, 102) &
                                 "It appears the solution has settled to " // &
                                 "a point where the slope of the gradient " // &
                                 "is effectively zero.  " // new_line('c') // &
@@ -304,13 +304,18 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, '(AI0AE8.3AE8.3)') "The algorithm failed to " // &
+            write(errmsg, 102) "The algorithm failed to " // &
                 "converge.  Function evaluations performed: ", neval, &
                 "." // new_line('c') // "Change in Variable: ", xnorm, &
                 new_line('c') // "Residual: ", fnorm
             call errmgr%report_error("qns_solve", trim(errmsg), &
                 NL_CONVERGENCE_ERROR)
         end if
+
+        ! Format
+100     format(A, I0, A, I0, A)
+101     format(A, I0, A)
+102     format(A, I0, A, E8.3, A, E8.3)
     end subroutine
 
 ! ------------------------------------------------------------------------------
