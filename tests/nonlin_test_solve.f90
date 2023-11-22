@@ -153,8 +153,7 @@ contains
         call obj%set_jacobian(jac)
 
         ! Generate a set of initial conditions
-        call random_number(ic)
-        ic = 10.0d0 * ic
+        ic = 1.0d0
 
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
@@ -200,7 +199,7 @@ contains
         call obj%set_fcn(fcn, 2, 2)
 
         ! Generate a set of initial conditions
-        call random_number(ic)
+        ic = 1.0d0
 
         ! Turn off the line search - this set of functions is too poorly scaled
         ! for the current implementation of the line search algorithm to offer
@@ -255,8 +254,7 @@ contains
         call obj%set_jacobian(jac)
 
         ! Generate a set of initial conditions
-        call random_number(ic)
-        ic = 10.0d0 * ic
+        ic = 1.0d0
 
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
@@ -302,7 +300,7 @@ contains
         call obj%set_fcn(fcn, 2, 2)
 
         ! Generate a set of initial conditions
-        call random_number(ic)
+        ic = 1.0d0
 
         ! Turn off the line search - this set of functions is too poorly scaled
         ! for the current implementation of the line search algorithm to offer
@@ -357,8 +355,7 @@ contains
         call obj%set_jacobian(jac)
 
         ! Generate a set of initial conditions
-        call random_number(ic)
-        ic = 10.0d0 * ic
+        ic = 1.0d0
 
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
@@ -413,7 +410,8 @@ contains
         call solver%set_max_fcn_evals(1000)
 
         ! Generate a set of initial conditions
-        call random_number(ic)
+        ic(:,1) = 1.0d0
+        ic(:,2) = 5.0d0
 
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)

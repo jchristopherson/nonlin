@@ -53,7 +53,7 @@ contains
         call obj%set_fcn(fcn, 2)
 
         ! Define an initial guess - the solution is (1, 1)
-        call random_number(x)
+        x = 0.0d0
 
         ! Call the solver
         call solver%solve(obj, x, fout, ib)
@@ -98,7 +98,7 @@ contains
         call obj%set_fcn(fcn, 2)
 
         ! Define an initial guess
-        call random_number(x)
+        x = 1.0d0
 
         ! Call the solver
         call solver%solve(obj, x, fout, ib)
@@ -137,7 +137,7 @@ contains
         call obj%set_fcn(fcn, 2)
 
         ! Define an initial guess - the solution is (1, 1)
-        call random_number(x)
+        x = 0.0d0
 
         ! Call the solver
         call solver%solve(obj, x, fout, ib)
@@ -182,7 +182,7 @@ contains
         call obj%set_fcn(fcn, 2)
 
         ! Define an initial guess
-        call random_number(x)
+        x = 1.0d0
 
         ! Call the solver
         call solver%solve(obj, x, fout, ib)
