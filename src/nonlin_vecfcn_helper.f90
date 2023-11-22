@@ -1,6 +1,7 @@
 ! nonlin_vecfcn_helper.f90
 
 submodule (nonlin_core) nonlin_vecfcn_helper
+    implicit none
 contains
 ! ------------------------------------------------------------------------------
     module subroutine vfh_set_fcn(this, fcn, nfcn, nvar)

@@ -1,6 +1,7 @@
 ! nonlin_solve_line_search.f90
 
 submodule (nonlin_solve) nonlin_solve_line_search
+    implicit none
 contains
 ! ------------------------------------------------------------------------------
     module subroutine lss_get_line_search(this, ls)

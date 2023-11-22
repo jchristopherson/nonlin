@@ -1,6 +1,7 @@
 ! nonlin_solve_quasi_newton.f90
 
 submodule (nonlin_solve) nonlin_solve_quasi_newton
+    implicit none
 contains
 ! ------------------------------------------------------------------------------
     module subroutine qns_solve(this, fcn, x, fvec, ib, err)

@@ -1,6 +1,7 @@
 ! nonlin_optimize_nelder_mead.f90
 
 submodule (nonlin_optimize) nonlin_optimize_nelder_mead
+    implicit none
 contains
 ! ------------------------------------------------------------------------------
     module subroutine nm_solve(this, fcn, x, fout, ib, err)

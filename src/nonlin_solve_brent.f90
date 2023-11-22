@@ -1,6 +1,7 @@
 ! nonlin_solve_brent.f90
 
 submodule (nonlin_solve) nonlin_solve_brent
+    implicit none
 contains
 ! ------------------------------------------------------------------------------
     module subroutine brent_solve(this, fcn, x, lim, f, ib, err)

@@ -1,6 +1,7 @@
 ! nonlin_equation_solver_1var.f90
 
 submodule (nonlin_core) nonlin_equation_solver_1var
+    implicit none
 contains
 ! ------------------------------------------------------------------------------
     pure module function es1_get_max_eval(this) result(n)

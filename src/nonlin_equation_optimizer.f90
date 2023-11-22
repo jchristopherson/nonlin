@@ -1,6 +1,7 @@
 ! nonlin_equation_optimizer.f90
 
 submodule (nonlin_core) nonlin_equation_optimizer
+    implicit none
 contains
 ! ------------------------------------------------------------------------------
     pure module function oe_get_max_eval(this) result(n)
