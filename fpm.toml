@@ -21,6 +21,7 @@ fortran_test_helper = { git = "https://github.com/jchristopherson/fortran_test_h
 library = true
 
 [build]
+link = ["blas", "lapack"]
 auto-executables = false
 auto-examples = false
 auto-tests = false
