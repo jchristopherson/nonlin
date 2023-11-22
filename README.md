@@ -3,9 +3,29 @@ A library that provides routines to compute the solutions to systems of nonlinea
 
 ## Status
 [![CMake](https://github.com/jchristopherson/nonlin/actions/workflows/cmake.yml/badge.svg)](https://github.com/jchristopherson/nonlin/actions/workflows/cmake.yml)
+[![Actions Status](https://github.com/jchristopherson/nonlin/workflows/fpm/badge.svg)](https://github.com/jchristopherson/nonlin/actions)
 
 ## Documentation
 Documentation can be found [here](https://jchristopherson.github.io/nonlin/)
+
+## Building NONLIN
+[CMake](https://cmake.org/)This library can be built using CMake.  For instructions see [Running CMake](https://cmake.org/runningcmake/).
+
+[FPM](https://github.com/fortran-lang/fpm) can also be used to build this library using the provided fpm.toml.
+```txt
+fpm build
+```
+The NONLIN library can be used within your FPM project by adding the following to your fpm.toml file.
+```toml
+[dependencies]
+nonlin = { git = "https://github.com/jchristopherson/nonlin" }
+```
+## External Libraries
+Here is a list of external code libraries utilized by this library.
+- [BLAS](http://www.netlib.org/blas/)
+- [LAPACK](http://www.netlib.org/lapack/)
+- [FERROR](https://github.com/jchristopherson/ferror)
+- [LINALG](https://github.com/jchristopherson/linalg)
 
 ## Example 1
 This example solves a set of two equations of two unknowns using a Quasi-Newton type solver.  In this example, the solver is left to compute the derivatives numerically.
@@ -253,7 +273,3 @@ Iterations: 52
 Function Evaluations: 101
 ```
 Notice, the convergence tolerance was set to its default value (1e-12).
-
-## TO DO
-Additional items to accomplish:
-- Constrained optimization routines.
