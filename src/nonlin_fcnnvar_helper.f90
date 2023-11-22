@@ -1,6 +1,7 @@
 ! nonlin_fcnnvar_helper.f90
 
 submodule (nonlin_core) nonlin_fcnnvar_helper
+    implicit none
 contains
 ! ------------------------------------------------------------------------------
     module function fnh_fcn(this, x) result(f)

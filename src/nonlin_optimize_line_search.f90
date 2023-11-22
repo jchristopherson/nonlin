@@ -1,6 +1,7 @@
 ! nonlin_optimize_line_search.f90
 
 submodule (nonlin_optimize) nonlin_optimize_line_search
+    implicit none
 contains
 ! ------------------------------------------------------------------------------
     module subroutine lso_get_line_search(this, ls)

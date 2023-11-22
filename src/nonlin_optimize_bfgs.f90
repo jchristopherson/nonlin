@@ -1,6 +1,19 @@
 ! nonlin_optimize_bfgs.f90
 
 submodule (nonlin_optimize) nonlin_optimize_bfgs
+    use lapack
+    implicit none
+
+    interface
+        subroutine DSYMV(uplo, n, alpha, a, lda, x, incx, beta, y, incy)
+            use iso_fortran_env, only : int32, real64
+            character, intent(in) :: uplo
+            integer(int32), intent(in) :: n, lda, incx, incy
+            real(real64), intent(in) :: alpha, beta, a(lda,*), x(*)
+            real(real64), intent(inout) :: y(*)
+        end subroutine
+    end interface
+
 contains
     module subroutine bfgs_solve(this, fcn, x, fout, ib, err)
         ! Arguments

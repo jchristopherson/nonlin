@@ -1,6 +1,7 @@
 ! nonlin_solve_newton.f90
 
 submodule (nonlin_solve) nonlin_solve_newton
+    implicit none
 contains
 ! ------------------------------------------------------------------------------
     module subroutine ns_solve(this, fcn, x, fvec, ib, err)

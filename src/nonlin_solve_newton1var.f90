@@ -1,6 +1,7 @@
 ! nonlin_solve_newton1var.f90
 
 submodule (nonlin_solve) nonlin_solve_newton1var
+    implicit none
 contains
 ! ------------------------------------------------------------------------------
     module subroutine newt1var_solve(this, fcn, x, lim, f, ib, err)
