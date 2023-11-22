@@ -13,6 +13,8 @@ include("${PROJECT_SOURCE_DIR}/cmake/helper.cmake")
 add_subdirectory(configure)
 
 # Deal with the dependencies
+find_package(BLAS)
+find_package(LAPACK)
 add_subdirectory(dependencies)
 
 # Source
@@ -24,6 +26,11 @@ add_fortran_library(
     ${PROJECT_VERSION}
     ${PROJECT_VERSION_MAJOR}
     ${NONLIN_SOURCES}
+)
+target_link_libraries(
+  ${PROJECT_NAME} 
+  ${BLAS_LIBRARIES} 
+  ${LAPACK_LIBRARIES}
 )
 link_library(${PROJECT_NAME} ${ferror_LIBRARY} ${ferror_INCLUDE_DIR})
 link_library(${PROJECT_NAME} ${linalg_LIBRARY} ${linalg_INCLUDE_DIR})
