@@ -1,4 +1,4 @@
 var structnonlin__solve_1_1brent__solver =
 [
-    [ "solve", "structnonlin__solve_1_1brent__solver.html#ae0b53fae4650d837a5c151f0f8f55277", null ]
+    [ "solve", "structnonlin__solve_1_1brent__solver.html#a6e6f2d872d8e54593d2a082f978c599b", null ]
 ];
