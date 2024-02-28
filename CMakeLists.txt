@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.24)
 project(
     nonlin
     LANGUAGES Fortran
-    VERSION 1.5.0
+    VERSION 1.5.2
 )
 
 # Get helper macros and functions
@@ -34,9 +34,6 @@ target_link_libraries(
 )
 link_library(${PROJECT_NAME} ${ferror_LIBRARY} ${ferror_INCLUDE_DIR})
 link_library(${PROJECT_NAME} ${linalg_LIBRARY} ${linalg_INCLUDE_DIR})
-
-# Installation
-add_subdirectory(install)
 
 # Testing
 option(BUILD_TESTING "Build tests")
