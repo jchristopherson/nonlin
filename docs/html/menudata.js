@@ -47,9 +47,9 @@ var menudata={children:[
 {text:"s",url:"namespacemembers_func.html#index_s"},
 {text:"t",url:"namespacemembers_func.html#index_t"}]},
 {text:"Variables",url:"namespacemembers_vars.html"}]}]},
-{text:"Data Types List",url:"annotated.html",children:[
+{text:"Data Types",url:"annotated.html",children:[
 {text:"Data Types List",url:"annotated.html"},
-{text:"Data Types",url:"classes.html"},
+{text:"Data Type Index",url:"classes.html"},
 {text:"Class Hierarchy",url:"hierarchy.html"},
 {text:"Data Fields",url:"functions.html",children:[
 {text:"All",url:"functions.html",children:[
@@ -60,6 +60,7 @@ var menudata={children:[
 {text:"g",url:"functions.html#index_g"},
 {text:"i",url:"functions.html#index_i"},
 {text:"j",url:"functions.html#index_j"},
+{text:"l",url:"functions.html#index_l"},
 {text:"m",url:"functions.html#index_m"},
 {text:"o",url:"functions.html#index_o"},
 {text:"p",url:"functions.html#index_p"},
@@ -74,6 +75,7 @@ var menudata={children:[
 {text:"g",url:"functions_func.html#index_g"},
 {text:"i",url:"functions_func.html#index_i"},
 {text:"j",url:"functions_func.html#index_j"},
+{text:"l",url:"functions_func.html#index_l"},
 {text:"o",url:"functions_func.html#index_o"},
 {text:"p",url:"functions_func.html#index_p"},
 {text:"r",url:"functions_func.html#index_r"},
