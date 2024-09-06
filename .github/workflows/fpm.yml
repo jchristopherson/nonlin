@@ -8,14 +8,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
         gcc_v: [10] # Version of GFortran we want to use.
         include:
         - os: ubuntu-latest
           os-arch: linux-x86_64
-
-        - os: macos-latest
-          os-arch: macos-x86_64
 
     env:
       FC: gfortran
