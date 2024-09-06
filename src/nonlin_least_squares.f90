@@ -675,7 +675,7 @@ contains
             temp = sqrt(par)
             wa1 = temp * diag
             call lmsolve(r(1:n,1:n), ipvt, wa1, qtb, x, sdiag, wa2)
-            wa2 = diag * x
+            wa2(1:n) = diag * x
             dxnorm = norm2(wa2)
             temp = fp
             fp = dxnorm - delta
