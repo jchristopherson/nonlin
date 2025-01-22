@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.24)
 project(
     nonlin
     LANGUAGES Fortran
-    VERSION 1.5.3
+    VERSION 1.5.4
 )
 
 # Get helper macros and functions
@@ -16,6 +16,18 @@ add_subdirectory(configure)
 find_package(BLAS)
 find_package(LAPACK)
 add_subdirectory(dependencies)
+
+if (NOT BLAS_FOUND OR NOT LAPACK_FOUND)
+  message(STATUS "BLAS/LAPACK could not be found.  A reference version will be employed.")
+  include(FetchContent)
+  FetchContent_Declare(
+      lapack
+      GIT_REPOSITORY "https://github.com/Reference-LAPACK/lapack"
+  )
+  FetchContent_MakeAvailable(lapack)
+  set(BLAS_LIBRARIES blas)
+  set(LAPACK_LIBRARIES lapack)
+endif()
 
 # Source
 add_subdirectory(src)
