@@ -6,7 +6,8 @@
 !! To provide various constants used by the NONLIN library.
 module nonlin_constants
     use, intrinsic :: iso_fortran_env, only : int32
-    use linalg
+    use linalg_errors, only : LA_OUT_OF_MEMORY_ERROR, LA_CONVERGENCE_ERROR, &
+        LA_INVALID_OPERATION_ERROR
     implicit none
 
 ! ******************************************************************************
