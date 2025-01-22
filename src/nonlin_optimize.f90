@@ -17,7 +17,8 @@ module nonlin_optimize
     use nonlin_constants
     use nonlin_core
     use linalg, only : rank1_update, tri_mtx_mult, cholesky_rank1_update, &
-        cholesky_rank1_downdate, solve_cholesky, LA_MATRIX_FORMAT_ERROR
+        cholesky_rank1_downdate, solve_cholesky
+    use linalg_errors, only : LA_MATRIX_FORMAT_ERROR
     implicit none
     private
     public :: nelder_mead
