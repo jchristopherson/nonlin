@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.24)
 project(
     nonlin
     LANGUAGES Fortran
-    VERSION 1.5.3
+    VERSION 1.5.4
 )
 
 # Get helper macros and functions
