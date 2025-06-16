@@ -1,5 +1,3 @@
-! nonlin_linesearch.f90
-
 ! REFERENCES
 ! - https://scicomp.stackexchange.com/questions/26330/backtracking-armijo-line-search-algorithm
 ! - https://ctk.math.ncsu.edu/
@@ -12,8 +10,10 @@
 !! iteration process.
 module nonlin_linesearch
     use, intrinsic :: iso_fortran_env, only : int32, real64
-    use nonlin_constants
-    use nonlin_core
+    use nonlin_error_handling
+    use nonlin_types
+    use nonlin_multi_eqn_mult_var
+    use nonlin_multi_var
     use ferror, only : errors
     implicit none
     private

@@ -1,11 +1,5 @@
-! nonlin_constants.f90
-
-!> @brief \b nonlin_constants
-!!
-!! @par Purpose
-!! To provide various constants used by the NONLIN library.
-module nonlin_constants
-    use, intrinsic :: iso_fortran_env, only : int32
+module nonlin_error_handling
+    use iso_fortran_env
     use linalg_errors, only : LA_OUT_OF_MEMORY_ERROR, LA_CONVERGENCE_ERROR, &
         LA_INVALID_OPERATION_ERROR
     implicit none
@@ -33,4 +27,5 @@ module nonlin_constants
     !> An error indicating the user-requested tolerance is too small to be
     !! practical for the problem at hand.
     integer(int32), parameter :: NL_TOLERANCE_TOO_SMALL_ERROR = 208
+
 end module
