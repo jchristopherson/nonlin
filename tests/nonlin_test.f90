@@ -18,6 +18,9 @@ program main
     rst = test_jacobian_1()
     if (.not.rst) overall = .false.
 
+    rst = test_jacobian_2()
+    if (.not.rst) overall = .false.
+
     rst = test_quasinewton_1()
     if (.not.rst) overall = .false.
 
