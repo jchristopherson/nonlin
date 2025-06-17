@@ -137,7 +137,7 @@ contains
 ! ******************************************************************************
 ! QUASI_NEWTON_SOLVER
 ! ------------------------------------------------------------------------------
-    subroutine qns_solve(this, fcn, x, fvec, ib, err)
+    subroutine qns_solve(this, fcn, x, fvec, ib, args, err)
         !! Applies the quasi-Newton's method developed by Broyden in 
         !! conjunction with a backtracking type line search to solve N equations
         !! of N unknowns.
@@ -163,6 +163,9 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
+        class(*), intent(inout), optional :: args
+            !! An optional argument to allow the user to communicate with
+            !! fcn.
         class(errors), intent(inout), optional, target :: err
             !! An error handling object.
 
@@ -270,7 +273,7 @@ contains
         end if
         call qr_factor(r, tau, work, lw1)
         call form_qr(r, tau, q, work, lw2)
-        call fcn%jacobian(x, b, fv = fvec, olwork = lw3)
+        call fcn%jacobian(x, b, fv = fvec, olwork = lw3, args = args)
         allocate(work(max(lw1, lw2, lw3)), stat = flag)
         if (flag /= 0) then
             ! ERROR: Out of memory
@@ -280,7 +283,7 @@ contains
         end if
 
         ! Test to see if the initial guess is a root
-        call fcn%fcn(x, fvec)
+        call fcn%fcn(x, fvec, args)
         f = half * dot_product(fvec, fvec)
         neval = neval + 1
         test = zero
@@ -305,7 +308,7 @@ contains
                 ! Compute or update the Jacobian
                 if (restart) then
                     ! Compute the Jacobian
-                    call fcn%jacobian(x, b, fvec, work)
+                    call fcn%jacobian(x, b, fvec, work, args = args)
                     njac = njac + 1
 
                     ! Compute the QR factorization, and form Q & R
@@ -373,12 +376,12 @@ contains
                     ! Apply the line search
                     call limit_search_vector(df(1:nvar), stpmax)
                     call ls%search(fcn, xold, dx, df(1:nvar), x, fvec, fold, &
-                        f, lib, errmgr)
+                        f, lib, args = args, err = errmgr)
                     neval = neval + lib%fcn_count
                 else
                     ! No line search - just update the solution estimate
                     x = x + df(1:nvar)
-                    call fcn%fcn(x, fvec)
+                    call fcn%fcn(x, fvec, args)
                     f = half * dot_product(fvec, fvec)
                     neval = neval + 1
                 end if
@@ -497,7 +500,7 @@ contains
 ! ******************************************************************************
 ! NEWTON_SOLVER
 ! ------------------------------------------------------------------------------
-    subroutine ns_solve(this, fcn, x, fvec, ib, err)
+    subroutine ns_solve(this, fcn, x, fvec, ib, args, err)
         !! Applies Newton's method in conjunction with a backtracking type
         !! line search to solve N equations of N unknowns.
         class(newton_solver), intent(inout) :: this
@@ -514,6 +517,8 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
+        class(*), intent(inout), optional :: args
+            !! An optional argument to allow the user to communicate with fcn.
         class(errors), intent(inout), optional, target :: err
             !! An error-handling object.
 
@@ -608,7 +613,7 @@ contains
         if (flag == 0) allocate(xold(nvar), stat = flag)
         if (flag == 0) allocate(jac(nvar, neqn), stat = flag)
         if (flag == 0) then
-            call fcn%jacobian(x, jac, fv = fvec, olwork = lwork)
+            call fcn%jacobian(x, jac, fv = fvec, olwork = lwork, args = args)
             allocate(work(lwork), stat = flag)
         end if
         if (flag /= 0) then
@@ -619,7 +624,7 @@ contains
         end if
 
         ! Test to see if the initial guess is a root
-        call fcn%fcn(x, fvec)
+        call fcn%fcn(x, fvec, args)
         f = half * dot_product(fvec, fvec)
         neval = neval + 1
         test = zero
@@ -642,7 +647,7 @@ contains
                 iter = iter + 1
 
                 ! Compute the Jacobian
-                call fcn%jacobian(x, jac, fvec, work)
+                call fcn%jacobian(x, jac, fvec, work, args = args)
                 njac = njac + 1
 
                 ! Compute the gradient
@@ -679,12 +684,12 @@ contains
                     ! Apply the line search
                     call limit_search_vector(dir, stpmax)
                     call ls%search(fcn, xold, grad, dir, x, fvec, &
-                        fold, f, lib, errmgr)
+                        fold, f, lib, args = args, err = errmgr)
                     neval = neval + lib%fcn_count
                 else
                     ! No line search - just update the solution estimate
                     x = x + dir
-                    call fcn%fcn(x, fvec)
+                    call fcn%fcn(x, fvec, args)
                     f = half * dot_product(fvec, fvec)
                     neval = neval + 1
                 end if
@@ -753,7 +758,7 @@ contains
 ! ******************************************************************************
 ! BRENT_SOLVER
 ! ------------------------------------------------------------------------------
-    subroutine brent_solve(this, fcn, x, lim, f, ib, err)
+    subroutine brent_solve(this, fcn, x, lim, f, ib, args, err)
         !! Solves an equation of one variable using Brent's method.
         !!
         !! See Also
@@ -782,6 +787,8 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
+        class(*), intent(inout), optional :: args
+            !! An optional argument to allow the user to communicate with fcn.
         class(errors), intent(inout), optional, target :: err
             !! An error handling object.
 
@@ -849,8 +856,8 @@ contains
 
         ! Process
         flag = 0
-        fa = fcn%fcn(a)
-        fb = fcn%fcn(b)
+        fa = fcn%fcn(a, args)
+        fb = fcn%fcn(b, args)
         neval = 2
         fc = fb
         do
@@ -936,7 +943,7 @@ contains
             else
                 b = b + sign(tol1, xm)
             end if
-            fb = fcn%fcn(b)
+            fb = fcn%fcn(b, args)
             neval = neval + 1
 
             ! Print iteration status
@@ -981,7 +988,7 @@ contains
 ! ******************************************************************************
 ! NEWTON_1VAR_SOLVER
 ! ------------------------------------------------------------------------------
-    subroutine newt1var_solve(this, fcn, x, lim, f, ib, err)
+    subroutine newt1var_solve(this, fcn, x, lim, f, ib, args, err)
         !! Solves an equation of one variable using Newton's method.
         class(newton_1var_solver), intent(inout) :: this
             !! The [[newton_1var_solver]] object.
@@ -999,6 +1006,8 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
+        class(*), intent(inout), optional :: args
+            !! An optional argument to allow the user to communicate with fcn.
         class(errors), intent(inout), optional, target :: err
             !! An error handling object.
 
@@ -1066,8 +1075,8 @@ contains
 
         ! See if the root is one of the end points
         flag = 0
-        fl = fcn%fcn(x1)
-        fh = fcn%fcn(x2)
+        fl = fcn%fcn(x1, args)
+        fh = fcn%fcn(x2, args)
         neval = 2
         if (abs(fl) < ftol) then
             x = x1
@@ -1099,8 +1108,8 @@ contains
         x = p5 * (x1 + x2)
         dxold = abs(x2 - x1)
         dx = dxold
-        ff = fcn%fcn(x)
-        df = fcn%diff(x, ff)
+        ff = fcn%fcn(x, args)
+        df = fcn%diff(x, f = ff, args = args)
         neval = neval + 1
         ndiff = ndiff + 1
         do
@@ -1135,8 +1144,8 @@ contains
             end if
 
             ! Update function values
-            ff = fcn%fcn(x)
-            df = fcn%diff(x, ff)
+            ff = fcn%fcn(x, args)
+            df = fcn%diff(x, f = ff, args = args)
             neval = neval + 1
             ndiff = ndiff + 1
 
@@ -1175,7 +1184,7 @@ contains
 
         ! Ensure the function value is current with the estimate of the root
         if (present(f)) then
-            f = fcn%fcn(x)
+            f = fcn%fcn(x, args)
             neval = neval + 1
         end if
 

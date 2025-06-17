@@ -28,9 +28,10 @@ contains
     ! Solution:
     ! x = +/-5
     ! y = +/-3
-    subroutine fcn1(x, f)
+    subroutine fcn1(x, f, args)
         real(real64), intent(in), dimension(:) :: x
         real(real64), intent(out), dimension(:) :: f
+        class(*), intent(inout), optional :: args
         f(1) = x(1)**2 + x(2)**2 - 34.0d0
         f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
     end subroutine
@@ -40,9 +41,10 @@ contains
     !     | 2x  2y |
     ! J = |        |
     !     | 2x  -4y|
-    subroutine jac1(x, j)
+    subroutine jac1(x, j, args)
         real(real64), intent(in), dimension(:) :: x
         real(real64), intent(out), dimension(:,:) :: j
+        class(*), intent(inout), optional :: args
         j = 2.0d0 * reshape([x(1), x(1), x(2), -2.0d0 * x(2)], [2, 2])
     end subroutine
 
@@ -69,9 +71,10 @@ contains
     ! Solution:
     ! x1 = 5e3
     ! x2 = 10
-    subroutine fcn2(x, f)
+    subroutine fcn2(x, f, args)
         real(real64), intent(in), dimension(:) :: x
         real(real64), intent(out), dimension(:) :: f
+        class(*), intent(inout), optional :: args
         f(1) = x(2) - 10.0d0
         f(2) = x(1) * x(2) - 5e4
     end subroutine
@@ -92,10 +95,11 @@ contains
 ! ******************************************************************************
 ! LEAST SQUARES FUNCTIONS
 ! ------------------------------------------------------------------------------
-    subroutine lsfcn1(x, f)
+    subroutine lsfcn1(x, f, args)
         ! Arguments
         real(real64), intent(in), dimension(:) :: x
         real(real64), intent(out), dimension(:) :: f
+        class(*), intent(inout), optional :: args
 
         ! Local Variables
         real(real64), dimension(21) :: xp, yp
@@ -123,8 +127,9 @@ contains
 ! 1 VARIABLE FUNCTIONS
 ! ------------------------------------------------------------------------------
     ! f(x) = sin(x) / x, SOLUTION: x = n * pi for n = 0, 1, 2, 3, ...
-    function f1var_1(x) result(f)
+    function f1var_1(x, args) result(f)
         real(real64), intent(in) :: x
+        class(*), intent(inout), optional :: args
         real(real64) :: f
         f = sin(x) / x
     end function

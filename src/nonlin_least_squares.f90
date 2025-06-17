@@ -67,7 +67,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    subroutine lss_solve(this, fcn, x, fvec, ib, err)
+    subroutine lss_solve(this, fcn, x, fvec, ib, args, err)
         !! Applies the Levenberg-Marquardt method to solve the nonlinear
         !! least-squares problem.  This routines is based upon the MINPACK 
         !! routine LMDIF.
@@ -86,6 +86,9 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
+        class(*), intent(inout), optional :: args
+                !! An optional argument to allow the user to communicate with
+                !! the routine.
         class(errors), intent(inout), optional, target :: err
             !! An error handling object.
 
@@ -194,7 +197,7 @@ contains
         end if
 
         ! Evaluate the function at the starting point, and calculate its norm
-        call fcn%fcn(x, fvec)
+        call fcn%fcn(x, fvec, args)
         neval = 1
         fnorm = norm2(fvec)
 
@@ -204,7 +207,7 @@ contains
         flag = 0
         do
             ! Evaluate the Jacobian
-            call fcn%jacobian(x, jac, fvec, w)
+            call fcn%jacobian(x, jac, fvec, w, args = args)
             njac = njac + 1
 
             ! Compute the QR factorization of the Jacobian
@@ -280,7 +283,7 @@ contains
                 if (iter == 1) delta = min(delta, pnorm)
 
                 ! Evaluate the function at X + P, and calculate its norm
-                call fcn%fcn(wa2, wa4)
+                call fcn%fcn(wa2, wa4, args)
                 neval = neval + 1
                 fnorm1 = norm2(wa4)
 

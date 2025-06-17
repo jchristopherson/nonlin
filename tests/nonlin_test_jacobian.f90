@@ -16,9 +16,10 @@ contains
     ! FUNCTIONS:
     ! x = r * cos(theta)
     ! y = r * sin(theta)
-    subroutine fcn1(x, f)
+    subroutine fcn1(x, f, args)
         real(real64), intent(in), dimension(:) :: x
         real(real64), intent(out), dimension(:) :: f
+        class(*), intent(inout), optional :: args
         real(real64) :: r, theta
         r = x(1)
         theta = x(2)
@@ -30,9 +31,10 @@ contains
     !     |cos  -r*sin|
     ! J = |           |
     !     |sin   r*cos|
-    subroutine jac1(x, jac)
+    subroutine jac1(x, jac, args)
         real(real64), intent(in), dimension(:) :: x
         real(real64), intent(out), dimension(:,:) :: jac
+        class(*), intent(inout), optional :: args
         real(real64) :: r, theta
         r = x(1)
         theta = x(2)

@@ -11,16 +11,19 @@ module nonlin_multi_var
     public :: nonlin_optimize_fcn
 
     interface
-        function fcnnvar(x) result(f)
+        function fcnnvar(x, args) result(f)
             !! Describes a function of N variables.
             use, intrinsic :: iso_fortran_env, only : real64
             real(real64), intent(in), dimension(:) :: x
                 !! An N-element array containing the independent variables.
+            class(*), intent(inout), optional :: args
+                !! An optional argument to allow the user to communicate with
+                !! the routine.
             real(real64) :: f
                 !! The value of the function.
         end function
 
-        subroutine gradientfcn(x, g)
+        subroutine gradientfcn(x, g, args)
             !! Describes a routine capable of computing the gradient vector
             !! of an equation of N variables.
             use, intrinsic :: iso_fortran_env, only : real64
@@ -29,6 +32,9 @@ module nonlin_multi_var
             real(real64), intent(out), dimension(:) :: g
                 !! An N-element array where the gradient vector will be
                 !! written as output.
+            class(*), intent(inout), optional :: args
+                !! An optional argument to allow the user to communicate with
+                !! the routine.
         end subroutine
     end interface
 
@@ -70,7 +76,7 @@ module nonlin_multi_var
     end type
 
     interface
-        subroutine nonlin_optimize_fcn(this, fcn, x, fout, ib, err)
+        subroutine nonlin_optimize_fcn(this, fcn, x, fout, ib, args, err)
             !! Describes the interface of a routine for optimizing an
             !! equation of N variables.
             use, intrinsic :: iso_fortran_env, only : real64
@@ -92,6 +98,9 @@ module nonlin_multi_var
             type(iteration_behavior), optional :: ib
                 !! An optional output, that if provided, allows the caller to 
                 !! obtain iteration performance statistics.
+            class(*), intent(inout), optional :: args
+                !! An optional argument to allow the user to communicate with
+                !! the routine.
             class(errors), intent(inout), optional, target :: err
                 !! An error handling object.
         end subroutine
@@ -100,17 +109,20 @@ contains
 ! ******************************************************************************
 ! FCNNVAR_HELPER
 ! ------------------------------------------------------------------------------
-    function fnh_fcn(this, x) result(f)
+    function fnh_fcn(this, x, args) result(f)
         !! Executes the routine containing the function to evaluate.
         class(fcnnvar_helper), intent(in) :: this
             !! The [[fcnnvar_helper]] object.
         real(real64), intent(in), dimension(:) :: x
             !! The value of the independent variables at which the function
             !! should be evaluated.
+        class(*), intent(inout), optional :: args
+            !! An optional argument to allow the user to communicate with
+            !! the routine.
         real(real64) :: f
             !! The value of the function.
         if (associated(this%m_fcn)) then
-            f = this%m_fcn(x)
+            f = this%m_fcn(x, args)
         end if
     end function
 
@@ -170,7 +182,7 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    subroutine fnh_grad_fcn(this, x, g, fv, err)
+    subroutine fnh_grad_fcn(this, x, g, fv, args, err)
         !! Computes the gradient of the function.
         class(fcnnvar_helper), intent(in) :: this
             !! The [[fcnnvar_helper]] object.
@@ -183,6 +195,9 @@ contains
             !! output.
         real(real64), intent(in), optional :: fv
             !! An optional input providing the function value at x.
+        class(*), intent(inout), optional :: args
+            !! An optional argument to allow the user to communicate with
+            !! the routine.
         integer(int32), intent(out), optional :: err
             !! An optional integer output that can be used to determine error 
             !! status.  If not used, and an error is encountered, the routine
@@ -222,13 +237,13 @@ contains
         if (.not.this%is_fcn_defined()) return
         if (this%is_gradient_defined()) then
             ! Call the user-defined gradient routine
-            call this%m_grad(x, g)
+            call this%m_grad(x, g, args)
         else
             ! Compute the gradient via finite differences
             if (present(fv)) then
                 f = fv
             else
-                f = this%fcn(x)
+                f = this%fcn(x, args)
             end if
 
             ! Establish step size factors
@@ -241,7 +256,7 @@ contains
                 h = eps * abs(temp)
                 if (h == zero) h = eps
                 x(j) = temp + h
-                f1 = this%fcn(x)
+                f1 = this%fcn(x, args)
                 x(j) = temp
                 g(j) = (f1 - f) / h
             end do

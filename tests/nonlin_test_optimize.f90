@@ -17,15 +17,17 @@ contains
 ! ------------------------------------------------------------------------------
 ! REF: https://en.wikipedia.org/wiki/Test_functions_for_optimization
 ! ------------------------------------------------------------------------------
-    function rosenbrock(x) result(f)
+    function rosenbrock(x, args) result(f)
         real(real64), intent(in), dimension(:) :: x
+        class(*), intent(inout), optional :: args
         real(real64) :: f
         f = 1.0d2 * (x(2) - x(1)**2)**2 + (x(1) - 1.0d0)**2
     end function
 
 ! ------------------------------------------------------------------------------
-    function beale(x) result(f)
+    function beale(x, args) result(f)
         real(real64), intent(in), dimension(:) :: x
+        class(*), intent(inout), optional :: args
         real(real64) :: f
         f = (1.5d0 - x(1) + x(1) * x(2))**2 + &
             (2.25d0 - x(1) + x(1) * x(2)**2)**2 + &

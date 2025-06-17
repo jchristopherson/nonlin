@@ -10,11 +10,14 @@ module nonlin_single_var
     public :: nonlin_solver_1var
 
     interface
-        function fcn1var(x) result(f)
+        function fcn1var(x, args) result(f)
             !! Describes a function of one variable.
             use, intrinsic :: iso_fortran_env, only : real64
             real(real64), intent(in) :: x
                 !! The independent variable.
+            class(*), intent(inout), optional :: args
+                !! An optional argument to allow the user to communicate with
+                !! the routine.
             real(real64) :: f
                 !! The value of the function at x.
         end function
@@ -66,7 +69,7 @@ module nonlin_single_var
     end type
 
     interface
-        subroutine nonlin_solver_1var(this, fcn, x, lim, f, ib, err)
+        subroutine nonlin_solver_1var(this, fcn, x, lim, f, ib, args, err)
             !! Describes the interface of a solver for an equation of one
             !! variable.
             use, intrinsic :: iso_fortran_env, only : real64
@@ -89,6 +92,9 @@ module nonlin_single_var
             type(iteration_behavior), optional :: ib
                 !! An optional output, that if provided, allows the
                 !! caller to obtain iteration performance information.
+            class(*), intent(inout), optional :: args
+                !! An optional argument to allow the user to communicate with
+                !! the routine.
             class(errors), intent(inout), optional, target :: err
                 !! An error handling object.
         end subroutine
@@ -98,17 +104,20 @@ contains
 ! ******************************************************************************
 ! FCN1VAR_HELPER
 ! ------------------------------------------------------------------------------
-    function f1h_fcn(this, x) result(f)
+    function f1h_fcn(this, x, args) result(f)
         !! Executes the routine containing the function to evaluate.
         class(fcn1var_helper), intent(in) :: this
             !! The [[fcn1var_helper]] object.
         real(real64), intent(in) :: x
             !! The value of the independent variable at which the function
             !! should be evaluated.
+        class(*), intent(inout), optional :: args
+            !! An optional argument to allow the user to communicate with
+            !! the routine.
         real(real64) :: f
             !! The value of the function.
         if (associated(this%m_fcn)) then
-            f = this%m_fcn(x)
+            f = this%m_fcn(x, args)
         end if
     end function
 
@@ -146,7 +155,7 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    function f1h_diff_fcn(this, x, f) result(df)
+    function f1h_diff_fcn(this, x, f, args) result(df)
         !! Computes the derivative of the function.  If a routine for computing 
         !! the derivative is not defined, the derivative is estimated via 
         !! finite differences.
@@ -159,6 +168,9 @@ contains
             !! An optional input specifying the function value at x.  If 
             !! supplied, and the derivative is being estimated numerically, the 
             !! function will not be evaluated at x.
+        class(*), intent(inout), optional :: args
+            !! An optional argument to allow the user to communicate with
+            !! the routine.
         real(real64) :: df
             !! The value of the derivative.
 
@@ -175,17 +187,17 @@ contains
         ! Process
         if (this%is_derivative_defined()) then
             ! Use the user-defined routine to compute the derivative
-            df = this%m_diff(x)
+            df = this%m_diff(x, args)
         else
             ! Compute the derivative via a forward difference
             h = eps * abs(x)
             if (h < epsmch) h = eps
             temp = x + h
-            f1 = this%fcn(temp)
+            f1 = this%fcn(temp, args)
             if (present(f)) then
                 f0 = f
             else
-                f0 = this%fcn(x)
+                f0 = this%fcn(x, args)
             end if
             df = (f1 - f0) / h
         end if
