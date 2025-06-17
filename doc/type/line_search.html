@@ -150,13 +150,13 @@
       <div id="boundprocs-0" class="panel-collapse collapse">
         <div class="list-group">
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-get_distance_factor">get_distance_factor</a>
-            <a class="list-group-item" href="../type/line_search.html#boundprocedure-get_max_fcn_evals">get_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/line_search.html#boundprocedure-get_max_fcn_evals~2">get_max_fcn_evals</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-get_scaling_factor">get_scaling_factor</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-ls_search_mimo">ls_search_mimo</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-ls_search_miso">ls_search_miso</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-search">search</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-set_distance_factor">set_distance_factor</a>
-            <a class="list-group-item" href="../type/line_search.html#boundprocedure-set_max_fcn_evals">set_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/line_search.html#boundprocedure-set_max_fcn_evals~2">set_max_fcn_evals</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-set_scaling_factor">set_scaling_factor</a>
         </div>
       </div>
@@ -180,16 +180,7 @@ that is usable for unconstrained minimization problems.</p>
 <p><a href="https://en.wikipedia.org/wiki/Backtracking_line_search">Wikipedia</a></p>
 </li>
 <li>
-<p>[Oxfford Lecture Notes]
-     (https://people.maths.ox.ac.uk/hauser/hauser_lecture2.pdf)</p>
-</li>
-<li>
-<p>[Northwestern University - Line Search]
-     (https://optimization.mccormick.northwestern.edu/index.php/Line_search_methods)</p>
-</li>
-<li>
-<p>[Northwestern University - Trust Region Methods]
-     (https://optimization.mccormick.northwestern.edu/index.php/Trust-region_methods)</p>
+<p><a href="https://people.maths.ox.ac.uk/hauser/hauser_lecture2.pdf">Oxfford Lecture Notes</a></p>
 </li>
 <li>
 <p><a href="https://reference.wolfram.com/language/tutorial/UnconstrainedOptimizationLineSearchMethods.html">Wolfram</a></p>
@@ -228,13 +219,13 @@ that is usable for unconstrained minimization problems.</p>
       <div id="boundprocs-1" class="panel-collapse collapse">
         <div class="list-group">
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-get_distance_factor">get_distance_factor</a>
-            <a class="list-group-item" href="../type/line_search.html#boundprocedure-get_max_fcn_evals">get_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/line_search.html#boundprocedure-get_max_fcn_evals~2">get_max_fcn_evals</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-get_scaling_factor">get_scaling_factor</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-ls_search_mimo">ls_search_mimo</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-ls_search_miso">ls_search_miso</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-search">search</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-set_distance_factor">set_distance_factor</a>
-            <a class="list-group-item" href="../type/line_search.html#boundprocedure-set_max_fcn_evals">set_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/line_search.html#boundprocedure-set_max_fcn_evals~2">set_max_fcn_evals</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-set_scaling_factor">set_scaling_factor</a>
         </div>
       </div>
@@ -254,11 +245,6 @@ that is usable for unconstrained minimization problems.</p>
             <div class="panel panel-default">
     <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_distance_factor"></span><h3>procedure, public :: <strong>get_distance_factor</strong>  => ls_get_dist         
     </h3></div>
-      <div class="panel-body">
-        
-        <p>@brief Gets a distance factor defining the minimum distance along the
-search direction vector is practical.</p>
-      </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
@@ -308,13 +294,8 @@ of the vector.</p>
   </div>
 
             <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_max_fcn_evals"></span><h3>procedure, public :: <strong>get_max_fcn_evals</strong>  => ls_get_max_eval         
+    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_max_fcn_evals~2"></span><h3>procedure, public :: <strong>get_max_fcn_evals</strong>  => ls_get_max_eval         
     </h3></div>
-      <div class="panel-body">
-        
-        <p>@brief Gets the maximum number of function evaluations allowed during
-a single line search.</p>
-      </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
@@ -365,18 +346,13 @@ single line search.</p>
             <div class="panel panel-default">
     <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_scaling_factor"></span><h3>procedure, public :: <strong>get_scaling_factor</strong>  => ls_get_scale         
     </h3></div>
-      <div class="panel-body">
-        
-        <p>@brief Gets the scaling of the product of the gradient and direction
-vectors.</p>
-      </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private pure function ls_get_scale(this) result(x)  
 </h3>
   <p>Gets the scaling of the product of the gradient and direction
-vectors <script type="math/tex">\alpha</script> such that <script type="math/tex"> f(\vec{x} + \lambda \vec{p}) <= 
+vectors <script type="math/tex">\alpha</script> such that <script type="math/tex"> f(\vec{x} + \lambda \vec{p}) \le 
 f(\vec{x}) + \lambda \alpha \vec{p}^{T} \vec{g} </script>, where <script type="math/tex">\vec{p}</script> 
 is the search direction vector, <script type="math/tex">\vec{g}</script> is the gradient vector, 
 and <script type="math/tex">\lambda</script> is the scaling factor.</p>
@@ -814,13 +790,6 @@ obtain iteration performance statistics.</p>
             <div class="panel panel-default">
     <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-search"></span><h3>generic, public :: <strong>search</strong>  => <a href='../type/line_search.html#boundprocedure-ls_search_mimo'>ls_search_mimo</a>, <a href='../type/line_search.html#boundprocedure-ls_search_miso'>ls_search_miso</a>         
     </h3></div>
-      <div class="panel-body">
-        
-        <p>@brief Utilizes an inexact, backtracking line search based on the
-Armijo-Goldstein condition to find a point as far along the specified
-direction vector that is usable for unconstrained minimization
-problems.</p>
-      </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
@@ -1205,11 +1174,6 @@ obtain iteration performance statistics.</p>
             <div class="panel panel-default">
     <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_distance_factor"></span><h3>procedure, public :: <strong>set_distance_factor</strong>  => ls_set_dist         
     </h3></div>
-      <div class="panel-body">
-        
-        <p>@brief Sets a distance factor defining the minimum distance along the
-search direction vector is practical.</p>
-      </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
@@ -1270,13 +1234,8 @@ set [0.1, 1.0).</p>
   </div>
 
             <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_max_fcn_evals"></span><h3>procedure, public :: <strong>set_max_fcn_evals</strong>  => ls_set_max_eval         
+    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_max_fcn_evals~2"></span><h3>procedure, public :: <strong>set_max_fcn_evals</strong>  => ls_set_max_eval         
     </h3></div>
-      <div class="panel-body">
-        
-        <p>@brief Sets the maximum number of function evaluations allowed during
-a single line search.</p>
-      </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
@@ -1337,18 +1296,13 @@ single line search.</p>
             <div class="panel panel-default">
     <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_scaling_factor"></span><h3>procedure, public :: <strong>set_scaling_factor</strong>  => ls_set_scale         
     </h3></div>
-      <div class="panel-body">
-        
-        <p>@brief Sets the scaling of the product of the gradient and direction
-vectors.</p>
-      </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private  subroutine ls_set_scale(this, x)  
 </h3>
   <p>Sets the scaling of the product of the gradient and direction
-vectors <script type="math/tex">\alpha</script> such that <script type="math/tex"> f(\vec{x} + \lambda \vec{p}) <= 
+vectors <script type="math/tex">\alpha</script> such that <script type="math/tex"> f(\vec{x} + \lambda \vec{p}) \le 
 f(\vec{x}) + \lambda \alpha \vec{p}^{T} \vec{g} </script>, where <script type="math/tex">\vec{p}</script> 
 is the search direction vector, <script type="math/tex">\vec{g}</script> is the gradient vector, 
 and <script type="math/tex">\lambda</script> is the scaling factor.</p>
@@ -1420,7 +1374,7 @@ and <script type="math/tex">\lambda</script> is the scaling factor.</p>
             <p class="text-right">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2025-06-17 11:49              </p>
+ on 2025-06-17 11:59              </p>
           </div>
         </div>
         <br>
