@@ -2,7 +2,7 @@
 
 program example
     use iso_fortran_env
-    use nonlin_polynomials
+    use nonlin
     implicit none
 
     ! Local Variables
