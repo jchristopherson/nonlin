@@ -25,14 +25,7 @@ module nonlin_linesearch
         !!
         !! - [Wikipedia](https://en.wikipedia.org/wiki/Backtracking_line_search)
         !!
-        !! - [Oxfford Lecture Notes]
-        !!      (https://people.maths.ox.ac.uk/hauser/hauser_lecture2.pdf)
-        !!
-        !! - [Northwestern University - Line Search]
-        !!      (https://optimization.mccormick.northwestern.edu/index.php/Line_search_methods)
-        !!
-        !! - [Northwestern University - Trust Region Methods]
-        !!      (https://optimization.mccormick.northwestern.edu/index.php/Trust-region_methods)
+        !! - [Oxfford Lecture Notes](https://people.maths.ox.ac.uk/hauser/hauser_lecture2.pdf)
         !!
         !! - [Wolfram](https://reference.wolfram.com/language/tutorial/UnconstrainedOptimizationLineSearchMethods.html)
         !!
@@ -57,28 +50,12 @@ module nonlin_linesearch
             !! considerations, the minimum value should be limited to 0.1 such 
             !! that the value must exist on the set [0.1, 1).
     contains
-        !> @brief Gets the maximum number of function evaluations allowed during
-        !! a single line search.
         procedure, public :: get_max_fcn_evals => ls_get_max_eval
-        !> @brief Sets the maximum number of function evaluations allowed during
-        !! a single line search.
         procedure, public :: set_max_fcn_evals => ls_set_max_eval
-        !> @brief Gets the scaling of the product of the gradient and direction
-        !! vectors.
         procedure, public :: get_scaling_factor => ls_get_scale
-        !> @brief Sets the scaling of the product of the gradient and direction
-        !! vectors.
         procedure, public :: set_scaling_factor => ls_set_scale
-        !> @brief Gets a distance factor defining the minimum distance along the
-        !! search direction vector is practical.
         procedure, public :: get_distance_factor => ls_get_dist
-        !> @brief Sets a distance factor defining the minimum distance along the
-        !! search direction vector is practical.
         procedure, public :: set_distance_factor => ls_set_dist
-        !> @brief Utilizes an inexact, backtracking line search based on the
-        !! Armijo-Goldstein condition to find a point as far along the specified
-        !! direction vector that is usable for unconstrained minimization
-        !! problems.
         generic, public :: search => ls_search_mimo, ls_search_miso
 
         procedure :: ls_search_mimo
@@ -113,7 +90,7 @@ contains
 ! ------------------------------------------------------------------------------
     pure function ls_get_scale(this) result(x)
         !! Gets the scaling of the product of the gradient and direction
-        !! vectors \(\alpha\) such that \( f(\vec{x} + \lambda \vec{p}) <= 
+        !! vectors \(\alpha\) such that \( f(\vec{x} + \lambda \vec{p}) \le 
         !! f(\vec{x}) + \lambda \alpha \vec{p}^{T} \vec{g} \), where \(\vec{p}\) 
         !! is the search direction vector, \(\vec{g}\) is the gradient vector, 
         !! and \(\lambda\) is the scaling factor.
@@ -127,7 +104,7 @@ contains
 ! --------------------
     subroutine ls_set_scale(this, x)
         !! Sets the scaling of the product of the gradient and direction
-        !! vectors \(\alpha\) such that \( f(\vec{x} + \lambda \vec{p}) <= 
+        !! vectors \(\alpha\) such that \( f(\vec{x} + \lambda \vec{p}) \le 
         !! f(\vec{x}) + \lambda \alpha \vec{p}^{T} \vec{g} \), where \(\vec{p}\) 
         !! is the search direction vector, \(\vec{g}\) is the gradient vector, 
         !! and \(\lambda\) is the scaling factor.
