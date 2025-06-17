@@ -57,25 +57,25 @@ module nonlin_linesearch
             !! considerations, the minimum value should be limited to 0.1 such 
             !! that the value must exist on the set [0.1, 1).
     contains
-        !> @brief Gets the maximum number of function evaluations allowed during
+        !> Gets the maximum number of function evaluations allowed during
         !! a single line search.
         procedure, public :: get_max_fcn_evals => ls_get_max_eval
-        !> @brief Sets the maximum number of function evaluations allowed during
+        !> Sets the maximum number of function evaluations allowed during
         !! a single line search.
         procedure, public :: set_max_fcn_evals => ls_set_max_eval
-        !> @brief Gets the scaling of the product of the gradient and direction
+        !> Gets the scaling of the product of the gradient and direction
         !! vectors.
         procedure, public :: get_scaling_factor => ls_get_scale
-        !> @brief Sets the scaling of the product of the gradient and direction
+        !> Sets the scaling of the product of the gradient and direction
         !! vectors.
         procedure, public :: set_scaling_factor => ls_set_scale
-        !> @brief Gets a distance factor defining the minimum distance along the
+        !> Gets a distance factor defining the minimum distance along the
         !! search direction vector is practical.
         procedure, public :: get_distance_factor => ls_get_dist
-        !> @brief Sets a distance factor defining the minimum distance along the
+        !> Sets a distance factor defining the minimum distance along the
         !! search direction vector is practical.
         procedure, public :: set_distance_factor => ls_set_dist
-        !> @brief Utilizes an inexact, backtracking line search based on the
+        !> Utilizes an inexact, backtracking line search based on the
         !! Armijo-Goldstein condition to find a point as far along the specified
         !! direction vector that is usable for unconstrained minimization
         !! problems.
