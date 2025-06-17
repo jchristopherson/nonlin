@@ -2,6 +2,8 @@ module nonlin_least_squares
     use iso_fortran_env
     use nonlin_multi_eqn_mult_var
     use nonlin_error_handling
+    use nonlin_types
+    use nonlin_helper
     use ferror, only : errors
     implicit none
     private

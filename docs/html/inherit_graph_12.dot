@@ -1,7 +1,0 @@
-digraph "Graphical Class Hierarchy"
-{
-  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
-  node [fontname="Helvetica",fontsize="10",shape=record];
-  rankdir="LR";
-  Node0 [label="nonlin_types::fcnnvar\l_helper",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structnonlin__types_1_1fcnnvar__helper.html",tooltip="Defines a type capable of encapsulating an equation of N variables. "];
-}

@@ -3,7 +3,7 @@
 ! Tests the Jacobian calculation utilities.
 module nonlin_test_jacobian
     use iso_fortran_env
-    use nonlin_core
+    use nonlin
     use fortran_test_helper
     implicit none
     private

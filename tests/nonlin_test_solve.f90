@@ -2,9 +2,7 @@
 
 module nonlin_test_solve
     use iso_fortran_env
-    use nonlin_core
-    use nonlin_solve
-    use nonlin_least_squares
+    use nonlin
     use ferror, only : errors
     implicit none
     private

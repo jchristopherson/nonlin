@@ -2,8 +2,7 @@
 
 module nonlin_test_optimize
     use iso_fortran_env
-    use nonlin_optimize
-    use nonlin_core
+    use nonlin
     use fortran_test_helper
     implicit none
     private

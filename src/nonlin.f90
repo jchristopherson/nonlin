@@ -4,6 +4,10 @@ module nonlin
     use nonlin_multi_var
     use nonlin_types
     use nonlin_least_squares
+    use nonlin_linesearch
+    use nonlin_optimize
+    use nonlin_solve
+    use nonlin_polynomials
     implicit none
 
     ! NONLIN_MULTI_EQN_MULTI_VAR
@@ -32,4 +36,27 @@ module nonlin
 
     ! NONLIN_LEAST_SQUARES
     public :: least_squares_solver
+
+    ! NONLIN_LINESEARCH
+    public :: line_search
+    public :: limit_search_vector
+
+    ! NONLIN_OPTIMIZE
+    public :: nelder_mead
+    public :: line_search_optimizer
+    public :: bfgs
+
+    ! NONLIN_SOLVE
+    public :: line_search_solver
+    public :: quasi_newton_solver
+    public :: newton_solver
+    public :: brent_solver
+    public :: newton_1var_solver
+
+    ! NONLIN_POLYNOMIALS
+    public :: polynomial
+    public :: assignment(=)
+    public :: operator(+)
+    public :: operator(-)
+    public :: operator(*)
 end module

@@ -1,117 +1,82 @@
-! nonlin_polynomials.f90
-
-
-! TO DO:
-! - Multiplication (convolution)
-! - Division (deconvolution)
-! - C interface
-
-!> @brief \b polynomials
-!!
-!! @par Purpose
-!! Provides a means of defining and operating on polynomials.
 module nonlin_polynomials
-    use, intrinsic :: iso_fortran_env, only : int32, real64
+    use iso_fortran_env
     use linalg, only : eigen, solve_least_squares
     use ferror, only : errors
-    use nonlin_constants, only : NL_INVALID_INPUT_ERROR, NL_ARRAY_SIZE_ERROR, &
-        NL_OUT_OF_MEMORY_ERROR
+    use nonlin_error_handling
     implicit none
-
-private
-public :: polynomial
-public :: assignment(=)
-public :: operator(+)
-public :: operator(-)
-public :: operator(*)
+    private
+    public :: polynomial
+    public :: assignment(=)
+    public :: operator(+)
+    public :: operator(-)
+    public :: operator(*)
 
 ! ******************************************************************************
 ! INTERFACES
 ! ------------------------------------------------------------------------------
-!> @brief Defines polynomial assignment.
-interface assignment(=)
-    module procedure :: poly_equals
-    module procedure :: poly_dbl_equals
-    module procedure :: poly_equals_array
-end interface
+    interface assignment(=)
+        !! Defines polynomial assignment.
+        module procedure :: poly_equals
+        module procedure :: poly_dbl_equals
+        module procedure :: poly_equals_array
+    end interface
 
-!> @brief Defines polynomial addition.
-interface operator(+)
-    module procedure :: poly_poly_add
-end interface
+    interface operator(+)
+        !! Defines polynomial addition.
+        module procedure :: poly_poly_add
+    end interface
 
-!> @brief Defines polynomial subtraction.
-interface operator(-)
-    module procedure :: poly_poly_subtract
-end interface
+    interface operator(-)
+        !! Defines polynomial subtraction.
+        module procedure :: poly_poly_subtract
+    end interface
 
-!> @brief Defines polynomial multiplication
-interface operator(*)
-    module procedure :: poly_poly_mult
-    module procedure :: poly_dbl_mult
-    module procedure :: dbl_poly_mult
-end interface
+    interface operator(*)
+        !! Defines polynomial multiplication
+        module procedure :: poly_poly_mult
+        module procedure :: poly_dbl_mult
+        module procedure :: dbl_poly_mult
+    end interface
 
 ! ******************************************************************************
 ! TYPES
 ! ------------------------------------------------------------------------------
-!> @brief Defines a polynomial, and associated routines for performing
-!! polynomial operations.
-type polynomial
-private
-    !> An array that contains the polynomial coefficients in ascending order.
-    real(real64), allocatable, dimension(:) :: m_coeffs
-contains
-    !> @brief Initializes the polynomial instance.
-    generic, public :: initialize => init_poly, init_poly_coeffs
-    !> @brief Returns the order of the polynomial object.
-    procedure, public :: order => get_poly_order
-    !> @brief Fits a polynomial of the specified order to a data set.
-    procedure, public :: fit => poly_fit
-    !> @brief Fits a polynomial of the specified order that passes through zero
-    !! to a data set.
-    procedure, public :: fit_thru_zero => poly_fit_thru_zero
-    !> @brief Evaluates a polynomial at the specified points.
-    generic, public :: evaluate => evaluate_real, evaluate_complex
-    !> @brief Returns the companion matrix for the polynomial.
-    procedure, public :: companion_mtx => poly_companion_mtx
-    !> @brief Computes all the roots of a polynomial.
-    procedure, public :: roots => poly_roots
-    !> @brief Gets the requested polynomial coefficient.
-    procedure, public :: get => get_poly_coefficient
-    !> @brief Gets an array containing all the coefficients of the polynomial.
-    procedure, public :: get_all => get_poly_coefficients
-    !> @brief Sets the requested polynomial coefficient by index.
-    procedure, public :: set => set_poly_coefficient
+    type polynomial
+        !! Defines a polynomial, and associated routines for performing
+        !! polynomial operations.
+        real(real64), private, allocatable, dimension(:) :: m_coeffs
+            !! An array that contains the polynomial coefficients in ascending 
+            !! order.
+    contains
+        generic, public :: initialize => init_poly, init_poly_coeffs
+        procedure, public :: order => get_poly_order
+        procedure, public :: fit => poly_fit
+        procedure, public :: fit_thru_zero => poly_fit_thru_zero
+        generic, public :: evaluate => evaluate_real, evaluate_complex
+        procedure, public :: companion_mtx => poly_companion_mtx
+        procedure, public :: roots => poly_roots
+        procedure, public :: get => get_poly_coefficient
+        procedure, public :: get_all => get_poly_coefficients
+        procedure, public :: set => set_poly_coefficient
 
-    procedure :: evaluate_real => poly_eval_double
-    procedure :: evaluate_complex => poly_eval_complex
-    procedure :: init_poly
-    procedure :: init_poly_coeffs
-end type
+        procedure, private :: evaluate_real => poly_eval_double
+        procedure, private :: evaluate_complex => poly_eval_complex
+        procedure, private :: init_poly
+        procedure, private :: init_poly_coeffs
+    end type
 
 contains
 ! ******************************************************************************
 ! POLYNOMIAL MEMBERS
 ! ------------------------------------------------------------------------------
-    !> @brief Initializes the polynomial instance, and sets all coefficients
-    !! to zero.
-    !!
-    !! @param[in,out] this The polynomial object.
-    !! @param[in] order The order of the polynomial (must be >= 0).
-    !! @param[out] err An optional errors-based object that if provided can be
-    !!  used to retrieve information relating to any errors encountered during
-    !!  execution.  If not provided, a default implementation of the errors
-    !!  class is used internally to provide error handling.  Possible errors and
-    !!  warning messages that may be encountered are as follows.
-    !!  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
-    !!      was specified.
-    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
     subroutine init_poly(this, order, err)
-        ! Arguments
+        !! Initializes the polynomial instance.
         class(polynomial), intent(inout) :: this
+            !! The [[polynomial]] object.
         integer(int32), intent(in) :: order
+            !! The order of the polynomial (must be >= 0).
         class(errors), intent(inout), optional, target :: err
+            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -151,24 +116,16 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Initializes the polynomial instance.
-    !!
-    !! @param[in,out] this The polynomial object.
-    !! @param[in] c The array of polynomial coefficients. The coefficients are
-    !!  established as follows: c(1) + c(2) * x + c(3) * x**2 + ... c(n) * x**n-1.
-    !! @param[out] err An optional errors-based object that if provided can be
-    !!  used to retrieve information relating to any errors encountered during
-    !!  execution.  If not provided, a default implementation of the errors
-    !!  class is used internally to provide error handling.  Possible errors and
-    !!  warning messages that may be encountered are as follows.
-    !!  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
-    !!      was specified.
-    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
     subroutine init_poly_coeffs(this, c, err)
-        ! Arguments
+        !! Initializes the polynomial instance.
         class(polynomial), intent(inout) :: this
+            !! The [[polynomial]] object.
         real(real64), intent(in), dimension(:) :: c
+            !! The array of polynomial coefficients. The coefficients are
+            !! established as follows: c(1) + c(2) * x + c(3) * x**2 + ...
+            !! c(n) * x**n-1.
         class(errors), intent(inout), optional, target :: err
+            !! An error handling object.
 
         ! Local Variables
         integer(int32) :: i, n
@@ -194,15 +151,13 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Returns the order of the polynomial object.
-    !!
-    !! @param[in] this The polynomial object.
-    !!
-    !! @return The order of the polynomial.  Returns -1 in the event no
-    !! polynomial coefficients have been defined.
     pure function get_poly_order(this) result(n)
+        !! Returns the order of the polynomial object.
         class(polynomial), intent(in) :: this
+            !! The [[polynomial]] object.
         integer(int32) :: n
+            !! The order of the polynomial.  Returns -1 in the event no
+            !! polynomial coefficients have been defined.
         if (.not.allocated(this%m_coeffs)) then
             n = -1
         else
@@ -211,83 +166,20 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Fits a polynomial of the specified order to a data set.
-    !!
-    !! @param[in,out] this The polynomial object.
-    !! @param[in] x An N-element array containing the independent variable data
-    !!  points.  Notice, must be N > @p order.
-    !! @param[in,out] y On input, an N-element array containing the dependent
-    !!  variable data points.  On output, the contents are overwritten.
-    !! @param[in] order The order of the polynomial (must be >= 1).
-    !! @param[out] err An optional errors-based object that if provided can be
-    !!  used to retrieve information relating to any errors encountered during
-    !!  execution.  If not provided, a default implementation of the errors
-    !!  class is used internally to provide error handling.  Possible errors and
-    !!  warning messages that may be encountered are as follows.
-    !!  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
-    !!      was specified, or if order is too large for the data set.
-    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
-    !!  - NL_ARRAY_SIZE_ERROR: Occurs if @p x and @p y are different sizes.
-    !!
-    !! @par Usage
-    !! The following code provides an example of how to fit a polynomial to a
-    !! set of data.
-    !! @code{.f90}
-    !! program example
-    !!     use linalg_constants, only : dp, i32
-    !!     use nonlin_polynomials
-    !!
-    !!     ! Local Variables
-    !!     real(real64), dimension(21) :: xp, yp, yf, yc, err
-    !!     real(real64) :: res
-    !!     type(polynomial) :: p
-    !!
-    !!     ! Data to fit
-    !!     xp = [0.0d0, 0.1d0, 0.2d0, 0.3d0, 0.4d0, 0.5d0, 0.6d0, 0.7d0, 0.8d0, &
-    !!         0.9d0, 1.0d0, 1.1d0, 1.2d0, 1.3d0, 1.4d0, 1.5d0, 1.6d0, 1.7d0, &
-    !!         1.8d0, 1.9d0, 2.0d0]
-    !!     yp = [1.216737514d0, 1.250032542d0, 1.305579195d0, 1.040182335d0, &
-    !!         1.751867738d0, 1.109716707d0, 2.018141531d0, 1.992418729d0, &
-    !!         1.807916923d0, 2.078806005d0, 2.698801324d0, 2.644662712d0, &
-    !!         3.412756702d0, 4.406137221d0, 4.567156645d0, 4.999550779d0, &
-    !!         5.652854194d0, 6.784320119d0, 8.307936836d0, 8.395126494d0, &
-    !!         10.30252404d0]
-    !!
-    !!     ! Create a copy of yp as it will be overwritten in the fit command
-    !!     yc = yp
-    !!
-    !!     ! Fit the polynomial
-    !!     call p%fit(xp, yp, 3)
-    !!
-    !!     ! Evaluate the polynomial at xp, and then determine the residual
-    !!     yf = p%evaluate(xp)
-    !!     err = abs(yf - yc)
-    !!     res = maxval(err)
-    !!
-    !!     ! Print out the coefficients
-    !!      print '(A)', "Polynomial Coefficients (c0 + c1*x + c2*x**2 + c3*x**3):"
-    !!      do i = 1, 4
-    !!          print '(AI0AF12.9)', "c", i - 1, " = ", p%get(i)
-    !!      end do
-    !!      print '(AE9.4)', "Residual: ", res
-    !! end program
-    !! @endcode
-    !! The above program returns the following results.
-    !! @code{.txt}
-    !! Polynomial Coefficients (c0 + c1*x + c2*x**2 + c3*x**3):
-    !! c0 =  1.186614186
-    !! c1 =  0.446613631
-    !! c2 = -0.122320499
-    !! c3 =  1.064762822
-    !! Residual: .5064E+00
-    !! @endcode
     subroutine poly_fit(this, x, y, order, err)
-        ! Arguments
+        !! Fits a polynomial of the specified order to the supplied data set.
         class(polynomial), intent(inout) :: this
+            !! The [[polynomial]] object.
         real(real64), intent(in), dimension(:) :: x
+            !! An N-element array containing the independent variable data
+            !! points.  Notice, must be N > order.
         real(real64), intent(inout), dimension(:) :: y
+            !! On input, an N-element array containing the dependent variable 
+            !! data points.  On output, the contents are overwritten.
         integer(int32), intent(in) :: order
+            !! The order of the polynomial (must be >= 1).
         class(errors), intent(inout), optional, target :: err
+            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: one = 1.0d0
@@ -354,30 +246,19 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Fits a polynomial of the specified order that passes through zero
-    !! to a data set.
-    !!
-    !! @param[in,out] this The polynomial object.
-    !! @param[in] x An N-element array containing the independent variable data
-    !!  points.  Notice, must be N > @p order.
-    !! @param[in,out] y On input, an N-element array containing the dependent
-    !!  variable data points.  On output, the contents are overwritten.
-    !! @param[in] order The order of the polynomial (must be >= 1).
-    !! @param[out] err An optional errors-based object that if provided can be
-    !!  used to retrieve information relating to any errors encountered during
-    !!  execution.  If not provided, a default implementation of the errors
-    !!  class is used internally to provide error handling.  Possible errors and
-    !!  warning messages that may be encountered are as follows.
-    !!  - NL_INVALID_INPUT_ERROR: Occurs if a zero or negative polynomial order
-    !!      was specified, or if order is too large for the data set.
-    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if insufficient memory is available.
-    !!  - NL_ARRAY_SIZE_ERROR: Occurs if @p x and @p y are different sizes.
     subroutine poly_fit_thru_zero(this, x, y, order, err)
-        ! Arguments
+        !! Fits a polynomial of the specified order that passes through zero
+        !! to the supplied data set.
         class(polynomial), intent(inout) :: this
+            !! The [[polynomial]] object.
         real(real64), intent(in), dimension(:) :: x
+            !! An N-element array containing the independent variable data
+            !! points.  Notice, must be N > order.
         real(real64), intent(inout), dimension(:) :: y
+            !! On input, an N-element array containing the dependent
+            !! variable data points.  On output, the contents are overwritten.
         integer(int32), intent(in) :: order
+            !! The order of the polynomial (must be >= 1).
         class(errors), intent(inout), optional, target :: err
 
         ! Parameters
@@ -443,17 +324,14 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Evaluates a polynomial at the specified points.
-    !!
-    !! @param[in] this The polynomial object.
-    !! @param[in] x The value(s) at which to evaluate the polynomial.
-    !!
-    !! @return The value(s) of the polynomial at @p x.
     elemental function poly_eval_double(this, x) result(y)
-        ! Arguments
+        !! Evaluates a polynomial at the specified points.
         class(polynomial), intent(in) :: this
+            !! The [[polynomial]] object.
         real(real64), intent(in) :: x
+            !! The value(s) at which to evaluate the polynomial.
         real(real64) :: y
+            !! The value(s) of the polynomial at x.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -480,17 +358,14 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Evaluates a polynomial at the specified points.
-    !!
-    !! @param[in] this The polynomial object.
-    !! @param[in] x The value(s) at which to evaluate the polynomial.
-    !!
-    !! @return The value(s) of the polynomial at @p x.
     elemental function poly_eval_complex(this, x) result(y)
-        ! Arguments
+        !! Evaluates a polynomial at the specified points.
         class(polynomial), intent(in) :: this
+            !! The [[polynomial]] object.
         complex(real64), intent(in) :: x
+            !! The value(s) at which to evaluate the polynomial.
         complex(real64) :: y
+            !! The value(s) of the polynomial at x.
 
         ! Parameters
         complex(real64), parameter :: zero = (0.0d0, 0.0d0)
@@ -517,19 +392,18 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Returns the companion matrix for the polynomial.
-    !!
-    !! @param[in] this The polynomial object.
-    !!
-    !! @return The companion matrix.
-    !!
-    !! @par See Also
-    !! - [Wikipedia](https://en.wikipedia.org/wiki/Companion_matrix)
-    !! - [Wolfram MathWorld](http://mathworld.wolfram.com/CompanionMatrix.html)
     pure function poly_companion_mtx(this) result(c)
-        ! Arguments
+        !! Returns the companion matrix for the polynomial.
+        !!
+        !! See Also
+        !!
+        !! - [Wikipedia](https://en.wikipedia.org/wiki/Companion_matrix)
+        !!
+        !! - [Wolfram MathWorld](http://mathworld.wolfram.com/CompanionMatrix.html)
         class(polynomial), intent(in) :: this
+            !! The [[polynomial]] object.
         real(real64), dimension(this%order(), this%order()) :: c
+            !! The companion matrix.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -549,73 +423,15 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Computes all the roots of a polynomial by computing the
-    !! eigenvalues of the polynomial companion matrix.
-    !!
-    !! @param[in] this The polynomial object.
-    !! @param[out] err An optional errors-based object that if provided can be
-    !!  used to retrieve information relating to any errors encountered during
-    !!  execution.  If not provided, a default implementation of the errors
-    !!  class is used internally to provide error handling.  Possible errors and
-    !!  warning messages that may be encountered are as follows.
-    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if local memory must be allocated, and
-    !!      there is insufficient memory available.
-    !!  - NL_CONVERGENCE_ERROR: Occurs if the algorithm failed to converge.
-    !!
-    !! @par Usage
-    !! The following code provides an example of how to compute the roots of a
-    !! polynomial.  This examples uses a tenth order polynomial; however, this
-    !! process is applicable to any order.
-    !! @code{.f90}
-    !! program example
-    !!     use linalg_constants, only : dp, i32
-    !!     use nonlin_polynomials
-    !!
-    !!     ! Parameters
-    !!     integer(int32), parameter :: order = 10
-    !!
-    !!     ! Local Variables
-    !!     integer(int32) :: i
-    !!     type(polynomial) :: p
-    !!     real(real64), dimension(order+1) :: coeff
-    !!     complex(real64), allocatable, dimension(:) :: rts, sol
-    !!
-    !!     ! Define the polynomial
-    !!     call random_number(coeff)
-    !!     call p%initialize(order)
-    !!     do i = 1, size(coeff)
-    !!         call p%set(i, coeff(i))
-    !!     end do
-    !!
-    !!     ! Compute the roots via the polynomial routine
-    !!     rts = p%roots()
-    !!
-    !!     ! Compute the value of the polynomial at each root and ensure it
-    !!     ! is sufficiently close to zero.
-    !!     sol = p%evaluate(rts)
-    !!     do i = 1, size(sol)
-    !!         print '(AE9.3AE9.3A)', "(", real(sol(i)), ", ", aimag(sol(i)), ")"
-    !!     end do
-    !! end program
-    !! @endcode
-    !! The above program returns the following results.
-    !! @code{.txt}
-    !! (-.466E-14, -.161E-14)
-    !! (-.466E-14, 0.161E-14)
-    !! (-.999E-15, 0.211E-14)
-    !! (-.999E-15, -.211E-14)
-    !! (0.444E-15, 0.108E-14)
-    !! (0.444E-15, -.108E-14)
-    !! (-.144E-14, -.433E-14)
-    !! (-.144E-14, 0.433E-14)
-    !! (0.644E-14, -.100E-13)
-    !! (0.644E-14, 0.100E-13)
-    !! @endcode
     function poly_roots(this, err) result(z)
-        ! Arguments
+        !! Computes all the roots of a polynomial by computing the eigenvalues
+        !! of the polynomial companion matrix.
         class(polynomial), intent(in) :: this
+            !! The [[polynomial]] object.
         complex(real64), dimension(this%order()) :: z
+            !! The roots of the polynomial.
         class(errors), intent(inout), optional, target :: err
+            !! An error handling object.
 
         ! Local Variables
         integer(int32) :: n
@@ -636,28 +452,18 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Gets the requested polynomial coefficient by index.  The
-    !! coefficient index is established as follows: c(1) + c(2) * x +
-    !! c(3) * x**2 + ... c(n) * x**n-1.
-    !!
-    !! @param[in] this The polynomial.
-    !! @param[in] ind The polynomial coefficient index (0 < ind <= order + 1).
-    !! @param[out] err An optional errors-based object that if provided can be
-    !!  used to retrieve information relating to any errors encountered during
-    !!  execution.  If not provided, a default implementation of the errors
-    !!  class is used internally to provide error handling.  Possible errors and
-    !!  warning messages that may be encountered are as follows.
-    !! - NL_INVALID_INPUT_ERROR: Occurs if the requested index is less than or
-    !!      equal to zero, or if the requested index exceeds the number of
-    !!      polynomial coefficients.
-    !!
-    !! @return The requested coefficient.
     function get_poly_coefficient(this, ind, err) result(c)
-        ! Arguments
+        !! Gets the requested polynomial coefficient by index.  The
+        !! coefficient index is established as follows: c(1) + c(2) * x +
+        !! c(3) * x**2 + ... c(n) * x**n-1.
         class(polynomial), intent(in) :: this
+            !! The [[polynomial]] object.
         integer(int32), intent(in) :: ind
+            !! The polynomial coefficient index.
         class(errors), intent(inout), optional, target :: err
+            !! An error handling object.
         real(real64) :: c
+            !! The requested coefficient.
 
         ! Local Variables
         class(errors), pointer :: errmgr
@@ -688,17 +494,14 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Gets an array containing all the coefficients of the polynomial.
-    !! The coefficient index is established as follows: c(1) + c(2) * x +
-    !! c(3) * x**2 + ... c(n) * x**n-1.
-    !!
-    !! @param[in] this The polynomial object.
-    !!
-    !! @return The array of coefficients.
     pure function get_poly_coefficients(this) result(c)
-        ! Arguments
+        !! Gets an array containing all the coefficients of the polynomial.
+        !! The coefficient index is established as follows: c(1) + c(2) * x +
+        !! c(3) * x**2 + ... c(n) * x**n-1.
         class(polynomial), intent(in) :: this
+            !! The [[polynomial]] object.
         real(real64), dimension(this%order() + 1) :: c
+            !! The array of coefficients.
 
         ! Process
         if (this%order() == -1) return
@@ -706,27 +509,18 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Sets the requested polynomial coefficient by index.  The
-    !! coefficient index is established as follows: c(1) + c(2) * x +
-    !! c(3) * x**2 + ... c(n) * x**n-1.
-    !!
-    !! @param[in,out] this The polynomial.
-    !! @param[in] ind The polynomial coefficient index (0 < ind <= order + 1).
-    !! @param[in] c The polynomial coefficient.
-    !! @param[out] err An optional errors-based object that if provided can be
-    !!  used to retrieve information relating to any errors encountered during
-    !!  execution.  If not provided, a default implementation of the errors
-    !!  class is used internally to provide error handling.  Possible errors and
-    !!  warning messages that may be encountered are as follows.
-    !! - NL_INVALID_INPUT_ERROR: Occurs if the requested index is less than or
-    !!      equal to zero, or if the requested index exceeds the number of
-    !!      polynomial coefficients.
     subroutine set_poly_coefficient(this, ind, c, err)
-        ! Arguments
+        !! Sets the requested polynomial coefficient by index.  The
+        !! coefficient index is established as follows: c(1) + c(2) * x +
+        !! c(3) * x**2 + ... c(n) * x**n-1.
         class(polynomial), intent(inout) :: this
+            !! The [[polynomial]] object.
         integer(int32), intent(in) :: ind
+            !! The polynomial coefficient index.
         real(real64), intent(in) :: c
+            !! The polynomial coefficient.
         class(errors), intent(inout), optional, target :: err
+            !! An error handling object.
 
         ! Local Variables
         class(errors), pointer :: errmgr
@@ -758,14 +552,12 @@ contains
 ! ******************************************************************************
 ! OPERATORS
 ! ------------------------------------------------------------------------------
-    !> @brief Assigns the contents of one polynomial to another.
-    !!
-    !! @param[in,out] x The assignee.
-    !! @param[in] y The polynomial to copy
     subroutine poly_equals(x, y)
-        ! Arguments
+        !! Assigns the contents of one polynomial to another.
         class(polynomial), intent(inout) :: x
+            !! The assignee.
         class(polynomial), intent(in) :: y
+            !! The item to copy.
 
         ! Local Variables
         integer(int32) :: i, ord
@@ -779,14 +571,12 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Assigns a number to each coefficient of the polynomial.
-    !!
-    !! @param[in,out] x The assignee.
-    !! @param[in] y The value to assign.
     subroutine poly_dbl_equals(x, y)
-        ! Arguments
+        !! Assigns a number to each coefficient of the polynomial.
         class(polynomial), intent(inout) :: x
+            !! The assignee.
         real(real64), intent(in) :: y
+            !! The value to assign.
 
         ! Local Variables
         integer(int32) :: i, ord
@@ -799,28 +589,24 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Assigns the contents of an array as polynomial coefficients.
-    !!
-    !! @param[in,out] x The assignee.
-    !! @param[in] y The coefficient array.
     subroutine poly_equals_array(x, y)
-        ! Arguments
+        !! Assigns the contents of an array as polynomial coefficients.
         class(polynomial), intent(inout) :: x
+            !! The assignee.
         real(real64), intent(in), dimension(:) :: y
+            !! The coefficient array.
         call x%initialize(y)
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Adds two polynomials.
-    !!
-    !! @param[in] x The left-hand-side argument.
-    !! @param[in] y The right-hand-side argument.
-    !!
-    !! @return The resulting polynomial.
     function poly_poly_add(x, y) result(z)
-        ! Arguments
-        class(polynomial), intent(in) :: x, y
+        !! Adds two polynomials.
+        class(polynomial), intent(in) :: x
+            !! The left-hand-side argument.
+        class(polynomial), intent(in) :: y
+            !! The right-hand-side argument.
         type(polynomial) :: z
+            !! The resulting polynomial.
 
         ! Local Variables
         integer(int32) :: i, max_ord, x_ord, y_ord
@@ -868,16 +654,14 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Subtracts two polynomials.
-    !!
-    !! @param[in] x The left-hand-side argument.
-    !! @param[in] y The right-hand-side argument.
-    !!
-    !! @return The resulting polynomial.
     function poly_poly_subtract(x, y) result(z)
-        ! Arguments
-        class(polynomial), intent(in) :: x, y
+        !! Subtracts two polynomials.
+        class(polynomial), intent(in) :: x
+            !! The left-hand-side argument.
+        class(polynomial), intent(in) :: y
+            !! The right-hand-side argument.
         type(polynomial) :: z
+            !! The resulting polynomial.
 
         ! Local Variables
         integer(int32) :: i, max_ord, x_ord, y_ord
@@ -925,16 +709,14 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Multiplies two polynomials.
-    !!
-    !! @param[in] x The left-hand-side argument.
-    !! @param[in] y The right-hand-side argument.
-    !!
-    !! @return The resulting polynomial.
     function poly_poly_mult(x, y) result(z)
-        ! Arguments
-        class(polynomial), intent(in) :: x, y
+        !! Multiplies two polynomials.
+        class(polynomial), intent(in) :: x
+            !! The left-hand-side argument.
+        class(polynomial), intent(in) :: y
+            !! The right-hand-side argument.
         type(polynomial) :: z
+            !! The resulting polynomial.
 
         ! Local Variables
         integer(int32) :: i, j, m, n
@@ -955,17 +737,14 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Multiplies a polynomial by a scalar value.
-    !!
-    !! @param[in] x The polynomial.
-    !! @param[in] y The scalar value.
-    !!
-    !! @return The resulting polynomial.
     function poly_dbl_mult(x, y) result(z)
-        ! Arguments
+        !! Multiplies a polynomial by a scalar value.
         class(polynomial), intent(in) :: x
+            !! The left-hand-side argument.
         real(real64), intent(in) :: y
+            !! The right-hand-side argument.
         type(polynomial) :: z
+            !! The resulting polynomial.
 
         ! Local Variables
         integer(int32) :: i, ord
@@ -979,17 +758,14 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Multiplies a polynomial by a scalar value.
-    !!
-    !! @param[in] x The scalar value.
-    !! @param[in] y The polynomial.
-    !!
-    !! @return The resulting polynomial.
     function dbl_poly_mult(x, y) result(z)
-        ! Arguments
+        !! Multiplies a polynomial by a scalar value.
         real(real64), intent(in) :: x
+            !! The left-hand-side argument.
         class(polynomial), intent(in) :: y
+            !! The right-hand-side argument.
         type(polynomial) :: z
+            !! The resulting polynomial.
 
         ! Local Variables
         integer(int32) :: i, ord
