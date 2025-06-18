@@ -13,6 +13,7 @@ module nonlin_optimize
     use nonlin_error_handling
     use nonlin_multi_var
     use nonlin_types
+    use lapack
     use linalg, only : rank1_update, tri_mtx_mult, cholesky_rank1_update, &
         cholesky_rank1_downdate, solve_cholesky
     use linalg_errors, only : LA_MATRIX_FORMAT_ERROR
@@ -581,7 +582,7 @@ contains
 ! ******************************************************************************
 ! BFGS
 ! ------------------------------------------------------------------------------
-    module subroutine bfgs_solve(this, fcn, x, fout, ib, args, err)
+    subroutine bfgs_solve(this, fcn, x, fout, ib, args, err)
         !! Utilizes the Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm
         !! for finding a minimum value of the specified function.
         class(bfgs), intent(inout) :: this
