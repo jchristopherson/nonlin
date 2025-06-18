@@ -63,10 +63,16 @@ program main
     rst = test_nelder_mead_2()
     if (.not.rst) overall = .false.
 
+    rst = test_nelder_mead_3()
+    if (.not.rst) overall = .false.
+
     rst = test_bfgs_1()
     if (.not.rst) overall = .false.
 
     rst = test_bfgs_2()
+    if (.not.rst) overall = .false.
+
+    rst = test_bfgs_3()
     if (.not.rst) overall = .false.
 
     rst = test_newton_3()
