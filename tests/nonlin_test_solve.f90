@@ -8,14 +8,20 @@ module nonlin_test_solve
     private
     public :: test_quasinewton_1
     public :: test_quasinewton_2
+    public :: test_quasinewton_3
+    public :: test_quasinewton_4
     public :: test_newton_1
     public :: test_newton_2
+    public :: test_newton_3
+    public :: test_newton_4
     public :: test_least_squares_1
     public :: test_least_squares_2
     public :: test_least_squares_3
+    public :: test_least_squares_4
     public :: test_brent_1
-    public :: test_newton_3
-    public :: test_quasinewton_3
+    public :: test_brent_2
+    public :: test_newton_1var_1
+    public :: test_newton_1var_2
 contains
 ! ******************************************************************************
 ! TEST FUNCTIONS
@@ -36,6 +42,19 @@ contains
         f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
     end subroutine
 
+    subroutine fcn1a(x, f, args)
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(out), dimension(:) :: f
+        class(*), intent(inout), optional :: args
+        real(real64) :: a
+        select type (args)
+        type is (real(real64))
+            a = args
+        end select
+        f(1) = x(1)**2 + x(2)**2 - 34.0d0
+        f(2) = x(1)**2 - a * x(2)**2 - 7.0d0
+    end subroutine
+
     ! Jacobian:
     !
     !     | 2x  2y |
@@ -46,6 +65,18 @@ contains
         real(real64), intent(out), dimension(:,:) :: j
         class(*), intent(inout), optional :: args
         j = 2.0d0 * reshape([x(1), x(1), x(2), -2.0d0 * x(2)], [2, 2])
+    end subroutine
+
+    subroutine jac1a(x, j, args)
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(out), dimension(:,:) :: j
+        class(*), intent(inout), optional :: args
+        real(real64) :: a
+        select type (args)
+        type is (real(real64))
+            a = args
+        end select
+        j = 2.0d0 * reshape([x(1), x(1), x(2), -a * x(2)], [2, 2])
     end subroutine
 
     pure function is_ans_1(x, tol) result(c)
@@ -134,6 +165,18 @@ contains
         f = sin(x) / x
     end function
 
+    function f1var_1a(x, args) result(f)
+        real(real64), intent(in) :: x
+        class(*), intent(inout), optional :: args
+        real(real64) :: f
+        real(real64) :: a
+        select type (args)
+        type is (real(real64))
+            a = args
+        end select
+        f = a * sin(x) / x
+    end function
+
 ! ******************************************************************************
 ! SOLVER TEST ROUTINES
 ! ------------------------------------------------------------------------------
@@ -156,7 +199,7 @@ contains
         call obj%set_jacobian(jac)
 
         ! Generate a set of initial conditions
-        ic = 1.0d0
+        call random_number(ic)
 
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
@@ -202,7 +245,7 @@ contains
         call obj%set_fcn(fcn, 2, 2)
 
         ! Generate a set of initial conditions
-        ic = 1.0d0
+        call random_number(ic)
 
         ! Turn off the line search - this set of functions is too poorly scaled
         ! for the current implementation of the line search algorithm to offer
@@ -217,6 +260,77 @@ contains
             if (.not.is_ans_2(x, 1.0d-6)) then
                 check = .false.
                 print 100, "Quasi-Newton Solver Failed: Test 2-", i
+                print 101, "Initial Condition: ", ic(i,1), ", ", &
+                    ic(i,2)
+                print 101, "Solution:", x(1), ", ", x(2)
+                print 101, "Residual:", f(1), ", ", f(2)
+                print 102, "Converged on residual: ", ib%converge_on_fcn
+                print 102, "Converged on solution change: ", &
+                    ib%converge_on_chng
+                print 102, "Converge on zero gradient: ", &
+                    ib%converge_on_zero_diff
+                print 100, "Iterations: ", ib%iter_count
+                print 100, "Function Evaluations: ", ib%fcn_count
+            end if
+        end do
+
+        ! Formatting
+100     format(A, I0)
+101     format(A, F9.5, A, F9.5)
+102     format(A, L)
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_quasinewton_3() result(check)
+        ! Local Variables
+        type(vecfcn_helper) :: obj
+        procedure(vecfcn), pointer :: fcn
+        procedure(jacobianfcn), pointer :: jac
+        type(quasi_newton_solver) :: solver
+        type(iteration_behavior) :: ib
+        real(real64) :: x(2), f(2), ic(10, 2), a
+        integer(int32) :: i
+        logical :: check
+
+        ! Initialization
+        check = .true.
+        a = 2.0d0
+        fcn => fcn1a
+        jac => jac1a
+        call obj%set_fcn(fcn, 2, 2)
+
+        ! Generate a set of initial conditions
+        call random_number(ic)
+
+        ! Process - Cycle over each different initial condition set
+        do i = 1, size(ic, 1)
+            x = ic(i,:)
+            call solver%solve(obj, x, f, ib, args = a)
+            if (.not.is_ans_1(x, 1.0d-6)) then
+                check = .false.
+                print 100, "Quasi-Newton Solver Failed: Test 3a-", i
+                print 101, "Initial Condition: ", ic(i,1), ", ", &
+                    ic(i,2)
+                print 101, "Solution:", x(1), ", ", x(2)
+                print 101, "Residual:", f(1), ", ", f(2)
+                print 102, "Converged on residual: ", ib%converge_on_fcn
+                print 102, "Converged on solution change: ", &
+                    ib%converge_on_chng
+                print 102, "Converge on zero gradient: ", &
+                    ib%converge_on_zero_diff
+                print 100, "Iterations: ", ib%iter_count
+                print 100, "Function Evaluations: ", ib%fcn_count
+            end if
+        end do
+
+        ! Now try with a Jacobian matrix
+        call obj%set_jacobian(jac)
+        do i = 1, size(ic, 1)
+            x = ic(i,:)
+            call solver%solve(obj, x, f, ib, args = a)
+            if (.not.is_ans_1(x, 1.0d-6)) then
+                check = .false.
+                print 100, "Quasi-Newton Solver Failed: Test 3b-", i
                 print 101, "Initial Condition: ", ic(i,1), ", ", &
                     ic(i,2)
                 print 101, "Solution:", x(1), ", ", x(2)
@@ -257,7 +371,7 @@ contains
         call obj%set_jacobian(jac)
 
         ! Generate a set of initial conditions
-        ic = 1.0d0
+        call random_number(ic)
 
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
@@ -303,7 +417,7 @@ contains
         call obj%set_fcn(fcn, 2, 2)
 
         ! Generate a set of initial conditions
-        ic = 1.0d0
+        call random_number(ic)
 
         ! Turn off the line search - this set of functions is too poorly scaled
         ! for the current implementation of the line search algorithm to offer
@@ -318,6 +432,77 @@ contains
             if (.not.is_ans_2(x, 1.0d-6)) then
                 check = .false.
                 print 100, "Newton Solver Failed: Test 2-", i
+                print 101, "Initial Condition: ", ic(i,1), ", ", &
+                    ic(i,2)
+                print 101, "Solution:", x(1), ", ", x(2)
+                print 101, "Residual:", f(1), ", ", f(2)
+                print 102, "Converged on residual: ", ib%converge_on_fcn
+                print 102, "Converged on solution change: ", &
+                    ib%converge_on_chng
+                print 102, "Converge on zero gradient: ", &
+                    ib%converge_on_zero_diff
+                print 100, "Iterations: ", ib%iter_count
+                print 100, "Function Evaluations: ", ib%fcn_count
+            end if
+        end do
+
+        ! Formatting
+100     format(A, I0)
+101     format(A, F9.5, A, F9.5)
+102     format(A, L)
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_newton_3() result(check)
+        ! Local Variables
+        type(vecfcn_helper) :: obj
+        procedure(vecfcn), pointer :: fcn
+        procedure(jacobianfcn), pointer :: jac
+        type(newton_solver) :: solver
+        type(iteration_behavior) :: ib
+        real(real64) :: x(2), f(2), ic(10, 2), a
+        integer(int32) :: i
+        logical :: check
+
+        ! Initialization
+        check = .true.
+        a = 2.0d0
+        fcn => fcn1a
+        jac => jac1a
+        call obj%set_fcn(fcn, 2, 2)
+
+        ! Generate a set of initial conditions
+        call random_number(ic)
+
+        ! Process - Cycle over each different initial condition set
+        do i = 1, size(ic, 1)
+            x = ic(i,:)
+            call solver%solve(obj, x, f, ib, args = a)
+            if (.not.is_ans_1(x, 1.0d-6)) then
+                check = .false.
+                print 100, "Newton Solver Failed: Test 3a-", i
+                print 101, "Initial Condition: ", ic(i,1), ", ", &
+                    ic(i,2)
+                print 101, "Solution:", x(1), ", ", x(2)
+                print 101, "Residual:", f(1), ", ", f(2)
+                print 102, "Converged on residual: ", ib%converge_on_fcn
+                print 102, "Converged on solution change: ", &
+                    ib%converge_on_chng
+                print 102, "Converge on zero gradient: ", &
+                    ib%converge_on_zero_diff
+                print 100, "Iterations: ", ib%iter_count
+                print 100, "Function Evaluations: ", ib%fcn_count
+            end if
+        end do
+
+        ! Now try with a user-defined Jacobian
+        call obj%set_jacobian(jac)
+        do i = 1, size(ic, 1)
+            x = ic(i,:)
+            call solver%solve(obj, x, f, ib, args = a)
+            if (.not.is_ans_1(x, 1.0d-6)) then
+                check = .false.
+                print 100, "Newton Solver Failed: Test 3b-", i
                 print 101, "Initial Condition: ", ic(i,1), ", ", &
                     ic(i,2)
                 print 101, "Solution:", x(1), ", ", x(2)
@@ -358,7 +543,7 @@ contains
         call obj%set_jacobian(jac)
 
         ! Generate a set of initial conditions
-        ic = 1.0d0
+        call random_number(ic)
 
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
@@ -464,6 +649,77 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
+    function test_least_squares_4() result(check)
+        ! Local Variables
+        type(vecfcn_helper) :: obj
+        procedure(vecfcn), pointer :: fcn
+        procedure(jacobianfcn), pointer :: jac
+        type(least_squares_solver) :: solver
+        type(iteration_behavior) :: ib
+        real(real64) :: x(2), f(2), ic(10, 2), a
+        integer(int32) :: i
+        logical :: check
+
+        ! Initialization
+        check = .true.
+        a = 2.0d0
+        fcn => fcn1
+        jac => jac1
+        call obj%set_fcn(fcn, 2, 2)
+
+        ! Generate a set of initial conditions
+        call random_number(ic)
+
+        ! Process - Cycle over each different initial condition set
+        do i = 1, size(ic, 1)
+            x = ic(i,:)
+            call solver%solve(obj, x, f, ib, args = a)
+            if (.not.is_ans_1(x, 1.0d-6)) then
+                check = .false.
+                print 100, "Least Squares Solver Failed: Test 4a-", i
+                print 101, "Initial Condition: ", ic(i,1), ", ", &
+                    ic(i,2)
+                print 101, "Solution:", x(1), ", ", x(2)
+                print 101, "Residual:", f(1), ", ", f(2)
+                print 102, "Converged on residual: ", ib%converge_on_fcn
+                print 102, "Converged on solution change: ", &
+                    ib%converge_on_chng
+                print 102, "Converge on zero gradient: ", &
+                    ib%converge_on_zero_diff
+                print 100, "Iterations: ", ib%iter_count
+                print 100, "Function Evaluations: ", ib%fcn_count
+            end if
+        end do
+
+        ! Try with a user-defined Jacobian
+        call obj%set_jacobian(jac)
+        do i = 1, size(ic, 1)
+            x = ic(i,:)
+            call solver%solve(obj, x, f, ib, args = a)
+            if (.not.is_ans_1(x, 1.0d-6)) then
+                check = .false.
+                print 100, "Least Squares Solver Failed: Test 4b-", i
+                print 101, "Initial Condition: ", ic(i,1), ", ", &
+                    ic(i,2)
+                print 101, "Solution:", x(1), ", ", x(2)
+                print 101, "Residual:", f(1), ", ", f(2)
+                print 102, "Converged on residual: ", ib%converge_on_fcn
+                print 102, "Converged on solution change: ", &
+                    ib%converge_on_chng
+                print 102, "Converge on zero gradient: ", &
+                    ib%converge_on_zero_diff
+                print 100, "Iterations: ", ib%iter_count
+                print 100, "Function Evaluations: ", ib%fcn_count
+            end if
+        end do
+
+        ! Formatting
+100     format(A, I0)
+101     format(A, F9.5, A, F9.5)
+102     format(A, L)
+    end function
+
+! ------------------------------------------------------------------------------
     function test_brent_1() result(check)
         ! Local Variables
         type(brent_solver) :: solver
@@ -502,7 +758,46 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    function test_newton_3() result(check)
+    function test_brent_2() result(check)
+        ! Local Variables
+        type(brent_solver) :: solver
+        type(fcn1var_helper) :: obj
+        procedure(fcn1var), pointer :: fcn
+        real(real64) :: x, f, a
+        type(value_pair) :: limits
+        logical :: check
+
+        ! Parameters
+        real(real64), parameter :: pi = 3.141592653589793d0
+        real(real64), parameter :: tol = 1.0d-6
+
+        ! Initialization
+        check = .true.
+        a = 2.0d0
+        fcn => f1var_1a
+        call obj%set_fcn(fcn)
+
+        ! Define the search limits
+        limits%x1 = 1.5d0
+        limits%x2 = 5.0d0
+
+        ! Compute the solution
+        call solver%solve(obj, x, limits, f, args = a)
+
+        ! The solution on this interval should be: pi
+        if (abs(x - pi) > tol) then
+            check = .false.
+            print 100, &
+                "Test Failed: Brent's Method Test 2.  Expected: ", pi, &
+                ", Found: ", x
+        end if
+
+        ! Formatting
+100     format(A, F8.5, A, F8.5)
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_newton_4() result(check)
         use powell_badly_scaled_module
 
         ! Local Variables
@@ -535,7 +830,7 @@ contains
         do i = 1, size(sol)
             if (abs(x(i) - sol(i)) > tol) then
                 check = .false.
-                print 100, "Test Failed: Newton's Method, Test 3."
+                print 100, "Test Failed: Newton's Method, Test 4."
                 print 101, "Expected: ", sol(i), " for root ", &
                     i, ", but found: ", x(i)
             end if
@@ -547,7 +842,7 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    function test_quasinewton_3() result(check)
+    function test_quasinewton_4() result(check)
         use powell_badly_scaled_module
 
         ! Local Variables
@@ -582,7 +877,7 @@ contains
         do i = 1, size(sol)
             if (abs(x(i) - sol(i)) > tol) then
                 check = .false.
-                print 100, "Test Failed: Quasi-Newton's Method, Test 3."
+                print 100, "Test Failed: Quasi-Newton's Method, Test 4."
                 print 101, "Expected: ", sol(i), " for root ", &
                     i, ", but found: ", x(i)
             end if
@@ -592,4 +887,83 @@ contains
 100     format(A)
 101     format(A, E12.5, A, I0, A, E12.5)
     end function
+
+! ------------------------------------------------------------------------------
+    function test_newton_1var_1() result(check)
+        ! Local Variables
+        type(newton_1var_solver) :: solver
+        type(fcn1var_helper) :: obj
+        procedure(fcn1var), pointer :: fcn
+        real(real64) :: x, f
+        type(value_pair) :: limits
+        logical :: check
+
+        ! Parameters
+        real(real64), parameter :: pi = 3.141592653589793d0
+        real(real64), parameter :: tol = 1.0d-6
+
+        ! Initialization
+        check = .true.
+        fcn => f1var_1
+        call obj%set_fcn(fcn)
+
+        ! Define the search limits
+        limits%x1 = 1.5d0
+        limits%x2 = 5.0d0
+
+        ! Compute the solution
+        call solver%solve(obj, x, limits, f)
+
+        ! The solution on this interval should be: pi
+        if (abs(x - pi) > tol) then
+            check = .false.
+            print 100, &
+                "Test Failed: Newton's (1 Variable) Method Test 1.  Expected: ", pi, &
+                ", Found: ", x
+        end if
+
+        ! Formatting
+100     format(A, F8.5, A, F8.5)
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_newton_1var_2() result(check)
+        ! Local Variables
+        type(newton_1var_solver) :: solver
+        type(fcn1var_helper) :: obj
+        procedure(fcn1var), pointer :: fcn
+        real(real64) :: x, f, a
+        type(value_pair) :: limits
+        logical :: check
+
+        ! Parameters
+        real(real64), parameter :: pi = 3.141592653589793d0
+        real(real64), parameter :: tol = 1.0d-6
+
+        ! Initialization
+        check = .true.
+        a = 2.0d0
+        fcn => f1var_1a
+        call obj%set_fcn(fcn)
+
+        ! Define the search limits
+        limits%x1 = 1.5d0
+        limits%x2 = 5.0d0
+
+        ! Compute the solution
+        call solver%solve(obj, x, limits, f, args = a)
+
+        ! The solution on this interval should be: pi
+        if (abs(x - pi) > tol) then
+            check = .false.
+            print 100, &
+                "Test Failed: Newton's (1 Variable) Method Test 2.  Expected: ", pi, &
+                ", Found: ", x
+        end if
+
+        ! Formatting
+100     format(A, F8.5, A, F8.5)
+    end function
+
+! ------------------------------------------------------------------------------
 end module

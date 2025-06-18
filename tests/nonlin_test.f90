@@ -81,6 +81,24 @@ program main
     rst = test_quasinewton_3()
     if (.not.rst) overall = .false.
 
+    rst = test_quasinewton_4()
+    if (.not.rst) overall = .false.
+
+    rst = test_newton_4()
+    if (.not.rst) overall = .false.
+
+    rst = test_least_squares_4()
+    if (.not.rst) overall = .false.
+
+    rst = test_brent_2()
+    if (.not.rst) overall = .false.
+
+    rst = test_newton_1var_1()
+    if (.not.rst) overall = .false.
+
+    rst = test_newton_1var_2()
+    if (.not.rst) overall = .false.
+
 
     ! End
     if (.not.overall) stop -1
