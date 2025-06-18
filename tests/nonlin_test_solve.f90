@@ -187,7 +187,7 @@ contains
         procedure(jacobianfcn), pointer :: jac
         type(quasi_newton_solver) :: solver
         type(iteration_behavior) :: ib
-        real(real64) :: x(2), f(2), ic(10, 2)
+        real(real64) :: x(2), f(2), ic(2, 2)
         integer(int32) :: i
         logical :: check
 
@@ -199,7 +199,8 @@ contains
         call obj%set_jacobian(jac)
 
         ! Generate a set of initial conditions
-        call random_number(ic)
+        ic(1,:) = 0.5d0
+        ic(2,:) = 1.0d0
 
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
@@ -235,7 +236,7 @@ contains
         procedure(vecfcn), pointer :: fcn
         type(quasi_newton_solver) :: solver
         type(iteration_behavior) :: ib
-        real(real64) :: x(2), f(2), ic(10, 2)
+        real(real64) :: x(2), f(2), ic(2, 2)
         integer(int32) :: i
         logical :: check
 
@@ -245,7 +246,8 @@ contains
         call obj%set_fcn(fcn, 2, 2)
 
         ! Generate a set of initial conditions
-        call random_number(ic)
+        ic(1,:) = 0.5d0
+        ic(2,:) = 1.0d0
 
         ! Turn off the line search - this set of functions is too poorly scaled
         ! for the current implementation of the line search algorithm to offer
@@ -288,7 +290,7 @@ contains
         procedure(jacobianfcn), pointer :: jac
         type(quasi_newton_solver) :: solver
         type(iteration_behavior) :: ib
-        real(real64) :: x(2), f(2), ic(10, 2), a
+        real(real64) :: x(2), f(2), ic(2, 2), a
         integer(int32) :: i
         logical :: check
 
@@ -300,7 +302,8 @@ contains
         call obj%set_fcn(fcn, 2, 2)
 
         ! Generate a set of initial conditions
-        call random_number(ic)
+        ic(1,:) = 0.5d0
+        ic(2,:) = 1.0d0
 
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
@@ -359,7 +362,7 @@ contains
         procedure(jacobianfcn), pointer :: jac
         type(newton_solver) :: solver
         type(iteration_behavior) :: ib
-        real(real64) :: x(2), f(2), ic(10, 2)
+        real(real64) :: x(2), f(2), ic(2, 2)
         integer(int32) :: i
         logical :: check
 
@@ -371,7 +374,8 @@ contains
         call obj%set_jacobian(jac)
 
         ! Generate a set of initial conditions
-        call random_number(ic)
+        ic(1,:) = 0.5d0
+        ic(2,:) = 1.0d0
 
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
@@ -407,7 +411,7 @@ contains
         procedure(vecfcn), pointer :: fcn
         type(newton_solver) :: solver
         type(iteration_behavior) :: ib
-        real(real64) :: x(2), f(2), ic(10, 2)
+        real(real64) :: x(2), f(2), ic(2, 2)
         integer(int32) :: i
         logical :: check
 
@@ -417,7 +421,8 @@ contains
         call obj%set_fcn(fcn, 2, 2)
 
         ! Generate a set of initial conditions
-        call random_number(ic)
+        ic(1,:) = 0.5d0
+        ic(2,:) = 1.0d0
 
         ! Turn off the line search - this set of functions is too poorly scaled
         ! for the current implementation of the line search algorithm to offer
@@ -460,7 +465,7 @@ contains
         procedure(jacobianfcn), pointer :: jac
         type(newton_solver) :: solver
         type(iteration_behavior) :: ib
-        real(real64) :: x(2), f(2), ic(10, 2), a
+        real(real64) :: x(2), f(2), ic(2, 2), a
         integer(int32) :: i
         logical :: check
 
@@ -472,7 +477,8 @@ contains
         call obj%set_fcn(fcn, 2, 2)
 
         ! Generate a set of initial conditions
-        call random_number(ic)
+        ic(1,:) = 0.5d0
+        ic(2,:) = 1.0d0
 
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
@@ -531,7 +537,7 @@ contains
         procedure(jacobianfcn), pointer :: jac
         type(least_squares_solver) :: solver
         type(iteration_behavior) :: ib
-        real(real64) :: x(2), f(2), ic(10, 2)
+        real(real64) :: x(2), f(2), ic(2, 2)
         integer(int32) :: i
         logical :: check
 
@@ -543,7 +549,8 @@ contains
         call obj%set_jacobian(jac)
 
         ! Generate a set of initial conditions
-        call random_number(ic)
+        ic(1,:) = 0.5d0
+        ic(2,:) = 1.0d0
 
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
@@ -579,7 +586,7 @@ contains
         procedure(vecfcn), pointer :: fcn
         type(least_squares_solver) :: solver
         type(iteration_behavior) :: ib
-        real(real64) :: x(2), f(2), ic(10, 2)
+        real(real64) :: x(2), f(2), ic(2, 2)
         integer(int32) :: i
         logical :: check
         type(errors) :: errmgr
@@ -598,8 +605,8 @@ contains
         call solver%set_max_fcn_evals(1000)
 
         ! Generate a set of initial conditions
-        ic(:,1) = 1.0d0
-        ic(:,2) = 5.0d0
+        ic(1,:) = 0.5d0
+        ic(2,:) = 1.0d0
 
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
@@ -656,7 +663,7 @@ contains
         procedure(jacobianfcn), pointer :: jac
         type(least_squares_solver) :: solver
         type(iteration_behavior) :: ib
-        real(real64) :: x(2), f(2), ic(10, 2), a
+        real(real64) :: x(2), f(2), ic(2, 2), a
         integer(int32) :: i
         logical :: check
 
@@ -668,7 +675,8 @@ contains
         call obj%set_fcn(fcn, 2, 2)
 
         ! Generate a set of initial conditions
-        call random_number(ic)
+        ic(1,:) = 0.5d0
+        ic(2,:) = 1.0d0
 
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
