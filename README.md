@@ -81,9 +81,10 @@ contains
     ! Define the routine containing the equations to solve.  The equations are:
     ! x**2 + y**2 = 34
     ! x**2 - 2 * y**2 = 7
-    subroutine fcns(x, f)
+    subroutine fcns(x, f, args)
         real(real64), intent(in), dimension(:) :: x
         real(real64), intent(out), dimension(:) :: f
+        class(*), intent(inout), optional :: args
         f(1) = x(1)**2 + x(2)**2 - 34.0d0
         f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
     end subroutine
@@ -132,10 +133,11 @@ program example
 
 contains
     ! The function containing the data to fit
-    subroutine fcns(x, f)
+    subroutine fcns(x, f, args)
         ! Arguments
         real(real64), intent(in), dimension(:) :: x  ! Contains the coefficients
         real(real64), intent(out), dimension(:) :: f
+        class(*), intent(inout), optional :: args
 
         ! Local Variables
         real(real64), dimension(21) :: xp, yp
@@ -255,8 +257,9 @@ program example
      print '(AI0)', "Function Evaluations: ", ib%fcn_count
 contains
     ! Rosenbrock's Function
-    function rosenbrock(x) result(f)
+    function rosenbrock(x, args) result(f)
         real(real64), intent(in), dimension(:) :: x
+        class(*), intent(inout), optional :: args
         real(real64) :: f
         f = 1.0d2 * (x(2) - x(1)**2)**2 + (x(1) - 1.0d0)**2
     end function
