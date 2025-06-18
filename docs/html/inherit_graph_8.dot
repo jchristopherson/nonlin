@@ -1,9 +1,0 @@
-digraph "Graphical Class Hierarchy"
-{
-  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
-  node [fontname="Helvetica",fontsize="10",shape=record];
-  rankdir="LR";
-  Node0 [label="nonlin_types::equation\l_solver_1var",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structnonlin__types_1_1equation__solver__1var.html",tooltip="A base class for various solvers of equations of one variable. "];
-  Node0 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
-  Node1 [label="nonlin_solve::brent\l_solver",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$structnonlin__solve_1_1brent__solver.html",tooltip="Defines a solver based upon Brent&#39;s method for solving an equation of one variable without using deri..."];
-}

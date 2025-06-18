@@ -1,7 +1,0 @@
-digraph "Graphical Class Hierarchy"
-{
-  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
-  node [fontname="Helvetica",fontsize="10",shape=record];
-  rankdir="LR";
-  Node0 [label="nonlin_types::nonlin\l_solver_1var",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$interfacenonlin__types_1_1nonlin__solver__1var.html",tooltip="Describes the interface of a solver for an equation of one variable. "];
-}

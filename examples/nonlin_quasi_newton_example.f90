@@ -2,8 +2,7 @@
 
 program  example
     use iso_fortran_env
-    use nonlin_core
-    use nonlin_solve, only : quasi_newton_solver
+    use nonlin
     use example_problems
     implicit none
 

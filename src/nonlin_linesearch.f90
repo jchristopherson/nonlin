@@ -1,19 +1,12 @@
-! nonlin_linesearch.f90
-
 ! REFERENCES
 ! - https://scicomp.stackexchange.com/questions/26330/backtracking-armijo-line-search-algorithm
 ! - https://ctk.math.ncsu.edu/
-
-!> @brief \b nonlin_linesearch
-!!
-!! @par Purpose
-!! To provide line search routines capable of minimizing nondesireable
-!! influences of the nonlinear equation solver model on the convergence of the
-!! iteration process.
 module nonlin_linesearch
     use, intrinsic :: iso_fortran_env, only : int32, real64
-    use nonlin_constants
-    use nonlin_core
+    use nonlin_error_handling
+    use nonlin_types
+    use nonlin_multi_eqn_mult_var
+    use nonlin_multi_var
     use ferror, only : errors
     implicit none
     private
@@ -23,63 +16,46 @@ module nonlin_linesearch
 ! ******************************************************************************
 ! TYPES
 ! ------------------------------------------------------------------------------
-    !> @brief Defines a type capable of performing an inexact, backtracking line
-    !! search to find a point as far along the specified direction vector that
-    !! is usable for unconstrained minimization problems.
-    !!
-    !! @par See Also
-    !! - [Wikipedia](https://en.wikipedia.org/wiki/Backtracking_line_search)
-    !! - [Oxfford Lecture Notes]
-    !!      (https://people.maths.ox.ac.uk/hauser/hauser_lecture2.pdf)
-    !! - [Northwestern University - Line Search]
-    !!      (https://optimization.mccormick.northwestern.edu/index.php/Line_search_methods)
-    !! - [Northwestern University - Trust Region Methods]
-    !!      (https://optimization.mccormick.northwestern.edu/index.php/Trust-region_methods)
-    !! - [Wolfram](https://reference.wolfram.com/language/tutorial/UnconstrainedOptimizationLineSearchMethods.html)
-    !! - [Numerical Recipes](http://numerical.recipes/)
     type line_search
-        private
-        !> The maximum number of function evaluations allowed during a single
-        !! line search.
-        integer(int32) :: m_maxEval = 100
-        !> Defines the scaling of the product of the gradient and direction
-        !! vectors such that F(X + LAMBDA * P) <=
-        !! F(X) + LAMBDA * ALPHA * P**T * G, where P is the search direction
-        !! vector, G is the gradient vector, and LAMBDA is the scaling factor.
-        !! The parameter must exist on the set (0, 1).  A value of 1e-4 is
-        !! typically a good starting point.
-        real(real64) :: m_alpha = 1.0d-4
-        !> Defines a minimum factor X used to determine a minimum value LAMBDA
-        !! such that MIN(LAMBDA) = X * LAMBDA, where LAMBDA defines the distance
-        !! along the line search direction assuming a value of one means the
-        !! full length of the direction vector is traversed.  As such, the value
-        !! must exist on the set (0, 1); however, for practical considerations,
-        !! the minimum value should be limited to 0.1 such that the value must
-        !! exist on the set [0.1, 1).
-        real(real64) :: m_factor = 0.1d0
+        !! Defines a type capable of performing an inexact, backtracking line
+        !! search to find a point as far along the specified direction vector 
+        !! that is usable for unconstrained minimization problems.
+        !!
+        !! See Also:
+        !!
+        !! - [Wikipedia](https://en.wikipedia.org/wiki/Backtracking_line_search)
+        !!
+        !! - [Oxfford Lecture Notes](https://people.maths.ox.ac.uk/hauser/hauser_lecture2.pdf)
+        !!
+        !! - [Wolfram](https://reference.wolfram.com/language/tutorial/UnconstrainedOptimizationLineSearchMethods.html)
+        !!
+        !! - [Numerical Recipes](http://numerical.recipes/)
+        integer(int32), private :: m_maxEval = 100
+            !! The maximum number of function evaluations allowed during a 
+            !! single line search.
+        real(real64), private :: m_alpha = 1.0d-4
+            !! Defines the scaling of the product of the gradient and direction
+            !! vectors such that \( f(\vec{x} + \lambda \vec{p}) <= 
+            !! f(\vec{x}) + \lambda \alpha \vec{p}^{T} \vec{g} \) where 
+            !! \(\vec{p}\) is the search direction vector, \(\vec{g}\) is the 
+            !! gradient vector, and \(\lambda\) is the scaling factor.  The 
+            !! parameter must exist on the set (0, 1).  A value of 1e-4 is 
+            !! typically a good starting point.
+        real(real64), private :: m_factor = 0.1d0
+            !! Defines a minimum factor X used to determine a minimum value 
+            !! \(\lambda\) where \(\lambda\) defines the distance along the 
+            !! line search direction assuming a value of one means the full 
+            !! length of the direction vector is traversed.  As such, the value 
+            !! must exist on the set (0, 1); however, for practical 
+            !! considerations, the minimum value should be limited to 0.1 such 
+            !! that the value must exist on the set [0.1, 1).
     contains
-        !> @brief Gets the maximum number of function evaluations allowed during
-        !! a single line search.
         procedure, public :: get_max_fcn_evals => ls_get_max_eval
-        !> @brief Sets the maximum number of function evaluations allowed during
-        !! a single line search.
         procedure, public :: set_max_fcn_evals => ls_set_max_eval
-        !> @brief Gets the scaling of the product of the gradient and direction
-        !! vectors.
         procedure, public :: get_scaling_factor => ls_get_scale
-        !> @brief Sets the scaling of the product of the gradient and direction
-        !! vectors.
         procedure, public :: set_scaling_factor => ls_set_scale
-        !> @brief Gets a distance factor defining the minimum distance along the
-        !! search direction vector is practical.
         procedure, public :: get_distance_factor => ls_get_dist
-        !> @brief Sets a distance factor defining the minimum distance along the
-        !! search direction vector is practical.
         procedure, public :: set_distance_factor => ls_set_dist
-        !> @brief Utilizes an inexact, backtracking line search based on the
-        !! Armijo-Goldstein condition to find a point as far along the specified
-        !! direction vector that is usable for unconstrained minimization
-        !! problems.
         generic, public :: search => ls_search_mimo, ls_search_miso
 
         procedure :: ls_search_mimo
@@ -88,83 +64,79 @@ module nonlin_linesearch
 
 contains
 ! ******************************************************************************
-! LINE SEARCH MEMBERS
+! LINE_SEARCH MEMBERS
 ! ------------------------------------------------------------------------------
-    !> @brief Gets the maximum number of function evaluations allowed during a
-    !! single line search.
-    !!
-    !! @param[in] this The line_search object.
-    !! @return The maximum number of function evaluations.
     pure function ls_get_max_eval(this) result(n)
+        !! Gets the maximum number of function evaluations allowed during a
+        !! single line search.
         class(line_search), intent(in) :: this
+            !! The [[line_search]] object.
         integer(int32) :: n
+            !! The maximum number of function evaluations.
         n = this%m_maxEval
     end function
 
 ! --------------------
-    !> @brief Sets the maximum number of function evaluations allowed during a
-    !! single line search.
-    !!
-    !! @param[in,out] this The line_search object.
-    !! @param[in] x The maximum number of function evaluations.
     subroutine ls_set_max_eval(this, x)
+        !! Sets the maximum number of function evaluations allowed during a
+        !! single line search.
         class(line_search), intent(inout) :: this
+            !! The [[line_search]] object.
         integer(int32), intent(in) :: x
+            !! The maximum number of function evaluations.
         this%m_maxEval = x
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Gets the scaling of the product of the gradient and direction
-    !! vectors (ALPHA) such that F(X + LAMBDA * P) <=
-    !! F(X) + LAMBDA * ALPHA * P**T * G, where P is the search direction vector,
-    !! G is the gradient vector, and LAMBDA is the scaling factor.
-    !!
-    !! @param[in] this The line_search object.
-    !! @return The scaling factor.
     pure function ls_get_scale(this) result(x)
+        !! Gets the scaling of the product of the gradient and direction
+        !! vectors \(\alpha\) such that \( f(\vec{x} + \lambda \vec{p}) \le 
+        !! f(\vec{x}) + \lambda \alpha \vec{p}^{T} \vec{g} \), where \(\vec{p}\) 
+        !! is the search direction vector, \(\vec{g}\) is the gradient vector, 
+        !! and \(\lambda\) is the scaling factor.
         class(line_search), intent(in) :: this
+            !! The [[line_search]] object.
         real(real64) :: x
+            !! The scaling factor.
         x = this%m_alpha
     end function
 
 ! --------------------
-    !> @brief sets the scaling of the product of the gradient and direction
-    !! vectors (ALPHA) such that F(X + LAMBDA * P) <=
-    !! F(X) + LAMBDA * ALPHA * P**T * G, where P is the search direction vector,
-    !! G is the gradient vector, and LAMBDA is the scaling factor.
-    !!
-    !! @param[in,out] this The line_search object.
-    !! @param[in] x The scaling factor.
     subroutine ls_set_scale(this, x)
+        !! Sets the scaling of the product of the gradient and direction
+        !! vectors \(\alpha\) such that \( f(\vec{x} + \lambda \vec{p}) \le 
+        !! f(\vec{x}) + \lambda \alpha \vec{p}^{T} \vec{g} \), where \(\vec{p}\) 
+        !! is the search direction vector, \(\vec{g}\) is the gradient vector, 
+        !! and \(\lambda\) is the scaling factor.
         class(line_search), intent(inout) :: this
+            !! The [[line_search]] object.
         real(real64), intent(in) :: x
+            !! The scaling factor.
         this%m_alpha = x
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Gets a distance factor defining the minimum distance along the
-    !! search direction vector is practical.
-    !!
-    !! @param[in] this The line_search object.
-    !! @return The distance factor.  A value of 1 indicates the full length
-    !!  of the vector.
     pure function ls_get_dist(this) result(x)
+        !! Gets a distance factor defining the minimum distance along the
+        !! search direction vector is practical.
         class(line_search), intent(in) :: this
+            !! The [[line_search]] object.
         real(real64) :: x
+            !! The distance factor.  A value of 1 indicates the full length
+            !! of the vector.
         x = this%m_factor
     end function
 
 ! --------------------
-    !> @brief Sets a distance factor defining the minimum distance along the
-    !! search direction vector is practical.
-    !!
-    !! @param[in,out] this The line_search object.
-    !! @param[in] x The distance factor.  A value of 1 indicates the full length
-    !!  of the vector.  Notice, this value is restricted to lie in the set
-    !!  [0.1, 1.0)
     subroutine ls_set_dist(this, x)
+        !! Sets a distance factor defining the minimum distance along the
+        !! search direction vector is practical.
         class(line_search), intent(inout) :: this
+            !! The [[line_search]] object.
         real(real64), intent(in) :: x
+            !! The distance factor.  A value of 1 indicates the full length
+            !! of the vector.  Notice, this value is restricted to lie in the 
+            !! set [0.1, 1.0).
         if (x <= 0.0d0) then
             this%m_factor = 0.1d0
         else if (x >= 1.0d0) then
@@ -175,52 +147,44 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Utilizes an inexact, backtracking line search to find a point as
-    !! far along the specified direction vector that is usable for unconstrained
-    !! minimization problems.
-    !!
-    !! @param[in] this The line_search object.
-    !! @param[in] fcn A vecfcn_helper object containing the system of equations.
-    !! @param[in] xold An N-element array defining the initial point, where N
-    !!  is the number of variables.
-    !! @param[in] grad An N-element array defining the gradient of @p fcn
-    !!  evaluated at @p xold.
-    !! @param[in] dir An N-element array defining the search direction.
-    !! @param[out] x An N-element array where the updated solution point will
-    !!  be written.
-    !! @param[out] fvec An M-element array containing the M equation values
-    !!  evaluated at @p x, where M is the number of equations.
-    !! @param[in] fold An optional input that provides the value resulting from:
-    !!  1/2 * dot_product(fcn(xold), fcn(xold)).  If not provided, @p fcn is
-    !!  evalauted at @p xold, and the aforementioned relationship is computed.
-    !! @param[out] fx The result of the operation:
-    !!  (1/2) * dot_product(@p fvec, @p fvec).  Remember @p fvec is evaluated at
-    !!  @p x.
-    !! @param[out] ib An optional output, that if provided, allows the caller to
-    !!  obtain iteration performance statistics.
-    !! @param[out] err An optional errors-based object that if provided can be
-    !!  used to retrieve information relating to any errors encountered during
-    !!  execution.  If not provided, a default implementation of the errors
-    !!  class is used internally to provide error handling.  Possible errors and
-    !!  warning messages that may be encountered are as follows.
-    !!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
-    !!  - NL_ARRAY_SIZE_ERROR: Occurs if any of the input arrays are not sized
-    !!      correctly.
-    !!  - NL_DIVERGENT_BEHAVIOR_ERROR: Occurs if the direction vector is
-    !!      pointing in an apparent uphill direction.
-    !!  - NL_CONVERGENCE_ERROR: Occurs if the line search cannot converge within
-    !!      the allowed number of iterations.
     subroutine ls_search_mimo(this, fcn, xold, grad, dir, x, fvec, fold, fx, &
-            ib, err)
-        ! Arguments
+            ib, args, err)
+        !! Utilizes an inexact, backtracking line search to find a point as
+        !! far along the specified direction vector that is usable for 
+        !! unconstrained minimization problems.
         class(line_search), intent(in) :: this
+            !! The [[line_search]] object.
         class(vecfcn_helper), intent(in) :: fcn
-        real(real64), intent(in), dimension(:) :: xold, dir, grad
-        real(real64), intent(out), dimension(:) :: x, fvec
+            !! A [[vecfcn_helper]] object containing the system of equations.
+        real(real64), intent(in), dimension(:) :: xold
+            !! An N-element array defining the initial point, where N is the 
+            !! number of variables.
+        real(real64), intent(in), dimension(:) :: grad
+            !! An N-element array defining the gradient of fcn evaluated at 
+            !! xold.
+        real(real64), intent(in), dimension(:) :: dir
+            !! An N-element array defining the search direction.
+        real(real64), intent(out), dimension(:) :: x
+            !! An N-element array where the updated solution point will be 
+            !! written.
+        real(real64), intent(out), dimension(:) :: fvec
+            !! An M-element array containing the M equation values evaluated at
+            !! x, where M is the number of equations.
         real(real64), intent(in), optional :: fold
+            !! An optional input that provides the value resulting from:
+            !! \( \frac{1}{2} \vec{f_{old}} \cdot \vec{f_{old}} \).  If not 
+            !! provided, fcn is evalauted at xold, and the aforementioned 
+            !! relationship is computed. 
         real(real64), intent(out), optional :: fx
+            !! The result of the operation: \( \frac{1}{2} \vec{f} \cdot 
+            !! \vec{f} \).
         type(iteration_behavior), optional :: ib
+            !! An optional output, that if provided, allows the caller to
+            !! obtain iteration performance statistics.
+        class(*), intent(inout), optional :: args
+            !! An optional argument to allow the user to communicate with fcn.
         class(errors), intent(inout), optional, target :: err
+            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -297,7 +261,7 @@ contains
             fo = fold
         else
             ! Evaluate the function, and compute the dot product
-            call fcn%fcn(xold, fvec)
+            call fcn%fcn(xold, fvec, args)
             fo = p5 * dot_product(fvec, fvec)
             neval = neval + 1
         end if
@@ -327,7 +291,7 @@ contains
         do
             ! Step along the specified direction by the amount ALAM
             x = xold + alam * dir
-            call fcn%fcn(x, fvec)
+            call fcn%fcn(x, fvec, args)
             f = p5 * dot_product(fvec, fvec)
             neval = neval + 1
             niter = niter + 1
@@ -398,47 +362,38 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Utilizes an inexact, backtracking line search to find a point as
-    !! far along the specified direction vector that is usable for unconstrained
-    !! minimization problems.
-    !!
-    !! @param[in] this The line_search object.
-    !! @param[in] fcn A fcnnvar_helper object containing the system of equations.
-    !! @param[in] xold An N-element array defining the initial point, where N
-    !!  is the number of variables.
-    !! @param[in] grad An N-element array defining the gradient of @p fcn
-    !!  evaluated at @p xold.
-    !! @param[in] dir An N-element array defining the search direction.
-    !! @param[out] x An N-element array where the updated solution point will
-    !!  be written.
-    !! @param[in] fold An optional input that provides the function value at
-    !!  @p xold.  If not provided, @p fcn is evalauted at @p xold.
-    !! @param[out] fx The value of the function as evaluated at @p x.
-    !! @param[out] ib An optional output, that if provided, allows the caller to
-    !!  obtain iteration performance statistics.
-    !! @param[out] err An optional errors-based object that if provided can be
-    !!  used to retrieve information relating to any errors encountered during
-    !!  execution.  If not provided, a default implementation of the errors
-    !!  class is used internally to provide error handling.  Possible errors and
-    !!  warning messages that may be encountered are as follows.
-    !!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
-    !!  - NL_ARRAY_SIZE_ERROR: Occurs if any of the input arrays are not sized
-    !!      correctly.
-    !!  - NL_DIVERGENT_BEHAVIOR_ERROR: Occurs if the direction vector is
-    !!      pointing in an apparent uphill direction.
-    !!  - NL_CONVERGENCE_ERROR: Occurs if the line search cannot converge within
-    !!      the allowed number of iterations.
     subroutine ls_search_miso(this, fcn, xold, grad, dir, x, fold, fx, &
-            ib, err)
-        ! Arguments
+            ib, args, err)
+        !! Utilizes an inexact, backtracking line search to find a point as far 
+        !! along the specified direction vector that is usable for unconstrained
+        !! minimization problems.
         class(line_search), intent(in) :: this
+            !! The [[line_search]] object.
         class(fcnnvar_helper), intent(in) :: fcn
-        real(real64), intent(in), dimension(:) :: xold, dir, grad
+            !! A [[fcnnvar_helper]] object containing the system of equations.
+        real(real64), intent(in), dimension(:) :: xold
+            !! An N-element array defining the initial point, where N is the 
+            !! number of variables.
+        real(real64), intent(in), dimension(:) :: grad
+            !! An N-element array defining the gradient of fcn evaluated at 
+            !! xold.
+        real(real64), intent(in), dimension(:) :: dir
+            !! An N-element array defining the search direction.
         real(real64), intent(out), dimension(:) :: x
+            !! An N-element array where the updated solution point will be 
+            !! written.
         real(real64), intent(in), optional :: fold
+            !! An optional input that provides the function value at xold.  If 
+            !! not provided, fcn is evalauted at xold.
         real(real64), intent(out), optional :: fx
+            !! The value of the function as evaluated at x.
         type(iteration_behavior), optional :: ib
+            !! An optional output, that if provided, allows the caller to
+            !! obtain iteration performance statistics.
+        class(*), intent(inout), optional :: args
+            !! An optional argument to allow the user to communicate with fcn.
         class(errors), intent(inout), optional, target :: err
+            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -512,7 +467,7 @@ contains
             fo = fold
         else
             ! Evaluate the function
-            fo = fcn%fcn(xold)
+            fo = fcn%fcn(xold, args)
             neval = neval + 1
         end if
 
@@ -541,7 +496,7 @@ contains
         do
             ! Step along the specified direction by the amount ALAM
             x = xold + alam * dir
-            f = fcn%fcn(x)
+            f = fcn%fcn(x, args)
             neval = neval + 1
             niter = niter + 1
 
@@ -611,24 +566,27 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Minimizes either the quadratic or cubic representation for a
-    !! backtracking-type line search.
-    !!
-    !! @param[in] mode Set to 1 to apply the quadratic model; else, any other
-    !!  value will apply the cubic model.
-    !! @param[in] f0 The previous function value.
-    !! @param[in] f The current function value.
-    !! @param[in] f1 The predicted function value.
-    !! @param[in] alam The step length scaling factor at @p f.
-    !! @param[in] alam1 The step length scaling factor at @p f1.
-    !! @param[in] slope The slope of the direction vector.
-    !! @return The new step length scaling factor.
     pure function min_backtrack_search(mode, f0, f, f1, alam, alam1, &
             slope) result(lam)
-        ! Arguments
+        !! Minimizes either the quadratic or cubic representation for a
+        !! backtracking-type line search.
         integer(int32), intent(in) :: mode
-        real(real64), intent(in) :: f0, f, f1, alam, alam1, slope
+            !! Set to 1 to apply the quadratic model; else, any other value
+            !! will apply the cubic model.
+        real(real64), intent(in) :: f0
+            !! The previous function value.
+        real(real64), intent(in) :: f
+            !! The current function value.
+        real(real64), intent(in) :: f1
+            !! The predicted function value.
+        real(real64), intent(in) :: alam
+            !! The step length scaling factor at f.
+        real(real64), intent(in) :: alam1
+            !! The step length scaling factor at f1.
+        real(real64), intent(in) :: slope
+            !! The slope of the direction vector.
         real(real64) :: lam
+            !! The new step length scaling factor.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -667,18 +625,16 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    !> @brief Provides a means of scaling the length of the search direction
-    !! vector.
-    !!
-    !! @param[in,out] x On input, the search direction vector.  On output, the
-    !!  search direction vector limited in length to that specified by @p lim.
-    !!  If the vector is originally shorter than the limit length, no change
-    !!  is made.
-    !! @param[in] lim The length limit value.
     subroutine limit_search_vector(x, lim)
-        ! Arguments
+        !! Provides a means of scaling the length of the search direction
+        !! vector.
         real(real64), intent(inout), dimension(:) :: x
+            !! On input, the search direction vector.  On output, the search 
+            !! direction vector limited in length to that specified by lim.
+            !!  If the vector is originally shorter than the limit length, no 
+            !! change is made.
         real(real64), intent(in) :: lim
+            !! The length limit value.
 
         ! Local Variables
         real(real64) :: mag

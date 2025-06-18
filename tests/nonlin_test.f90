@@ -18,6 +18,9 @@ program main
     rst = test_jacobian_1()
     if (.not.rst) overall = .false.
 
+    rst = test_jacobian_2()
+    if (.not.rst) overall = .false.
+
     rst = test_quasinewton_1()
     if (.not.rst) overall = .false.
 
@@ -60,16 +63,40 @@ program main
     rst = test_nelder_mead_2()
     if (.not.rst) overall = .false.
 
+    rst = test_nelder_mead_3()
+    if (.not.rst) overall = .false.
+
     rst = test_bfgs_1()
     if (.not.rst) overall = .false.
 
     rst = test_bfgs_2()
     if (.not.rst) overall = .false.
 
+    rst = test_bfgs_3()
+    if (.not.rst) overall = .false.
+
     rst = test_newton_3()
     if (.not.rst) overall = .false.
 
     rst = test_quasinewton_3()
+    if (.not.rst) overall = .false.
+
+    rst = test_quasinewton_4()
+    if (.not.rst) overall = .false.
+
+    rst = test_newton_4()
+    if (.not.rst) overall = .false.
+
+    rst = test_least_squares_4()
+    if (.not.rst) overall = .false.
+
+    rst = test_brent_2()
+    if (.not.rst) overall = .false.
+
+    rst = test_newton_1var_1()
+    if (.not.rst) overall = .false.
+
+    rst = test_newton_1var_2()
     if (.not.rst) overall = .false.
 
 

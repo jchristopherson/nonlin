@@ -3,8 +3,9 @@ module example_problems
 contains
 ! ------------------------------------------------------------------------------
 ! f(x) = sin(x) / x, solution: x = x * pi for n = 1, 2, 3, ...
-function sinx_div_x(x) result(f)
+function sinx_div_x(x, args) result(f)
     real(real64), intent(in) :: x
+    class(*), intent(inout), optional :: args
     real(real64) :: f
     f = sin(x) / x
 end function
@@ -13,8 +14,9 @@ end function
 ! The Beale function:
 ! f(x) = (1.5 - x + xy)**2 + (2.25 - x + xy**2)**2 + (2.625 - x + xy**3)**2
 ! The minimum is at x = 3, y = 0.5, and f(3, 0.5) = 0
-function beale(x) result(f)
+function beale(x, args) result(f)
     real(real64), intent(in), dimension(:) :: x
+    class(*), intent(inout), optional :: args
     real(real64) :: f
     f = (1.5d0 - x(1) + x(1) * x(2))**2 + &
         (2.25d0 - x(1) + x(1) * x(2)**2)**2 + &
@@ -22,9 +24,10 @@ function beale(x) result(f)
 end function
 
 ! The gradient
-subroutine bealegrad(x, g)
+subroutine bealegrad(x, g, args)
     real(real64), intent(in), dimension(:) :: x
     real(real64), intent(out), dimension(:) :: g
+    class(*), intent(inout), optional :: args
 
     g(1) = 2.0d0 * (x(2)**3 - 1.0d0) * (x(1) * x(2)**3 - x(1) + 2.625d0) + &
         2.0d0 * (x(2)**2 - 1.0d0) * (x(1) * x(2)**2 - x(1) + 2.25d0) + &
@@ -42,9 +45,10 @@ end subroutine
 ! Solution:
 ! x(1) = 1.098159e-5
 ! x(2) = 9.106146
-subroutine powell_bad(x, f)
+subroutine powell_bad(x, f, args)
     real(real64), intent(in), dimension(:) :: x
     real(real64), intent(out), dimension(:) :: f
+    class(*), intent(inout), optional :: args
     f(1) = 1.0d4 * x(1) * x(2) - 1.0d0
     f(2) = exp(-x(1)) + exp(-x(2)) - 1.0001d0
 end subroutine
@@ -52,9 +56,10 @@ end subroutine
 ! ------------------------------------------------------------------------------
 ! x**2 + y**2 = 34
 ! x**2 - 2 * y**2 = 7
-subroutine misc_2fcn(x, f)
+subroutine misc_2fcn(x, f, args)
     real(real64), intent(in), dimension(:) :: x
     real(real64), intent(out), dimension(:) :: f
+    class(*), intent(inout), optional :: args
     f(1) = x(1)**2 + x(2)**2 - 34.0d0
     f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
 end subroutine
@@ -63,9 +68,10 @@ end subroutine
 ! The system of equations (source: https://www.mathworks.com/help/optim/ug/fsolve.html)
 ! 2 * x1 - x2 = exp(-x1)
 ! -x1 + 2 * x2 = exp(-x2)
-subroutine misc_2fcn_01(x, f)
+subroutine misc_2fcn_01(x, f, args)
     real(real64), intent(in), dimension(:) :: x
     real(real64), intent(out), dimension(:) :: f
+    class(*), intent(inout), optional :: args
     f(1) = 2.0d0 * x(1) - x(2) - exp(-x(1))
     f(2) = -x(1) + 2.0d0 * x(2) - exp(-x(2))
 end subroutine
@@ -74,9 +80,10 @@ end subroutine
 !     | exp(-x1) + 2          -1     |
 ! J = |                              |
 !     |     -1          exp(-x2) + 2 |
-subroutine misc_2fcn_01_jac(x, jac)
+subroutine misc_2fcn_01_jac(x, jac, args)
     real(real64), intent(in), dimension(:) :: x
     real(real64), intent(out), dimension(:,:) :: jac
+    class(*), intent(inout), optional :: args
     jac(1,1) = exp(-x(1)) + 2.0d0
     jac(2,1) = -1.0d0
     jac(1,2) = -1.0d0
@@ -85,26 +92,29 @@ end subroutine
 
 ! ------------------------------------------------------------------------------
 ! f(x) = x**3 - 2 * x - 1
-function fcn_1var(x) result(f)
+function fcn_1var(x, args) result(f)
     real(real64), intent(in) :: x
+    class(*), intent(inout), optional :: args
     real(real64) :: f
     f = x**3 - 2.0d0 * x - 1.0d0
 end function
 
 ! ------------------------------------------------------------------------------
 ! Rosenbrock's Function
-function rosenbrock(x) result(f)
+function rosenbrock(x, args) result(f)
     real(real64), intent(in), dimension(:) :: x
+    class(*), intent(inout), optional :: args
     real(real64) :: f
     f = 1.0d2 * (x(2) - x(1)**2)**2 + (x(1) - 1.0d0)**2
 end function
 
 ! ------------------------------------------------------------------------------
 ! Least-Squares Polynomial Fitting Function
-subroutine lsq_poly_fit_fcn(x, f)
+subroutine lsq_poly_fit_fcn(x, f, args)
     ! Arguments
     real(real64), intent(in), dimension(:) :: x  ! Contains the coefficients
     real(real64), intent(out), dimension(:) :: f
+    class(*), intent(inout), optional :: args
 
     ! Local Variables
     real(real64), dimension(21) :: xp, yp

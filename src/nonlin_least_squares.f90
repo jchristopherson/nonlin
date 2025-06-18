@@ -1,13 +1,9 @@
-! nonlin_least_squares.f90
-
-!> @brief \b nonlin_least_squares
-!!
-!! @par Purpose
-!! To provide routines capable of solving the nonlinear least squares problem.
 module nonlin_least_squares
-    use, intrinsic :: iso_fortran_env, only : int32, real64
-    use nonlin_constants
-    use nonlin_core
+    use iso_fortran_env
+    use nonlin_multi_eqn_mult_var
+    use nonlin_error_handling
+    use nonlin_types
+    use nonlin_helper
     use ferror, only : errors
     implicit none
     private
@@ -19,15 +15,13 @@ module nonlin_least_squares
     !> @brief Defines a Levenberg-Marquardt based solver for unconstrained
     !! least-squares problems.
     type, extends(equation_solver) :: least_squares_solver
-        private
-        !> Initial step bounding factor
-        real(real64) :: m_factor = 100.0d0
+        !! Defines a Levenberg-Marquardt based solver for unconstrained
+        !! least-squares problems.
+        real(real64), private :: m_factor = 100.0d0
+            !! Initial step bounding factor
     contains
-        !> @brief Gets a factor used to scale the bounds on the initial step.
         procedure, public :: get_step_scaling_factor => lss_get_factor
-        !> @brief Sets a factor used to scale the bounds on the initial step.
         procedure, public :: set_step_scaling_factor => lss_set_factor
-        !> @brief Solves the system of equations.
         procedure, public :: solve => lss_solve
     end type
 
@@ -35,39 +29,34 @@ contains
 ! ******************************************************************************
 ! LEAST_SQUARES_SOLVER MEMBERS
 ! ------------------------------------------------------------------------------
-    !> @brief Gets a factor used to scale the bounds on the initial step.
-    !!
-    !! @param[in] this The least_squares_solver object.
-    !! @return The factor.
-    !!
-    !! @par Remarks
-    !! This factor is used to set the bounds on the initial step such that the
-    !! initial step is bounded as the product of the factor with the Euclidean
-    !! norm of the vector resulting from multiplication of the diagonal
-    !! scaling matrix and the solution estimate.  If zero, the factor itself
-    !! is used.
     pure function lss_get_factor(this) result(x)
+        !! Gets a factor used to scale the bounds on the initial step.
+        !!
+        !! This factor is used to set the bounds on the initial step such that 
+        !! the initial step is bounded as the product of the factor with the 
+        !! Euclidean norm of the vector resulting from multiplication of the 
+        !! diagonal scaling matrix and the solution estimate.  If zero, the 
+        !! factor itself is used.
         class(least_squares_solver), intent(in) :: this
+            !! The [[least_squares_solver]] object.
         real(real64) :: x
+            !! The factor.
         x = this%m_factor
     end function
 
 ! --------------------
-    !> @brief Sets a factor used to scale the bounds on the initial step.
-    !!
-    !! @param[in] this The least_squares_solver object.
-    !! @param[in] x The factor.  Notice, the factor is limited to the interval
-    !!  [0.1, 100].
-    !!
-    !! @par Remarks
-    !! This factor is used to set the bounds on the initial step such that the
-    !! initial step is bounded as the product of the factor with the Euclidean
-    !! norm of the vector resulting from multiplication of the diagonal
-    !! scaling matrix and the solution estimate.  If zero, the factor itself
-    !! is used.
     subroutine lss_set_factor(this, x)
+        !! Sets a factor used to scale the bounds on the initial step.
+        !!
+        !! This factor is used to set the bounds on the initial step such that 
+        !! the initial step is bounded as the product of the factor with the 
+        !! Euclidean norm of the vector resulting from multiplication of the 
+        !! diagonal scaling matrix and the solution estimate.  If zero, the 
+        !! factor itself is used.
         class(least_squares_solver), intent(inout) :: this
+            !! The [[least_squares_solver]] object.
         real(real64), intent(in) :: x
+            !! The factor.
         if (x < 0.1d0) then
             this%m_factor = 0.1d0
         else if (x > 1.0d2) then
@@ -78,169 +67,30 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Applies the Levenberg-Marquardt method to solve the nonlinear
-    !! least-squares problem.
-    !!
-    !! @param[in,out] this The least_squares_solver object.
-    !! @param[in] fcn The vecfcn_helper object containing the equations to
-    !!  solve.
-    !! @param[in,out] x On input, an M-element array containing an initial
-    !!  estimate to the solution.  On output, the updated solution estimate.
-    !!  M is the number of variables.
-    !! @param[out] fvec An N-element array that, on output, will contain
-    !!  the values of each equation as evaluated at the variable values
-    !!  given in @p x.  N is the number of equations.
-    !! @param[out] ib An optional output, that if provided, allows the
-    !!  caller to obtain iteration performance statistics.
-    !! @param[out] err An optional errors-based object that if provided can be
-    !!  used to retrieve information relating to any errors encountered during
-    !!  execution.  If not provided, a default implementation of the errors
-    !!  class is used internally to provide error handling.  Possible errors and
-    !!  warning messages that may be encountered are as follows.
-    !!  - NL_INVALID_OPERATION_ERROR: Occurs if no equations have been defined.
-    !!  - NL_INVALID_INPUT_ERROR: Occurs if the number of equations is less than
-    !!      than the number of variables.
-    !!  - NL_ARRAY_SIZE_ERROR: Occurs if any of the input arrays are not sized
-    !!      correctly.
-    !!  - NL_CONVERGENCE_ERROR: Occurs if the line search cannot converge within
-    !!      the allowed number of iterations.
-    !!  - NL_OUT_OF_MEMORY_ERROR: Occurs if there is insufficient memory
-    !!      available.
-    !!  - NL_TOLERANCE_TOO_SMALL_ERROR: Occurs if the requested tolerance is
-    !!      to small to be practical for the problem at hand.
-    !!
-    !! @par Remarks
-    !! This routines is based upon the MINPACK routine LMDIF.
-    !!
-    !! @par Example 1
-    !! The following code provides an example of how to solve a system of N
-    !! equations of N unknonwns using the Levenberg-Marquardt method.
-    !! @code{.f90}
-    !! program main
-    !!     use nonlin_core, only : vecfcn, vecfcn_helper
-    !!     use nonlin_least_squares, only : least_squares_solver
-    !!
-    !!     type(vecfcn_helper) :: obj
-    !!     procedure(vecfcn), pointer :: fcn
-    !!     type(least_squares_solver) :: solver
-    !!     real(real64) :: x(2), f(2)
-    !!
-    !!     ! Set the initial conditions to [1, 1]
-    !!     x = 1.0d0
-    !!
-    !!     ! Define the function
-    !!     fcn => fcn1
-    !!     call obj%set_fcn(fcn, 2, 2)
-    !!
-    !!     ! Solve the system of equations.  The solution overwrites X
-    !!     call solver%solve(obj, x, f)
-    !!
-    !!     ! Print the output and the residual:
-    !!     print '(AF5.3AF5.3A)', "The solution: (", x(1), ", ", x(2), ")"
-    !!     print '(AE8.3AE8.3A)', "The residual: (", f(1), ", ", f(2), ")"
-    !! contains
-    !!     ! System of Equations:
-    !!     !
-    !!     ! x**2 + y**2 = 34
-    !!     ! x**2 - 2 * y**2 = 7
-    !!     !
-    !!     ! Solution:
-    !!     ! x = +/-5
-    !!     ! y = +/-3
-    !!     subroutine fcn1(x, f)
-    !!         real(real64), intent(in), dimension(:) :: x
-    !!         real(real64), intent(out), dimension(:) :: f
-    !!         f(1) = x(1)**2 + x(2)**2 - 34.0d0
-    !!         f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
-    !!     end subroutine
-    !! end program
-    !! @endcode
-    !! The above program returns the following results.
-    !! @code{.txt}
-    !! The solution: (5.000, 3.000)
-    !! The residual: (.000E+00, .000E+00)
-    !! @endcode
-    !!
-    !! @par Example 2
-    !! @code{.f90}
-    !! program example
-    !!     use nonlin_core, only : vecfcn_helper, vecfcn
-    !!     use nonlin_least_squares, only : least_squares_solver
-    !!     implicit none
-    !!
-    !!     ! Local Variables
-    !!     type(vecfcn_helper) :: obj
-    !!     procedure(vecfcn), pointer :: fcn
-    !!     type(least_squares_solver) :: solver
-    !!     real(real64) :: x(4), f(21) ! There are 4 coefficients and 21 data points
-    !!
-    !!     ! Locate the routine containing the equations to solve
-    !!     fcn => fcns
-    !!     call obj%set_fcn(fcn, 21, 4)
-    !!
-    !!     ! Define an initial guess
-    !!     x = 1.0d0 ! Equivalent to x = [1.0d0, 1.0d0, 1.0d0, 1.0d0]
-    !!
-    !!     ! Solve
-    !!     call solver%solve(obj, x, f)
-    !!
-    !!     ! Display the output
-    !!     print "(AF12.8)", "c1: ", x(1)
-    !!     print "(AF12.8)", "c2: ", x(2)
-    !!     print "(AF12.8)", "c3: ", x(3)
-    !!     print "(AF12.8)", "c4: ", x(4)
-    !!     print "(AF9.5)", "Max Residual: ", maxval(abs(f))
-    !!
-    !! contains
-    !!     ! The function containing the data to fit
-    !!     subroutine fcns(x, f)
-    !!         ! Arguments
-    !!         real(real64), intent(in), dimension(:) :: x  ! Contains the coefficients
-    !!         real(real64), intent(out), dimension(:) :: f
-    !!
-    !!         ! Local Variables
-    !!         real(real64), dimension(21) :: xp, yp
-    !!
-    !!         ! Data to fit (21 data points)
-    !!         xp = [0.0d0, 0.1d0, 0.2d0, 0.3d0, 0.4d0, 0.5d0, 0.6d0, 0.7d0, 0.8d0, &
-    !!             0.9d0, 1.0d0, 1.1d0, 1.2d0, 1.3d0, 1.4d0, 1.5d0, 1.6d0, 1.7d0, &
-    !!             1.8d0, 1.9d0, 2.0d0]
-    !!         yp = [1.216737514d0, 1.250032542d0, 1.305579195d0, 1.040182335d0, &
-    !!             1.751867738d0, 1.109716707d0, 2.018141531d0, 1.992418729d0, &
-    !!             1.807916923d0, 2.078806005d0, 2.698801324d0, 2.644662712d0, &
-    !!             3.412756702d0, 4.406137221d0, 4.567156645d0, 4.999550779d0, &
-    !!             5.652854194d0, 6.784320119d0, 8.307936836d0, 8.395126494d0, &
-    !!             10.30252404d0]
-    !!
-    !!         ! We'll apply a cubic polynomial model to this data:
-    !!         ! y = c1 * x**3 + c2 * x**2 + c3 * x + c4
-    !!         f = x(1) * xp**3 + x(2) * xp**2 + x(3) * xp + x(4) - yp
-    !!
-    !!         ! For reference, the data was generated by adding random errors to
-    !!         ! the following polynomial: y = x**3 - 0.3 * x**2 + 1.2 * x + 0.3
-    !!     end subroutine
-    !! end program
-    !! @endcode
-    !! The above program returns the following results.
-    !! @code{.txt}
-    !! c1:   1.06476276
-    !! c2:  -0.12232029
-    !! c3:   0.44661345
-    !! c4:   1.18661422
-    !! Max Residual:   0.50636
-    !! @endcode
-    !!
-    !! @par See Also
-    !! - [Wikipedia](https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm)
-    !! - [MINPACK (Wikipedia)](https://en.wikipedia.org/wiki/MINPACK)
-    subroutine lss_solve(this, fcn, x, fvec, ib, err)
-        ! Arguments
+    subroutine lss_solve(this, fcn, x, fvec, ib, args, err)
+        !! Applies the Levenberg-Marquardt method to solve the nonlinear
+        !! least-squares problem.  This routines is based upon the MINPACK 
+        !! routine LMDIF.
         class(least_squares_solver), intent(inout) :: this
+            !! The [[least_squares_solver]] object.
         class(vecfcn_helper), intent(in) :: fcn
+            !! The [[vecfcn_helper]] object containing the equations to solve.
         real(real64), intent(inout), dimension(:) :: x
+            !! On input, an N-element array containing an initial estimate 
+            !! to the solution.  On output, the updated solution estimate.
+            !! N is the number of variables.
         real(real64), intent(out), dimension(:) :: fvec
+            !! An M-element array that, on output, will contain the values 
+            !! of each equation as evaluated at the variable values given 
+            !! in x.
         type(iteration_behavior), optional :: ib
+            !! An optional output, that if provided, allows the caller to 
+            !! obtain iteration performance statistics.
+        class(*), intent(inout), optional :: args
+                !! An optional argument to allow the user to communicate with
+                !! the routine.
         class(errors), intent(inout), optional, target :: err
+            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -347,7 +197,7 @@ contains
         end if
 
         ! Evaluate the function at the starting point, and calculate its norm
-        call fcn%fcn(x, fvec)
+        call fcn%fcn(x, fvec, args)
         neval = 1
         fnorm = norm2(fvec)
 
@@ -357,7 +207,7 @@ contains
         flag = 0
         do
             ! Evaluate the Jacobian
-            call fcn%jacobian(x, jac, fvec, w)
+            call fcn%jacobian(x, jac, fvec, w, args = args)
             njac = njac + 1
 
             ! Compute the QR factorization of the Jacobian
@@ -433,7 +283,7 @@ contains
                 if (iter == 1) delta = min(delta, pnorm)
 
                 ! Evaluate the function at X + P, and calculate its norm
-                call fcn%fcn(wa2, wa4)
+                call fcn%fcn(wa2, wa4, args)
                 neval = neval + 1
                 fnorm1 = norm2(wa4)
 
@@ -539,42 +389,42 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Completes the solution of the Levenberg-Marquardt problem when
-    !! provided with a QR factored form of the system Jacobian matrix.  The form
-    !! of the problem at this stage is J*X = B (J = Jacobian), and D*X = 0,
-    !! where D is a diagonal matrix.
-    !!
-    !! @param[in,out] r On input, the N-by-N upper triangular matrix R1 of the
-    !! QR factorization.  On output, the upper triangular portion is unaltered,
-    !! but the strict lower triangle contains the strict upper triangle
-    !! (transposed) of the matrix S.
-    !! @param[in] ipvt An N-element array tracking the pivoting operations from
-    !! the original QR factorization.
-    !! @param[in] diag An N-element array containing the diagonal components of
-    !! the matrix D.
-    !! @param[in] qtb An N-element array containing the first N elements of
-    !! Q1**T * B.
-    !! @param[in] delta A positive input variable that specifies an upper bounds
-    !! on the Euclidean norm of D*X.
-    !! @param[in,out] par On input, the initial estimate of the
-    !! Levenberg-Marquardt parameter.  On output, the final estimate.
-    !! @param[out] x The N-element array that is the solution of A*X = B, and of
-    !! D*X = 0.
-    !! @param[out] sdiag An N-element array containing the diagonal elements of
-    !! the matrix S.
-    !! @param[out] wa1 An N-element workspace array.
-    !! @param[out] wa2 An N-element workspace array.
-    !!
-    !! @par Remarks
-    !! This routines is based upon the MINPACK routine LMPAR.
     subroutine lmpar(r, ipvt, diag, qtb, delta, par, x, sdiag, wa1, wa2)
-        ! Arguments
+        !! Completes the solution of the Levenberg-Marquardt problem when
+        !! provided with a QR factored form of the system Jacobian matrix.  The
+        !! form of the problem at this stage is J*X = B (J = Jacobian), and 
+        !! D*X = 0, where D is a diagonal matrix.
+        !!
+        !! This routines is based upon the MINPACK routine LMPAR.
         real(real64), intent(inout), dimension(:,:) :: r
+            !! On input, the N-by-N upper triangular matrix R1 of the
+            !! QR factorization.  On output, the upper triangular portion is 
+            !! unaltered, but the strict lower triangle contains the strict 
+            !! upper triangle (transposed) of the matrix S.
         integer(int32), intent(in), dimension(:) :: ipvt
-        real(real64), intent(in), dimension(:) :: diag, qtb
+            !! An N-element array tracking the pivoting operations from the 
+            !! original QR factorization.
+        real(real64), intent(in), dimension(:) :: diag
+            !! An N-element array containing the diagonal components of the 
+            !! matrix D.
+        real(real64), intent(in), dimension(:) :: qtb
+            !! An N-element array containing the first N elements of Q1**T * B.
         real(real64), intent(in) :: delta
+            !! A positive input variable that specifies an upper bounds on the 
+            !! Euclidean norm of D*X.
         real(real64), intent(inout) :: par
-        real(real64), intent(out), dimension(:) :: x, sdiag, wa1, wa2
+            !! On input, the initial estimate of the Levenberg-Marquardt 
+            !! parameter.  On output, the final estimate.
+        real(real64), intent(out), dimension(:) :: x
+            !! The N-element array that is the solution of A*X = B, and of
+            !! D*X = 0.
+        real(real64), intent(out), dimension(:) :: sdiag
+            !! An N-element array containing the diagonal elements of the 
+            !! matrix S.
+        real(real64), intent(out), dimension(:) :: wa1
+            !! An N-element workspace array.
+        real(real64), intent(out), dimension(:) :: wa2
+            !! An N-element workspace array.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -714,32 +564,31 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Computes the QR factorization of an M-by-N matrix.
-    !!
-    !! @param[in,out] a On input, the M-by-N matrix to factor.  On output, the
-    !! strict upper triangular portion contains matrix R1 of the factorization,
-    !! the lower trapezoidal portion contains the factored form of Q1, and the
-    !! diagonal contains the corresponding elementary reflector.
-    !! @param[in] pivot Set to true to utilize column pivoting; else, set to
-    !! false for no pivoting.
-    !! @param[out] ipvt An N-element array that is used to contain the pivot
-    !! indices unless @p pivot is set to false.  In such event, this array is
-    !! unused.
-    !! @param[out] rdiag An N-element array used to store the diagonal elements
-    !! of the R1 matrix.
-    !! @param[out] acnorm An N-element array used to contain the norms of each
-    !! column in the event column pivoting is used.  If pivoting is not used,
-    !! this array is unused.
-    !! @param[out] wa An N-element workspace array.
-    !!
-    !! @par Remarks
-    !! This routines is based upon the MINPACK routine QRFAC.
     subroutine lmfactor(a, pivot, ipvt, rdiag, acnorm, wa)
-        ! Arguments
+        !! Computes the QR factorization of an M-by-N matrix.
+        !!
+        !! This routines is based upon the MINPACK routine QRFAC.
         real(real64), intent(inout), dimension(:,:) :: a
+            !! On input, the M-by-N matrix to factor.  On output, the strict 
+            !! upper triangular portion contains matrix R1 of the factorization,
+            !! the lower trapezoidal portion contains the factored form of Q1, 
+            !! and the diagonal contains the corresponding elementary reflector.
         logical, intent(in) :: pivot
+            !! Set to true to utilize column pivoting; else, set to false for 
+            !! no pivoting.
         integer(int32), intent(out), dimension(:) :: ipvt
-        real(real64), intent(out), dimension(:) :: rdiag, acnorm, wa
+            !! An N-element array that is used to contain the pivot indices 
+            !! unless pivot is set to false.  In such event, this array is
+            !! unused.
+        real(real64), intent(out), dimension(:) :: rdiag
+            !! An N-element array used to store the diagonal elements of the 
+            !! R1 matrix.
+        real(real64), intent(out), dimension(:) :: acnorm
+            !! An N-element array used to contain the norms of each column in 
+            !! the event column pivoting is used.  If pivoting is not used,
+            !! this array is unused.
+        real(real64), intent(out), dimension(:) :: wa
+            !! An N-element workspace array.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -816,33 +665,32 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    !> @brief Solves the QR factored system A*X = B, coupled with the diagonal
-    !! system D*X = 0 in the least-squares sense.
-    !!
-    !! @param[in,out] r On input, the N-by-N upper triangular matrix R1 of the
-    !! QR factorization.  On output, the upper triangular portion is unaltered,
-    !! but the strict lower triangle contains the strict upper triangle
-    !! (transposed) of the matrix S.
-    !! @param[in] ipvt An N-element array tracking the pivoting operations from
-    !! the original QR factorization.
-    !! @param[in] diag An N-element array containing the diagonal components of
-    !! the matrix D.
-    !! @param[in] qtb An N-element array containing the first N elements of
-    !! Q1**T * B.
-    !! @param[out] x The N-element array that is the solution of A*X = B, and of
-    !! D*X = 0.
-    !! @param[out] sdiag An N-element array containing the diagonal elements of
-    !! the matrix S.
-    !! @param[out] wa An N-element workspace array.
-    !!
-    !! @par Remarks
-    !! This routines is based upon the MINPACK routine QRSOLV.
     subroutine lmsolve(r, ipvt, diag, qtb, x, sdiag, wa)
-        ! Arguments
+        !! Solves the QR factored system A*X = B, coupled with the diagonal 
+        !! system D*X = 0 in the least-squares sense.
+        !!
+        !! This routines is based upon the MINPACK routine QRSOLV.
         real(real64), intent(inout), dimension(:,:) :: r
+            !! On input, the N-by-N upper triangular matrix R1 of the QR 
+            !! factorization.  On output, the upper triangular portion is 
+            !! unaltered, but the strict lower triangle contains the strict 
+            !! upper triangle (transposed) of the matrix S.
         integer(int32), intent(in), dimension(:) :: ipvt
-        real(real64), intent(in), dimension(:) :: diag, qtb
-        real(real64), intent(out), dimension(:) :: x, sdiag, wa
+            !! An N-element array tracking the pivoting operations from the 
+            !! original QR factorization.
+        real(real64), intent(in), dimension(:) :: diag
+            !! An N-element array containing the diagonal components of the 
+            !! matrix D.
+        real(real64), intent(in), dimension(:) :: qtb
+            !! An N-element array containing the first N elements of Q1**T * B.
+        real(real64), intent(out), dimension(:) :: x
+            !! The N-element array that is the solution of A*X = B, and of
+            !! D*X = 0.
+        real(real64), intent(out), dimension(:) :: sdiag
+            !! An N-element array containing the diagonal elements of the 
+            !! matrix S.
+        real(real64), intent(out), dimension(:) :: wa
+            !! An N-element workspace array.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
