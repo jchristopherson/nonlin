@@ -37,11 +37,11 @@ add_test(
 
 if (${BUILD_SHARED_LIBS} AND WIN32)
     add_custom_command(
-        TARGET linalg_test
+        TARGET nonlin_test
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy 
-        $<TARGET_RUNTIME_DLLS:linalg_test> 
-        $<TARGET_FILE_DIR:linalg_test>
+        $<TARGET_RUNTIME_DLLS:nonlin_test> 
+        $<TARGET_FILE_DIR:nonlin_test>
         COMMAND_EXPAND_LISTS
     )
 endif()

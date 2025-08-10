@@ -1,5 +1,5 @@
 # Quasi-Newton Example
-add_executable(quasi_newton_example nonlin_quasi_newton_example.f90 example_problems.f90)
+add_executable(c nonlin_quasi_newton_example.f90 example_problems.f90)
 target_link_libraries(quasi_newton_example nonlin)
 
 # Least-Squares Example
@@ -41,3 +41,14 @@ target_link_libraries(newton_example_2 nonlin)
 # Polynomial Roots Example
 add_executable(polynomial_roots_example nonlin_poly_roots_example.f90)
 target_link_libraries(polynomial_roots_example nonlin)
+
+if (${BUILD_SHARED_LIBS} AND WIN32)
+    add_custom_command(
+        TARGET quasi_newton_example
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy 
+        $<TARGET_RUNTIME_DLLS:quasi_newton_example> 
+        $<TARGET_FILE_DIR:quasi_newton_example>
+        COMMAND_EXPAND_LISTS
+    )
+endif()
