@@ -1,5 +1,5 @@
 # Quasi-Newton Example
-add_executable(c nonlin_quasi_newton_example.f90 example_problems.f90)
+add_executable(quasi_newton_example nonlin_quasi_newton_example.f90 example_problems.f90)
 target_link_libraries(quasi_newton_example nonlin)
 
 # Least-Squares Example
