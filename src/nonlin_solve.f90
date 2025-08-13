@@ -331,7 +331,7 @@ contains
                     ! Compute the new Q and R matrices for the rank1 update:
                     ! B' = B + ALPHA * S * DX**T
                     call rank1_update(one, s, dx, b)
-                    call qr_rank1_update(q, r, s, dx, work) ! S & DX overwritten
+                    call qr_rank1_update(q, r, s, dx) ! S & DX overwritten
 
                     ! Increment the counter tracking how many iterations have
                     ! passed since the last Jacobian recalculation
