@@ -887,10 +887,10 @@ contains
         nl = min(n, size(minX))
 
         do i = 1, nl
-            if (x(i) < l(i)) x(i) = l(i)
+            if (x(i) < minX(i)) x(i) = minX(i)
         end do
         do i = 1, nu
-            if (x(i) > u(i)) x(i) = u(i)
+            if (x(i) > maxX(i)) x(i) = maxX(i)
         end do
     end subroutine
 
