@@ -25,6 +25,20 @@ module nonlin_least_squares
         procedure, public :: solve => lss_solve
     end type
 
+    type, extends(least_squares_solver) :: constrained_least_squares_solver
+        !! Defines a Levenberg-Marquardt style constrained least-squares solver.
+        real(real64), private, allocatable, dimension(:) :: m_upper
+            !! An upper set of parameter bounds.
+        real(real64), private, allocatable, dimension(:) :: m_lower
+            !! A lower set of parameter bounds.
+    contains
+        procedure, public :: get_upper_limits => cls_get_upper_bounds
+        procedure, public :: set_upper_limits => cls_set_upper_bounds
+        procedure, public :: get_lower_limits => cls_get_lower_bounds
+        procedure, public :: set_lower_limits => cls_set_lower_bounds
+        procedure, public :: apply_limits => cls_apply_limits
+    end type
+
 contains
 ! ******************************************************************************
 ! LEAST_SQUARES_SOLVER MEMBERS
@@ -787,6 +801,102 @@ contains
             x(l) = wa(j)
         end do ! LINE 160
     end subroutine
+
+! ******************************************************************************
+! CONSTRAINED_LEAST_SQUARES_SOLVER MEMBERS & HELPER ROUTINES
+! ------------------------------------------------------------------------------
+    pure function cls_get_upper_bounds(this) result(rst)
+        !! Gets the array of upper bounds constraints.
+        class(constrained_least_squares_solver), intent(in) :: this
+            !! The constrained_least_squares_solver object.
+        real(real64), allocatable, dimension(:) :: rst
+            !! The limit array.
+
+        if (allocated(this%m_upper)) then
+            rst = this%m_upper
+        else
+            allocate(rst(0))
+        end if
+    end function
+
+! --------------------
+    subroutine cls_set_upper_bounds(this, x)
+        !! Sets the array of upper bounds constraints.
+        class(constrained_least_squares_solver), intent(inout) :: this
+            !! The constrained_least_squares_solver object.
+        real(real64), intent(in), dimension(:) :: x
+            !! The limit array.
+
+        if (allocated(this%m_upper)) then
+            deallocate(this%m_upper)
+            this%m_upper = x
+        else
+            this%m_upper = x
+        end if
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    pure function cls_get_lower_bounds(this) result(rst)
+        !! Gets the array of lower bounds constraints.
+        class(constrained_least_squares_solver), intent(in) :: this
+            !! The constrained_least_squares_solver object.
+        real(real64), allocatable, dimension(:) :: rst
+            !! The limit array.
+
+        if (allocated(this%m_lower)) then
+            rst = this%m_lower
+        else
+            allocate(rst(0))
+        end if
+    end function
+
+! --------------------
+    subroutine cls_set_lower_bounds(this, x)
+        !! Sets the array of lower bounds constraints.
+        class(constrained_least_squares_solver), intent(inout) :: this
+            !! The constrained_least_squares_solver object.
+        real(real64), intent(in), dimension(:) :: x
+            !! The limit array.
+
+        if (allocated(this%m_lower)) then
+            deallocate(this%m_lower)
+            this%m_lower = x
+        else
+            this%m_lower = x
+        end if
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    subroutine cls_apply_limits(this, x)
+        !! Applies the limits to the solution vector.
+        class(constrained_least_squares_solver), intent(in) :: this
+            !! The constrained_least_squares_solver object.
+        real(real64), intent(inout), dimension(:) :: x
+            !! On input, the solution vector.  On output, the clamped solution
+            !! vector.
+
+        ! Local Variables
+        integer(int32) :: i, nu, nl, n
+        real(real64), allocatable, dimension(:) :: maxX, minX
+
+        ! Process
+        maxX = this%get_upper_limits()
+        minX = this%get_lower_limits()
+        n = size(x)
+        nu = min(n, size(maxX))
+        nl = min(n, size(minX))
+
+        do i = 1, nl
+            if (x(i) < l(i)) x(i) = l(i)
+        end do
+        do i = 1, nu
+            if (x(i) > u(i)) x(i) = u(i)
+        end do
+    end subroutine
+
+! ------------------------------------------------------------------------------
+
+! ------------------------------------------------------------------------------
 
 ! ------------------------------------------------------------------------------
 end module
