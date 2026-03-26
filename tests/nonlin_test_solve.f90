@@ -22,6 +22,11 @@ module nonlin_test_solve
     public :: test_brent_2
     public :: test_newton_1var_1
     public :: test_newton_1var_2
+    public :: test_constrained_least_squares_1
+    public :: test_constrained_least_squares_2
+    public :: test_constrained_least_squares_3
+    public :: test_constrained_least_squares_4
+    public :: test_constrained_least_squares_bounds
 contains
 ! ******************************************************************************
 ! TEST FUNCTIONS
@@ -971,6 +976,248 @@ contains
 
         ! Formatting
 100     format(A, F8.5, A, F8.5)
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_constrained_least_squares_1() result(check)
+        ! Local Variables
+        type(vecfcn_helper) :: obj
+        procedure(vecfcn), pointer :: fcn
+        procedure(jacobianfcn), pointer :: jac
+        type(constrained_least_squares_solver) :: solver
+        type(iteration_behavior) :: ib
+        real(real64) :: x(2), f(2), ic(2, 2)
+        integer(int32) :: i
+        logical :: check
+
+        ! Initialization
+        check = .true.
+        fcn => fcn1
+        jac => jac1
+        call obj%set_fcn(fcn, 2, 2)
+        call obj%set_jacobian(jac)
+
+        ! Generate a set of initial conditions
+        ic(1,:) = 0.5d0
+        ic(2,:) = 1.0d0
+
+        ! Process - Cycle over each different initial condition set
+        do i = 1, size(ic, 1)
+            x = ic(i,:)
+            call solver%solve(obj, x, f, ib)
+            if (.not.is_ans_1(x, 1.0d-6)) then
+                check = .false.
+                print 100, "Constrained Least Squares Solver Failed: Test 1-", i
+                print 101, "Initial Condition: ", ic(i,1), ", ", &
+                    ic(i,2)
+                print 101, "Solution:", x(1), ", ", x(2)
+                print 101, "Residual:", f(1), ", ", f(2)
+                print 102, "Converged on residual: ", ib%converge_on_fcn
+                print 102, "Converged on solution change: ", &
+                    ib%converge_on_chng
+                print 102, "Converge on zero gradient: ", &
+                    ib%converge_on_zero_diff
+                print 100, "Iterations: ", ib%iter_count
+                print 100, "Function Evaluations: ", ib%fcn_count
+            end if
+        end do
+
+        ! Formatting
+100     format(A, I0)
+101     format(A, F9.5, A, F9.5)
+102     format(A, L)
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_constrained_least_squares_2() result(check)
+        ! Local Variables
+        type(vecfcn_helper) :: obj
+        procedure(vecfcn), pointer :: fcn
+        type(constrained_least_squares_solver) :: solver
+        type(iteration_behavior) :: ib
+        real(real64) :: x(2), f(2), ic(2, 2)
+        integer(int32) :: i
+        logical :: check
+        type(errors) :: errmgr
+
+        ! Initialization
+        check = .true.
+        fcn => fcn2
+        call obj%set_fcn(fcn, 2, 2)
+
+        ! Do not terminate testing if the solution does not converge.  This
+        ! routine may have a bit of issue with this problem.  It can take
+        ! many iterations to converge.
+        call errmgr%set_exit_on_error(.false.)
+
+        ! Increase the number of iterations allowed
+        call solver%set_max_fcn_evals(1000)
+
+        ! Generate a set of initial conditions
+        ic(1,:) = 0.5d0
+        ic(2,:) = 1.0d0
+
+        ! Process - Cycle over each different initial condition set
+        do i = 1, size(ic, 1)
+            x = ic(i,:)
+            call solver%solve(obj, x, f, ib, err = errmgr)
+            if (.not.is_ans_2(x, 1.0d-6)) then
+                check = .false.
+                print 100, "Constrained Least Squares Solver Failed: Test 2-", i
+                print 101, "Initial Condition: ", ic(i,1), ", ", &
+                    ic(i,2)
+                print 101, "Solution:", x(1), ", ", x(2)
+                print 101, "Residual:", f(1), ", ", f(2)
+                print 102, "Converged on residual: ", ib%converge_on_fcn
+                print 102, "Converged on solution change: ", &
+                    ib%converge_on_chng
+                print 102, "Converge on zero gradient: ", &
+                    ib%converge_on_zero_diff
+                print 100, "Iterations: ", ib%iter_count
+                print 100, "Function Evaluations: ", ib%fcn_count
+            end if
+        end do
+
+        ! Formatting
+100     format(A, I0)
+101     format(A, F9.5, A, F9.5)
+102     format(A, L)
+    end function
+
+! ------------------------------------------------------------------------------
+    subroutine test_constrained_least_squares_3()
+        ! Local Variables
+        type(vecfcn_helper) :: obj
+        procedure(vecfcn), pointer :: fcn
+        type(constrained_least_squares_solver) :: solver
+        real(real64) :: x(4), f(21) ! There are 4 coefficients and 21 data points
+
+        ! Initialization
+        fcn => lsfcn1
+        x = 1.0d0   ! Set X to an initial guess of [1, 1, 1, 1]
+        call obj%set_fcn(fcn, 21, 4)
+
+        ! Compute the solution, and store the polynomial coefficients in X
+        call solver%solve(obj, x, f)
+
+        ! Print out the coefficients
+        !print *, x
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    function test_constrained_least_squares_4() result(check)
+        ! Local Variables
+        type(vecfcn_helper) :: obj
+        procedure(vecfcn), pointer :: fcn
+        procedure(jacobianfcn), pointer :: jac
+        type(constrained_least_squares_solver) :: solver
+        type(iteration_behavior) :: ib
+        real(real64) :: x(2), f(2), ic(2, 2), a
+        integer(int32) :: i
+        logical :: check
+
+        ! Initialization
+        check = .true.
+        a = 2.0d0
+        fcn => fcn1
+        jac => jac1
+        call obj%set_fcn(fcn, 2, 2)
+
+        ! Generate a set of initial conditions
+        ic(1,:) = 0.5d0
+        ic(2,:) = 1.0d0
+
+        ! Process - Cycle over each different initial condition set
+        do i = 1, size(ic, 1)
+            x = ic(i,:)
+            call solver%solve(obj, x, f, ib, args = a)
+            if (.not.is_ans_1(x, 1.0d-6)) then
+                check = .false.
+                print 100, "Constrained Least Squares Solver Failed: Test 4a-", i
+                print 101, "Initial Condition: ", ic(i,1), ", ", &
+                    ic(i,2)
+                print 101, "Solution:", x(1), ", ", x(2)
+                print 101, "Residual:", f(1), ", ", f(2)
+                print 102, "Converged on residual: ", ib%converge_on_fcn
+                print 102, "Converged on solution change: ", &
+                    ib%converge_on_chng
+                print 102, "Converge on zero gradient: ", &
+                    ib%converge_on_zero_diff
+                print 100, "Iterations: ", ib%iter_count
+                print 100, "Function Evaluations: ", ib%fcn_count
+            end if
+        end do
+
+        ! Try with a user-defined Jacobian
+        call obj%set_jacobian(jac)
+        do i = 1, size(ic, 1)
+            x = ic(i,:)
+            call solver%solve(obj, x, f, ib, args = a)
+            if (.not.is_ans_1(x, 1.0d-6)) then
+                check = .false.
+                print 100, "Constrained Least Squares Solver Failed: Test 4b-", i
+                print 101, "Initial Condition: ", ic(i,1), ", ", &
+                    ic(i,2)
+                print 101, "Solution:", x(1), ", ", x(2)
+                print 101, "Residual:", f(1), ", ", f(2)
+                print 102, "Converged on residual: ", ib%converge_on_fcn
+                print 102, "Converged on solution change: ", &
+                    ib%converge_on_chng
+                print 102, "Converge on zero gradient: ", &
+                    ib%converge_on_zero_diff
+                print 100, "Iterations: ", ib%iter_count
+                print 100, "Function Evaluations: ", ib%fcn_count
+            end if
+        end do
+
+        ! Formatting
+100     format(A, I0)
+101     format(A, F9.5, A, F9.5)
+102     format(A, L)
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_constrained_least_squares_bounds() result(check)
+        ! Local Variables
+        type(vecfcn_helper) :: obj
+        procedure(vecfcn), pointer :: fcn
+        type(constrained_least_squares_solver) :: solver
+        real(real64) :: x(2), f(2), low(2), high(2)
+        logical :: check
+
+        ! Initialization
+        check = .true.
+        fcn => fcn1
+        call obj%set_fcn(fcn, 2, 2)
+
+        ! Set tight, active bounds around the known solution (5,3)
+        low = [4.0d0, 2.0d0]
+        high = [4.6d0, 2.6d0]
+        call solver%set_lower_limits(low)
+        call solver%set_upper_limits(high)
+
+        ! Starting point outside bounds
+        x = [1.0d0, 1.0d0]
+
+        ! Solve
+        call solver%solve(obj, x, f)
+
+        ! Bound enforcement should hold
+        if (any(x < low - 1.0d-10) .or. any(x > high + 1.0d-10)) then
+            check = .false.
+            print 100, "Constrained Least Squares Bounds Solver Failed"
+            print 101, "Result:", x(1), x(2)
+            print 101, "Expected range:", low(1), low(2), high(1), high(2)
+        end if
+
+        ! The solution should be in the feasible region
+        if (x(1) < low(1) .or. x(1) > high(1) .or. x(2) < low(2) .or. x(2) > high(2)) then
+            check = .false.
+        end if
+
+        ! Formatting
+100     format(A)
+101     format(A, 4F10.6)
     end function
 
 ! ------------------------------------------------------------------------------

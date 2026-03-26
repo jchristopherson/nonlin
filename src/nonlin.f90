@@ -36,6 +36,7 @@ module nonlin
 
     ! NONLIN_LEAST_SQUARES
     public :: least_squares_solver
+    public :: constrained_least_squares_solver
 
     ! NONLIN_LINESEARCH
     public :: line_search

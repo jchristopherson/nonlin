@@ -8,6 +8,7 @@ module nonlin_least_squares
     implicit none
     private
     public :: least_squares_solver
+    public :: constrained_least_squares_solver
 
 ! ******************************************************************************
 ! TYPES
@@ -23,6 +24,25 @@ module nonlin_least_squares
         procedure, public :: get_step_scaling_factor => lss_get_factor
         procedure, public :: set_step_scaling_factor => lss_set_factor
         procedure, public :: solve => lss_solve
+    end type
+
+    type, extends(equation_solver) :: constrained_least_squares_solver
+        !! Defines a Levenberg-Marquardt style constrained least-squares solver.
+        real(real64), private, allocatable, dimension(:) :: m_upper
+            !! An upper set of parameter bounds.
+        real(real64), private, allocatable, dimension(:) :: m_lower
+            !! A lower set of parameter bounds.
+        real(real64), private :: m_lambda = 1.0d-3
+            !! The damping parameter.
+    contains
+        procedure, public :: get_upper_limits => cls_get_upper_bounds
+        procedure, public :: set_upper_limits => cls_set_upper_bounds
+        procedure, public :: get_lower_limits => cls_get_lower_bounds
+        procedure, public :: set_lower_limits => cls_set_lower_bounds
+        procedure, public :: apply_limits => cls_apply_limits
+        procedure, public :: get_damping_factor => cls_get_damping
+        procedure, public :: set_damping_factor => cls_set_damping
+        procedure, public :: solve => cls_solve
     end type
 
 contains
@@ -788,5 +808,466 @@ contains
         end do ! LINE 160
     end subroutine
 
+! ******************************************************************************
+! CONSTRAINED_LEAST_SQUARES_SOLVER MEMBERS & HELPER ROUTINES
+! ------------------------------------------------------------------------------
+    pure function cls_get_upper_bounds(this) result(rst)
+        !! Gets the array of upper bounds constraints.
+        class(constrained_least_squares_solver), intent(in) :: this
+            !! The [[constrained_least_squares_solver]] object.
+        real(real64), allocatable, dimension(:) :: rst
+            !! The limit array.
+
+        if (allocated(this%m_upper)) then
+            rst = this%m_upper
+        else
+            allocate(rst(0))
+        end if
+    end function
+
+! --------------------
+    subroutine cls_set_upper_bounds(this, x)
+        !! Sets the array of upper bounds constraints.
+        class(constrained_least_squares_solver), intent(inout) :: this
+            !! The [[constrained_least_squares_solver]] object.
+        real(real64), intent(in), dimension(:) :: x
+            !! The limit array.
+
+        if (allocated(this%m_upper)) then
+            deallocate(this%m_upper)
+            this%m_upper = x
+        else
+            this%m_upper = x
+        end if
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    pure function cls_get_lower_bounds(this) result(rst)
+        !! Gets the array of lower bounds constraints.
+        class(constrained_least_squares_solver), intent(in) :: this
+            !! The [[constrained_least_squares_solver]] object.
+        real(real64), allocatable, dimension(:) :: rst
+            !! The limit array.
+
+        if (allocated(this%m_lower)) then
+            rst = this%m_lower
+        else
+            allocate(rst(0))
+        end if
+    end function
+
+! --------------------
+    subroutine cls_set_lower_bounds(this, x)
+        !! Sets the array of lower bounds constraints.
+        class(constrained_least_squares_solver), intent(inout) :: this
+            !! The [[constrained_least_squares_solver]] object.
+        real(real64), intent(in), dimension(:) :: x
+            !! The limit array.
+
+        if (allocated(this%m_lower)) then
+            deallocate(this%m_lower)
+            this%m_lower = x
+        else
+            this%m_lower = x
+        end if
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    subroutine cls_apply_limits(this, x)
+        !! Applies the limits to the solution vector.
+        class(constrained_least_squares_solver), intent(in) :: this
+            !! The [[constrained_least_squares_solver]] object.
+        real(real64), intent(inout), dimension(:) :: x
+            !! On input, the solution vector.  On output, the clamped solution
+            !! vector.
+
+        ! Local Variables
+        integer(int32) :: i, nu, nl, n
+        real(real64), allocatable, dimension(:) :: maxX, minX
+
+        ! Process
+        maxX = this%get_upper_limits()
+        minX = this%get_lower_limits()
+        n = size(x)
+        nu = min(n, size(maxX))
+        nl = min(n, size(minX))
+
+        do i = 1, nl
+            if (x(i) < minX(i)) x(i) = minX(i)
+        end do
+        do i = 1, nu
+            if (x(i) > maxX(i)) x(i) = maxX(i)
+        end do
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    pure function cls_get_damping(this) result(rst)
+        !! Gets the damping parameter \(\lambda\) from \(\left( J^{T} J \right) 
+        !! \vec{\delta} = J^{T} \left( \vec{y} - f \right)\).
+        class(constrained_least_squares_solver), intent(in) :: this
+            !! The [[constrained_least_squares_solver]] object.
+        real(real64) :: rst
+            !! The damping factor.
+        rst = this%m_lambda
+    end function
+
+! --------------------
+    subroutine cls_set_damping(this, x)
+        !! Sets the damping parameter \(\lambda\) from \(\left( J^{T} J \right) 
+        !! \vec{\delta} = J^{T} \left( \vec{y} - f \right)\).
+        class(constrained_least_squares_solver), intent(inout) :: this
+            !! The [[constrained_least_squares_solver]] object.
+        real(real64), intent(in) :: x
+            !! The damping factor.
+
+        if (x <= 0.0d0) then
+            this%m_lambda = 1.0d-12
+        else
+            this%m_lambda = x
+        end if
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    subroutine cls_solve(this, fcn, x, fvec, ib, args, err)
+        !! Applies the constrained least-squares solver to solve the nonlinear
+        !! least-squares problem.
+        class(constrained_least_squares_solver), intent(inout) :: this
+            !! The [[constrained_least_squares_solver]] object.
+        class(vecfcn_helper), intent(in) :: fcn
+            !! The [[vecfcn_helper]] object containing the equations to solve.
+        real(real64), intent(inout), dimension(:) :: x
+            !! On input, an N-element array containing an initial estimate 
+            !! to the solution.  On output, the updated solution estimate.
+            !! N is the number of variables.
+        real(real64), intent(out), dimension(:) :: fvec
+            !! An M-element array that, on output, will contain the values 
+            !! of each equation as evaluated at the variable values given 
+            !! in x.
+        type(iteration_behavior), optional :: ib
+            !! An optional output, that if provided, allows the caller to 
+            !! obtain iteration performance statistics.
+        class(*), intent(inout), optional :: args
+                !! An optional argument to allow the user to communicate with
+                !! the routine.
+        class(errors), intent(inout), optional, target :: err
+            !! An error handling object.
+
+        ! Parameters
+        real(real64), parameter :: lambda_inc = 1.0d1
+        real(real64), parameter :: lambda_dec = 3.0d-1
+        real(real64), parameter :: min_lambda = 1.0d-10
+        real(real64), parameter :: max_lambda = 1.0d10
+        integer(int32), parameter :: max_rejects = 20
+
+        ! Local Variables
+        logical :: xcnvrg, fcnvrg, gcnvrg, converged
+        integer(int32) :: i, iter, neqn, nvar, maxeval, njac, lwork, neval, &
+            flag, consecutive_rejects
+        real(real64) :: ftol, xtol, gtol, lambda, fnorm, xnorm, gnorm, &
+            fnormnew, ared, pred, rho
+        real(real64), allocatable, dimension(:) :: work, g, p, xnew, fnew
+        real(real64), allocatable, dimension(:,:) :: jac, jtj, a
+        class(errors), pointer :: errmgr
+        type(errors), target :: deferr
+        character(len = 256) :: errmsg
+        
+        ! Initialization
+        converged = .false.
+        xcnvrg = .false.
+        fcnvrg = .false.
+        gcnvrg = .false.
+        neqn = fcn%get_equation_count()
+        nvar = fcn%get_variable_count()
+        neval = 0
+        iter = 0
+        njac = 0
+        lambda = this%get_damping_factor()
+        ftol = this%get_fcn_tolerance()
+        xtol = this%get_var_tolerance()
+        gtol = this%get_gradient_tolerance()
+        maxeval = this%get_max_fcn_evals()
+        if (present(ib)) then
+            ib%iter_count = iter
+            ib%fcn_count = neval
+            ib%jacobian_count = njac
+            ib%converge_on_fcn = fcnvrg
+            ib%converge_on_chng = xcnvrg
+            ib%converge_on_zero_diff = gcnvrg
+        end if
+        if (present(err)) then
+            errmgr => err
+        else
+            errmgr => deferr
+        end if
+
+        ! Input Check
+        if (.not.fcn%is_fcn_defined()) then
+            ! ERROR: No function is defined
+            call errmgr%report_error("cls_solve", &
+                "No function has been defined.", &
+                NL_INVALID_OPERATION_ERROR)
+            return
+        end if
+        flag = 0
+        if (size(x) /= nvar) then
+            flag = 3
+        else if (size(fvec) /= neqn) then
+            flag = 4
+        end if
+        if (flag /= 0) then
+            ! One of the input arrays is not sized correctly
+            write(errmsg, 100) "Input number ", flag, &
+                " is not sized correctly."
+            call errmgr%report_error("cls_solve", trim(errmsg), &
+                NL_ARRAY_SIZE_ERROR)
+            return
+        end if
+
+        ! Local Memory Allocations
+        allocate( &
+            jac(neqn, nvar), &
+            jtj(nvar, nvar), &
+            g(nvar), &
+            a(nvar, nvar), &
+            p(nvar), &
+            xnew(nvar), &
+            fnew(neqn) &
+        )
+        call fcn%jacobian(x, jac, fv = fvec, olwork = lwork)
+        allocate(work(lwork))
+
+        ! Evaluate the function at the starting point
+        call this%apply_limits(x)
+        call fcn%fcn(x, fvec, args)
+        neval = 1
+        fnorm = norm2(fvec)
+
+        ! Primary Iteration Loop
+        ! consecutive_rejects = 0
+
+        ! main_loop : do
+        !     ! Update the iteration counter
+        !     iter = iter + 1
+
+        !     ! Enforce bounds on the current estimate
+        !     call this%apply_limits(x)
+
+        !     ! Evaluate the Jacobian at the current point
+        !     call fcn%jacobian(x, jac, fv = fvec, work = work, args = args)
+        !     njac = njac + 1
+
+        !     ! Compute J**T * J and g = J**T * fvec
+        !     call compute_dls_gradient(jac, fvec, jtj, g)
+        !     gnorm = norm2(g)
+
+        !     ! Gradient based convergence check
+        !     if (gnorm <= gtol) then
+        !         gcnvrg = .true.
+        !         converged = .true.
+        !         exit main_loop
+        !     end if
+
+        !     ! Inner Loop
+        !     inner_loop : do
+        !         ! Solve the linear system
+        !         call dls_solve_linear_system(jtj, g, lambda, p, a)
+
+        !         ! Trial step and clamp to box constraints
+        !         xnew = x + p
+        !         call this%apply_limits(xnew)
+        !         p = xnew - x
+        !         xnorm = norm2(p)
+
+        !         ! Convergence check
+        !         if (xnorm <= xtol) then
+        !             xcnvrg = .true.
+        !             converged = .true.
+        !             exit main_loop
+        !         end if
+
+        !         ! Update the solution and residual
+        !         call fcn%fcn(xnew, fnew, args)
+        !         neval = neval + 1
+        !         fnormnew = norm2(fnew)
+
+        !         ! Trust Region Reduction Ratio
+        !         ared = 0.5d0 * (fnorm**2 - fnormnew**2)
+        !         pred = 0.5d0 * dot_product(p, lambda * p - g)
+
+        !         if (pred <= 0.0d0) then
+        !             ! Non-productive step; increase damping and retry
+        !             lambda = min(lambda * lambda_inc, max_lambda)
+        !             consecutive_rejects = consecutive_rejects + 1
+        !             if (consecutive_rejects >= max_rejects) exit main_loop
+        !             cycle inner_loop
+        !         end if
+
+        !         rho = ared / pred
+        !         if (rho > 0.0d0) then
+        !             ! Accept the step and decrease damping
+        !             x = xnew
+        !             fvec = fnew
+        !             fnorm = fnormnew
+        !             lambda = max(lambda * lambda_dec, min_lambda)
+        !             consecutive_rejects = 0
+        !             exit inner_loop
+        !         else
+        !             ! Reject the step and increase damping
+        !             lambda = min(lambda * lambda_inc, max_lambda)
+        !             consecutive_rejects = consecutive_rejects + 1
+        !         end if
+
+        !         ! Check the function evaluation tracker
+        !         if (neval >= maxeval) exit main_loop
+        !     end do inner_loop
+
+        !     ! Print iteration status
+        !     if (this%get_print_status()) then
+        !         call print_status(iter, neval, njac, xnorm, fnorm)
+        !     end if
+
+        !     ! Check for termination conditions
+        !     if (abs(ared) <= ftol) then
+        !         fcnvrg = .true.
+        !         converged = .true.
+        !         exit main_loop
+        !     end if
+        !     if (consecutive_rejects >= 12) then
+        !         ! The damping parameter is not improving progress
+        !         exit main_loop
+        !     end if
+        ! end do main_loop
+
+        ! Report out iteration statistics
+        if (present(ib)) then
+            ib%iter_count = iter
+            ib%fcn_count = neval
+            ib%jacobian_count = njac
+            ib%converge_on_fcn = fcnvrg
+            ib%converge_on_chng = xcnvrg
+            ib%converge_on_zero_diff = gcnvrg
+        end if
+
+        ! Check for convergence issues
+        if (.not.converged) then
+            write(errmsg, 101) "The algorithm failed to " // &
+                "converge.  Function evaluations performed: ", neval, &
+                "." // new_line('c') // "Change in Variable: ", xnorm, &
+                new_line('c') // "Residual: ", fnorm
+            call errmgr%report_error("cls_solve", trim(errmsg), &
+                flag)
+        end if
+
+        ! Formatting
+100     format(A, I0, A)
+101     format(A, I0, A, E10.3, A, E10.3)
+    end subroutine
+
+! ******************************************************************************
+! HELPER ROUTINES
+! ------------------------------------------------------------------------------
+    subroutine broyden_update(xold, fold, jac, x, f, dx, df)
+        use linalg, only : rank1_update
+        !! Computes a rank-1 update to the Jacobian matrix where 
+        !! \(J_{update} = \delta f \delta x^{T} + J\).
+        real(real64), intent(in), dimension(:) :: xold
+            !! The N-element array of the previous set of solution variables.
+        real(real64), intent(in), dimension(:) :: fold
+            !! The M-element array of the previous residual values.
+        real(real64), intent(inout), dimension(:,:) :: jac
+            !! On input, the M-by-N Jacobian matrix.  On output, the updated
+            !! Jacobian matrix.
+        real(real64), intent(in), dimension(:) :: x
+            !! The N-element array of the current set of solution variables.
+        real(real64), intent(in), dimension(:) :: f
+            !! The M-element array of the residual values.
+        real(real64), intent(out), dimension(:) :: dx
+            !! The N-element array of the change in solution variables.
+        real(real64), intent(out), dimension(:) :: df
+            !! The M-element array containing \(\frac{f - f_{old} - 
+            !! J \delta x}{\delta x^{T} \delta x}\).
+
+        ! Local Variables
+        real(real64) :: h2
+
+        ! Process
+        dx = x - xold
+        h2 = dot_product(dx, dx)
+        df = f - fold - matmul(jac, dx)
+        df = df / h2
+        call rank1_update(1.0d0, df, dx, jac)
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    subroutine dls_matrix(fcn, xold, fold, update, x, jac, neval, njac, fnew, &
+        dx, df, Jtdf, args)
+        use linalg, only : mtx_mult
+        !! Build the Levenberg-Marquardt matrix by either computing a new
+        !! Jacobian matrix or performing a rank-1 update to the existing 
+        !! Jacobian matrix.
+        type(vecfcn_helper), intent(inout) :: fcn
+            !! The [[vecfcn_helper]] containing the residual and Jacobian 
+            !! calculations.
+        real(real64), intent(in), dimension(:) :: xold
+            !! The N-element array containing the previous solution estimate.
+        real(real64), intent(in), dimension(:) :: fold
+            !! The M-element array containing the previous residual.
+        logical, intent(inout) :: update
+            !! On input, set to true to force an update of the Jacobian; else,
+            !! set to false to force a recalculation of the Jacobian.  On
+            !! output, this parameter is reset to false if a Jacobian update
+            !! was performed.
+        real(real64), intent(inout), dimension(:) :: x
+            !! The N-element array containing the current solution estimate.
+            !! This array is used as in-place storage for Jacobian calculations
+            !! but is restored on output.
+        real(real64), intent(inout), dimension(:,:) :: jac
+            !! The M-by-N Jacobian matrix.
+        integer(int32), intent(inout) :: neval
+            !! The number of function evaluations.
+        integer(int32), intent(inout) :: njac
+            !! The number of Jacobian evaluations.
+        real(real64), intent(out), dimension(:) :: fnew
+            !! The M-element updated residual estimate.
+        real(real64), intent(out), dimension(:) :: dx
+            !! The N-element array of the change in solution variables.
+        real(real64), intent(out), dimension(:) :: df
+            !! The M-element array containing \(\frac{f - f_{old} - 
+            !! J \delta x}{\delta x^{T} \delta x}\).
+        real(real64), intent(out), dimension(:) :: Jtdf
+            !! The N-element array containing the product \(J^{T} \delta f \).
+        class(*), intent(inout), optional :: args
+            !! User-defined arguments.
+
+        ! Local Variables
+        integer(int32) :: m, n
+
+        ! Initialization
+        m = size(fold)
+        n = size(x)
+
+        ! Perform the next function evaluation
+        call fcn%fcn(x, fnew, args)
+        neval = neval + 1
+
+        ! Update or recompute the Jacobian matrix
+        if (update) then
+            call fcn%jacobian(x, jac, fv = fnew, args = args)
+            njac = njac + 1
+            update = .false.
+        else
+            call broyden_update(xold, fold, jac, x, fnew, dx, df)
+        end if
+
+        ! Compute J**T * df
+        call mtx_mult(.true., 1.0d0, jac, df, 0.0d0, Jtdf)
+    end subroutine
+
+! ------------------------------------------------------------------------------
+
+! ------------------------------------------------------------------------------
+
+! ------------------------------------------------------------------------------
+    
 ! ------------------------------------------------------------------------------
 end module
