@@ -8,6 +8,7 @@ module nonlin_least_squares
     implicit none
     private
     public :: least_squares_solver
+    public :: constrained_least_squares_solver
 
 ! ******************************************************************************
 ! TYPES
@@ -25,18 +26,23 @@ module nonlin_least_squares
         procedure, public :: solve => lss_solve
     end type
 
-    type, extends(least_squares_solver) :: constrained_least_squares_solver
+    type, extends(equation_solver) :: constrained_least_squares_solver
         !! Defines a Levenberg-Marquardt style constrained least-squares solver.
         real(real64), private, allocatable, dimension(:) :: m_upper
             !! An upper set of parameter bounds.
         real(real64), private, allocatable, dimension(:) :: m_lower
             !! A lower set of parameter bounds.
+        real(real64), private :: m_lambda = 1.0d-3
+            !! The damping parameter.
     contains
         procedure, public :: get_upper_limits => cls_get_upper_bounds
         procedure, public :: set_upper_limits => cls_set_upper_bounds
         procedure, public :: get_lower_limits => cls_get_lower_bounds
         procedure, public :: set_lower_limits => cls_set_lower_bounds
         procedure, public :: apply_limits => cls_apply_limits
+        procedure, public :: get_damping_factor => cls_get_damping
+        procedure, public :: set_damping_factor => cls_set_damping
+        procedure, public :: solve => cls_solve
     end type
 
 contains
@@ -895,6 +901,33 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
+    pure function cls_get_damping(this) result(rst)
+        !! Gets the damping parameter \(\lambda\) from \(\left( J^{T} J \right) 
+        !! \vec{\delta} = J^{T} \left( \vec{y} - f \right)\).
+        class(constrained_least_squares_solver), intent(in) :: this
+            !! The [[constrained_least_squares_solver]] object.
+        real(real64) :: rst
+            !! The damping factor.
+        rst = this%m_lambda
+    end function
+
+! --------------------
+    subroutine cls_set_damping(this, x)
+        !! Sets the damping parameter \(\lambda\) from \(\left( J^{T} J \right) 
+        !! \vec{\delta} = J^{T} \left( \vec{y} - f \right)\).
+        class(constrained_least_squares_solver), intent(inout) :: this
+            !! The [[constrained_least_squares_solver]] object.
+        real(real64), intent(in) :: x
+            !! The damping factor.
+
+        if (x <= 0.0d0) then
+            this%m_lambda = 1.0d-12
+        else
+            this%m_lambda = x
+        end if
+    end subroutine
+
+! ------------------------------------------------------------------------------
     subroutine cls_solve(this, fcn, x, fvec, ib, args, err)
         !! Applies the constrained least-squares solver to solve the nonlinear
         !! least-squares problem.
@@ -923,11 +956,13 @@ contains
         real(real64), parameter :: lambda_inc = 1.0d1
         real(real64), parameter :: lambda_dec = 3.0d-1
         real(real64), parameter :: min_lambda = 1.0d-10
+        real(real64), parameter :: max_lambda = 1.0d10
+        integer(int32), parameter :: max_rejects = 20
 
         ! Local Variables
         logical :: xcnvrg, fcnvrg, gcnvrg, converged
         integer(int32) :: i, iter, neqn, nvar, maxeval, njac, lwork, neval, &
-            flag
+            flag, consecutive_rejects
         real(real64) :: ftol, xtol, gtol, lambda, fnorm, xnorm, gnorm, &
             fnormnew, ared, pred, rho
         real(real64), allocatable, dimension(:) :: work, g, p, xnew, fnew
@@ -946,7 +981,7 @@ contains
         neval = 0
         iter = 0
         njac = 0
-        lambda = this%get_step_scaling_factor()
+        lambda = this%get_damping_factor()
         ftol = this%get_fcn_tolerance()
         xtol = this%get_var_tolerance()
         gtol = this%get_gradient_tolerance()
@@ -1008,76 +1043,100 @@ contains
         fnorm = norm2(fvec)
 
         ! Primary Iteration Loop
-        main_loop : do
-            ! Update the iteration counter
-            iter = iter + 1
+        ! consecutive_rejects = 0
 
-            ! Compute the Jacobian
-            call fcn%jacobian(x, jac, fv = fvec, work = work, args = args)
-            njac = njac + 1
+        ! main_loop : do
+        !     ! Update the iteration counter
+        !     iter = iter + 1
 
-            ! Compute J**T * J and g = J**T * fvec
-            call compute_dls_gradient(jac, fvec, jtj, g)
-            gnorm = norm2(g)
+        !     ! Enforce bounds on the current estimate
+        !     call this%apply_limits(x)
 
-            ! Gradient based convergence check
-            if (gnorm < gtol) then
-                gcnvrg = .true.
-                converged = .true.
-                exit main_loop
-            end if
+        !     ! Evaluate the Jacobian at the current point
+        !     call fcn%jacobian(x, jac, fv = fvec, work = work, args = args)
+        !     njac = njac + 1
 
-            ! Solve the linear system
-            call dls_solve_linear_system(jtj, g, lambda, p, a)
-            xnorm = norm2(p)
+        !     ! Compute J**T * J and g = J**T * fvec
+        !     call compute_dls_gradient(jac, fvec, jtj, g)
+        !     gnorm = norm2(g)
 
-            ! Trial step and clamp limits
-            xnew = x + p
-            call this%apply_limits(xnew)
+        !     ! Gradient based convergence check
+        !     if (gnorm <= gtol) then
+        !         gcnvrg = .true.
+        !         converged = .true.
+        !         exit main_loop
+        !     end if
 
-            ! Test for a small change in solution
-            if (xnorm < xtol) then
-                xcnvrg = .true.
-                converged = .true.
-                exit main_loop
-            end if
+        !     ! Inner Loop
+        !     inner_loop : do
+        !         ! Solve the linear system
+        !         call dls_solve_linear_system(jtj, g, lambda, p, a)
 
-            ! Update the solution estimate
-            call fcn%fcn(xnew, fnew, args)
-            neval = neval + 1
-            fnormnew = norm2(fnew)
-            ared = 0.5d0 * (fnorm**2 - fnormnew**2)
-            pred = 0.5d0 * dot_product(p, lambda * p - g)
-            if (pred <= 0.0d0) then
-                ! Numerical issue, increase the damping and try again
-                lambda = lambda * lambda_inc
-                cycle main_loop
-            end if
-            rho = ared / pred
-            if (rho > 0.0d0) then
-                ! Accept the step and decrease the damping
-                x = xnew
-                fvec = fnew
-                fnorm = fnormnew
-                lambda = max(lambda * lambda_dec, min_lambda)
-            else
-                ! Reject the step
-                lambda = lambda * lambda_inc
-            end if
+        !         ! Trial step and clamp to box constraints
+        !         xnew = x + p
+        !         call this%apply_limits(xnew)
+        !         p = xnew - x
+        !         xnorm = norm2(p)
 
-            ! Print iteration status
-            if (this%get_print_status()) then
-                call print_status(iter, neval, njac, xnorm, fnorm)
-            end if
+        !         ! Convergence check
+        !         if (xnorm <= xtol) then
+        !             xcnvrg = .true.
+        !             converged = .true.
+        !             exit main_loop
+        !         end if
 
-            ! Check for evaluation overrun & residual convergence
-            if (neval >= maxeval) exit main_loop
-            if (abs(ared) < ftol) then
-                fcnvrg = .true.
-                converged = .true.
-                exit main_loop
-            end if
-        end do main_loop
+        !         ! Update the solution and residual
+        !         call fcn%fcn(xnew, fnew, args)
+        !         neval = neval + 1
+        !         fnormnew = norm2(fnew)
+
+        !         ! Trust Region Reduction Ratio
+        !         ared = 0.5d0 * (fnorm**2 - fnormnew**2)
+        !         pred = 0.5d0 * dot_product(p, lambda * p - g)
+
+        !         if (pred <= 0.0d0) then
+        !             ! Non-productive step; increase damping and retry
+        !             lambda = min(lambda * lambda_inc, max_lambda)
+        !             consecutive_rejects = consecutive_rejects + 1
+        !             if (consecutive_rejects >= max_rejects) exit main_loop
+        !             cycle inner_loop
+        !         end if
+
+        !         rho = ared / pred
+        !         if (rho > 0.0d0) then
+        !             ! Accept the step and decrease damping
+        !             x = xnew
+        !             fvec = fnew
+        !             fnorm = fnormnew
+        !             lambda = max(lambda * lambda_dec, min_lambda)
+        !             consecutive_rejects = 0
+        !             exit inner_loop
+        !         else
+        !             ! Reject the step and increase damping
+        !             lambda = min(lambda * lambda_inc, max_lambda)
+        !             consecutive_rejects = consecutive_rejects + 1
+        !         end if
+
+        !         ! Check the function evaluation tracker
+        !         if (neval >= maxeval) exit main_loop
+        !     end do inner_loop
+
+        !     ! Print iteration status
+        !     if (this%get_print_status()) then
+        !         call print_status(iter, neval, njac, xnorm, fnorm)
+        !     end if
+
+        !     ! Check for termination conditions
+        !     if (abs(ared) <= ftol) then
+        !         fcnvrg = .true.
+        !         converged = .true.
+        !         exit main_loop
+        !     end if
+        !     if (consecutive_rejects >= 12) then
+        !         ! The damping parameter is not improving progress
+        !         exit main_loop
+        !     end if
+        ! end do main_loop
 
         ! Report out iteration statistics
         if (present(ib)) then
@@ -1107,70 +1166,108 @@ contains
 ! ******************************************************************************
 ! HELPER ROUTINES
 ! ------------------------------------------------------------------------------
-    subroutine compute_dls_gradient(jac, r, jtj, g)
-        use blas, only : dgemv, dgemm
-        !! Computes \(J^{T} J \) and \(\vec{g} = J^{T} \vec{r} \).
-        real(real64), intent(in), dimension(:,:) :: jac
-            !! The M-by-N jacobian matrix.
-        real(real64), intent(in), dimension(:) :: r
-            !! The M-element residual vector.
-        real(real64), intent(out), dimension(:,:) :: jtj
-            !! The N-by-N matrix product \(J^{T} J\).
-        real(real64), intent(out), dimension(:) :: g
-            !! The N-element gradient vector.
+    subroutine broyden_update(xold, fold, jac, x, f, dx, df)
+        use linalg, only : rank1_update
+        !! Computes a rank-1 update to the Jacobian matrix where 
+        !! \(J_{update} = \delta f \delta x^{T} + J\).
+        real(real64), intent(in), dimension(:) :: xold
+            !! The N-element array of the previous set of solution variables.
+        real(real64), intent(in), dimension(:) :: fold
+            !! The M-element array of the previous residual values.
+        real(real64), intent(inout), dimension(:,:) :: jac
+            !! On input, the M-by-N Jacobian matrix.  On output, the updated
+            !! Jacobian matrix.
+        real(real64), intent(in), dimension(:) :: x
+            !! The N-element array of the current set of solution variables.
+        real(real64), intent(in), dimension(:) :: f
+            !! The M-element array of the residual values.
+        real(real64), intent(out), dimension(:) :: dx
+            !! The N-element array of the change in solution variables.
+        real(real64), intent(out), dimension(:) :: df
+            !! The M-element array containing \(\frac{f - f_{old} - 
+            !! J \delta x}{\delta x^{T} \delta x}\).
+
+        ! Local Variables
+        real(real64) :: h2
+
+        ! Process
+        dx = x - xold
+        h2 = dot_product(dx, dx)
+        df = f - fold - matmul(jac, dx)
+        df = df / h2
+        call rank1_update(1.0d0, df, dx, jac)
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    subroutine dls_matrix(fcn, xold, fold, update, x, jac, neval, njac, fnew, &
+        dx, df, Jtdf, args)
+        use linalg, only : mtx_mult
+        !! Build the Levenberg-Marquardt matrix by either computing a new
+        !! Jacobian matrix or performing a rank-1 update to the existing 
+        !! Jacobian matrix.
+        type(vecfcn_helper), intent(inout) :: fcn
+            !! The [[vecfcn_helper]] containing the residual and Jacobian 
+            !! calculations.
+        real(real64), intent(in), dimension(:) :: xold
+            !! The N-element array containing the previous solution estimate.
+        real(real64), intent(in), dimension(:) :: fold
+            !! The M-element array containing the previous residual.
+        logical, intent(inout) :: update
+            !! On input, set to true to force an update of the Jacobian; else,
+            !! set to false to force a recalculation of the Jacobian.  On
+            !! output, this parameter is reset to false if a Jacobian update
+            !! was performed.
+        real(real64), intent(inout), dimension(:) :: x
+            !! The N-element array containing the current solution estimate.
+            !! This array is used as in-place storage for Jacobian calculations
+            !! but is restored on output.
+        real(real64), intent(inout), dimension(:,:) :: jac
+            !! The M-by-N Jacobian matrix.
+        integer(int32), intent(inout) :: neval
+            !! The number of function evaluations.
+        integer(int32), intent(inout) :: njac
+            !! The number of Jacobian evaluations.
+        real(real64), intent(out), dimension(:) :: fnew
+            !! The M-element updated residual estimate.
+        real(real64), intent(out), dimension(:) :: dx
+            !! The N-element array of the change in solution variables.
+        real(real64), intent(out), dimension(:) :: df
+            !! The M-element array containing \(\frac{f - f_{old} - 
+            !! J \delta x}{\delta x^{T} \delta x}\).
+        real(real64), intent(out), dimension(:) :: Jtdf
+            !! The N-element array containing the product \(J^{T} \delta f \).
+        class(*), intent(inout), optional :: args
+            !! User-defined arguments.
 
         ! Local Variables
         integer(int32) :: m, n
 
         ! Initialization
-        m = size(jac, 1)
-        n = size(jac, 2)
+        m = size(fold)
+        n = size(x)
 
-        ! Compute the gradient vector
-        call dgemv('T', m, n, 1.0d0, jac, m, r, 1, 0.0d0, g, 1)
+        ! Perform the next function evaluation
+        call fcn%fcn(x, fnew, args)
+        neval = neval + 1
 
-        ! Compute J^{T} * J
-        call dgemm('T', 'N', n, n, m, 1.0d0, jac, m, jac, m, 0.0d0, jtj, n)
+        ! Update or recompute the Jacobian matrix
+        if (update) then
+            call fcn%jacobian(x, jac, fv = fnew, args = args)
+            njac = njac + 1
+            update = .false.
+        else
+            call broyden_update(xold, fold, jac, x, fnew, dx, df)
+        end if
+
+        ! Compute J**T * df
+        call mtx_mult(.true., 1.0d0, jac, df, 0.0d0, Jtdf)
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    subroutine dls_solve_linear_system(jtj, g, lambda, p, work)
-        use lapack, only : dpotrf, dpotrs
-        !! Solves the linear system \(\left(J^{T} J + \lambda I\right) \vec{p}
-        !! = -\vec{g} \).
-        real(real64), intent(in), dimension(:,:) :: jtj
-            !! The N-by-N matrix \(J^{T} J\) matrix.
-        real(real64), intent(in), dimension(:) :: g
-            !! The N-element gradient vector.
-        real(real64), intent(in) :: lambda
-            !! The scaling factor.
-        real(real64), intent(out), dimension(:) :: p
-            !! The N-element solution vector.
-        real(real64), intent(out), target, dimension(:,:) :: work
-            !! An N-by-N workspace matrix.
 
-        ! Local Variables
-        integer(int32) :: i, n, flag
+! ------------------------------------------------------------------------------
 
-        ! Compute the Cholesky factorization of JTJ.
-        n = size(jtj, 1)
-        work = jtj
-        do i = 1, n
-            work(i,i) = work(i,i) + lambda  ! computes JTJ + lambda I
-        end do
-
-        call dpotrf('U', n, work, n, flag)
-        
-        ! Fall back onto steepest descent if the matrix was not positive definite
-        if (flag /= 0) then
-            p = -g
-            return
-        end if
-
-        ! Solve the system of equations
-        p = -g
-        call dpotrs('U', n, 1, work, n, p, n, flag)
-    end subroutine
-
+! ------------------------------------------------------------------------------
+    
 ! ------------------------------------------------------------------------------
 end module
