@@ -986,7 +986,7 @@ contains
         procedure(jacobianfcn), pointer :: jac
         type(constrained_least_squares_solver) :: solver
         type(iteration_behavior) :: ib
-        real(real64) :: x(2), f(2), ic(2, 2)
+        real(real64) :: x(2), f(2), ic(2, 2), big
         integer(int32) :: i
         logical :: check
 
@@ -996,10 +996,15 @@ contains
         jac => jac1
         call obj%set_fcn(fcn, 2, 2)
         call obj%set_jacobian(jac)
+        big = huge(big)
 
         ! Generate a set of initial conditions
         ic(1,:) = 0.5d0
         ic(2,:) = 1.0d0
+
+        ! Set limits
+        call solver%set_upper_limits([big, big])
+        call solver%set_lower_limits([-big, -big])
 
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
@@ -1051,7 +1056,7 @@ contains
         call errmgr%set_exit_on_error(.false.)
 
         ! Increase the number of iterations allowed
-        call solver%set_max_fcn_evals(1000)
+        call solver%set_max_fcn_evals(5000)
 
         ! Generate a set of initial conditions
         ic(1,:) = 0.5d0

@@ -4,7 +4,11 @@ module nonlin_least_squares
     use nonlin_error_handling
     use nonlin_types
     use nonlin_helper
+    use nonlin_single_var, only : fcn1var_helper, fcn1var
+    use nonlin_solve, only : brent_solver
     use ferror, only : errors
+    use linalg, only : qr_factor, solve_qr
+    use blas, only : dgemv, dgemm
     implicit none
     private
     public :: least_squares_solver
@@ -929,7 +933,6 @@ contains
 
 ! ------------------------------------------------------------------------------
     subroutine cls_solve(this, fcn, x, fvec, ib, args, err)
-        use linalg, only : lu_factor, solve_lu
         !! Applies the constrained least-squares solver to solve the nonlinear
         !! least-squares problem.
         class(constrained_least_squares_solver), intent(inout) :: this
@@ -954,26 +957,26 @@ contains
             !! An error handling object.
 
         ! Parameters
-        real(real64), parameter :: lambda_inc = 1.0d1
-        real(real64), parameter :: lambda_dec = 3.0d-1
-        real(real64), parameter :: min_lambda = 1.0d-10
-        real(real64), parameter :: max_lambda = 1.0d10
-        integer(int32), parameter :: max_rejects = 20
+        real(real64), parameter :: delta0 = 1.0d0
+        real(real64), parameter :: delta_max = 1.0d3
+        real(real64), parameter :: eta = 1.0d-1
+        integer(int32), parameter :: ls_max_iter = 10
+        real(real64), parameter :: ls_cl = 1.0d-4
+        real(real64), parameter :: ls_beta = 0.5d0
 
         ! Local Variables
-        logical :: xcnvrg, fcnvrg, gcnvrg, converged, update
-        integer(int32) :: i, iter, neqn, nvar, maxeval, njac, lwork, neval, &
-            flag
-        integer(int32), allocatable, dimension(:) :: iwork
-        real(real64) :: ftol, xtol, gtol, lambda, fnorm, xnorm, gnorm
-        real(real64), allocatable, dimension(:) :: work, g, dx, df, xold, xtry, fold, workm, workn
-        real(real64), allocatable, dimension(:,:) :: jac, jtj, jtjc
+        logical :: converged, xcnvrg, fcnvrg, gcnvrg
+        integer(int32) :: k, neqn, nvar, neval, iter, njac, maxeval, flag
+        real(real64) :: xnorm, fnorm, gnorm, factor, fnewnorm, ftol, gtol, &
+            xtol, actred, prered, rho, delta, stepscale, dderiv
+        real(real64), allocatable, dimension(:) :: tau, Jp, s, g, p, xnew, &
+            fnew, xl, xu
+        real(real64), allocatable, dimension(:,:) :: qr, jac
         class(errors), pointer :: errmgr
         type(errors), target :: deferr
         character(len = 256) :: errmsg
         
         ! Initialization
-        update = .true.
         converged = .false.
         xcnvrg = .false.
         fcnvrg = .false.
@@ -987,6 +990,14 @@ contains
         xtol = this%get_var_tolerance()
         gtol = this%get_gradient_tolerance()
         maxeval = this%get_max_fcn_evals()
+        xl = this%get_lower_limits()
+        xu = this%get_upper_limits()
+        if (present(err)) then
+            errmgr => err
+        else
+            errmgr => deferr
+        end if
+
         if (present(ib)) then
             ib%iter_count = iter
             ib%fcn_count = neval
@@ -994,11 +1005,6 @@ contains
             ib%converge_on_fcn = fcnvrg
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = gcnvrg
-        end if
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
         end if
 
         ! Input Check
@@ -1024,74 +1030,164 @@ contains
             return
         end if
 
+        ! Check the limit arrays
+        if (size(xl) /= nvar) then
+            deallocate(xl)
+            allocate(xl(nvar), source = -huge(0.0d0))
+            call this%set_lower_limits(xl)
+        end if
+        if (size(xu) /= nvar) then
+            deallocate(xu)
+            allocate(xu(nvar), source = huge(0.0d0))
+            call this%set_upper_limits(xu)
+        end if
+
         ! Local Memory Allocations
         allocate( &
-            iwork(nvar), &
-            jac(neqn, nvar), &
-            jtj(nvar, nvar), &
-            jtjc(nvar, nvar), &
+            tau(min(neqn, nvar)), &
+            Jp(neqn), &
+            s(nvar), &
             g(nvar), &
-            dx(nvar), &
-            df(neqn), &
-            xold(nvar), &
-            xtry(nvar), &
-            fold(neqn), &
-            workm(neqn), &
-            workn(nvar) &
+            p(nvar), &
+            xnew(nvar), &
+            fnew(neqn), &
+            qr(neqn, nvar), &
+            jac(neqn, nvar) &
         )
-        call fcn%jacobian(x, jac, fv = fvec, olwork = lwork)
-        allocate(work(lwork))
 
-        ! Evaluate the function at the starting point
+        ! Initial Evaluations
         call this%apply_limits(x)
         call fcn%fcn(x, fvec, args)
         neval = 1
-        xold = x
-        fold = fvec
-        call dls_matrix(fcn, xold, fvec, update, x, jac, neval, njac, fvec, dx, df, &
-            g, jtj, args)
-        jtjc = jtj
+        fnorm = norm2(fvec)
+        xnorm = norm2(x)
+        if (.not. is_finite_array(x) .or. .not. is_finite_array(fvec)) then
+            return
+        end if
 
-        ! Define an initial value for lambda
-        lambda = 1.0d-2
+        ! Process
+        delta = delta0
+        iter = 1
+        outer : do
+            ! Evaluate the Jacobian
+            call fcn%jacobian(x, jac, fv = fvec, args = args)
+            njac = njac + 1
 
-        ! Iteration Process
-        main_loop : do while (neval < maxeval)
-            ! Update the iteration counter
-            iter = iter + 1
+            ! Print iteration status
+            if (this%get_print_status()) then
+                call print_status(iter, neval, njac, xnorm, fnorm)
+            end if
 
-            ! Compute dx = A \ b
-            ! A = J**T * J + lambda * diag(J**T * J)
-            ! b = J**T * df = g
-            do i = 1, nvar
-                jtj(i,i) = jtj(i,i) * (1.0d0 + lambda)
-                dx(i) = g(i)
-            end do
+            ! Compute the QR factorization of J
+            qr = jac
+            call qr_factor(qr, tau)
 
-            ! Solve the linear system via LU decomposition
-            call lu_factor(jtj, iwork, errmgr)   ! overwrites jtj with [L\U]
-            if (errmgr%has_error_occurred()) return
-            call solve_lu(jtj, iwork, dx)       ! solution stored in dx
+            ! Compute the scaling factors
+            call coleman_li_scaling(x, xl, xu, s)
 
-            ! Update the solution and acknowledge solution limits
-            xtry = xold + dx
-            call this%apply_limits(xtry)
+            ! Determine the step direction
+            call dogleg(delta, x, fvec, jac, qr, tau, s, xl, xu, p, g, Jp, &
+                prered)
+            xnorm = scaled_norm(p, s)
+            gnorm = norm2(g)
+            xnew = x + p
 
             ! Update the residual
-            call fcn%fcn(xtry, fvec, args)
+            call fcn%fcn(xnew, fnew, args)
+            fnewnorm = norm2(fnew)
             neval = neval + 1
 
-            ! Perform any necessary updates
-            call dls_update(fcn, xold, x, xtry, fold, fvec, dx, lambda, g, &
-                jtj, jac, neval, njac, update, workn, workm, args)
+            ! Compute the actual reduction and the reduction ratio
+            actred = 0.5d0 * (fnorm**2 - fnewnorm**2)
+            if (prered > 0.0d0 .and. actred >= 0.0d0) then
+                rho = actred / prered
+            else
+                rho = 0.0d0
+            end if
 
-            ! Determine the update requirements
+            ! Update the trust region radius
+            if (rho < 0.25d0) then
+                delta = max(0.25d0, 1.0d-12)
+            else if (rho > 0.75d0 .and. abs(xnorm - delta) < 1.0d-12 * delta) then
+                delta = min(2.0d0 * delta, delta_max)
+            end if
 
-            ! Check for convergence
-            converged = dls_check_convergence(iter, njac, neval, maxeval, &
-                xtol, ftol, gtol, dx, fvec, g, ib)
-            if (converged) exit main_loop
-        end do main_loop
+            ! Accept the step?
+            if (rho > eta .and. fnewnorm <= fnorm) then
+                ! Accept the trust-region step
+                x = xnew
+                call this%apply_limits(x)
+                fvec = fnew
+                fnorm = fnewnorm
+                iter = iter + 1
+            else
+                ! Try an Armijo backtracking step along p
+                dderiv = dot_product(g, p)
+                if (dderiv >= 0.0d0) then
+                    ! This isn't a descent direction.  Just shrink the trust
+                    ! region
+                    delta = max(0.5d0 * delta, 1.0d-12)
+                else
+                    stepscale = 1.0d0
+                    backtrack : do k = 1, ls_max_iter
+                        xnew = x + stepscale * p
+                        call this%apply_limits(xnew)
+                        call fcn%fcn(xnew, fnew, args)
+                        neval = neval + 1
+                        fnewnorm = norm2(fnew)
+                        if (fnewnorm <= fnorm + ls_cl * stepscale * dderiv) then
+                            ! Accept the line-search step
+                            x = xnew
+                            fvec = fnew
+                            fnorm = fnewnorm
+                            iter = iter + 1
+
+                            ! Modestly adjust the trust-region radius
+                            delta = max(stepscale * xnorm, 1.0d-12)
+                            exit backtrack
+                        end if
+                        stepscale = stepscale * ls_beta
+                    end do backtrack
+
+                    ! If the line search fails, shrink the trust region
+                    if (k > ls_max_iter) then
+                        delta = max(0.5d0 * delta, 1.0d-12)
+                    end if
+                end if
+            end if
+
+            if (.not. is_finite_array(x) .or. .not. is_finite_array(fvec)) then
+                exit outer
+            end if
+
+            ! Test for convergence
+            if (xnorm <= xtol) then
+                converged = .true.
+                xcnvrg = .true.
+                exit outer
+            end if
+            if (fnorm <= ftol) then
+                converged = .true.
+                fcnvrg = .true.
+                exit outer
+            end if
+            if (gnorm <= gtol) then
+                converged = .true.
+                gcnvrg = .true.
+                exit outer
+            end if
+            if (neval >= maxeval) exit outer
+        end do outer
+
+        ! Report out iteration statistics
+        if (present(ib)) then
+            ib%iter_count = iter
+            ib%fcn_count = neval
+            ib%jacobian_count = njac
+            ib%converge_on_fcn = fcnvrg
+            ib%converge_on_chng = xcnvrg
+            ib%converge_on_zero_diff = gcnvrg
+        end if
 
         ! Check for convergence issues
         if (.not.converged) then
@@ -1111,262 +1207,230 @@ contains
 ! ******************************************************************************
 ! HELPER ROUTINES
 ! ------------------------------------------------------------------------------
-    subroutine broyden_update(xold, fold, jac, x, f, dx, df)
-        use linalg, only : rank1_update
-        !! Computes a rank-1 update to the Jacobian matrix where 
-        !! \(J_{update} = \delta f \delta x^{T} + J\).
-        real(real64), intent(in), dimension(:) :: xold
-            !! The N-element array of the previous set of solution variables.
-        real(real64), intent(in), dimension(:) :: fold
-            !! The M-element array of the previous residual values.
-        real(real64), intent(inout), dimension(:,:) :: jac
-            !! On input, the M-by-N Jacobian matrix.  On output, the updated
-            !! Jacobian matrix.
+    pure function alpha_box(x, p, xl, xu) result(rst)
+        !! Computes the maximum feasible alpha such that:
+        !!  xl <= x + alpha * p <= xu.
         real(real64), intent(in), dimension(:) :: x
-            !! The N-element array of the current set of solution variables.
-        real(real64), intent(in), dimension(:) :: f
-            !! The M-element array of the residual values.
-        real(real64), intent(out), dimension(:) :: dx
-            !! The N-element array of the change in solution variables.
-        real(real64), intent(out), dimension(:) :: df
-            !! The M-element array containing \(\frac{f - f_{old} - 
-            !! J \delta x}{\delta x^{T} \delta x}\).
-
-        ! Local Variables
-        real(real64) :: h2
-
-        ! Process
-        dx = x - xold
-        h2 = dot_product(dx, dx)
-        df = f - fold - matmul(jac, dx)
-        df = df / h2
-        call rank1_update(1.0d0, df, dx, jac)
-    end subroutine
-
-! ------------------------------------------------------------------------------
-    subroutine dls_matrix(fcn, xold, fold, update, x, jac, neval, njac, fnew, &
-        dx, df, Jtdf, JtJ, args)
-        use linalg, only : mtx_mult
-        !! Build the Levenberg-Marquardt matrix by either computing a new
-        !! Jacobian matrix or performing a rank-1 update to the existing 
-        !! Jacobian matrix.
-        type(vecfcn_helper), intent(in) :: fcn
-            !! The [[vecfcn_helper]] containing the residual and Jacobian 
-            !! calculations.
-        real(real64), intent(in), dimension(:) :: xold
-            !! The N-element array containing the previous solution estimate.
-        real(real64), intent(in), dimension(:) :: fold
-            !! The M-element array containing the previous residual.
-        logical, intent(inout) :: update
-            !! On input, set to true to force an update of the Jacobian; else,
-            !! set to false to force a recalculation of the Jacobian.  On
-            !! output, this parameter is reset to false if a Jacobian update
-            !! was performed.
-        real(real64), intent(inout), dimension(:) :: x
             !! The N-element array containing the current solution estimate.
-            !! This array is used as in-place storage for Jacobian calculations
-            !! but is restored on output.
-        real(real64), intent(inout), dimension(:,:) :: jac
-            !! The M-by-N Jacobian matrix.
-        integer(int32), intent(inout) :: neval
-            !! The number of function evaluations.
-        integer(int32), intent(inout) :: njac
-            !! The number of Jacobian evaluations.
-        real(real64), intent(out), dimension(:) :: fnew
-            !! The M-element updated residual estimate.
-        real(real64), intent(out), dimension(:) :: dx
-            !! The N-element array of the change in solution variables.
-        real(real64), intent(out), dimension(:) :: df
-            !! The M-element array containing \(\frac{f - f_{old} - 
-            !! J \delta x}{\delta x^{T} \delta x}\).
-        real(real64), intent(out), dimension(:) :: Jtdf
-            !! The N-element gradient vector \(J^{T} \delta f \).
-        real(real64), intent(out), dimension(:,:) :: JtJ
-            !! The N-by-N matrix containing the product \(J^{T} J\).
-        class(*), intent(inout), optional :: args
-            !! User-defined arguments.
+        real(real64), intent(in), dimension(:) :: p
+            !! The N-element array containing the proposed solution step.
+        real(real64), intent(in), dimension(:) :: xl
+            !! The N-element array containing the lower bounds.
+        real(real64), intent(in), dimension(:) :: xu
+            !! The N-element array containing the upper bounds.
+        real(real64) :: rst
+            !! The largest possible alpha.
 
-        ! Local Variables
-        integer(int32) :: m, n
+        integer(int32) :: i, n
+        real(real64) :: a
 
-        ! Initialization
-        m = size(fold)
         n = size(x)
+        rst = huge(rst)
 
-        ! Perform the next function evaluation
-        call fcn%fcn(x, fnew, args)
-        neval = neval + 1
-
-        ! Update or recompute the Jacobian matrix
-        if (update) then
-            call fcn%jacobian(x, jac, fv = fnew, args = args)
-            njac = njac + 1
-            update = .false.
-        else
-            call broyden_update(xold, fold, jac, x, fnew, dx, df)
-        end if
-
-        ! Compute J**T * df
-        call mtx_mult(.true., 1.0d0, jac, df, 0.0d0, Jtdf)
-
-        ! Compute J**T * J
-        call mtx_mult(.true., .false., 1.0d0, jac, jac, 0.0d0, JtJ)
-    end subroutine
-
-! ------------------------------------------------------------------------------
-    subroutine dls_update(fcn, xold, x, xtry, fold, f, h, lambda, &
-            Jtdf, JtJ, J, neval, njac, update, wn, wm, args)
-        use linalg, only : extract_diagonal
-        !! Updates the Jacobian and associated matrices, along with updating
-        !! the damping parameter.
-        type(vecfcn_helper), intent(in) :: fcn
-            !! The [[vecfcn_helper]] object containing the residual and 
-            !! Jacobian routines.
-        real(real64), intent(inout), dimension(:) :: xold
-            !! The N-element array containing the previous solution estimate.
-        real(real64), intent(inout), dimension(:) :: x
-            !! The N-element array containing the current solution estimate.
-        real(real64), intent(in), dimension(:) :: xtry
-            !! The N-element array containing the solution estimate to try.
-        real(real64), intent(inout), dimension(:) :: fold
-            !! The M-element array containing the previous residual estimate.
-        real(real64), intent(inout), dimension(:) :: f
-            !! The M-element array containing the current residual estimate.
-        real(real64), intent(in), dimension(:) :: h
-            !! The N-element change in solution estimate.
-        real(real64), intent(inout) :: lambda
-            !! The damping parameter.
-        real(real64), intent(inout), dimension(:) :: Jtdf
-            !! The N-element gradient vector \(J^{T} \delta f\).
-        real(real64), intent(inout), dimension(:,:) :: JtJ
-            !! The N-by-N product \(J^{T} J\).
-        real(real64), intent(inout), dimension(:,:) :: J
-            !! The M-by-N Jacobian matrix.
-        integer(int32), intent(inout) :: neval
-            !! The number of function evaluations.
-        integer(int32), intent(inout) :: njac
-            !! The number of Jacobian matrix evaluations.
-        logical, intent(inout) :: update
-            !! On input, set to true to force an update of the Jacobian; else,
-            !! set to false to force a recalculation of the Jacobian.  On
-            !! output, this parameter is reset to false if a Jacobian update
-            !! was performed.
-        real(real64), intent(out), dimension(:) :: wn
-            !! An N-element workspace array.
-        real(real64), intent(out), dimension(:) :: wm
-            !! An M-element workspace array.
-        class(*), intent(inout), optional :: args
-            !! User-defined arguments.
-
-        ! Parameters
-        real(real64), parameter :: lambdaInc = 1.0d1
-        real(real64), parameter :: lambdaDec = 9.0d0
-
-        ! Local Variables
-        integer(int32) :: n
-        real(real64) :: rho, ared, pred, fnormOld, fnorm
-
-        ! Initialization
-        n = size(x)
-        fnormOld = norm2(fold)
-        fnorm = norm2(f)
-
-        ! Process
-        call extract_diagonal(JtJ, wn)
-        wn = lambda * wn * h + Jtdf
-        ared = 0.5d0 * (fnormOld**2 - fnorm**2)
-        pred = 0.5d0 * dot_product(h, wn)
-        rho = ared / pred
-        if (rho > 0.0d0) then
-            ! Things are improving
-            xold = x
-            fold = f
-            x = xtry
-
-            ! Recompute the matrices
-            call dls_matrix(fcn, xold, fold, update, x, J, neval, njac, &
-                f, wn, wm, Jtdf, JtJ, args)
-
-            ! Decrease lambda
-            lambda = max(lambda / lambdaDec, 1.0d-7)
-        else
-            ! The iteration is not improving.  Recompute matrices accordingly
-            call dls_matrix(fcn, xold, fold, update, x, J, neval, njac, f, &
-                wn, wm, Jtdf, JtJ, args)
-
-            ! Increase lambda
-            lambda = min(lambda * lambdaInc, 1.0d7)
-        end if
-    end subroutine
-
-! ------------------------------------------------------------------------------
-    function dls_check_convergence(niter, njac, neval, maxeval, xtol, ftol, gtol, dx, f, g, ib) result(rst)
-        !! Provides a check on convergence.
-        integer(int32), intent(in) :: niter
-            !! The current number of iterations.
-        integer(int32), intent(in) :: njac
-            !! The current number of Jacobian evaluations.
-        integer(int32), intent(in) :: neval
-            !! The current number of function evaluations.
-        integer(int32), intent(in) :: maxeval
-            !! The maximum number of allowed function evaluations.
-        real(real64), intent(in) :: xtol
-            !! The change in solution tolerance.
-        real(real64), intent(in) :: ftol
-            !! The residual tolerance.
-        real(real64), intent(in) :: gtol
-            !! The gradient tolerance.
-        real(real64), intent(in), dimension(:) :: dx
-            !! The N-element array containing the change in solution.
-        real(real64), intent(in), dimension(:) :: f
-            !! The M-element array containing the residuals.
-        real(real64), intent(in), dimension(:) :: g
-            !! The N-element array containing the gradient.
-        type(iteration_behavior), intent(out) :: ib
-            !! An [[iteration_behavior]] container with which to report the
-            !! results.
-        logical :: rst
-            !! True if convergence was achieved; else, false.
-
-        ! Local Variables
-        real(real64) :: fnorm, xnorm, gnorm
-
-        ! Initialization
-        rst = .false.
-        xnorm = norm2(dx)
-        fnorm = norm2(f)
-        gnorm = norm2(g)
-        ib%fcn_count = neval
-        ib%jacobian_count = njac
-        ib%iter_count = niter
-        ib%converge_on_chng = .false.
-        ib%converge_on_fcn = .false.
-        ib%converge_on_zero_diff = .false.
-        ib%gradient_count = njac
-
-        ! Iteration Checks
-        if (neval >= maxeval) then
-            return
-        end if
-
-        ! Tolerance Checks
-        if (xnorm <= xtol) then
-            rst = .true.
-            ib%converge_on_chng = .true.
-        end if
-        if (gnorm <= gtol) then
-            rst = .true.
-            ib%converge_on_zero_diff = .true.
-        end if
-        if (fnorm <= ftol) then
-            rst = .true.
-            ib%converge_on_fcn = .true.
-        end if
+        do i = 1, n
+            if (p(i) > 0.0d0) then
+                if (xu(i) < x(i)) then
+                    rst = 0.0d0
+                    return
+                end if
+                a = (xu(i) - x(i)) / p(i)
+                if (a < rst) rst = a
+            else if (p(i) < 0.0d0) then
+                if (xl(i) > x(i)) then
+                    rst = 0.0d0
+                    return
+                end if
+                a = (xl(i) - x(i)) / p(i)
+                if (a < rst) rst = a
+            end if
+        end do
+        if (rst < 0.0d0) rst = 0.0d0
     end function
 
 ! ------------------------------------------------------------------------------
+    subroutine coleman_li_scaling(x, xl, xu, s)
+        !! Computes the Coleman-Li scaling matrix.
+        real(real64), intent(in), dimension(:) :: x
+            !! The N-element array containing the current solution estimate.
+        real(real64), intent(in), dimension(size(x)) :: xl
+            !! The N-element array containing the lower bounds.
+        real(real64), intent(in), dimension(size(x)) :: xu
+            !! The N-element array containing the upper bounds.
+        real(real64), intent(out), dimension(size(x)) :: s
+            !! The N-element array containing the diagonal of the scaling 
+            !! matrix.
+
+        ! Parameters
+        real(real64), parameter :: min_scale = 1.0d-8
+        real(real64), parameter :: max_scale = 1.0d8
+
+        ! Local Variables
+        integer(int32) :: i, n
+        real(real64) :: di, big
+
+        ! Process
+        n = size(x)
+        big = huge(1.0d0)
+
+        do i = 1, n
+            if (xl(i) > -big .and. xu(i) < big) then
+                di = min(x(i) - xl(i), xu(i) - x(i))
+            else if (xl(i) > -big) then
+                di = x(i) - xl(i)
+            else if (xu(i) < big) then
+                di = xu(i) - x(i)
+            else
+                di = 1.0d0
+            end if
+            di = max(di, min_scale)
+            s(i) = 1.0d0 / di
+            if (s(i) > max_scale) s(i) = max_scale
+        end do
+    end subroutine
 
 ! ------------------------------------------------------------------------------
-    
+    pure function scaled_norm(x, s) result(rst)
+        !! Computes a scaled Euclidean norm.
+        real(real64), intent(in), dimension(:) :: x
+            !! The N-element array.
+        real(real64), intent(in), dimension(size(x)) :: s
+            !! The N-element scaling array.
+        real(real64) :: rst
+            !! The result
+
+        rst = norm2(x * s)
+    end function
+
+! ------------------------------------------------------------------------------
+    pure function is_finite_array(x) result(rst)
+        !! Tests to see if the array contains all finite values.
+        real(real64), intent(in), dimension(:) :: x
+            !! The array to test.
+        logical :: rst
+            !! Returns true if all values are finite; else, false.
+
+        ! Local Variables
+        integer(int32) :: i
+
+        ! Process
+        rst = .true.
+        do i = 1, size(x)
+            if (.not.(x(i) == x(i))) then
+                rst = .false.
+                exit
+            end if
+            if (abs(x(i)) == huge(0.0d0)) then
+                rst = .false.
+                exit
+            end if
+        end do
+    end function
+
+! ------------------------------------------------------------------------------
+    subroutine dogleg(delta, x, f, jac, qr, tau, s, xl, xu, p, g, Jp, prered)
+        !! Computes a dog-leg step for Powell's method.
+        real(real64), intent(in) :: delta
+            !! The trust-region radius.
+        real(real64), intent(in), dimension(:) :: x
+            !! The N-element array containing the current solution estimate.
+        real(real64), intent(in), dimension(:) :: f
+            !! The M-element array containing the residuals.
+        real(real64), intent(in), dimension(:,:) :: jac
+            !! The M-by-N Jacobian matrix.
+        real(real64), intent(inout), dimension(:,:) :: qr
+            !! The M-by-N matrix output by qr_factor.
+        real(real64), intent(in), dimension(:) :: tau
+            !! The MIN(M,N)-element array, tau, as output by qr_factor.
+        real(real64), intent(in), dimension(:) :: s
+            !! The N-element diagonal of the scaling matrix.
+        real(real64), intent(in), dimension(:) :: xl
+            !! The N-element array containing the lower bounds.
+        real(real64), intent(in), dimension(:) :: xu
+            !! The N-element array containing the upper bounds.
+        real(real64), intent(out), dimension(:) :: p
+            !! The updated step size.
+        real(real64), intent(out), dimension(:) :: g
+            !! The N-element gradient vector.
+        real(real64), intent(out), dimension(:) :: Jp
+            !! The M-element array resulting from J * p.
+        real(real64), intent(out) :: prered
+            !! The predicted reduction.
+
+        ! Local Variables
+        integer(int32) :: m, n
+        real(real64) :: alpha, pgnnorm, psdnorm, t, c1, c2, a, b, c, arg
+        real(real64), allocatable, dimension(:) :: pgn, psd, u, v, Jg
+
+        ! Initialization
+        m = size(jac, 1)
+        n = size(jac, 2)
+        allocate(pgn(n), psd(n), u(n), v(n), Jg(m))
+
+        ! Compute the gradient vector
+        call dgemv('T', m, n, 1.0d0, jac, m, f, 1, 0.0d0, g, 1)
+
+        ! Solve the linear system for the Gauss-Newton step
+        u = f
+        call solve_qr(qr, tau, u)   ! solution stored in u(1:n)
+        pgn = -u(1:n)
+        pgnnorm = scaled_norm(pgn, s)
+
+        ! Is it enough, or do we need to try a steepest decsent step?
+        if (pgnnorm > delta) then
+            ! The Gauss-Newton step failed.  Try the steepest descent step
+            call dgemv('N', m, n, 1.0d0, jac, m, g, 1, 0.0d0, Jg, 1)
+            c1 = dot_product(g, g)
+            c2 = dot_product(Jg, Jg)
+            if (c2 > 0.0d0 .and. c1 > 0.0d0) then
+                alpha = c1 / c2
+            else
+                alpha = 0.0d0
+            end if
+            psd = -alpha * g
+            psdnorm = scaled_norm(psd, s)
+            if (psdnorm >= delta .and. psdnorm > 0.0d0) then
+                ! Go ahead and use the steepest descent step
+                p = (delta / psdnorm) * psd
+            else
+                u(1:n) = pgn - psd
+                u(1:n) = s * u(1:n)
+                v = s * psd
+                a = dot_product(u(1:n), u(1:n))
+                b = 2.0d0 * dot_product(u(1:n), v)
+                c = dot_product(v, v) - delta**2
+                if (a <= 0.0d0) then
+                    p = psd
+                else
+                    arg = max(0.0d0, b**2 - 4.0d0 * a * c)
+                    if (arg == 0.0d0) then
+                        t = -b / (2.0d0 * a)
+                    else
+                        t = (-b + sqrt(arg)) / (2.0d0 * a)
+                        if (t < 0.0d0 .or. t > 1.0d0) then
+                            t = (-b - sqrt(arg)) / (2.0d0 * a)
+                        end if
+                    end if
+                    t = max(0.0d0, min(1.0d0, t))
+                    p = psd + t * u(1:n)
+                end if
+            end if
+        else
+            ! Just use the Gauss-Newton step
+            p = pgn
+        end if
+
+        ! Ensure to respect any limits
+        alpha = alpha_box(x, p, xl, xu)
+        if (alpha < 1.0d0) then
+            p = alpha * p
+        end if
+
+        ! Compute the predicted reduction
+        call dgemv('N', m, n, 1.0d0, jac, m, p, 1, 0.0d0, Jp, 1)
+        c1 = dot_product(g, p)
+        c2 = 0.5d0 * dot_product(Jp, Jp)
+        prered = -c1 - c2
+    end subroutine
+
 ! ------------------------------------------------------------------------------
 end module
