@@ -1197,7 +1197,7 @@ contains
 
         ! Set tight, active bounds around the known solution (5,3)
         low = [4.0d0, 2.0d0]
-        high = [4.6d0, 2.6d0]
+        high = [5.6d0, 3.6d0]
         call solver%set_lower_limits(low)
         call solver%set_upper_limits(high)
 

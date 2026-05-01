@@ -108,6 +108,9 @@ program main
     rst = test_constrained_least_squares_4()
     if (.not.rst) overall = .false.
 
+    rst = test_constrained_least_squares_bounds()
+    if (.not.rst) overall = .false.
+
     ! End
     if (.not.overall) stop -1
 end program
