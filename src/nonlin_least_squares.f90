@@ -12,6 +12,7 @@ module nonlin_least_squares
     implicit none
     private
     public :: least_squares_solver
+    public :: constrained_equation_solver
     public :: constrained_least_squares_solver
 
 ! ******************************************************************************
@@ -30,22 +31,36 @@ module nonlin_least_squares
         procedure, public :: solve => lss_solve
     end type
 
-    type, extends(equation_solver) :: constrained_least_squares_solver
-        !! Defines a Levenberg-Marquardt style constrained least-squares solver.
+    type, abstract, extends(least_squares_solver) :: constrained_equation_solver
+        !! A least-squares solver that implements limits (constraints) on the
+        !! solution variables.
         real(real64), private, allocatable, dimension(:) :: m_upper
             !! An upper set of parameter bounds.
         real(real64), private, allocatable, dimension(:) :: m_lower
             !! A lower set of parameter bounds.
-        real(real64), private :: m_lambda = 1.0d-3
-            !! The damping parameter.
     contains
-        procedure, public :: get_upper_limits => cls_get_upper_bounds
-        procedure, public :: set_upper_limits => cls_set_upper_bounds
-        procedure, public :: get_lower_limits => cls_get_lower_bounds
-        procedure, public :: set_lower_limits => cls_set_lower_bounds
-        procedure, public :: apply_limits => cls_apply_limits
-        procedure, public :: get_damping_factor => cls_get_damping
-        procedure, public :: set_damping_factor => cls_set_damping
+        procedure, public :: get_upper_limits => ces_get_upper_bounds
+        procedure, public :: set_upper_limits => ces_set_upper_bounds
+        procedure, public :: get_lower_limits => ces_get_lower_bounds
+        procedure, public :: set_lower_limits => ces_set_lower_bounds
+        procedure, public :: apply_limits => ces_apply_limits
+    end type
+
+    type, extends(constrained_equation_solver) :: constrained_least_squares_solver
+        !! Defines a constrained least-squares solver using Powell's trust
+        !! region method.  In the event the trust-region approach is slow to
+        !! converge a backtracking type line search will be utilized.  The
+        !! solver also utilizes a Coleman-Li scaling approach that works to
+        !! improve stability when the solution is near a constraint.
+        real(real64), private :: m_delta = 1.0d0
+            !! The damping parameter.
+        real(real64), private :: m_scaling = 1.0d0
+            !! The initial line-search scaling parameter.
+    contains
+        procedure, public :: get_trust_region_radius => cls_get_radius
+        procedure, public :: set_trust_region_radius => cls_set_radius
+        procedure, public :: get_step_scaling_factor => cls_get_factor
+        procedure, public :: set_step_scaling_factor => cls_set_factor
         procedure, public :: solve => cls_solve
     end type
 
@@ -813,12 +828,12 @@ contains
     end subroutine
 
 ! ******************************************************************************
-! CONSTRAINED_LEAST_SQUARES_SOLVER MEMBERS & HELPER ROUTINES
+! CONSTRAINED_EQUATION_SOLVER MEMBERS
 ! ------------------------------------------------------------------------------
-    pure function cls_get_upper_bounds(this) result(rst)
+    pure function ces_get_upper_bounds(this) result(rst)
         !! Gets the array of upper bounds constraints.
-        class(constrained_least_squares_solver), intent(in) :: this
-            !! The [[constrained_least_squares_solver]] object.
+        class(constrained_equation_solver), intent(in) :: this
+            !! The [[constrained_equation_solver]] object.
         real(real64), allocatable, dimension(:) :: rst
             !! The limit array.
 
@@ -830,10 +845,10 @@ contains
     end function
 
 ! --------------------
-    subroutine cls_set_upper_bounds(this, x)
+    subroutine ces_set_upper_bounds(this, x)
         !! Sets the array of upper bounds constraints.
-        class(constrained_least_squares_solver), intent(inout) :: this
-            !! The [[constrained_least_squares_solver]] object.
+        class(constrained_equation_solver), intent(inout) :: this
+            !! The [[constrained_equation_solver]] object.
         real(real64), intent(in), dimension(:) :: x
             !! The limit array.
 
@@ -846,10 +861,10 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    pure function cls_get_lower_bounds(this) result(rst)
+    pure function ces_get_lower_bounds(this) result(rst)
         !! Gets the array of lower bounds constraints.
-        class(constrained_least_squares_solver), intent(in) :: this
-            !! The [[constrained_least_squares_solver]] object.
+        class(constrained_equation_solver), intent(in) :: this
+            !! The [[constrained_equation_solver]] object.
         real(real64), allocatable, dimension(:) :: rst
             !! The limit array.
 
@@ -861,10 +876,10 @@ contains
     end function
 
 ! --------------------
-    subroutine cls_set_lower_bounds(this, x)
+    subroutine ces_set_lower_bounds(this, x)
         !! Sets the array of lower bounds constraints.
-        class(constrained_least_squares_solver), intent(inout) :: this
-            !! The [[constrained_least_squares_solver]] object.
+        class(constrained_equation_solver), intent(inout) :: this
+            !! The [[constrained_equation_solver]] object.
         real(real64), intent(in), dimension(:) :: x
             !! The limit array.
 
@@ -877,10 +892,10 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    subroutine cls_apply_limits(this, x)
+    subroutine ces_apply_limits(this, x)
         !! Applies the limits to the solution vector.
-        class(constrained_least_squares_solver), intent(in) :: this
-            !! The [[constrained_least_squares_solver]] object.
+        class(constrained_equation_solver), intent(in) :: this
+            !! The [[constrained_equation_solver]] object.
         real(real64), intent(inout), dimension(:) :: x
             !! On input, the solution vector.  On output, the clamped solution
             !! vector.
@@ -904,30 +919,55 @@ contains
         end do
     end subroutine
 
+! ******************************************************************************
+! CONSTRAINED_LEAST_SQUARES_SOLVER MEMBERS & HELPER ROUTINES
 ! ------------------------------------------------------------------------------
-    pure function cls_get_damping(this) result(rst)
-        !! Gets the damping parameter \(\lambda\) from \(\left( J^{T} J \right) 
-        !! \vec{\delta} = J^{T} \left( \vec{y} - f \right)\).
+    pure function cls_get_radius(this) result(rst)
+        !! Gets the initial trust-region radius.
         class(constrained_least_squares_solver), intent(in) :: this
             !! The [[constrained_least_squares_solver]] object.
         real(real64) :: rst
-            !! The damping factor.
-        rst = this%m_lambda
+            !! The trust-region radius.
+        rst = this%m_delta
     end function
 
 ! --------------------
-    subroutine cls_set_damping(this, x)
-        !! Sets the damping parameter \(\lambda\) from \(\left( J^{T} J \right) 
-        !! \vec{\delta} = J^{T} \left( \vec{y} - f \right)\).
+    subroutine cls_set_radius(this, x)
+        !! Sets the initial trust region radius.
         class(constrained_least_squares_solver), intent(inout) :: this
             !! The [[constrained_least_squares_solver]] object.
         real(real64), intent(in) :: x
-            !! The damping factor.
+            !! The The trust-region radius.
 
         if (x <= 0.0d0) then
-            this%m_lambda = 1.0d-12
+            this%m_delta = 1.0d0
         else
-            this%m_lambda = x
+            this%m_delta = x
+        end if
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    pure function cls_get_factor(this) result(rst)
+        !! Gets the initial line-search step size scaling factor.
+        class(constrained_least_squares_solver), intent(in) :: this
+            !! The [[constrained_least_squares_solver]] object.
+        real(real64) :: rst
+            !! The scaling factor.
+        rst = this%m_scaling
+    end function
+
+! --------------------
+    subroutine cls_set_factor(this, x)
+        !! Gets the initial line-search step size scaling factor.
+        class(constrained_least_squares_solver), intent(inout) :: this
+            !! The [[constrained_least_squares_solver]] object.
+        real(real64), intent(in) :: x
+            !! The scaling factor.
+
+        if (x <= 0.0d0) then
+            this%m_scaling = 1.0d0
+        else
+            this%m_scaling = x
         end if
     end subroutine
 
@@ -957,7 +997,6 @@ contains
             !! An error handling object.
 
         ! Parameters
-        real(real64), parameter :: delta0 = 1.0d0
         real(real64), parameter :: delta_max = 1.0d3
         real(real64), parameter :: eta = 1.0d-1
         integer(int32), parameter :: ls_max_iter = 10
@@ -1066,7 +1105,7 @@ contains
         end if
 
         ! Process
-        delta = delta0
+        delta = this%get_trust_region_radius()
         iter = 1
         outer : do
             ! Evaluate the Jacobian
@@ -1128,7 +1167,7 @@ contains
                     ! region
                     delta = max(0.5d0 * delta, 1.0d-12)
                 else
-                    stepscale = 1.0d0
+                    stepscale = this%get_step_scaling_factor()
                     backtrack : do k = 1, ls_max_iter
                         xnew = x + stepscale * p
                         call this%apply_limits(xnew)
