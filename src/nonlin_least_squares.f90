@@ -177,6 +177,7 @@ contains
             ib%converge_on_fcn = fcnvrg
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = gcnvrg
+            ib%gradient_count = 0
         end if
         if (present(err)) then
             errmgr => err
@@ -1044,6 +1045,7 @@ contains
             ib%converge_on_fcn = fcnvrg
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = gcnvrg
+            ib%gradient_count = 0
         end if
 
         ! Input Check
@@ -1052,6 +1054,14 @@ contains
             call errmgr%report_error("cls_solve", &
                 "No function has been defined.", &
                 NL_INVALID_OPERATION_ERROR)
+            return
+        end if
+        if (nvar > neqn) then
+            ! ERROR: System is underdetermined
+            call errmgr%report_error("cls_solve", "The solver cannot " // &
+                "solve the underdetermined problem.  The number of " // &
+                "unknowns must not exceed the number of equations.", &
+                NL_INVALID_INPUT_ERROR)
             return
         end if
         flag = 0
