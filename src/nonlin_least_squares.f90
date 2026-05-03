@@ -62,6 +62,10 @@ module nonlin_least_squares
         !! utilizing the product of the Jacobian and the residual as follows.
         !! $$ \vec{g} = J \vec{f} $$
         !!
+        !! The steepest descent step is then as follows.
+        !! $$ \vec{p_{sd}} = -\alpha \vec{g} $$
+        !! where \( \alpha = \frac{||\vec{g}||^{2}}{||J \vec{g}||^2} \).
+        !!
         !! Finally, the dogleg is computed as follows.
         !! $$ \vec{p} = \vec{p_{sd}} + t \left( \vec{p_{gn}} - \vec{p_{sd}} 
         !! \right) $$
