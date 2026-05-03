@@ -18,8 +18,6 @@ module nonlin_least_squares
 ! ******************************************************************************
 ! TYPES
 ! ------------------------------------------------------------------------------
-    !> @brief Defines a Levenberg-Marquardt based solver for unconstrained
-    !! least-squares problems.
     type, extends(equation_solver) :: least_squares_solver
         !! Defines a Levenberg-Marquardt based solver for unconstrained
         !! least-squares problems.
@@ -52,6 +50,22 @@ module nonlin_least_squares
         !! converge a backtracking type line search will be utilized.  The
         !! solver also utilizes a Coleman-Li scaling approach that works to
         !! improve stability when the solution is near a constraint.
+        !!
+        !! The trust region approach assumes a radius of \(\Delta\), which can
+        !! be initially defined by the user but is automatically altered by the
+        !! solver, and is implemented as follows.
+        !!
+        !! Gauss-Newton Step (Solved via QR decomposition):
+        !! $$ J \vec{p_{gn}} = -\vec{f} $$
+        !!
+        !! The gradient vector for the steepest descent is calculated by
+        !! utilizing the product of the Jacobian and the residual as follows.
+        !! $$ \vec{g} = J \vec{f} $$
+        !!
+        !! Finally, the dogleg is computed as follows.
+        !! $$ \vec{p} = \vec{p_{sd}} + t \left( \vec{p_{gn}} - \vec{p_{sd}} 
+        !! \right) $$
+        !! where \(t\) is found such that \(|| \vec{p}|| = \Delta \).
         real(real64), private :: m_delta = 1.0d0
             !! The damping parameter.
         real(real64), private :: m_scaling = 1.0d0
