@@ -96,7 +96,7 @@
           <li id="statements"><i class="fa fa-list-ol"></i>
             <a data-toggle="tooltip"
                data-placement="bottom" data-html="true"
-               title="<p> 7.4% of total for derived types.</p>Including implementation: 551 statements, 16.5% of total for derived types.">15 statements</a>
+               title="<p> 6.7% of total for derived types.</p>Including implementation: 555 statements, 13.7% of total for derived types.">15 statements</a>
           </li>
 
             <li id="source-file">
@@ -402,7 +402,7 @@ and <script type="math/tex">\lambda</script> is the scaling factor.</p>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
-    private  subroutine ls_search_mimo(this, fcn, xold, grad, dir, x, fvec, fold, fx, ib, err)  
+    private  subroutine ls_search_mimo(this, fcn, xold, grad, dir, x, fvec, fold, fx, ib, args, err)  
 </h3>
   <p>Utilizes an inexact, backtracking line search to find a point as
 far along the specified direction vector that is usable for 
@@ -576,6 +576,21 @@ relationship is computed. </p>
             <td>
                 <p>An optional output, that if provided, allows the caller to
 obtain iteration performance statistics.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(*),
+            </td>
+<td>intent(inout),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>args</strong></td>
+            <td>
+                <p>An optional argument to allow the user to communicate with fcn.</p>
             </td>
         </tr>
         <tr>
@@ -607,7 +622,7 @@ obtain iteration performance statistics.</p>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
-    private  subroutine ls_search_miso(this, fcn, xold, grad, dir, x, fold, fx, ib, err)  
+    private  subroutine ls_search_miso(this, fcn, xold, grad, dir, x, fold, fx, ib, args, err)  
 </h3>
   <p>Utilizes an inexact, backtracking line search to find a point as far 
 along the specified direction vector that is usable for unconstrained
@@ -767,6 +782,21 @@ obtain iteration performance statistics.</p>
         <tr>
             <td>
               <span class="anchor" ></span>
+              class(*),
+            </td>
+<td>intent(inout),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>args</strong></td>
+            <td>
+                <p>An optional argument to allow the user to communicate with fcn.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
               class(errors),
             </td>
 <td>intent(inout),</td>
@@ -793,7 +823,7 @@ obtain iteration performance statistics.</p>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
-    private  subroutine ls_search_mimo(this, fcn, xold, grad, dir, x, fvec, fold, fx, ib, err)  
+    private  subroutine ls_search_mimo(this, fcn, xold, grad, dir, x, fvec, fold, fx, ib, args, err)  
 </h3>
   <p>Utilizes an inexact, backtracking line search to find a point as
 far along the specified direction vector that is usable for 
@@ -972,6 +1002,21 @@ obtain iteration performance statistics.</p>
         <tr>
             <td>
               <span class="anchor" ></span>
+              class(*),
+            </td>
+<td>intent(inout),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>args</strong></td>
+            <td>
+                <p>An optional argument to allow the user to communicate with fcn.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
               class(errors),
             </td>
 <td>intent(inout),</td>
@@ -991,7 +1036,7 @@ obtain iteration performance statistics.</p>
         </li>
         <li class="list-group-item">
                   <h3>
-    private  subroutine ls_search_miso(this, fcn, xold, grad, dir, x, fold, fx, ib, err)  
+    private  subroutine ls_search_miso(this, fcn, xold, grad, dir, x, fold, fx, ib, args, err)  
 </h3>
   <p>Utilizes an inexact, backtracking line search to find a point as far 
 along the specified direction vector that is usable for unconstrained
@@ -1146,6 +1191,21 @@ not provided, fcn is evalauted at xold.</p>
             <td>
                 <p>An optional output, that if provided, allows the caller to
 obtain iteration performance statistics.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(*),
+            </td>
+<td>intent(inout),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>args</strong></td>
+            <td>
+                <p>An optional argument to allow the user to communicate with fcn.</p>
             </td>
         </tr>
         <tr>
@@ -1367,14 +1427,14 @@ and <script type="math/tex">\lambda</script> is the scaling factor.</p>
     <footer>
       <div class="container">
         <div class="row">
-          <div class="col-xs-6 col-md-6"><p>NONLIN was developed by Jason Christopherson<br>&copy; 2025 
+          <div class="col-xs-6 col-md-6"><p>NONLIN was developed by Jason Christopherson<br>&copy; 2026 
 </p>
           </div>
           <div class="col-xs-6 col-md-6">
             <p class="text-right">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2025-06-17 11:59              </p>
+ on 2026-05-03 09:03              </p>
           </div>
         </div>
         <br>

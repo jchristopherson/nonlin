@@ -96,7 +96,7 @@
           <li id="statements"><i class="fa fa-list-ol"></i>
             <a data-toggle="tooltip"
                data-placement="bottom" data-html="true"
-               title=" 7.6% of total for modules and submodules.">252 statements</a>
+               title=" 6.8% of total for modules and submodules.">257 statements</a>
           </li>
 
             <li id="source-file">
@@ -185,8 +185,8 @@
           <li class="list-group-item">
             <ul class="list-inline">
                 <li>ferror</li>
-                <li><a href='<a href="http://fortranwiki.org/fortran/show/iso_fortran_env">iso_fortran_env</a>'>iso_fortran_env</a></li>
                 <li><a href='../module/nonlin_types.html'>nonlin_types</a></li>
+                <li><a href='<a href="http://fortranwiki.org/fortran/show/iso_fortran_env">iso_fortran_env</a>'>iso_fortran_env</a></li>
             </ul>
           </li>
       </ul>
@@ -262,7 +262,7 @@
     <ul class="list-group">
         <li class="list-group-item">
               <h3>
-    public  subroutine jacobianfcn(x, jac)  
+    public  subroutine jacobianfcn(x, jac, args)  
 
     </h3>
   <p>Describes a routine capable of computing the Jacobian matrix
@@ -309,6 +309,22 @@ of M functions of N unknowns.</p>
                 <p>An M-by-N matrix where the Jacobian will be written.</p>
             </td>
         </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(*),
+            </td>
+<td>intent(inout),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>args</strong></td>
+            <td>
+                <p>An optional argument to allow the user to communicate with
+the routine.</p>
+            </td>
+        </tr>
     </tbody>
   </table>
 
@@ -326,7 +342,7 @@ of M functions of N unknowns.</p>
     <ul class="list-group">
         <li class="list-group-item">
               <h3>
-    public  subroutine nonlin_solver(this, fcn, x, fvec, ib, err)  
+    public  subroutine nonlin_solver(this, fcn, x, fvec, ib, args, err)  
 
     </h3>
   <p>Describes the interface of a nonlinear equation solver.</p>
@@ -426,6 +442,22 @@ obtain iteration performance statistics.</p>
         <tr>
             <td>
               <span class="anchor" ></span>
+              class(*),
+            </td>
+<td>intent(inout),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>args</strong></td>
+            <td>
+                <p>An optional argument to allow the user to communicate with
+the routine.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
               class(errors),
             </td>
 <td>intent(inout),</td>
@@ -455,7 +487,7 @@ obtain iteration performance statistics.</p>
     <ul class="list-group">
         <li class="list-group-item">
               <h3>
-    public  subroutine vecfcn(x, f)  
+    public  subroutine vecfcn(x, f, args)  
 
     </h3>
   <p>Describes an M-element vector-valued function of N-variables.</p>
@@ -500,6 +532,22 @@ obtain iteration performance statistics.</p>
             <td>
                 <p>An M-element array that, on output, contains the values
 of the M functions.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(*),
+            </td>
+<td>intent(inout),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>args</strong></td>
+            <td>
+                <p>An optional argument to allow the user to communicate with
+the routine.</p>
             </td>
         </tr>
     </tbody>
@@ -638,7 +686,7 @@ of the M functions.</p>
                 <td>
                     procedure
 (nonlin_solver)                    ,                  public
-, pass                  :: <strong><a href='../type/equation_solver.html#boundprocedure-solve~2'>solve</a></strong>
+, pass                  :: <strong><a href='../type/equation_solver.html#boundprocedure-solve~3'>solve</a></strong>
 <small></small>                </td>
                 <td></td>
               </tr>
@@ -704,7 +752,7 @@ ancillary operations that may be needed by the solver.</p>
                 <td>
                     procedure
                     ,                  public
-                  :: <strong><a href='../type/vecfcn_helper.html#boundprocedure-fcn~18'>fcn</a></strong>
+                  :: <strong><a href='../type/vecfcn_helper.html#boundprocedure-fcn~19'>fcn</a></strong>
  =>
                     vfh_fcn
 <small>Subroutine</small>                </td>
@@ -800,14 +848,14 @@ ancillary operations that may be needed by the solver.</p>
     <footer>
       <div class="container">
         <div class="row">
-          <div class="col-xs-6 col-md-6"><p>NONLIN was developed by Jason Christopherson<br>&copy; 2025 
+          <div class="col-xs-6 col-md-6"><p>NONLIN was developed by Jason Christopherson<br>&copy; 2026 
 </p>
           </div>
           <div class="col-xs-6 col-md-6">
             <p class="text-right">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2025-06-17 11:59              </p>
+ on 2026-05-03 09:03              </p>
           </div>
         </div>
         <br>

@@ -11,7 +11,7 @@ module nonlin_multi_eqn_mult_var
     public :: nonlin_solver
 
     interface
-        subroutine vecfcn(x, f)
+        subroutine vecfcn(x, f, args)
             !! Describes an M-element vector-valued function of N-variables.
             use, intrinsic :: iso_fortran_env, only : real64
             real(real64), intent(in), dimension(:) :: x
@@ -19,9 +19,12 @@ module nonlin_multi_eqn_mult_var
             real(real64), intent(out), dimension(:) :: f
                 !! An M-element array that, on output, contains the values
                 !! of the M functions.
+            class(*), intent(inout), optional :: args
+                !! An optional argument to allow the user to communicate with
+                !! the routine.
         end subroutine
 
-        subroutine jacobianfcn(x, jac)
+        subroutine jacobianfcn(x, jac, args)
             !! Describes a routine capable of computing the Jacobian matrix
             !! of M functions of N unknowns.
             use, intrinsic :: iso_fortran_env, only : real64
@@ -29,6 +32,9 @@ module nonlin_multi_eqn_mult_var
                 !! An N-element array containing the independent variables.
             real(real64), intent(out), dimension(:,:) :: jac
                 !! An M-by-N matrix where the Jacobian will be written.
+            class(*), intent(inout), optional :: args
+                !! An optional argument to allow the user to communicate with
+                !! the routine.
         end subroutine
     end interface
 
@@ -85,7 +91,7 @@ module nonlin_multi_eqn_mult_var
     end type
 
     interface
-        subroutine nonlin_solver(this, fcn, x, fvec, ib, err)
+        subroutine nonlin_solver(this, fcn, x, fvec, ib, args, err)
             !! Describes the interface of a nonlinear equation solver.
             use, intrinsic :: iso_fortran_env, only : real64
             use nonlin_types, only : iteration_behavior
@@ -108,6 +114,9 @@ module nonlin_multi_eqn_mult_var
             type(iteration_behavior), optional :: ib
                 !! An optional output, that if provided, allows the caller to 
                 !! obtain iteration performance statistics.
+            class(*), intent(inout), optional :: args
+                !! An optional argument to allow the user to communicate with
+                !! the routine.
             class(errors), intent(inout), optional, target :: err
                 !! An error handling object.
         end subroutine
@@ -169,7 +178,7 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    subroutine vfh_fcn(this, x, f)
+    subroutine vfh_fcn(this, x, f, args)
         !! Executes the routine containing the system of equations to
         !! solve.  No action is taken if the pointer to the subroutine has not
         !! been defined.
@@ -180,13 +189,16 @@ contains
         real(real64), intent(out), dimension(:) :: f
             !! An M-element array that, on output, contains the values
             !! of the M functions.
+        class(*), intent(inout), optional :: args
+                !! An optional argument to allow the user to communicate with
+                !! the routine.
         if (this%is_fcn_defined()) then
-            call this%m_fcn(x, f)
+            call this%m_fcn(x, f, args)
         end if
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    subroutine vfh_jac_fcn(this, x, jac, fv, work, olwork, err)
+    subroutine vfh_jac_fcn(this, x, jac, fv, work, olwork, args, err)
         !! Executes the routine containing the Jacobian matrix if
         !! supplied.  If not supplied, the Jacobian is computed via finite
         !! differences.
@@ -211,6 +223,9 @@ contains
             !! An optional output used to determine workspace size. If supplied, 
             !! the routine determines the optimal size for work, and returns 
             !! without performing any actual calculations.
+        class(*), intent(inout), optional :: args
+            !! An optional argument to allow the user to communicate with
+            !! the routine.
         integer(int32), intent(out), optional :: err
             !! An optional integer output that can be used to determine
             !! error status.  If not used, and an error is encountered, the 
@@ -262,7 +277,7 @@ contains
             end if
 
             ! Call the user-defined Jacobian routine
-            call this%m_jac(x, jac)
+            call this%m_jac(x, jac, args)
         else
             ! Compute the Jacobian via finite differences
             if (present(fv)) then
@@ -295,7 +310,7 @@ contains
                     fptr => fv(1:m)
                 else
                     fptr => work(m+1:2*m)
-                    call this%fcn(x, fptr)
+                    call this%fcn(x, fptr, args)
                 end if
             else
                 allocate(wrk(lwork), stat = flag)
@@ -309,7 +324,7 @@ contains
                     fptr => fv(1:m)
                 else
                     fptr => wrk(m+1:2*m)
-                    call this%fcn(x, fptr)
+                    call this%fcn(x, fptr, args)
                 end if
             end if
 
@@ -323,7 +338,7 @@ contains
                 h = eps * abs(temp)
                 if (h == zero) h = eps
                 x(j) = temp + h
-                call this%fcn(x, f1ptr)
+                call this%fcn(x, f1ptr, args)
                 x(j) = temp
                 jac(:,j) = (f1ptr - fptr) / h
             end do

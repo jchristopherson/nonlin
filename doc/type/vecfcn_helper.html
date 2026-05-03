@@ -96,7 +96,7 @@
           <li id="statements"><i class="fa fa-list-ol"></i>
             <a data-toggle="tooltip"
                data-placement="bottom" data-html="true"
-               title="<p> 7.4% of total for derived types.</p>Including implementation: 143 statements,  4.3% of total for derived types.">15 statements</a>
+               title="<p> 6.7% of total for derived types.</p>Including implementation: 145 statements,  3.6% of total for derived types.">15 statements</a>
           </li>
 
             <li id="source-file">
@@ -161,7 +161,7 @@
       </div>
       <div id="boundprocs-0" class="panel-collapse collapse">
         <div class="list-group">
-            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-fcn~18">fcn</a>
+            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-fcn~19">fcn</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-get_equation_count">get_equation_count</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-get_variable_count">get_variable_count</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-is_fcn_defined">is_fcn_defined</a>
@@ -228,7 +228,7 @@ ancillary operations that may be needed by the solver.</p>
       </div>
       <div id="boundprocs-1" class="panel-collapse collapse">
         <div class="list-group">
-            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-fcn~18">fcn</a>
+            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-fcn~19">fcn</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-get_equation_count">get_equation_count</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-get_variable_count">get_variable_count</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-is_fcn_defined">is_fcn_defined</a>
@@ -286,12 +286,12 @@ ancillary operations that may be needed by the solver.</p>
       <section>
         <h2>Type-Bound Procedures</h2>
             <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-fcn~18"></span><h3>procedure, public :: <strong>fcn</strong>  => vfh_fcn         
+    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-fcn~19"></span><h3>procedure, public :: <strong>fcn</strong>  => vfh_fcn         
     </h3></div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
-    private  subroutine vfh_fcn(this, x, f)  
+    private  subroutine vfh_fcn(this, x, f, args)  
 </h3>
   <p>Executes the routine containing the system of equations to
 solve.  No action is taken if the pointer to the subroutine has not
@@ -352,6 +352,22 @@ been defined.</p>
             <td>
                 <p>An M-element array that, on output, contains the values
 of the M functions.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(*),
+            </td>
+<td>intent(inout),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>args</strong></td>
+            <td>
+                <p>An optional argument to allow the user to communicate with
+the routine.</p>
             </td>
         </tr>
     </tbody>
@@ -566,7 +582,7 @@ defined.</p>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
-    private  subroutine vfh_jac_fcn(this, x, jac, fv, work, olwork, err)  
+    private  subroutine vfh_jac_fcn(this, x, jac, fv, work, olwork, args, err)  
 </h3>
   <p>Executes the routine containing the Jacobian matrix if
 supplied.  If not supplied, the Jacobian is computed via finite
@@ -680,6 +696,22 @@ does not provide a routine for computing the Jacobian.</p>
                 <p>An optional output used to determine workspace size. If supplied, 
 the routine determines the optimal size for work, and returns 
 without performing any actual calculations.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(*),
+            </td>
+<td>intent(inout),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>args</strong></td>
+            <td>
+                <p>An optional argument to allow the user to communicate with
+the routine.</p>
             </td>
         </tr>
         <tr>
@@ -882,14 +914,14 @@ the default state).</p>
     <footer>
       <div class="container">
         <div class="row">
-          <div class="col-xs-6 col-md-6"><p>NONLIN was developed by Jason Christopherson<br>&copy; 2025 
+          <div class="col-xs-6 col-md-6"><p>NONLIN was developed by Jason Christopherson<br>&copy; 2026 
 </p>
           </div>
           <div class="col-xs-6 col-md-6">
             <p class="text-right">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2025-06-17 11:59              </p>
+ on 2026-05-03 09:03              </p>
           </div>
         </div>
         <br>
