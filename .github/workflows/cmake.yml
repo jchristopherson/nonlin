@@ -23,7 +23,7 @@ jobs:
             toolchain: {compiler: intel, version: '2025.0'}
 
     steps:
-      - uses: fortran-lang/setup-fortran@v1
+      - uses: fortran-lang/setup-fortran@v1.9
         id: setup-fortran
         with:
           compiler: ${{ matrix.toolchain.compiler }}
