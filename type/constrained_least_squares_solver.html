@@ -8,7 +8,7 @@
     <meta name="author" content="Jason Christopherson" >
     <link rel="icon" href="../favicon.png">
 
-    <title>quasi_newton_solver &ndash; NONLIN </title>
+    <title>constrained_least_squares_solver &ndash; NONLIN </title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -84,7 +84,7 @@
 
     <div class="container">
   <div class="row">
-    <h1>quasi_newton_solver
+    <h1>constrained_least_squares_solver
       <small>Derived Type</small>
       
     </h1>
@@ -96,18 +96,18 @@
           <li id="statements"><i class="fa fa-list-ol"></i>
             <a data-toggle="tooltip"
                data-placement="bottom" data-html="true"
-               title="<p> 3.1% of total for derived types.</p>Including implementation: 300 statements,  7.4% of total for derived types.">7 statements</a>
+               title="<p> 4.5% of total for derived types.</p>Including implementation: 328 statements,  8.1% of total for derived types.">10 statements</a>
           </li>
 
             <li id="source-file">
               <i class="fa fa-code"></i>
-              <a href="../src/nonlin_solve.f90"> Source File</a>
+              <a href="../src/nonlin_least_squares.f90"> Source File</a>
             </li>
         </ul>
         <ol class="breadcrumb in-well text-right">
-              <li><a href='../sourcefile/nonlin_solve.f90.html'>nonlin_solve.f90</a></li>
-              <li><a href='../module/nonlin_solve.html'>nonlin_solve</a></li>
-          <li class="active">quasi_newton_solver</li>
+              <li><a href='../sourcefile/nonlin_least_squares.f90.html'>nonlin_least_squares.f90</a></li>
+              <li><a href='../module/nonlin_least_squares.html'>nonlin_least_squares</a></li>
+          <li class="active">constrained_least_squares_solver</li>
         </ol>
       </div>
     </div>
@@ -149,25 +149,26 @@
       </div>
       <div id="boundprocs-0" class="panel-collapse collapse">
         <div class="list-group">
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_fcn_tolerance">get_fcn_tolerance</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_gradient_tolerance">get_gradient_tolerance</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_jacobian_interval">get_jacobian_interval</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_line_search~2">get_line_search</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_max_fcn_evals">get_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_print_status">get_print_status</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_use_line_search~2">get_use_line_search</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_var_tolerance">get_var_tolerance</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-is_line_search_defined~2">is_line_search_defined</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_default_line_search~2">set_default_line_search</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_fcn_tolerance">set_fcn_tolerance</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_gradient_tolerance">set_gradient_tolerance</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_jacobian_interval">set_jacobian_interval</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_line_search~2">set_line_search</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_max_fcn_evals">set_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_print_status">set_print_status</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_use_line_search~2">set_use_line_search</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_var_tolerance">set_var_tolerance</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-solve~11">solve</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-apply_limits">apply_limits</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_fcn_tolerance">get_fcn_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_gradient_tolerance">get_gradient_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_lower_limits">get_lower_limits</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_max_fcn_evals">get_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_print_status">get_print_status</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_step_scaling_factor~2">get_step_scaling_factor</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_trust_region_radius">get_trust_region_radius</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_upper_limits">get_upper_limits</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_var_tolerance">get_var_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_fcn_tolerance">set_fcn_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_gradient_tolerance">set_gradient_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_lower_limits">set_lower_limits</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_max_fcn_evals">set_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_print_status">set_print_status</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_step_scaling_factor~2">set_step_scaling_factor</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_trust_region_radius">set_trust_region_radius</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_upper_limits">set_upper_limits</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_var_tolerance">set_var_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-solve~2">solve</a>
         </div>
       </div>
     </div>
@@ -180,8 +181,29 @@
     </div>
     
     <div class="col-md-9" id='text'>
-      <h2>type, public, extends(<a href='../type/line_search_solver.html'>line_search_solver</a>) :: quasi_newton_solver</h2>
-    <p>Defines a quasi-Newton type solver based upon Broyden's method.</p>
+      <h2>type, public, extends(<a href='../type/constrained_equation_solver.html'>constrained_equation_solver</a>) :: constrained_least_squares_solver</h2>
+    <p>Defines a constrained least-squares solver using Powell's trust
+region method.  In the event the trust-region approach is slow to
+converge a backtracking type line search will be utilized.  The
+solver also utilizes a Coleman-Li scaling approach that works to
+improve stability when the solution is near a constraint.</p>
+<p>The trust region approach assumes a radius of <script type="math/tex">\Delta</script>, which can
+be initially defined by the user but is automatically altered by the
+solver, and is implemented as follows.</p>
+<p>Gauss-Newton Step (Solved via QR decomposition):
+<script type="math/tex; mode=display"> J \vec{p_{gn}} = -\vec{f} </script>
+</p>
+<p>The gradient vector for the steepest descent is calculated by
+utilizing the product of the Jacobian and the residual as follows.
+<script type="math/tex; mode=display"> \vec{g} = J \vec{f} </script>
+</p>
+<p>The steepest descent step is then as follows.
+<script type="math/tex; mode=display"> \vec{p_{sd}} = -\alpha \vec{g} </script>
+where <script type="math/tex"> \alpha = \frac{||\vec{g}||^{2}}{||J \vec{g}||^2} </script>.</p>
+<p>Finally, the dogleg is computed as follows.
+<script type="math/tex; mode=display"> \vec{p} = \vec{p_{sd}} + t \left( \vec{p_{gn}} - \vec{p_{sd}} 
+\right) </script>
+where <script type="math/tex">t</script> is found such that <script type="math/tex">|| \vec{p}|| = \Delta </script>.</p>
     <br>
 
     <section class="visible-xs visible-sm hidden-md">
@@ -211,25 +233,26 @@
       </div>
       <div id="boundprocs-1" class="panel-collapse collapse">
         <div class="list-group">
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_fcn_tolerance">get_fcn_tolerance</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_gradient_tolerance">get_gradient_tolerance</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_jacobian_interval">get_jacobian_interval</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_line_search~2">get_line_search</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_max_fcn_evals">get_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_print_status">get_print_status</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_use_line_search~2">get_use_line_search</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_var_tolerance">get_var_tolerance</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-is_line_search_defined~2">is_line_search_defined</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_default_line_search~2">set_default_line_search</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_fcn_tolerance">set_fcn_tolerance</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_gradient_tolerance">set_gradient_tolerance</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_jacobian_interval">set_jacobian_interval</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_line_search~2">set_line_search</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_max_fcn_evals">set_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_print_status">set_print_status</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_use_line_search~2">set_use_line_search</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_var_tolerance">set_var_tolerance</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-solve~11">solve</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-apply_limits">apply_limits</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_fcn_tolerance">get_fcn_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_gradient_tolerance">get_gradient_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_lower_limits">get_lower_limits</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_max_fcn_evals">get_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_print_status">get_print_status</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_step_scaling_factor~2">get_step_scaling_factor</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_trust_region_radius">get_trust_region_radius</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_upper_limits">get_upper_limits</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_var_tolerance">get_var_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_fcn_tolerance">set_fcn_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_gradient_tolerance">set_gradient_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_lower_limits">set_lower_limits</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_max_fcn_evals">set_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_print_status">set_print_status</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_step_scaling_factor~2">set_step_scaling_factor</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_trust_region_radius">set_trust_region_radius</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_upper_limits">set_upper_limits</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_var_tolerance">set_var_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-solve~2">solve</a>
         </div>
       </div>
     </div>
@@ -245,6 +268,66 @@
 
       <section>
         <h2>Type-Bound Procedures</h2>
+            <div class="panel panel-default">
+    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-apply_limits"></span><h3>procedure, public :: <strong>apply_limits</strong>  => ces_apply_limits         
+    </h3></div>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
+    private  subroutine ces_apply_limits(this, x)  
+</h3>
+  <p>Applies the limits to the solution vector.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th>Type</th>
+<th>Intent</th><th>Optional</th>        <th>Attributes</th>
+        <th></th>
+        <th>Name</th>
+        <th></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='../type/constrained_equation_solver.html'>constrained_equation_solver</a>),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+                <p>The <a href="../type/constrained_equation_solver.html">constrained_equation_solver</a> object.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(inout),</td>
+              <td></td>            <td>
+              dimension(:)
+            </td>
+            <td>::</td>
+            <td><strong>x</strong></td>
+            <td>
+                <p>On input, the solution vector.  On output, the clamped solution
+vector.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+        </li>
+    </ul>
+  </div>
+
             <div class="panel panel-default">
     <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_fcn_tolerance"></span><h3>procedure, public :: <strong>get_fcn_tolerance</strong>  => es_get_fcn_tol         
     </h3></div>
@@ -345,15 +428,14 @@ tolerance.</p>
   </div>
 
             <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_jacobian_interval"></span><h3>procedure, public :: <strong>get_jacobian_interval</strong>  => qns_get_jac_interval         
+    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_lower_limits"></span><h3>procedure, public :: <strong>get_lower_limits</strong>  => ces_get_lower_bounds         
     </h3></div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
-    private pure function qns_get_jac_interval(this) result(n)  
+    private pure function ces_get_lower_bounds(this) result(rst)  
 </h3>
-  <p>Gets the number of iterations that may pass before forcing a
-recalculation of the Jacobian matrix.</p>
+  <p>Gets the array of lower bounds constraints.</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -369,7 +451,7 @@ recalculation of the Jacobian matrix.</p>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/quasi_newton_solver.html'>quasi_newton_solver</a>),
+              class(<a href='../type/constrained_equation_solver.html'>constrained_equation_solver</a>),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -378,7 +460,7 @@ recalculation of the Jacobian matrix.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/quasi_newton_solver.html">quasi_newton_solver</a> object.</p>
+                <p>The <a href="../type/constrained_equation_solver.html">constrained_equation_solver</a> object.</p>
             </td>
         </tr>
     </tbody>
@@ -386,68 +468,9 @@ recalculation of the Jacobian matrix.</p>
 
     <h4>
     Return Value
-    <small>integer(kind=int32)</small>
+    <small>real(kind=real64), allocatable, dimension(:)</small>
     </h4>
-    <p>The number of iterations.</p>
-
-        </li>
-    </ul>
-  </div>
-
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_line_search~2"></span><h3>procedure, public :: <strong>get_line_search</strong>  => lss_get_line_search         
-    </h3></div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
-    private  subroutine lss_get_line_search(this, ls)  
-</h3>
-  <p>Gets the line search module.</p>
-
-  <h4>Arguments</h4>
-      <table class="table table-striped varlist">
-    <thead>
-      <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
-    </thead>
-    <tbody>
-        <tr>
-            <td>
-              <span class="anchor" ></span>
-              class(<a href='../type/line_search_solver.html'>line_search_solver</a>),
-            </td>
-<td>intent(in)</td>
-              <td></td>            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>this</strong></td>
-            <td>
-                <p>The <a href="../type/line_search_solver.html">line_search_solver</a> object.</p>
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" ></span>
-              class(<a href='../type/line_search.html'>line_search</a>),
-            </td>
-<td>intent(out),</td>
-              <td></td>            <td>
-              allocatable
-            </td>
-            <td>::</td>
-            <td><strong>ls</strong></td>
-            <td>
-                <p>The <a href="../type/line_search.html">line_search</a> object.</p>
-            </td>
-        </tr>
-    </tbody>
-  </table>
-
+    <p>The limit array.</p>
 
         </li>
     </ul>
@@ -554,14 +577,14 @@ printed.</p>
   </div>
 
             <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_use_line_search~2"></span><h3>procedure, public :: <strong>get_use_line_search</strong>  => lss_get_use_search         
+    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_step_scaling_factor~2"></span><h3>procedure, public :: <strong>get_step_scaling_factor</strong>  => cls_get_factor         
     </h3></div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
-    private pure function lss_get_use_search(this) result(x)  
+    private pure function cls_get_factor(this) result(rst)  
 </h3>
-  <p>Gets a value determining if a line-search should be employed.</p>
+  <p>Gets the initial line-search step size scaling factor.</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -577,7 +600,7 @@ printed.</p>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/line_search_solver.html'>line_search_solver</a>),
+              class(<a href='../type/constrained_least_squares_solver.html'>constrained_least_squares_solver</a>),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -586,7 +609,7 @@ printed.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/line_search_solver.html">line_search_solver</a> object.</p>
+                <p>The <a href="../type/constrained_least_squares_solver.html">constrained_least_squares_solver</a> object.</p>
             </td>
         </tr>
     </tbody>
@@ -594,9 +617,107 @@ printed.</p>
 
     <h4>
     Return Value
-    <small>logical</small>
+    <small>real(kind=real64)</small>
     </h4>
-    <p>Returns true if a line search should be used; else, false.</p>
+    <p>The scaling factor.</p>
+
+        </li>
+    </ul>
+  </div>
+
+            <div class="panel panel-default">
+    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_trust_region_radius"></span><h3>procedure, public :: <strong>get_trust_region_radius</strong>  => cls_get_radius         
+    </h3></div>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
+    private pure function cls_get_radius(this) result(rst)  
+</h3>
+  <p>Gets the initial trust-region radius.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th>Type</th>
+<th>Intent</th><th>Optional</th>        <th>Attributes</th>
+        <th></th>
+        <th>Name</th>
+        <th></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='../type/constrained_least_squares_solver.html'>constrained_least_squares_solver</a>),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+                <p>The <a href="../type/constrained_least_squares_solver.html">constrained_least_squares_solver</a> object.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>real(kind=real64)</small>
+    </h4>
+    <p>The trust-region radius.</p>
+
+        </li>
+    </ul>
+  </div>
+
+            <div class="panel panel-default">
+    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_upper_limits"></span><h3>procedure, public :: <strong>get_upper_limits</strong>  => ces_get_upper_bounds         
+    </h3></div>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
+    private pure function ces_get_upper_bounds(this) result(rst)  
+</h3>
+  <p>Gets the array of upper bounds constraints.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th>Type</th>
+<th>Intent</th><th>Optional</th>        <th>Attributes</th>
+        <th></th>
+        <th>Name</th>
+        <th></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='../type/constrained_equation_solver.html'>constrained_equation_solver</a>),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+                <p>The <a href="../type/constrained_equation_solver.html">constrained_equation_solver</a> object.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>real(kind=real64), allocatable, dimension(:)</small>
+    </h4>
+    <p>The limit array.</p>
 
         </li>
     </ul>
@@ -646,100 +767,6 @@ printed.</p>
     <small>real(kind=real64)</small>
     </h4>
     <p>The tolerance value.</p>
-
-        </li>
-    </ul>
-  </div>
-
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-is_line_search_defined~2"></span><h3>procedure, public :: <strong>is_line_search_defined</strong>  => lss_is_line_search_defined         
-    </h3></div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
-    private pure function lss_is_line_search_defined(this) result(x)  
-</h3>
-  <p>Tests to see if a line search module is defined.</p>
-
-  <h4>Arguments</h4>
-      <table class="table table-striped varlist">
-    <thead>
-      <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
-    </thead>
-    <tbody>
-        <tr>
-            <td>
-              <span class="anchor" ></span>
-              class(<a href='../type/line_search_solver.html'>line_search_solver</a>),
-            </td>
-<td>intent(in)</td>
-              <td></td>            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>this</strong></td>
-            <td>
-                <p>The <a href="../type/line_search_solver.html">line_search_solver</a> object.</p>
-            </td>
-        </tr>
-    </tbody>
-  </table>
-
-    <h4>
-    Return Value
-    <small>logical</small>
-    </h4>
-    <p>Returns true if a module is defined; else, false.</p>
-
-        </li>
-    </ul>
-  </div>
-
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_default_line_search~2"></span><h3>procedure, public :: <strong>set_default_line_search</strong>  => lss_set_default         
-    </h3></div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
-    private  subroutine lss_set_default(this)  
-</h3>
-  <p>Establishes a default line_search object for the line search
-module.</p>
-
-  <h4>Arguments</h4>
-      <table class="table table-striped varlist">
-    <thead>
-      <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
-    </thead>
-    <tbody>
-        <tr>
-            <td>
-              <span class="anchor" ></span>
-              class(<a href='../type/line_search_solver.html'>line_search_solver</a>),
-            </td>
-<td>intent(inout)</td>
-              <td></td>            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>this</strong></td>
-            <td>
-                <p>The <a href="../type/line_search_solver.html">line_search_solver</a> object.</p>
-            </td>
-        </tr>
-    </tbody>
-  </table>
-
 
         </li>
     </ul>
@@ -864,15 +891,14 @@ module.</p>
   </div>
 
             <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_jacobian_interval"></span><h3>procedure, public :: <strong>set_jacobian_interval</strong>  => qns_set_jac_interval         
+    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_lower_limits"></span><h3>procedure, public :: <strong>set_lower_limits</strong>  => ces_set_lower_bounds         
     </h3></div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
-    private  subroutine qns_set_jac_interval(this, n)  
+    private  subroutine ces_set_lower_bounds(this, x)  
 </h3>
-  <p>Sets the number of iterations that may pass before forcing a
-recalculation of the Jacobian matrix.</p>
+  <p>Sets the array of lower bounds constraints.</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -888,7 +914,7 @@ recalculation of the Jacobian matrix.</p>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/quasi_newton_solver.html'>quasi_newton_solver</a>),
+              class(<a href='../type/constrained_equation_solver.html'>constrained_equation_solver</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -897,81 +923,22 @@ recalculation of the Jacobian matrix.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/quasi_newton_solver.html">quasi_newton_solver</a> object.</p>
+                <p>The <a href="../type/constrained_equation_solver.html">constrained_equation_solver</a> object.</p>
             </td>
         </tr>
         <tr>
             <td>
               <span class="anchor" ></span>
-              integer(kind=int32),
+              real(kind=real64),
             </td>
-<td>intent(in)</td>
+<td>intent(in),</td>
               <td></td>            <td>
-              
+              dimension(:)
             </td>
             <td>::</td>
-            <td><strong>n</strong></td>
+            <td><strong>x</strong></td>
             <td>
-                <p>The number of iterations.</p>
-            </td>
-        </tr>
-    </tbody>
-  </table>
-
-
-        </li>
-    </ul>
-  </div>
-
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_line_search~2"></span><h3>procedure, public :: <strong>set_line_search</strong>  => lss_set_line_search         
-    </h3></div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
-    private  subroutine lss_set_line_search(this, ls)  
-</h3>
-  <p>Sets the line search module.</p>
-
-  <h4>Arguments</h4>
-      <table class="table table-striped varlist">
-    <thead>
-      <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
-    </thead>
-    <tbody>
-        <tr>
-            <td>
-              <span class="anchor" ></span>
-              class(<a href='../type/line_search_solver.html'>line_search_solver</a>),
-            </td>
-<td>intent(inout)</td>
-              <td></td>            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>this</strong></td>
-            <td>
-                <p>The <a href="../type/line_search_solver.html">line_search_solver</a> object.</p>
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" ></span>
-              class(<a href='../type/line_search.html'>line_search</a>),
-            </td>
-<td>intent(in)</td>
-              <td></td>            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>ls</strong></td>
-            <td>
-                <p>The <a href="../type/line_search.html">line_search</a> object.</p>
+                <p>The limit array.</p>
             </td>
         </tr>
     </tbody>
@@ -1103,14 +1070,14 @@ printed.</p>
   </div>
 
             <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_use_line_search~2"></span><h3>procedure, public :: <strong>set_use_line_search</strong>  => lss_set_use_search         
+    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_step_scaling_factor~2"></span><h3>procedure, public :: <strong>set_step_scaling_factor</strong>  => cls_set_factor         
     </h3></div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
-    private  subroutine lss_set_use_search(this, x)  
+    private  subroutine cls_set_factor(this, x)  
 </h3>
-  <p>Sets a value determining if a line-search should be employed.</p>
+  <p>Gets the initial line-search step size scaling factor.</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -1126,7 +1093,7 @@ printed.</p>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/line_search_solver.html'>line_search_solver</a>),
+              class(<a href='../type/constrained_least_squares_solver.html'>constrained_least_squares_solver</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -1135,13 +1102,13 @@ printed.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/line_search_solver.html">line_search_solver</a> object.</p>
+                <p>The <a href="../type/constrained_least_squares_solver.html">constrained_least_squares_solver</a> object.</p>
             </td>
         </tr>
         <tr>
             <td>
               <span class="anchor" ></span>
-              logical,
+              real(kind=real64),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -1150,7 +1117,125 @@ printed.</p>
             <td>::</td>
             <td><strong>x</strong></td>
             <td>
-                <p>Set to true if a line search should be used; else, false.</p>
+                <p>The scaling factor.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+        </li>
+    </ul>
+  </div>
+
+            <div class="panel panel-default">
+    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_trust_region_radius"></span><h3>procedure, public :: <strong>set_trust_region_radius</strong>  => cls_set_radius         
+    </h3></div>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
+    private  subroutine cls_set_radius(this, x)  
+</h3>
+  <p>Sets the initial trust region radius.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th>Type</th>
+<th>Intent</th><th>Optional</th>        <th>Attributes</th>
+        <th></th>
+        <th>Name</th>
+        <th></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='../type/constrained_least_squares_solver.html'>constrained_least_squares_solver</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+                <p>The <a href="../type/constrained_least_squares_solver.html">constrained_least_squares_solver</a> object.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>x</strong></td>
+            <td>
+                <p>The The trust-region radius.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+        </li>
+    </ul>
+  </div>
+
+            <div class="panel panel-default">
+    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_upper_limits"></span><h3>procedure, public :: <strong>set_upper_limits</strong>  => ces_set_upper_bounds         
+    </h3></div>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
+    private  subroutine ces_set_upper_bounds(this, x)  
+</h3>
+  <p>Sets the array of upper bounds constraints.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th>Type</th>
+<th>Intent</th><th>Optional</th>        <th>Attributes</th>
+        <th></th>
+        <th>Name</th>
+        <th></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='../type/constrained_equation_solver.html'>constrained_equation_solver</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+                <p>The <a href="../type/constrained_equation_solver.html">constrained_equation_solver</a> object.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              dimension(:)
+            </td>
+            <td>::</td>
+            <td><strong>x</strong></td>
+            <td>
+                <p>The limit array.</p>
             </td>
         </tr>
     </tbody>
@@ -1221,28 +1306,15 @@ printed.</p>
   </div>
 
             <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-solve~11"></span><h3>procedure, public :: <strong>solve</strong>  => qns_solve         
+    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-solve~2"></span><h3>procedure, public :: <strong>solve</strong>  => cls_solve         
     </h3></div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
-    private  subroutine qns_solve(this, fcn, x, fvec, ib, args, err)  
+    private  subroutine cls_solve(this, fcn, x, fvec, ib, args, err)  
 </h3>
-  <p>Applies the quasi-Newton's method developed by Broyden in 
-conjunction with a backtracking type line search to solve N equations
-of N unknowns.</p>
-<p>See Also:</p>
-<ul>
-<li>
-<p><a href="http://www.ams.org/journals/mcom/1965-19-092/S0025-5718-1965-0198670-6/S0025-5718-1965-0198670-6.pdf">Broyden's Paper</a></p>
-</li>
-<li>
-<p><a href="https://en.wikipedia.org/wiki/Broyden%27s_method">Wikipedia</a></p>
-</li>
-<li>
-<p><a href="http://numerical.recipes/">Numerical Recipes</a></p>
-</li>
-</ul>
+  <p>Applies the constrained least-squares solver to solve the nonlinear
+least-squares problem.</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -1258,7 +1330,7 @@ of N unknowns.</p>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/quasi_newton_solver.html'>quasi_newton_solver</a>),
+              class(<a href='../type/constrained_least_squares_solver.html'>constrained_least_squares_solver</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -1267,7 +1339,7 @@ of N unknowns.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/quasi_newton_solver.html">quasi_newton_solver</a> object.</p>
+                <p>The <a href="../type/constrained_least_squares_solver.html">constrained_least_squares_solver</a> object.</p>
             </td>
         </tr>
         <tr>
@@ -1297,9 +1369,9 @@ of N unknowns.</p>
             <td>::</td>
             <td><strong>x</strong></td>
             <td>
-                <p>On input, an N-element array containing an initial estimate to 
-the solution.  On output, the updated solution estimate.  N is 
-the number of variables.</p>
+                <p>On input, an N-element array containing an initial estimate 
+to the solution.  On output, the updated solution estimate.
+N is the number of variables.</p>
             </td>
         </tr>
         <tr>
@@ -1314,8 +1386,9 @@ the number of variables.</p>
             <td>::</td>
             <td><strong>fvec</strong></td>
             <td>
-                <p>An N-element array that, on output, will contain the values of 
-each equation as evaluated at the variable values given in x.</p>
+                <p>An M-element array that, on output, will contain the values 
+of each equation as evaluated at the variable values given 
+in x.</p>
             </td>
         </tr>
         <tr>
@@ -1347,7 +1420,7 @@ obtain iteration performance statistics.</p>
             <td><strong>args</strong></td>
             <td>
                 <p>An optional argument to allow the user to communicate with
-fcn.</p>
+the routine.</p>
             </td>
         </tr>
         <tr>

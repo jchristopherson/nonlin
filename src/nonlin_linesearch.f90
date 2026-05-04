@@ -148,7 +148,7 @@ contains
 
 ! ------------------------------------------------------------------------------
     subroutine ls_search_mimo(this, fcn, xold, grad, dir, x, fvec, fold, fx, &
-            ib, err)
+            ib, args, err)
         !! Utilizes an inexact, backtracking line search to find a point as
         !! far along the specified direction vector that is usable for 
         !! unconstrained minimization problems.
@@ -181,6 +181,8 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to
             !! obtain iteration performance statistics.
+        class(*), intent(inout), optional :: args
+            !! An optional argument to allow the user to communicate with fcn.
         class(errors), intent(inout), optional, target :: err
             !! An error handling object.
 
@@ -259,7 +261,7 @@ contains
             fo = fold
         else
             ! Evaluate the function, and compute the dot product
-            call fcn%fcn(xold, fvec)
+            call fcn%fcn(xold, fvec, args)
             fo = p5 * dot_product(fvec, fvec)
             neval = neval + 1
         end if
@@ -289,7 +291,7 @@ contains
         do
             ! Step along the specified direction by the amount ALAM
             x = xold + alam * dir
-            call fcn%fcn(x, fvec)
+            call fcn%fcn(x, fvec, args)
             f = p5 * dot_product(fvec, fvec)
             neval = neval + 1
             niter = niter + 1
@@ -361,7 +363,7 @@ contains
 
 ! ------------------------------------------------------------------------------
     subroutine ls_search_miso(this, fcn, xold, grad, dir, x, fold, fx, &
-            ib, err)
+            ib, args, err)
         !! Utilizes an inexact, backtracking line search to find a point as far 
         !! along the specified direction vector that is usable for unconstrained
         !! minimization problems.
@@ -388,6 +390,8 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to
             !! obtain iteration performance statistics.
+        class(*), intent(inout), optional :: args
+            !! An optional argument to allow the user to communicate with fcn.
         class(errors), intent(inout), optional, target :: err
             !! An error handling object.
 
@@ -463,7 +467,7 @@ contains
             fo = fold
         else
             ! Evaluate the function
-            fo = fcn%fcn(xold)
+            fo = fcn%fcn(xold, args)
             neval = neval + 1
         end if
 
@@ -492,7 +496,7 @@ contains
         do
             ! Step along the specified direction by the amount ALAM
             x = xold + alam * dir
-            f = fcn%fcn(x)
+            f = fcn%fcn(x, args)
             neval = neval + 1
             niter = niter + 1
 
