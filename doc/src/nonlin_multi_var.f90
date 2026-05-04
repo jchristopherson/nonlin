@@ -41,11 +41,11 @@ module nonlin_multi_var
     type fcnnvar_helper
         !! Defines a type capable of encapsulating an equation of N variables.
         private
-        procedure(fcnnvar), pointer, nopass :: m_fcn => null()
+        procedure(fcnnvar), private, pointer, nopass :: m_fcn => null()
             !! A pointer to the target fcnnvar routine.
-        procedure(gradientfcn), pointer, nopass :: m_grad => null()
+        procedure(gradientfcn), private, pointer, nopass :: m_grad => null()
             !! A pointer to the gradient routine.
-        integer(int32) :: m_nvar = 0
+        integer(int32), private :: m_nvar = 0
             !! The number of variables in m_fcn.
     contains
         procedure, public :: fcn => fnh_fcn
