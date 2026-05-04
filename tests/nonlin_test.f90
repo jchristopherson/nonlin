@@ -105,6 +105,9 @@ program main
     rst = test_constrained_least_squares_2()
     if (.not.rst) overall = .false.
 
+    rst = test_constrained_least_squares_3()
+    if (.not.rst) overall = .false.
+
     rst = test_constrained_least_squares_4()
     if (.not.rst) overall = .false.
 
