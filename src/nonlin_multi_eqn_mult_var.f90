@@ -51,7 +51,7 @@ module nonlin_multi_eqn_mult_var
             !! supplied.
         integer(int32), private :: m_nfcn = 0
             !! The number of functions in m_fcn.
-        integer(int32) :: m_nvar = 0
+        integer(int32), private :: m_nvar = 0
             !! The number of variables in m_fcn.
     contains
         procedure, public :: set_fcn => vfh_set_fcn

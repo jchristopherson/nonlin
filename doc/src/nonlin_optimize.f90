@@ -13,6 +13,7 @@ module nonlin_optimize
     use nonlin_error_handling
     use nonlin_multi_var
     use nonlin_types
+    use lapack
     use linalg, only : rank1_update, tri_mtx_mult, cholesky_rank1_update, &
         cholesky_rank1_downdate, solve_cholesky
     use linalg_errors, only : LA_MATRIX_FORMAT_ERROR
@@ -90,7 +91,7 @@ contains
 ! ******************************************************************************
 ! NELDER_MEAD
 ! ------------------------------------------------------------------------------
-    subroutine nm_solve(this, fcn, x, fout, ib, err)
+    subroutine nm_solve(this, fcn, x, fout, ib, args, err)
         !! Utilizes the Nelder-Mead simplex method for finding a minimum
         !! value of the specified function.
         !!
@@ -126,6 +127,8 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
+        class(*), intent(inout), optional :: args
+            !! An optional argument to allow the user to communicate with fcn.
         class(errors), intent(inout), optional, target :: err
             !! An error handling object.
 
@@ -227,7 +230,7 @@ contains
 
         ! Evaluate the function at each vertex of the simplex
         do i = 1, npts
-            f(i) = fcn%fcn(this%m_simplex(:,i))
+            f(i) = fcn%fcn(this%m_simplex(:,i), args)
         end do
         neval = npts
         fval = f(1)
@@ -284,17 +287,20 @@ contains
 
             ! Start of a new iteration by reflecting the simplex at its largest
             ! point.
-            ftry = this%extrapolate(fcn, f, pcent, ihi, negone, neval, work)
+            ftry = this%extrapolate(fcn, f, pcent, ihi, negone, neval, work, &
+                args = args)
             if (ftry <= f(ilo)) then
                 ! The result of the reflection is better than the current
                 ! best point.  As a result, try a factor of 2 in the reflected
                 ! direction.  Again, the highest point is of interest.
-                ftry = this%extrapolate(fcn, f, pcent, ihi, two, neval, work)
+                ftry = this%extrapolate(fcn, f, pcent, ihi, two, neval, work, &
+                    args = args)
             else if (ftry >= f(ihi2)) then
                 ! The reflected point is worse than the second highest, so look
                 ! for an intermediate lower point (contract the simplex)
                 fsave = f(ihi)
-                ftry = this%extrapolate(fcn, f, pcent, ihi, half, neval, work)
+                ftry = this%extrapolate(fcn, f, pcent, ihi, half, neval, work, &
+                    args = args)
                 if (ftry >= fsave) then
                     ! Cannot improve on the high point.  Try to contract around
                     ! the low point.
@@ -303,7 +309,7 @@ contains
                             pcent = half * (this%m_simplex(:,i) + &
                                 this%m_simplex(:,ilo))
                             this%m_simplex(:,i) = pcent
-                            f(i) = fcn%fcn(pcent)
+                            f(i) = fcn%fcn(pcent, args)
                         end if
                     end do
                     neval = neval + npts
@@ -363,7 +369,7 @@ contains
 
 ! ------------------------------------------------------------------------------
     function nm_extrapolate(this, fcn, y, pcent, ihi, fac, neval, &
-            work) result(ytry)
+            work, args) result(ytry)
         !! Extrapolates by the specified factor through the simplex across
         !! from the largest point.  If the extrapolation results in a better
         !! estimate, the current high point is replaced with the new estimate.
@@ -384,6 +390,9 @@ contains
         real(real64), intent(out), dimension(:) :: work
             !! An N-element workspace array where N is the number of dimensions
             !! of the problem.
+        class(*), intent(inout), optional :: args
+            !! An optional argument to allow the user to communicate with
+            !! the routine.
         real(real64) :: ytry
             !! The new function estimate.
 
@@ -406,7 +415,7 @@ contains
 
          ! Evaluate the function at the trial point, and then replace if the
          ! trial provides an improvement
-         ytry = fcn%fcn(work)
+         ytry = fcn%fcn(work, args)
          neval = neval + 1
          if (ytry < y(ihi)) then
             y(ihi) = ytry
@@ -573,7 +582,7 @@ contains
 ! ******************************************************************************
 ! BFGS
 ! ------------------------------------------------------------------------------
-    module subroutine bfgs_solve(this, fcn, x, fout, ib, err)
+    subroutine bfgs_solve(this, fcn, x, fout, ib, args, err)
         !! Utilizes the Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm
         !! for finding a minimum value of the specified function.
         class(bfgs), intent(inout) :: this
@@ -590,6 +599,8 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
+        class(*), intent(inout), optional :: args
+            !! An optional argument to allow the user to communicate with fcn.
         class(errors), intent(inout), optional, target :: err
             !! An error handling object.
 
@@ -678,8 +689,8 @@ contains
         end if
 
         ! Process
-        fp = fcn%fcn(x)
-        call fcn%gradient(x, g, fp)
+        fp = fcn%fcn(x, args)
+        call fcn%gradient(x, g, fv = fp, args = args)
         neval = 1
         ngrad = 1
 
@@ -706,12 +717,13 @@ contains
                 ! Perform the line search
                 if (this%get_use_line_search()) then
                     call limit_search_vector(dx, stpmax)
-                    call ls%search(fcn, x, g, dx, xnew, fp, fret, lib, errmgr)
+                    call ls%search(fcn, x, g, dx, xnew, fp, fret, lib, &
+                        args = args, err = errmgr)
                     neval = neval + lib%fcn_count
                     fp = fret
                 else
                     xnew = x + dx
-                    fp = fcn%fcn(xnew)
+                    fp = fcn%fcn(xnew, args)
                     neval = neval + 1
                 end if
 
@@ -721,7 +733,7 @@ contains
                     x(i) = xnew(i)
                     gold(i) = g(i)
                 end do
-                call fcn%gradient(x, g, fp)
+                call fcn%gradient(x, g, fv = fp, args = args)
                 ngrad = ngrad + 1
 
                 ! Test for convergence on the change in X

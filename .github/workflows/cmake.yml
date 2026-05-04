@@ -17,14 +17,13 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         toolchain:
-          - {compiler: gcc, version: 11}
-          - {compiler: intel-classic, version: '2021.9'}
+          - {compiler: gcc, version: '14'}
         include:
           - os: ubuntu-latest
-            toolchain: {compiler: intel, version: '2023.2'}
+            toolchain: {compiler: intel, version: '2025.0'}
 
     steps:
-      - uses: awvwgk/setup-fortran@v1
+      - uses: fortran-lang/setup-fortran@v1.9
         id: setup-fortran
         with:
           compiler: ${{ matrix.toolchain.compiler }}
@@ -45,4 +44,4 @@ jobs:
 
       - name: Test with CMake
         working-directory: ${{github.workspace}}/build
-        run: ctest -C ${{env.BUILD_TYPE}} --rerun-failed --output-on-failure
+        run: ctest -C ${{env.BUILD_TYPE}} --output-on-failure

@@ -4,16 +4,20 @@ module nonlin_least_squares
     use nonlin_error_handling
     use nonlin_types
     use nonlin_helper
+    use nonlin_single_var, only : fcn1var_helper, fcn1var
+    use nonlin_solve, only : brent_solver
     use ferror, only : errors
+    use linalg, only : qr_factor, solve_qr
+    use blas, only : dgemv, dgemm
     implicit none
     private
     public :: least_squares_solver
+    public :: constrained_equation_solver
+    public :: constrained_least_squares_solver
 
 ! ******************************************************************************
 ! TYPES
 ! ------------------------------------------------------------------------------
-    !> @brief Defines a Levenberg-Marquardt based solver for unconstrained
-    !! least-squares problems.
     type, extends(equation_solver) :: least_squares_solver
         !! Defines a Levenberg-Marquardt based solver for unconstrained
         !! least-squares problems.
@@ -23,6 +27,59 @@ module nonlin_least_squares
         procedure, public :: get_step_scaling_factor => lss_get_factor
         procedure, public :: set_step_scaling_factor => lss_set_factor
         procedure, public :: solve => lss_solve
+    end type
+
+    type, abstract, extends(least_squares_solver) :: constrained_equation_solver
+        !! A least-squares solver that implements limits (constraints) on the
+        !! solution variables.
+        real(real64), private, allocatable, dimension(:) :: m_upper
+            !! An upper set of parameter bounds.
+        real(real64), private, allocatable, dimension(:) :: m_lower
+            !! A lower set of parameter bounds.
+    contains
+        procedure, public :: get_upper_limits => ces_get_upper_bounds
+        procedure, public :: set_upper_limits => ces_set_upper_bounds
+        procedure, public :: get_lower_limits => ces_get_lower_bounds
+        procedure, public :: set_lower_limits => ces_set_lower_bounds
+        procedure, public :: apply_limits => ces_apply_limits
+    end type
+
+    type, extends(constrained_equation_solver) :: constrained_least_squares_solver
+        !! Defines a constrained least-squares solver using Powell's trust
+        !! region method.  In the event the trust-region approach is slow to
+        !! converge a backtracking type line search will be utilized.  The
+        !! solver also utilizes a Coleman-Li scaling approach that works to
+        !! improve stability when the solution is near a constraint.
+        !!
+        !! The trust region approach assumes a radius of \(\Delta\), which can
+        !! be initially defined by the user but is automatically altered by the
+        !! solver, and is implemented as follows.
+        !!
+        !! Gauss-Newton Step (Solved via QR decomposition):
+        !! $$ J \vec{p_{gn}} = -\vec{f} $$
+        !!
+        !! The gradient vector for the steepest descent is calculated by
+        !! utilizing the product of the Jacobian and the residual as follows.
+        !! $$ \vec{g} = J \vec{f} $$
+        !!
+        !! The steepest descent step is then as follows.
+        !! $$ \vec{p_{sd}} = -\alpha \vec{g} $$
+        !! where \( \alpha = \frac{||\vec{g}||^{2}}{||J \vec{g}||^2} \).
+        !!
+        !! Finally, the dogleg is computed as follows.
+        !! $$ \vec{p} = \vec{p_{sd}} + t \left( \vec{p_{gn}} - \vec{p_{sd}} 
+        !! \right) $$
+        !! where \(t\) is found such that \(|| \vec{p}|| = \Delta \).
+        real(real64), private :: m_delta = 1.0d0
+            !! The damping parameter.
+        real(real64), private :: m_scaling = 1.0d0
+            !! The initial line-search scaling parameter.
+    contains
+        procedure, public :: get_trust_region_radius => cls_get_radius
+        procedure, public :: set_trust_region_radius => cls_set_radius
+        procedure, public :: get_step_scaling_factor => cls_get_factor
+        procedure, public :: set_step_scaling_factor => cls_set_factor
+        procedure, public :: solve => cls_solve
     end type
 
 contains
@@ -138,6 +195,7 @@ contains
             ib%converge_on_fcn = fcnvrg
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = gcnvrg
+            ib%gradient_count = 0
         end if
         if (present(err)) then
             errmgr => err
@@ -786,6 +844,659 @@ contains
             l = ipvt(j)
             x(l) = wa(j)
         end do ! LINE 160
+    end subroutine
+
+! ******************************************************************************
+! CONSTRAINED_EQUATION_SOLVER MEMBERS
+! ------------------------------------------------------------------------------
+    pure function ces_get_upper_bounds(this) result(rst)
+        !! Gets the array of upper bounds constraints.
+        class(constrained_equation_solver), intent(in) :: this
+            !! The [[constrained_equation_solver]] object.
+        real(real64), allocatable, dimension(:) :: rst
+            !! The limit array.
+
+        if (allocated(this%m_upper)) then
+            rst = this%m_upper
+        else
+            allocate(rst(0))
+        end if
+    end function
+
+! --------------------
+    subroutine ces_set_upper_bounds(this, x)
+        !! Sets the array of upper bounds constraints.
+        class(constrained_equation_solver), intent(inout) :: this
+            !! The [[constrained_equation_solver]] object.
+        real(real64), intent(in), dimension(:) :: x
+            !! The limit array.
+
+        if (allocated(this%m_upper)) then
+            deallocate(this%m_upper)
+            this%m_upper = x
+        else
+            this%m_upper = x
+        end if
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    pure function ces_get_lower_bounds(this) result(rst)
+        !! Gets the array of lower bounds constraints.
+        class(constrained_equation_solver), intent(in) :: this
+            !! The [[constrained_equation_solver]] object.
+        real(real64), allocatable, dimension(:) :: rst
+            !! The limit array.
+
+        if (allocated(this%m_lower)) then
+            rst = this%m_lower
+        else
+            allocate(rst(0))
+        end if
+    end function
+
+! --------------------
+    subroutine ces_set_lower_bounds(this, x)
+        !! Sets the array of lower bounds constraints.
+        class(constrained_equation_solver), intent(inout) :: this
+            !! The [[constrained_equation_solver]] object.
+        real(real64), intent(in), dimension(:) :: x
+            !! The limit array.
+
+        if (allocated(this%m_lower)) then
+            deallocate(this%m_lower)
+            this%m_lower = x
+        else
+            this%m_lower = x
+        end if
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    subroutine ces_apply_limits(this, x)
+        !! Applies the limits to the solution vector.
+        class(constrained_equation_solver), intent(in) :: this
+            !! The [[constrained_equation_solver]] object.
+        real(real64), intent(inout), dimension(:) :: x
+            !! On input, the solution vector.  On output, the clamped solution
+            !! vector.
+
+        ! Local Variables
+        integer(int32) :: i, nu, nl, n
+        real(real64), allocatable, dimension(:) :: maxX, minX
+
+        ! Process
+        maxX = this%get_upper_limits()
+        minX = this%get_lower_limits()
+        n = size(x)
+        nu = min(n, size(maxX))
+        nl = min(n, size(minX))
+
+        do i = 1, nl
+            if (x(i) < minX(i)) x(i) = minX(i)
+        end do
+        do i = 1, nu
+            if (x(i) > maxX(i)) x(i) = maxX(i)
+        end do
+    end subroutine
+
+! ******************************************************************************
+! CONSTRAINED_LEAST_SQUARES_SOLVER MEMBERS & HELPER ROUTINES
+! ------------------------------------------------------------------------------
+    pure function cls_get_radius(this) result(rst)
+        !! Gets the initial trust-region radius.
+        class(constrained_least_squares_solver), intent(in) :: this
+            !! The [[constrained_least_squares_solver]] object.
+        real(real64) :: rst
+            !! The trust-region radius.
+        rst = this%m_delta
+    end function
+
+! --------------------
+    subroutine cls_set_radius(this, x)
+        !! Sets the initial trust region radius.
+        class(constrained_least_squares_solver), intent(inout) :: this
+            !! The [[constrained_least_squares_solver]] object.
+        real(real64), intent(in) :: x
+            !! The The trust-region radius.
+
+        if (x <= 0.0d0) then
+            this%m_delta = 1.0d0
+        else
+            this%m_delta = x
+        end if
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    pure function cls_get_factor(this) result(rst)
+        !! Gets the initial line-search step size scaling factor.
+        class(constrained_least_squares_solver), intent(in) :: this
+            !! The [[constrained_least_squares_solver]] object.
+        real(real64) :: rst
+            !! The scaling factor.
+        rst = this%m_scaling
+    end function
+
+! --------------------
+    subroutine cls_set_factor(this, x)
+        !! Gets the initial line-search step size scaling factor.
+        class(constrained_least_squares_solver), intent(inout) :: this
+            !! The [[constrained_least_squares_solver]] object.
+        real(real64), intent(in) :: x
+            !! The scaling factor.
+
+        if (x <= 0.0d0) then
+            this%m_scaling = 1.0d0
+        else
+            this%m_scaling = x
+        end if
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    subroutine cls_solve(this, fcn, x, fvec, ib, args, err)
+        !! Applies the constrained least-squares solver to solve the nonlinear
+        !! least-squares problem.
+        class(constrained_least_squares_solver), intent(inout) :: this
+            !! The [[constrained_least_squares_solver]] object.
+        class(vecfcn_helper), intent(in) :: fcn
+            !! The [[vecfcn_helper]] object containing the equations to solve.
+        real(real64), intent(inout), dimension(:) :: x
+            !! On input, an N-element array containing an initial estimate 
+            !! to the solution.  On output, the updated solution estimate.
+            !! N is the number of variables.
+        real(real64), intent(out), dimension(:) :: fvec
+            !! An M-element array that, on output, will contain the values 
+            !! of each equation as evaluated at the variable values given 
+            !! in x.
+        type(iteration_behavior), optional :: ib
+            !! An optional output, that if provided, allows the caller to 
+            !! obtain iteration performance statistics.
+        class(*), intent(inout), optional :: args
+                !! An optional argument to allow the user to communicate with
+                !! the routine.
+        class(errors), intent(inout), optional, target :: err
+            !! An error handling object.
+
+        ! Parameters
+        real(real64), parameter :: delta_max = 1.0d3
+        real(real64), parameter :: eta = 1.0d-1
+        integer(int32), parameter :: ls_max_iter = 10
+        real(real64), parameter :: ls_cl = 1.0d-4
+        real(real64), parameter :: ls_beta = 0.5d0
+
+        ! Local Variables
+        logical :: converged, xcnvrg, fcnvrg, gcnvrg
+        integer(int32) :: k, neqn, nvar, neval, iter, njac, maxeval, flag
+        real(real64) :: xnorm, fnorm, gnorm, factor, fnewnorm, ftol, gtol, &
+            xtol, actred, prered, rho, delta, stepscale, dderiv
+        real(real64), allocatable, dimension(:) :: tau, Jp, s, g, p, xnew, &
+            fnew, xl, xu
+        real(real64), allocatable, dimension(:,:) :: qr, jac
+        class(errors), pointer :: errmgr
+        type(errors), target :: deferr
+        character(len = 256) :: errmsg
+        
+        ! Initialization
+        converged = .false.
+        xcnvrg = .false.
+        fcnvrg = .false.
+        gcnvrg = .false.
+        neqn = fcn%get_equation_count()
+        nvar = fcn%get_variable_count()
+        neval = 0
+        iter = 0
+        njac = 0
+        ftol = this%get_fcn_tolerance()
+        xtol = this%get_var_tolerance()
+        gtol = this%get_gradient_tolerance()
+        maxeval = this%get_max_fcn_evals()
+        xl = this%get_lower_limits()
+        xu = this%get_upper_limits()
+        if (present(err)) then
+            errmgr => err
+        else
+            errmgr => deferr
+        end if
+
+        if (present(ib)) then
+            ib%iter_count = iter
+            ib%fcn_count = neval
+            ib%jacobian_count = njac
+            ib%converge_on_fcn = fcnvrg
+            ib%converge_on_chng = xcnvrg
+            ib%converge_on_zero_diff = gcnvrg
+            ib%gradient_count = 0
+        end if
+
+        ! Input Check
+        if (.not.fcn%is_fcn_defined()) then
+            ! ERROR: No function is defined
+            call errmgr%report_error("cls_solve", &
+                "No function has been defined.", &
+                NL_INVALID_OPERATION_ERROR)
+            return
+        end if
+        if (nvar > neqn) then
+            ! ERROR: System is underdetermined
+            call errmgr%report_error("cls_solve", "The solver cannot " // &
+                "solve the underdetermined problem.  The number of " // &
+                "unknowns must not exceed the number of equations.", &
+                NL_INVALID_INPUT_ERROR)
+            return
+        end if
+        flag = 0
+        if (size(x) /= nvar) then
+            flag = 3
+        else if (size(fvec) /= neqn) then
+            flag = 4
+        end if
+        if (flag /= 0) then
+            ! One of the input arrays is not sized correctly
+            write(errmsg, 100) "Input number ", flag, &
+                " is not sized correctly."
+            call errmgr%report_error("cls_solve", trim(errmsg), &
+                NL_ARRAY_SIZE_ERROR)
+            return
+        end if
+
+        ! Check the limit arrays
+        if (size(xl) /= nvar) then
+            deallocate(xl)
+            allocate(xl(nvar), source = -huge(0.0d0))
+            call this%set_lower_limits(xl)
+        end if
+        if (size(xu) /= nvar) then
+            deallocate(xu)
+            allocate(xu(nvar), source = huge(0.0d0))
+            call this%set_upper_limits(xu)
+        end if
+
+        ! Local Memory Allocations
+        allocate( &
+            tau(min(neqn, nvar)), &
+            Jp(neqn), &
+            s(nvar), &
+            g(nvar), &
+            p(nvar), &
+            xnew(nvar), &
+            fnew(neqn), &
+            qr(neqn, nvar), &
+            jac(neqn, nvar) &
+        )
+
+        ! Initial Evaluations
+        call this%apply_limits(x)
+        call fcn%fcn(x, fvec, args)
+        neval = 1
+        fnorm = norm2(fvec)
+        xnorm = norm2(x)
+        if (.not. is_finite_array(x) .or. .not. is_finite_array(fvec)) then
+            return
+        end if
+
+        ! Process
+        delta = this%get_trust_region_radius()
+        iter = 1
+        outer : do
+            ! Evaluate the Jacobian
+            call fcn%jacobian(x, jac, fv = fvec, args = args)
+            njac = njac + 1
+
+            ! Print iteration status
+            if (this%get_print_status()) then
+                call print_status(iter, neval, njac, xnorm, fnorm)
+            end if
+
+            ! Compute the QR factorization of J
+            qr = jac
+            call qr_factor(qr, tau)
+
+            ! Compute the scaling factors
+            call coleman_li_scaling(x, xl, xu, s)
+
+            ! Determine the step direction
+            call dogleg(delta, x, fvec, jac, qr, tau, s, xl, xu, p, g, Jp, &
+                prered)
+            xnorm = scaled_norm(p, s)
+            gnorm = norm2(g)
+            xnew = x + p
+
+            ! Update the residual
+            call fcn%fcn(xnew, fnew, args)
+            fnewnorm = norm2(fnew)
+            neval = neval + 1
+
+            ! Compute the actual reduction and the reduction ratio
+            actred = 0.5d0 * (fnorm**2 - fnewnorm**2)
+            if (prered > 0.0d0 .and. actred >= 0.0d0) then
+                rho = actred / prered
+            else
+                rho = 0.0d0
+            end if
+
+            ! Update the trust region radius
+            if (rho < 0.25d0) then
+                delta = max(0.25d0, 1.0d-12)
+            else if (rho > 0.75d0 .and. abs(xnorm - delta) < 1.0d-12 * delta) then
+                delta = min(2.0d0 * delta, delta_max)
+            end if
+
+            ! Accept the step?
+            if (rho > eta .and. fnewnorm <= fnorm) then
+                ! Accept the trust-region step
+                x = xnew
+                call this%apply_limits(x)
+                fvec = fnew
+                fnorm = fnewnorm
+                iter = iter + 1
+            else
+                ! Try an Armijo backtracking step along p
+                dderiv = dot_product(g, p)
+                if (dderiv >= 0.0d0) then
+                    ! This isn't a descent direction.  Just shrink the trust
+                    ! region
+                    delta = max(0.5d0 * delta, 1.0d-12)
+                else
+                    stepscale = this%get_step_scaling_factor()
+                    backtrack : do k = 1, ls_max_iter
+                        xnew = x + stepscale * p
+                        call this%apply_limits(xnew)
+                        call fcn%fcn(xnew, fnew, args)
+                        neval = neval + 1
+                        fnewnorm = norm2(fnew)
+                        if (fnewnorm <= fnorm + ls_cl * stepscale * dderiv) then
+                            ! Accept the line-search step
+                            x = xnew
+                            fvec = fnew
+                            fnorm = fnewnorm
+                            iter = iter + 1
+
+                            ! Modestly adjust the trust-region radius
+                            delta = max(stepscale * xnorm, 1.0d-12)
+                            exit backtrack
+                        end if
+                        stepscale = stepscale * ls_beta
+                    end do backtrack
+
+                    ! If the line search fails, shrink the trust region
+                    if (k > ls_max_iter) then
+                        delta = max(0.5d0 * delta, 1.0d-12)
+                    end if
+                end if
+            end if
+
+            if (.not. is_finite_array(x) .or. .not. is_finite_array(fvec)) then
+                exit outer
+            end if
+
+            ! Test for convergence
+            if (xnorm <= xtol) then
+                converged = .true.
+                xcnvrg = .true.
+                exit outer
+            end if
+            if (fnorm <= ftol) then
+                converged = .true.
+                fcnvrg = .true.
+                exit outer
+            end if
+            if (gnorm <= gtol) then
+                converged = .true.
+                gcnvrg = .true.
+                exit outer
+            end if
+            if (neval >= maxeval) exit outer
+        end do outer
+
+        ! Report out iteration statistics
+        if (present(ib)) then
+            ib%iter_count = iter
+            ib%fcn_count = neval
+            ib%jacobian_count = njac
+            ib%converge_on_fcn = fcnvrg
+            ib%converge_on_chng = xcnvrg
+            ib%converge_on_zero_diff = gcnvrg
+        end if
+
+        ! Check for convergence issues
+        if (.not.converged) then
+            write(errmsg, 101) "The algorithm failed to " // &
+                "converge.  Function evaluations performed: ", neval, &
+                "." // new_line('c') // "Change in Variable: ", xnorm, &
+                new_line('c') // "Residual: ", fnorm
+            call errmgr%report_error("cls_solve", trim(errmsg), &
+                flag)
+        end if
+
+        ! Formatting
+100     format(A, I0, A)
+101     format(A, I0, A, E10.3, A, E10.3)
+    end subroutine
+
+! ******************************************************************************
+! HELPER ROUTINES
+! ------------------------------------------------------------------------------
+    pure function alpha_box(x, p, xl, xu) result(rst)
+        !! Computes the maximum feasible alpha such that:
+        !!  xl <= x + alpha * p <= xu.
+        real(real64), intent(in), dimension(:) :: x
+            !! The N-element array containing the current solution estimate.
+        real(real64), intent(in), dimension(:) :: p
+            !! The N-element array containing the proposed solution step.
+        real(real64), intent(in), dimension(:) :: xl
+            !! The N-element array containing the lower bounds.
+        real(real64), intent(in), dimension(:) :: xu
+            !! The N-element array containing the upper bounds.
+        real(real64) :: rst
+            !! The largest possible alpha.
+
+        integer(int32) :: i, n
+        real(real64) :: a
+
+        n = size(x)
+        rst = huge(rst)
+
+        do i = 1, n
+            if (p(i) > 0.0d0) then
+                if (xu(i) < x(i)) then
+                    rst = 0.0d0
+                    return
+                end if
+                a = (xu(i) - x(i)) / p(i)
+                if (a < rst) rst = a
+            else if (p(i) < 0.0d0) then
+                if (xl(i) > x(i)) then
+                    rst = 0.0d0
+                    return
+                end if
+                a = (xl(i) - x(i)) / p(i)
+                if (a < rst) rst = a
+            end if
+        end do
+        if (rst < 0.0d0) rst = 0.0d0
+    end function
+
+! ------------------------------------------------------------------------------
+    subroutine coleman_li_scaling(x, xl, xu, s)
+        !! Computes the Coleman-Li scaling matrix.
+        real(real64), intent(in), dimension(:) :: x
+            !! The N-element array containing the current solution estimate.
+        real(real64), intent(in), dimension(size(x)) :: xl
+            !! The N-element array containing the lower bounds.
+        real(real64), intent(in), dimension(size(x)) :: xu
+            !! The N-element array containing the upper bounds.
+        real(real64), intent(out), dimension(size(x)) :: s
+            !! The N-element array containing the diagonal of the scaling 
+            !! matrix.
+
+        ! Parameters
+        real(real64), parameter :: min_scale = 1.0d-8
+        real(real64), parameter :: max_scale = 1.0d8
+
+        ! Local Variables
+        integer(int32) :: i, n
+        real(real64) :: di, big
+
+        ! Process
+        n = size(x)
+        big = huge(1.0d0)
+
+        do i = 1, n
+            if (xl(i) > -big .and. xu(i) < big) then
+                di = min(x(i) - xl(i), xu(i) - x(i))
+            else if (xl(i) > -big) then
+                di = x(i) - xl(i)
+            else if (xu(i) < big) then
+                di = xu(i) - x(i)
+            else
+                di = 1.0d0
+            end if
+            di = max(di, min_scale)
+            s(i) = 1.0d0 / di
+            if (s(i) > max_scale) s(i) = max_scale
+        end do
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    pure function scaled_norm(x, s) result(rst)
+        !! Computes a scaled Euclidean norm.
+        real(real64), intent(in), dimension(:) :: x
+            !! The N-element array.
+        real(real64), intent(in), dimension(size(x)) :: s
+            !! The N-element scaling array.
+        real(real64) :: rst
+            !! The result
+
+        rst = norm2(x * s)
+    end function
+
+! ------------------------------------------------------------------------------
+    pure function is_finite_array(x) result(rst)
+        !! Tests to see if the array contains all finite values.
+        real(real64), intent(in), dimension(:) :: x
+            !! The array to test.
+        logical :: rst
+            !! Returns true if all values are finite; else, false.
+
+        ! Local Variables
+        integer(int32) :: i
+
+        ! Process
+        rst = .true.
+        do i = 1, size(x)
+            if (.not.(x(i) == x(i))) then
+                rst = .false.
+                exit
+            end if
+            if (abs(x(i)) == huge(0.0d0)) then
+                rst = .false.
+                exit
+            end if
+        end do
+    end function
+
+! ------------------------------------------------------------------------------
+    subroutine dogleg(delta, x, f, jac, qr, tau, s, xl, xu, p, g, Jp, prered)
+        !! Computes a dog-leg step for Powell's method.
+        real(real64), intent(in) :: delta
+            !! The trust-region radius.
+        real(real64), intent(in), dimension(:) :: x
+            !! The N-element array containing the current solution estimate.
+        real(real64), intent(in), dimension(:) :: f
+            !! The M-element array containing the residuals.
+        real(real64), intent(in), dimension(:,:) :: jac
+            !! The M-by-N Jacobian matrix.
+        real(real64), intent(inout), dimension(:,:) :: qr
+            !! The M-by-N matrix output by qr_factor.
+        real(real64), intent(in), dimension(:) :: tau
+            !! The MIN(M,N)-element array, tau, as output by qr_factor.
+        real(real64), intent(in), dimension(:) :: s
+            !! The N-element diagonal of the scaling matrix.
+        real(real64), intent(in), dimension(:) :: xl
+            !! The N-element array containing the lower bounds.
+        real(real64), intent(in), dimension(:) :: xu
+            !! The N-element array containing the upper bounds.
+        real(real64), intent(out), dimension(:) :: p
+            !! The updated step size.
+        real(real64), intent(out), dimension(:) :: g
+            !! The N-element gradient vector.
+        real(real64), intent(out), dimension(:) :: Jp
+            !! The M-element array resulting from J * p.
+        real(real64), intent(out) :: prered
+            !! The predicted reduction.
+
+        ! Local Variables
+        integer(int32) :: m, n
+        real(real64) :: alpha, pgnnorm, psdnorm, t, c1, c2, a, b, c, arg
+        real(real64), allocatable, dimension(:) :: pgn, psd, u, v, Jg
+
+        ! Initialization
+        m = size(jac, 1)
+        n = size(jac, 2)
+        allocate(pgn(n), psd(n), u(n), v(n), Jg(m))
+
+        ! Compute the gradient vector
+        call dgemv('T', m, n, 1.0d0, jac, m, f, 1, 0.0d0, g, 1)
+
+        ! Solve the linear system for the Gauss-Newton step
+        u = f
+        call solve_qr(qr, tau, u)   ! solution stored in u(1:n)
+        pgn = -u(1:n)
+        pgnnorm = scaled_norm(pgn, s)
+
+        ! Is it enough, or do we need to try a steepest decsent step?
+        if (pgnnorm > delta) then
+            ! The Gauss-Newton step failed.  Try the steepest descent step
+            call dgemv('N', m, n, 1.0d0, jac, m, g, 1, 0.0d0, Jg, 1)
+            c1 = dot_product(g, g)
+            c2 = dot_product(Jg, Jg)
+            if (c2 > 0.0d0 .and. c1 > 0.0d0) then
+                alpha = c1 / c2
+            else
+                alpha = 0.0d0
+            end if
+            psd = -alpha * g
+            psdnorm = scaled_norm(psd, s)
+            if (psdnorm >= delta .and. psdnorm > 0.0d0) then
+                ! Go ahead and use the steepest descent step
+                p = (delta / psdnorm) * psd
+            else
+                u(1:n) = pgn - psd
+                u(1:n) = s * u(1:n)
+                v = s * psd
+                a = dot_product(u(1:n), u(1:n))
+                b = 2.0d0 * dot_product(u(1:n), v)
+                c = dot_product(v, v) - delta**2
+                if (a <= 0.0d0) then
+                    p = psd
+                else
+                    arg = max(0.0d0, b**2 - 4.0d0 * a * c)
+                    if (arg == 0.0d0) then
+                        t = -b / (2.0d0 * a)
+                    else
+                        t = (-b + sqrt(arg)) / (2.0d0 * a)
+                        if (t < 0.0d0 .or. t > 1.0d0) then
+                            t = (-b - sqrt(arg)) / (2.0d0 * a)
+                        end if
+                    end if
+                    t = max(0.0d0, min(1.0d0, t))
+                    p = psd + t * u(1:n)
+                end if
+            end if
+        else
+            ! Just use the Gauss-Newton step
+            p = pgn
+        end if
+
+        ! Ensure to respect any limits
+        alpha = alpha_box(x, p, xl, xu)
+        if (alpha < 1.0d0) then
+            p = alpha * p
+        end if
+
+        ! Compute the predicted reduction
+        call dgemv('N', m, n, 1.0d0, jac, m, p, 1, 0.0d0, Jp, 1)
+        c1 = dot_product(g, p)
+        c2 = 0.5d0 * dot_product(Jp, Jp)
+        prered = -c1 - c2
     end subroutine
 
 ! ------------------------------------------------------------------------------
