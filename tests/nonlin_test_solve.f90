@@ -1090,24 +1090,39 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    subroutine test_constrained_least_squares_3()
+    function test_constrained_least_squares_3() result(rst)
         ! Local Variables
+        logical :: rst
+        real(real64), parameter :: tol = 1.0d-5
         type(vecfcn_helper) :: obj
         procedure(vecfcn), pointer :: fcn
-        type(constrained_least_squares_solver) :: solver
-        real(real64) :: x(4), f(21) ! There are 4 coefficients and 21 data points
+        type(least_squares_solver) :: solver
+        type(constrained_least_squares_solver) :: csolver
+        real(real64) :: x(4), f(21), xc(4) ! There are 4 coefficients and 21 data points
 
         ! Initialization
+        rst = .true.
         fcn => lsfcn1
         x = 1.0d0   ! Set X to an initial guess of [1, 1, 1, 1]
+        xc = 1.0d0
         call obj%set_fcn(fcn, 21, 4)
 
         ! Compute the solution, and store the polynomial coefficients in X
         call solver%solve(obj, x, f)
+        call csolver%solve(obj, xc, f)
 
-        ! Print out the coefficients
-        !print *, x
-    end subroutine
+        ! Test
+        if ( &
+            abs(x(1) - xc(1)) > tol .or. &
+            abs(x(2) - xc(2)) > tol .or. &
+            abs(x(3) - xc(3)) > tol .or. &
+            abs(x(4) - xc(4)) > tol &
+        ) &
+        then
+            rst = .false.
+            print '(A)', "Constrained Least Squares Test 3 Failed."
+        end if
+    end function
 
 ! ------------------------------------------------------------------------------
     function test_constrained_least_squares_4() result(check)
