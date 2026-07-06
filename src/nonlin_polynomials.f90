@@ -65,6 +65,11 @@ module nonlin_polynomials
         procedure, private :: init_poly_coeffs
     end type
 
+    interface polynomial
+        module procedure :: poly_init_1
+        module procedure :: poly_init_2
+    end interface
+
 contains
 ! ******************************************************************************
 ! POLYNOMIAL MEMBERS
@@ -776,6 +781,34 @@ contains
         do i = 1, ord + 1
             call z%set(i, y%get(i) * x)
         end do
+    end function
+
+! ------------------------------------------------------------------------------
+    function poly_init_1(order, err) result(rst)
+        !! Initializes a new [[polynomial]] instance.
+        integer(int32), intent(in) :: order
+            !! The order of the polynomial (must be >= 0).
+        class(errors), intent(inout), optional, target :: err
+            !! An error handling object.
+        type(polynomial) :: rst
+            !! The new [[polynomial]] object.
+
+        call rst%initialize(order, err = err)
+    end function
+
+! ------------------------------------------------------------------------------
+    function poly_init_2(c, err) result(rst)
+        !! Initializes a new [[polynomial]] instance.
+        real(real64), intent(in), dimension(:) :: c
+            !! The array of polynomial coefficients. The coefficients are
+            !! established as follows: c(1) + c(2) * x + c(3) * x**2 + ...
+            !! c(n) * x**n-1.
+        class(errors), intent(inout), optional, target :: err
+            !! An error handling object.
+        type(polynomial) :: rst
+            !! The new [[polynomial]] object.
+
+        call rst%initialize(c, err = err)
     end function
 
 ! ------------------------------------------------------------------------------

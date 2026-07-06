@@ -64,7 +64,7 @@ contains
 
         ! Define the polynomial
         call random_number(coeff)
-        call p%initialize(order)
+        p = polynomial(order)
         do i = 1, size(coeff)
             call p%set(i, coeff(i))
         end do
@@ -107,8 +107,8 @@ contains
         ! Define the polynomials
         call random_number(c1)
         call random_number(c2)
-        call p1%initialize(order1)
-        call p2%initialize(order2)
+        p1 = polynomial(order1)
+        p2 = polynomial(order2)
         do i = 1, size(c1)
             call p1%set(i, c1(i))
         end do
@@ -165,8 +165,8 @@ contains
         ! Define the polynomials
         call random_number(c1)
         call random_number(c2)
-        call p1%initialize(order1)
-        call p2%initialize(order2)
+        p1 = polynomial(order1)
+        p2 = polynomial(order2)
         do i = 1, size(c1)
             call p1%set(i, c1(i))
         end do
@@ -217,9 +217,8 @@ contains
         real(real64), parameter :: tol = 1.0d-8
 
         ! Initialization
-        call p1%initialize(3)
-        call p2%initialize(2)
-        call ans%initialize(5)
+        p1 = polynomial(3)
+        p2 = polynomial(2)
 
         ! Set p1 = 5 + 10x**2 + 6x**3
         call p1%set(1, 5.0d0)
@@ -233,12 +232,7 @@ contains
         call p2%set(3, 4.0d0)
 
         ! Answer: ans = 5 + 10x + 30x**2 + 26x**3 + 52x**4 + 24x**5
-        call ans%set(1, 5.0d0)
-        call ans%set(2, 10.0d0)
-        call ans%set(3, 30.0d0)
-        call ans%set(4, 26.0d0)
-        call ans%set(5, 52.0d0)
-        call ans%set(6, 24.0d0)
+        ans = polynomial([5.0d0, 10.0d0, 30.0d0, 26.0d0, 52.0d0, 24.0d0])
 
         ! Compute p1 * p2 = p3
         p3 = p1 * p2
