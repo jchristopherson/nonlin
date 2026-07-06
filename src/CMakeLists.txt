@@ -24,7 +24,7 @@ include(FetchContent)
 find_package(BLAS)
 find_package(LAPACK)
 find_package(ferror QUIET)
-find_package(linalg 1.8.8 QUIET)
+find_package(linalg 1.8.9 QUIET)
 
 if (NOT BLAS_FOUND OR NOT LAPACK_FOUND)
   message(STATUS "BLAS/LAPACK could not be found.  A reference version will be employed.")
@@ -35,6 +35,9 @@ if (NOT BLAS_FOUND OR NOT LAPACK_FOUND)
   FetchContent_MakeAvailable(lapack)
   set(BLAS_LIBRARIES blas)
   set(LAPACK_LIBRARIES lapack)
+  set(BUILD_LAPACK_BLAS TRUE)
+else()
+    set(BUILD_LAPACK_BLAS FALSE)
 endif()
 
 if (NOT ferror_FOUND)
@@ -106,10 +109,46 @@ install(
 )
 install(DIRECTORY ${NONLIN_MOD_DIR} DESTINATION ${CMAKE_INSTALL_MODULEDIR})
 
-if (${BUILD_FERROR} AND ${BUILD_SHARED_LIBS})
-    install(IMPORTED_RUNTIME_ARTIFACTS ${FERROR_LIBRARIES})
-endif()
+if (${BUILD_SHARED_LIBS})
+    if (${BUILD_FERROR})
+        install(TARGETS ${FERROR_LIBRARIES}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
+    endif()
 
-if (${BUILD_LINALG} AND ${BUILD_SHARED_LIBS})
-    install(IMPORTED_RUNTIME_ARTIFACTS ${LINALG_LIBRARIES})
+    if (${BUILD_LINALG})
+        install(TARGETS ${LINALG_LIBRARIES}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
+    endif()
+
+    if (${BUILD_LAPACK_BLAS})
+        install(TARGETS ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
+    endif()
+else()
+    if (${BUILD_FERROR})
+        install(TARGETS ${FERROR_LIBRARIES}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
+    endif()
+
+    if (${BUILD_LINALG})
+        install(TARGETS ${LINALG_LIBRARIES}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
+    endif()
+
+    if (${BUILD_LAPACK_BLAS})
+        install(TARGETS ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
+    endif()
 endif()
