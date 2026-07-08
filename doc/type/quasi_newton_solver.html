@@ -134,21 +134,21 @@
             <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_gradient_tolerance">get_gradient_tolerance</a>
             <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_jacobian_interval">get_jacobian_interval</a>
             <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_line_search~2">get_line_search</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_max_fcn_evals">get_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_print_status">get_print_status</a>
+            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_max_fcn_evals~3">get_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_print_status~2">get_print_status</a>
             <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_use_line_search~2">get_use_line_search</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_var_tolerance">get_var_tolerance</a>
+            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-get_var_tolerance~2">get_var_tolerance</a>
             <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-is_line_search_defined~2">is_line_search_defined</a>
             <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_default_line_search~2">set_default_line_search</a>
             <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_fcn_tolerance">set_fcn_tolerance</a>
             <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_gradient_tolerance">set_gradient_tolerance</a>
             <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_jacobian_interval">set_jacobian_interval</a>
             <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_line_search~2">set_line_search</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_max_fcn_evals">set_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_print_status">set_print_status</a>
+            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_max_fcn_evals~3">set_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_print_status~2">set_print_status</a>
             <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_use_line_search~2">set_use_line_search</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_var_tolerance">set_var_tolerance</a>
-            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-solve~8">solve</a>
+            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-set_var_tolerance~2">set_var_tolerance</a>
+            <a class="list-group-item" href="../type/quasi_newton_solver.html#boundprocedure-solve~6">solve</a>
         </div>
       </div>
     </div>
@@ -165,12 +165,12 @@
       <h2>
         type, public, extends(<a href='line_search_solver.html'>line_search_solver</a>) :: quasi_newton_solver</h2>
     <p>Defines a quasi-Newton solver based upon Broyden's method.  The
-algorithm maintains an approximate Jacobian $B_k$ and updates the
+algorithm maintains an approximate Jacobian <script type="math/tex">B_k</script> and updates the
 iterate from the nonlinear system $F(x)=0$ using
 <script type="math/tex; mode=display"> B_k s_k = -F(x_k), \qquad x_{k+1} = x_k + s_k </script>
 with the rank-one Jacobian correction
 <script type="math/tex; mode=display"> B_{k+1} = B_k + \frac{(y_k - B_k s_k)s_k^T}{s_k^T s_k} </script>
-where $y_k = F(x_{k+1}) - F(x_k)$. </p>
+where <script type="math/tex">y_k = F(x_{k+1}) - F(x_k)</script>. </p>
     <br>
 
     
@@ -425,7 +425,7 @@ recalculation of the Jacobian matrix.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_max_fcn_evals"></span>
+      <span class="anchor" id="boundprocedure-get_max_fcn_evals~3"></span>
       <h3>
           procedure, public ::
   <strong>get_max_fcn_evals</strong> => es_get_max_eval
@@ -484,7 +484,7 @@ a single solve.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_print_status"></span>
+      <span class="anchor" id="boundprocedure-get_print_status~2"></span>
       <h3>
           procedure, public ::
   <strong>get_print_status</strong> => es_get_print_status
@@ -601,7 +601,7 @@ printed.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_var_tolerance"></span>
+      <span class="anchor" id="boundprocedure-get_var_tolerance~2"></span>
       <h3>
           procedure, public ::
   <strong>get_var_tolerance</strong> => es_get_var_tol
@@ -1044,7 +1044,7 @@ recalculation of the Jacobian matrix.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_max_fcn_evals"></span>
+      <span class="anchor" id="boundprocedure-set_max_fcn_evals~3"></span>
       <h3>
           procedure, public ::
   <strong>set_max_fcn_evals</strong> => es_set_max_eval
@@ -1113,7 +1113,7 @@ a single solve.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_print_status"></span>
+      <span class="anchor" id="boundprocedure-set_print_status~2"></span>
       <h3>
           procedure, public ::
   <strong>set_print_status</strong> => es_set_print_status
@@ -1250,7 +1250,7 @@ printed.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_var_tolerance"></span>
+      <span class="anchor" id="boundprocedure-set_var_tolerance~2"></span>
       <h3>
           procedure, public ::
   <strong>set_var_tolerance</strong> => es_set_var_tol
@@ -1318,7 +1318,7 @@ printed.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-solve~8"></span>
+      <span class="anchor" id="boundprocedure-solve~6"></span>
       <h3>
           procedure, public ::
   <strong>solve</strong> => qns_solve
@@ -1495,7 +1495,7 @@ fcn.</p>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-07-08 17:48              </p>
+ on 2026-07-08 18:01              </p>
           </div>
         </div>
         <br>

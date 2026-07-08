@@ -152,14 +152,14 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
-                  <li class="list-inline-item">linalg</li>
-                  <li class="list-inline-item"><a href='nonlin_types.html'>nonlin_types</a></li>
-                  <li class="list-inline-item"><a href='nonlin_linesearch.html'>nonlin_linesearch</a></li>
-                  <li class="list-inline-item">ferror</li>
-                  <li class="list-inline-item"><a href='nonlin_multi_var.html'>nonlin_multi_var</a></li>
                   <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_fortran_env'>iso_fortran_env</a></li>
+                  <li class="list-inline-item"><a href='nonlin_linesearch.html'>nonlin_linesearch</a></li>
                   <li class="list-inline-item"><a href='nonlin_error_handling.html'>nonlin_error_handling</a></li>
+                  <li class="list-inline-item">ferror</li>
+                  <li class="list-inline-item"><a href='nonlin_types.html'>nonlin_types</a></li>
                   <li class="list-inline-item">linalg_errors</li>
+                  <li class="list-inline-item">linalg</li>
+                  <li class="list-inline-item"><a href='nonlin_multi_var.html'>nonlin_multi_var</a></li>
                   <li class="list-inline-item">lapack</li>
               </ul>
             </li>
@@ -191,7 +191,7 @@
 minimization of smooth functions of multiple variables.  The method
 uses a quasi-Newton inverse Hessian approximation and the update
 <script type="math/tex; mode=display"> B_{k+1} = B_k + \frac{y_k y_k^T}{y_k^T s_k} - \frac{B_k s_k s_k^T B_k}{s_k^T B_k s_k} </script>
-with $s_k = x_{k+1}-x_k$ and $y_k = \nabla f(x_{k+1})-\nabla f(x_k)$. </p><a href="../type/bfgs.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+with <script type="math/tex">s_k = x_{k+1}-x_k</script> and <script type="math/tex">y_k = \nabla f(x_{k+1})-\nabla f(x_k)</script>. </p><a href="../type/bfgs.html" class="pull-right"><emph>Read more&hellip;</emph></a>
 
 
 
@@ -206,12 +206,12 @@ with $s_k = x_{k+1}-x_k$ and $y_k = \nabla f(x_{k+1})-\nabla f(x_k)$. </p><a hre
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-get_max_fcn_evals~2'>get_max_fcn_evals</a></strong> => oe_get_max_eval</td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-get_max_fcn_evals'>get_max_fcn_evals</a></strong> => oe_get_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-get_print_status~2'>get_print_status</a></strong> => oe_get_print_status</td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-get_print_status'>get_print_status</a></strong> => oe_get_print_status</td>
                 <td></td>
               </tr>
               <tr>
@@ -226,7 +226,7 @@ with $s_k = x_{k+1}-x_k$ and $y_k = \nabla f(x_{k+1})-\nabla f(x_k)$. </p><a hre
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_optimizer.html#boundprocedure-get_var_tolerance~2'>get_var_tolerance</a></strong> => lso_get_var_tol</td>
+  <strong><a href='..\type\line_search_optimizer.html#boundprocedure-get_var_tolerance'>get_var_tolerance</a></strong> => lso_get_var_tol</td>
                 <td></td>
               </tr>
               <tr>
@@ -246,12 +246,12 @@ with $s_k = x_{k+1}-x_k$ and $y_k = \nabla f(x_{k+1})-\nabla f(x_k)$. </p><a hre
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-set_max_fcn_evals~2'>set_max_fcn_evals</a></strong> => oe_set_max_eval</td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-set_max_fcn_evals'>set_max_fcn_evals</a></strong> => oe_set_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-set_print_status~2'>set_print_status</a></strong> => oe_set_print_status</td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-set_print_status'>set_print_status</a></strong> => oe_set_print_status</td>
                 <td></td>
               </tr>
               <tr>
@@ -266,12 +266,12 @@ with $s_k = x_{k+1}-x_k$ and $y_k = \nabla f(x_{k+1})-\nabla f(x_k)$. </p><a hre
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_optimizer.html#boundprocedure-set_var_tolerance~2'>set_var_tolerance</a></strong> => lso_set_var_tol</td>
+  <strong><a href='..\type\line_search_optimizer.html#boundprocedure-set_var_tolerance'>set_var_tolerance</a></strong> => lso_set_var_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\bfgs.html#boundprocedure-solve~3'>solve</a></strong> => bfgs_solve</td>
+  <strong><a href='..\type\bfgs.html#boundprocedure-solve~5'>solve</a></strong> => bfgs_solve</td>
                 <td></td>
               </tr>
           </tbody>
@@ -290,8 +290,8 @@ with $s_k = x_{k+1}-x_k$ and $y_k = \nabla f(x_{k+1})-\nabla f(x_k)$. </p><a hre
     </div>
     <div class="card-body">
       <p>A base class for optimizers that improve a trial step with a line
-search.  The search direction $p_k$ is combined with a step length
-$\alpha_k$ through
+search.  The search direction <script type="math/tex">p_k</script> is combined with a step length
+<script type="math/tex">\alpha_k</script> through
 <script type="math/tex; mode=display"> x_{k+1} = x_k + \alpha_k p_k </script>
 and the accepted step satisfies a sufficient decrease condition.</p>
 
@@ -308,12 +308,12 @@ and the accepted step satisfies a sufficient decrease condition.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-get_max_fcn_evals~2'>get_max_fcn_evals</a></strong> => oe_get_max_eval</td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-get_max_fcn_evals'>get_max_fcn_evals</a></strong> => oe_get_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-get_print_status~2'>get_print_status</a></strong> => oe_get_print_status</td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-get_print_status'>get_print_status</a></strong> => oe_get_print_status</td>
                 <td></td>
               </tr>
               <tr>
@@ -328,7 +328,7 @@ and the accepted step satisfies a sufficient decrease condition.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_optimizer.html#boundprocedure-get_var_tolerance~2'>get_var_tolerance</a></strong> => lso_get_var_tol</td>
+  <strong><a href='..\type\line_search_optimizer.html#boundprocedure-get_var_tolerance'>get_var_tolerance</a></strong> => lso_get_var_tol</td>
                 <td></td>
               </tr>
               <tr>
@@ -348,12 +348,12 @@ and the accepted step satisfies a sufficient decrease condition.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-set_max_fcn_evals~2'>set_max_fcn_evals</a></strong> => oe_set_max_eval</td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-set_max_fcn_evals'>set_max_fcn_evals</a></strong> => oe_set_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-set_print_status~2'>set_print_status</a></strong> => oe_set_print_status</td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-set_print_status'>set_print_status</a></strong> => oe_set_print_status</td>
                 <td></td>
               </tr>
               <tr>
@@ -368,12 +368,12 @@ and the accepted step satisfies a sufficient decrease condition.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_optimizer.html#boundprocedure-set_var_tolerance~2'>set_var_tolerance</a></strong> => lso_set_var_tol</td>
+  <strong><a href='..\type\line_search_optimizer.html#boundprocedure-set_var_tolerance'>set_var_tolerance</a></strong> => lso_set_var_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure(<a href='..\interface\nonlin_optimize_fcn.html'>nonlin_optimize_fcn</a>), public, deferred, pass ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-solve~6'>solve</a></strong></td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-solve~3'>solve</a></strong></td>
                 <td></td>
               </tr>
           </tbody>
@@ -394,7 +394,7 @@ and the accepted step satisfies a sufficient decrease condition.</p>
       <p>Defines a direct-search optimizer based on Nelder and Mead's simplex
 method.  The algorithm maintains a simplex of $n+1$ vertices and
 updates it by reflection, expansion, contraction, and shrinking
-steps to reduce the objective value $f(x)$.</p>
+steps to reduce the objective value <script type="math/tex">f(x)</script>.</p>
 
 
 
@@ -409,12 +409,12 @@ steps to reduce the objective value $f(x)$.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-get_max_fcn_evals~2'>get_max_fcn_evals</a></strong> => oe_get_max_eval</td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-get_max_fcn_evals'>get_max_fcn_evals</a></strong> => oe_get_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-get_print_status~2'>get_print_status</a></strong> => oe_get_print_status</td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-get_print_status'>get_print_status</a></strong> => oe_get_print_status</td>
                 <td></td>
               </tr>
               <tr>
@@ -434,12 +434,12 @@ steps to reduce the objective value $f(x)$.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-set_max_fcn_evals~2'>set_max_fcn_evals</a></strong> => oe_set_max_eval</td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-set_max_fcn_evals'>set_max_fcn_evals</a></strong> => oe_set_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-set_print_status~2'>set_print_status</a></strong> => oe_set_print_status</td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-set_print_status'>set_print_status</a></strong> => oe_set_print_status</td>
                 <td></td>
               </tr>
               <tr>
@@ -454,7 +454,7 @@ steps to reduce the objective value $f(x)$.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\nelder_mead.html#boundprocedure-solve~2'>solve</a></strong> => nm_solve</td>
+  <strong><a href='..\type\nelder_mead.html#boundprocedure-solve~4'>solve</a></strong> => nm_solve</td>
                 <td></td>
               </tr>
           </tbody>
@@ -484,7 +484,7 @@ steps to reduce the objective value $f(x)$.</p>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-07-08 17:48              </p>
+ on 2026-07-08 18:01              </p>
           </div>
         </div>
         <br>

@@ -164,8 +164,8 @@
             <li class="list-group-item">
               <ul class="list-inline">
                   <li class="list-inline-item">ferror</li>
-                  <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_fortran_env'>iso_fortran_env</a></li>
                   <li class="list-inline-item"><a href='nonlin_types.html'>nonlin_types</a></li>
+                  <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_fortran_env'>iso_fortran_env</a></li>
               </ul>
             </li>
         </ul>
@@ -207,7 +207,7 @@
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-x~55"></span>
+              <span class="anchor" id="variable-x~82"></span>
               real(kind=real64),
             </td>
 <td>intent(in)</td>
@@ -222,7 +222,7 @@
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-args~16"></span>
+              <span class="anchor" id="variable-args~22"></span>
               class(*),
             </td>
 <td>intent(inout),</td>
@@ -277,7 +277,7 @@ variable.</p>
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this~62"></span>
+              <span class="anchor" id="variable-this~95"></span>
               class(<a href='..\type\equation_solver_1var.html'>equation_solver_1var</a>),
             </td>
 <td>intent(inout)</td>
@@ -292,7 +292,7 @@ variable.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-fcn~14"></span>
+              <span class="anchor" id="variable-fcn~20"></span>
               class(<a href='..\type\fcn1var_helper.html'>fcn1var_helper</a>),
             </td>
 <td>intent(in)</td>
@@ -307,7 +307,7 @@ variable.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-x~56"></span>
+              <span class="anchor" id="variable-x~83"></span>
               real(kind=real64),
             </td>
 <td>intent(inout)</td>
@@ -323,7 +323,7 @@ solution.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-lim"></span>
+              <span class="anchor" id="variable-lim~4"></span>
               type(<a href='..\type\value_pair.html'>value_pair</a>),
             </td>
 <td>intent(in)</td>
@@ -338,7 +338,7 @@ solution.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-f~10"></span>
+              <span class="anchor" id="variable-f~17"></span>
               real(kind=real64),
             </td>
 <td>intent(out),</td>
@@ -354,7 +354,7 @@ as computed at x.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-ib~7"></span>
+              <span class="anchor" id="variable-ib~13"></span>
               type(<a href='..\type\iteration_behavior.html'>iteration_behavior</a>),
             </td>
 <td></td>
@@ -370,7 +370,7 @@ caller to obtain iteration performance information.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-args~17"></span>
+              <span class="anchor" id="variable-args~23"></span>
               class(*),
             </td>
 <td>intent(inout),</td>
@@ -386,7 +386,7 @@ the routine.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-err~9"></span>
+              <span class="anchor" id="variable-err~25"></span>
               class(errors),
             </td>
 <td>intent(inout),</td>
@@ -443,7 +443,7 @@ the routine.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_max_fcn_evals~3'>get_max_fcn_evals</a></strong> => es1_get_max_eval</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_max_fcn_evals~4'>get_max_fcn_evals</a></strong> => es1_get_max_eval</td>
                 <td></td>
               </tr>
               <tr>
@@ -468,7 +468,7 @@ the routine.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_max_fcn_evals~3'>set_max_fcn_evals</a></strong> => es1_set_max_eval</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_max_fcn_evals~4'>set_max_fcn_evals</a></strong> => es1_set_max_eval</td>
                 <td></td>
               </tr>
               <tr>
@@ -483,7 +483,7 @@ the routine.</p>
               </tr>
               <tr>
                 <td>  procedure(<a href='..\interface\nonlin_solver_1var.html'>nonlin_solver_1var</a>), public, deferred, pass ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-solve~7'>solve</a></strong></td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-solve~11'>solve</a></strong></td>
                 <td></td>
               </tr>
           </tbody>
@@ -517,7 +517,7 @@ variable of the form: f(x) = 0.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\fcn1var_helper.html#boundprocedure-fcn~13'>fcn</a></strong> => f1h_fcn</td>
+  <strong><a href='..\type\fcn1var_helper.html#boundprocedure-fcn~19'>fcn</a></strong> => f1h_fcn</td>
                 <td></td>
               </tr>
               <tr>
@@ -567,7 +567,7 @@ variable of the form: f(x) = 0.</p>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-07-08 17:48              </p>
+ on 2026-07-08 18:01              </p>
           </div>
         </div>
         <br>

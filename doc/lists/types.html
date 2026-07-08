@@ -77,13 +77,13 @@
 minimization of smooth functions of multiple variables.  The method
 uses a quasi-Newton inverse Hessian approximation and the update
 <script type="math/tex; mode=display"> B_{k+1} = B_k + \frac{y_k y_k^T}{y_k^T s_k} - \frac{B_k s_k s_k^T B_k}{s_k^T B_k s_k} </script>
-with $s_k = x_{k+1}-x_k$ and $y_k = \nabla f(x_{k+1})-\nabla f(x_k)$. </p><a href="../type/bfgs.html" class="pull-right"><emph>Read more&hellip;</emph></a></td>
+with <script type="math/tex">s_k = x_{k+1}-x_k</script> and <script type="math/tex">y_k = \nabla f(x_{k+1})-\nabla f(x_k)</script>. </p><a href="../type/bfgs.html" class="pull-right"><emph>Read more&hellip;</emph></a></td>
                </tr>
 			   <tr>
                  <td><a href='..\type\brent_solver.html'>brent_solver</a></td>
                  <td><a href='..\module\nonlin_solve.html'>nonlin_solve</a></td>
                  <td><a href='..\type\equation_solver_1var.html'>equation_solver_1var</a></td>
-                 <td><p>Defines a derivative-free solver for a scalar equation $f(x)=0$
+                 <td><p>Defines a derivative-free solver for a scalar equation <script type="math/tex">f(x)=0</script>
 based on Brent's method.  The method combines bisection with secant
 and inverse quadratic interpolation to maintain a bracket and
 converge to a root.</p></td>
@@ -93,7 +93,7 @@ converge to a root.</p></td>
                  <td><a href='..\module\nonlin_least_squares.html'>nonlin_least_squares</a></td>
                  <td><a href='..\type\least_squares_solver.html'>least_squares_solver</a></td>
                  <td><p>A least-squares solver that enforces bounds on the solution values,
-typically expressed as $x_i^L \le x_i \le x_i^U$.  The solver
+typically expressed as <script type="math/tex">x_i^L \le x_i \le x_i^U</script>.  The solver
 applies the bounds during the iteration so that each trial step
 remains feasible.</p></td>
                </tr>
@@ -102,16 +102,16 @@ remains feasible.</p></td>
                  <td><a href='..\module\nonlin_least_squares.html'>nonlin_least_squares</a></td>
                  <td><a href='..\type\constrained_equation_solver.html'>constrained_equation_solver</a></td>
                  <td><p>Defines a constrained least-squares solver using Powell's trust
-region method.  The method seeks a correction $p$ that reduces the
-residual vector $r(x)$ while remaining inside a trust region of size
-$\Delta$ and the bounds $x^L \le x \le x^U$.  The trial step is
+region method.  The method seeks a correction <script type="math/tex">p</script> that reduces the
+residual vector <script type="math/tex">r(x)</script> while remaining inside a trust region of size
+<script type="math/tex">\Delta</script> and the bounds <script type="math/tex">x^L \le x \le x^U</script>.  The trial step is
 formed from a Gauss-Newton step
 <script type="math/tex; mode=display"> J p_{gn} = -r </script>
 a steepest-descent step
 <script type="math/tex; mode=display"> p_{sd} = -\alpha g, \qquad g = J^T r, \qquad \alpha = \frac{\|g\|^2}{\|Jg\|^2} </script>
 and a dogleg combination
 <script type="math/tex; mode=display"> p = p_{sd} + t \left( p_{gn} - p_{sd} \right) </script>
-with $t$ chosen so that $|p| = \Delta$.  If the trust-region step
+with <script type="math/tex">t</script> chosen so that <script type="math/tex">\|p\| = \Delta</script>.  If the trust-region step
 is rejected, a backtracking line search is used to improve the
 step acceptance.</p></td>
                </tr>
@@ -160,7 +160,7 @@ iteration process.</p></td>
                  <td><p>Defines a Levenberg-Marquardt solver for unconstrained least-squares
 problems.  The update is obtained from the damped normal equations
 <script type="math/tex; mode=display"> (J^T J + \lambda I) \Delta x = -J^T r </script>
-where $r(x)$ is the residual vector and $x_{k+1}=x_k+\Delta x$.</p></td>
+where <script type="math/tex">r(x)</script> is the residual vector and <script type="math/tex">x_{k+1}=x_k+\Delta x</script>.</p></td>
                </tr>
 			   <tr>
                  <td><a href='..\type\line_search.html'>line_search</a></td>
@@ -175,8 +175,8 @@ that is usable for unconstrained minimization problems.</p><a href="../type/line
                  <td><a href='..\module\nonlin_optimize.html'>nonlin_optimize</a></td>
                  <td><a href='..\type\equation_optimizer.html'>equation_optimizer</a></td>
                  <td><p>A base class for optimizers that improve a trial step with a line
-search.  The search direction $p_k$ is combined with a step length
-$\alpha_k$ through
+search.  The search direction <script type="math/tex">p_k</script> is combined with a step length
+<script type="math/tex">\alpha_k</script> through
 <script type="math/tex; mode=display"> x_{k+1} = x_k + \alpha_k p_k </script>
 and the accepted step satisfies a sufficient decrease condition.</p></td>
                </tr>
@@ -199,13 +199,13 @@ decrease condition such as the Armijo rule
                  <td><p>Defines a direct-search optimizer based on Nelder and Mead's simplex
 method.  The algorithm maintains a simplex of $n+1$ vertices and
 updates it by reflection, expansion, contraction, and shrinking
-steps to reduce the objective value $f(x)$.</p></td>
+steps to reduce the objective value <script type="math/tex">f(x)</script>.</p></td>
                </tr>
 			   <tr>
                  <td><a href='..\type\newton_1var_solver.html'>newton_1var_solver</a></td>
                  <td><a href='..\module\nonlin_solve.html'>nonlin_solve</a></td>
                  <td><a href='..\type\equation_solver_1var.html'>equation_solver_1var</a></td>
-                 <td><p>Defines a safeguarded Newton solver for a scalar equation $f(x)=0$.
+                 <td><p>Defines a safeguarded Newton solver for a scalar equation <script type="math/tex">f(x)=0</script>.
 The iteration uses the Newton update
 <script type="math/tex; mode=display"> x_{k+1} = x_k - \frac{f(x_k)}{f'(x_k)} </script>
 and retains a bracketing interval so that the step remains bounded
@@ -218,7 +218,7 @@ by the root bracket.</p></td>
                  <td><p>Defines a Newton solver for systems of nonlinear equations.  At each
 iteration the correction is obtained from the linearized system
 <script type="math/tex; mode=display"> J(x_k) \Delta x_k = -F(x_k), \qquad x_{k+1} = x_k + \Delta x_k </script>
-where $J(x_k)$ is the Jacobian matrix of $F$.</p></td>
+where <script type="math/tex">J(x_k)</script> is the Jacobian matrix of <script type="math/tex">F</script>.</p></td>
                </tr>
 			   <tr>
                  <td><a href='..\type\polynomial.html'>polynomial</a></td>
@@ -232,12 +232,12 @@ polynomial operations.</p></td>
                  <td><a href='..\module\nonlin_solve.html'>nonlin_solve</a></td>
                  <td><a href='..\type\line_search_solver.html'>line_search_solver</a></td>
                  <td><p>Defines a quasi-Newton solver based upon Broyden's method.  The
-algorithm maintains an approximate Jacobian $B_k$ and updates the
+algorithm maintains an approximate Jacobian <script type="math/tex">B_k</script> and updates the
 iterate from the nonlinear system $F(x)=0$ using
 <script type="math/tex; mode=display"> B_k s_k = -F(x_k), \qquad x_{k+1} = x_k + s_k </script>
 with the rank-one Jacobian correction
 <script type="math/tex; mode=display"> B_{k+1} = B_k + \frac{(y_k - B_k s_k)s_k^T}{s_k^T s_k} </script>
-where $y_k = F(x_{k+1}) - F(x_k)$. </p></td>
+where <script type="math/tex">y_k = F(x_{k+1}) - F(x_k)</script>. </p></td>
                </tr>
 			   <tr>
                  <td><a href='..\type\value_pair.html'>value_pair</a></td>
@@ -271,7 +271,7 @@ ancillary operations that may be needed by the solver.</p></td>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-07-08 17:48              </p>
+ on 2026-07-08 18:01              </p>
           </div>
         </div>
         <br>

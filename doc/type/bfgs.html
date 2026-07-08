@@ -131,20 +131,20 @@
       <div id="boundprocs-0" class="collapse">
         <div class="list-group list-group-flush">
             <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_line_search">get_line_search</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_max_fcn_evals~2">get_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_print_status~2">get_print_status</a>
+            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_max_fcn_evals">get_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_print_status">get_print_status</a>
             <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_tolerance">get_tolerance</a>
             <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_use_line_search">get_use_line_search</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_var_tolerance~2">get_var_tolerance</a>
+            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_var_tolerance">get_var_tolerance</a>
             <a class="list-group-item" href="../type/bfgs.html#boundprocedure-is_line_search_defined">is_line_search_defined</a>
             <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_default_line_search">set_default_line_search</a>
             <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_line_search">set_line_search</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_max_fcn_evals~2">set_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_print_status~2">set_print_status</a>
+            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_max_fcn_evals">set_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_print_status">set_print_status</a>
             <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_tolerance">set_tolerance</a>
             <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_use_line_search">set_use_line_search</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_var_tolerance~2">set_var_tolerance</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-solve~3">solve</a>
+            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_var_tolerance">set_var_tolerance</a>
+            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-solve~5">solve</a>
         </div>
       </div>
     </div>
@@ -164,7 +164,7 @@
 minimization of smooth functions of multiple variables.  The method
 uses a quasi-Newton inverse Hessian approximation and the update
 <script type="math/tex; mode=display"> B_{k+1} = B_k + \frac{y_k y_k^T}{y_k^T s_k} - \frac{B_k s_k s_k^T B_k}{s_k^T B_k s_k} </script>
-with $s_k = x_{k+1}-x_k$ and $y_k = \nabla f(x_{k+1})-\nabla f(x_k)$. </p>
+with <script type="math/tex">s_k = x_{k+1}-x_k</script> and <script type="math/tex">y_k = \nabla f(x_{k+1})-\nabla f(x_k)</script>. </p>
 <p>See Also:</p>
 <ul>
 <li>
@@ -255,7 +255,7 @@ with $s_k = x_{k+1}-x_k$ and $y_k = \nabla f(x_{k+1})-\nabla f(x_k)$. </p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_max_fcn_evals~2"></span>
+      <span class="anchor" id="boundprocedure-get_max_fcn_evals"></span>
       <h3>
           procedure, public ::
   <strong>get_max_fcn_evals</strong> => oe_get_max_eval
@@ -313,7 +313,7 @@ with $s_k = x_{k+1}-x_k$ and $y_k = \nabla f(x_{k+1})-\nabla f(x_k)$. </p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_print_status~2"></span>
+      <span class="anchor" id="boundprocedure-get_print_status"></span>
       <h3>
           procedure, public ::
   <strong>get_print_status</strong> => oe_get_print_status
@@ -487,7 +487,7 @@ with $s_k = x_{k+1}-x_k$ and $y_k = \nabla f(x_{k+1})-\nabla f(x_k)$. </p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_var_tolerance~2"></span>
+      <span class="anchor" id="boundprocedure-get_var_tolerance"></span>
       <h3>
           procedure, public ::
   <strong>get_var_tolerance</strong> => lso_get_var_tol
@@ -725,7 +725,7 @@ module.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_max_fcn_evals~2"></span>
+      <span class="anchor" id="boundprocedure-set_max_fcn_evals"></span>
       <h3>
           procedure, public ::
   <strong>set_max_fcn_evals</strong> => oe_set_max_eval
@@ -793,7 +793,7 @@ module.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_print_status~2"></span>
+      <span class="anchor" id="boundprocedure-set_print_status"></span>
       <h3>
           procedure, public ::
   <strong>set_print_status</strong> => oe_set_print_status
@@ -997,7 +997,7 @@ module.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_var_tolerance~2"></span>
+      <span class="anchor" id="boundprocedure-set_var_tolerance"></span>
       <h3>
           procedure, public ::
   <strong>set_var_tolerance</strong> => lso_set_var_tol
@@ -1065,7 +1065,7 @@ module.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-solve~3"></span>
+      <span class="anchor" id="boundprocedure-solve~5"></span>
       <h3>
           procedure, public ::
   <strong>solve</strong> => bfgs_solve
@@ -1228,7 +1228,7 @@ obtain iteration performance statistics.</p>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-07-08 17:48              </p>
+ on 2026-07-08 18:01              </p>
           </div>
         </div>
         <br>

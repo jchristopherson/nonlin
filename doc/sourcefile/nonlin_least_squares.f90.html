@@ -175,7 +175,7 @@
 <a id="ln-22" name="ln-22" href="#ln-22"></a><span class="w">        </span><span class="c">!! Defines a Levenberg-Marquardt solver for unconstrained least-squares</span>
 <a id="ln-23" name="ln-23" href="#ln-23"></a><span class="w">        </span><span class="c">!! problems.  The update is obtained from the damped normal equations</span>
 <a id="ln-24" name="ln-24" href="#ln-24"></a><span class="w">        </span><span class="c">!! $$ (J^T J + \lambda I) \Delta x = -J^T r $$</span>
-<a id="ln-25" name="ln-25" href="#ln-25"></a><span class="w">        </span><span class="c">!! where $r(x)$ is the residual vector and $x_{k+1}=x_k+\Delta x$.</span>
+<a id="ln-25" name="ln-25" href="#ln-25"></a><span class="w">        </span><span class="c">!! where \(r(x)\) is the residual vector and \(x_{k+1}=x_k+\Delta x\).</span>
 <a id="ln-26" name="ln-26" href="#ln-26"></a><span class="w">        </span><span class="kt">real</span><span class="p">(</span><span class="n">real64</span><span class="p">),</span><span class="w"> </span><span class="k">private</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">m_factor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="mf">0.0d0</span>
 <a id="ln-27" name="ln-27" href="#ln-27"></a><span class="w">            </span><span class="c">!! Initial step bounding factor</span>
 <a id="ln-28" name="ln-28" href="#ln-28"></a><span class="w">    </span><span class="k">contains</span>
@@ -186,7 +186,7 @@
 <a id="ln-33" name="ln-33" href="#ln-33"></a>
 <a id="ln-34" name="ln-34" href="#ln-34"></a><span class="k">    type</span><span class="p">,</span><span class="w"> </span><span class="k">abstract</span><span class="p">,</span><span class="w"> </span><span class="k">extends</span><span class="p">(</span><span class="n">least_squares_solver</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">constrained_equation_solver</span>
 <a id="ln-35" name="ln-35" href="#ln-35"></a><span class="w">        </span><span class="c">!! A least-squares solver that enforces bounds on the solution values,</span>
-<a id="ln-36" name="ln-36" href="#ln-36"></a><span class="w">        </span><span class="c">!! typically expressed as $x_i^L \le x_i \le x_i^U$.  The solver</span>
+<a id="ln-36" name="ln-36" href="#ln-36"></a><span class="w">        </span><span class="c">!! typically expressed as \(x_i^L \le x_i \le x_i^U\).  The solver</span>
 <a id="ln-37" name="ln-37" href="#ln-37"></a><span class="w">        </span><span class="c">!! applies the bounds during the iteration so that each trial step</span>
 <a id="ln-38" name="ln-38" href="#ln-38"></a><span class="w">        </span><span class="c">!! remains feasible.</span>
 <a id="ln-39" name="ln-39" href="#ln-39"></a><span class="w">        </span><span class="kt">real</span><span class="p">(</span><span class="n">real64</span><span class="p">),</span><span class="w"> </span><span class="k">private</span><span class="p">,</span><span class="w"> </span><span class="k">allocatable</span><span class="p">,</span><span class="w"> </span><span class="k">dimension</span><span class="p">(:)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">m_upper</span>
@@ -203,16 +203,16 @@
 <a id="ln-50" name="ln-50" href="#ln-50"></a>
 <a id="ln-51" name="ln-51" href="#ln-51"></a><span class="k">    type</span><span class="p">,</span><span class="w"> </span><span class="k">extends</span><span class="p">(</span><span class="n">constrained_equation_solver</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">constrained_least_squares_solver</span>
 <a id="ln-52" name="ln-52" href="#ln-52"></a><span class="w">        </span><span class="c">!! Defines a constrained least-squares solver using Powell&#39;s trust</span>
-<a id="ln-53" name="ln-53" href="#ln-53"></a><span class="w">        </span><span class="c">!! region method.  The method seeks a correction $p$ that reduces the</span>
-<a id="ln-54" name="ln-54" href="#ln-54"></a><span class="w">        </span><span class="c">!! residual vector $r(x)$ while remaining inside a trust region of size</span>
-<a id="ln-55" name="ln-55" href="#ln-55"></a><span class="w">        </span><span class="c">!! $\Delta$ and the bounds $x^L \le x \le x^U$.  The trial step is</span>
+<a id="ln-53" name="ln-53" href="#ln-53"></a><span class="w">        </span><span class="c">!! region method.  The method seeks a correction \(p\) that reduces the</span>
+<a id="ln-54" name="ln-54" href="#ln-54"></a><span class="w">        </span><span class="c">!! residual vector \(r(x)\) while remaining inside a trust region of size</span>
+<a id="ln-55" name="ln-55" href="#ln-55"></a><span class="w">        </span><span class="c">!! \(\Delta\) and the bounds \(x^L \le x \le x^U\).  The trial step is</span>
 <a id="ln-56" name="ln-56" href="#ln-56"></a><span class="w">        </span><span class="c">!! formed from a Gauss-Newton step</span>
 <a id="ln-57" name="ln-57" href="#ln-57"></a><span class="w">        </span><span class="c">!! $$ J p_{gn} = -r $$</span>
 <a id="ln-58" name="ln-58" href="#ln-58"></a><span class="w">        </span><span class="c">!! a steepest-descent step</span>
 <a id="ln-59" name="ln-59" href="#ln-59"></a><span class="w">        </span><span class="c">!! $$ p_{sd} = -\alpha g, \qquad g = J^T r, \qquad \alpha = \frac{\|g\|^2}{\|Jg\|^2} $$</span>
 <a id="ln-60" name="ln-60" href="#ln-60"></a><span class="w">        </span><span class="c">!! and a dogleg combination</span>
 <a id="ln-61" name="ln-61" href="#ln-61"></a><span class="w">        </span><span class="c">!! $$ p = p_{sd} + t \left( p_{gn} - p_{sd} \right) $$</span>
-<a id="ln-62" name="ln-62" href="#ln-62"></a><span class="w">        </span><span class="c">!! with $t$ chosen so that $\|p\| = \Delta$.  If the trust-region step</span>
+<a id="ln-62" name="ln-62" href="#ln-62"></a><span class="w">        </span><span class="c">!! with \(t\) chosen so that \(\|p\| = \Delta\).  If the trust-region step</span>
 <a id="ln-63" name="ln-63" href="#ln-63"></a><span class="w">        </span><span class="c">!! is rejected, a backtracking line search is used to improve the</span>
 <a id="ln-64" name="ln-64" href="#ln-64"></a><span class="w">        </span><span class="c">!! step acceptance.</span>
 <a id="ln-65" name="ln-65" href="#ln-65"></a><span class="w">        </span><span class="kt">real</span><span class="p">(</span><span class="n">real64</span><span class="p">),</span><span class="w"> </span><span class="k">private</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">m_delta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0d0</span>
@@ -1666,7 +1666,7 @@
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-07-08 17:48              </p>
+ on 2026-07-08 18:01              </p>
           </div>
         </div>
         <br>

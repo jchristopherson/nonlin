@@ -22,7 +22,7 @@ module nonlin_least_squares
         !! Defines a Levenberg-Marquardt solver for unconstrained least-squares
         !! problems.  The update is obtained from the damped normal equations
         !! $$ (J^T J + \lambda I) \Delta x = -J^T r $$
-        !! where $r(x)$ is the residual vector and $x_{k+1}=x_k+\Delta x$.
+        !! where \(r(x)\) is the residual vector and \(x_{k+1}=x_k+\Delta x\).
         real(real64), private :: m_factor = 100.0d0
             !! Initial step bounding factor
     contains
@@ -33,7 +33,7 @@ module nonlin_least_squares
 
     type, abstract, extends(least_squares_solver) :: constrained_equation_solver
         !! A least-squares solver that enforces bounds on the solution values,
-        !! typically expressed as $x_i^L \le x_i \le x_i^U$.  The solver
+        !! typically expressed as \(x_i^L \le x_i \le x_i^U\).  The solver
         !! applies the bounds during the iteration so that each trial step
         !! remains feasible.
         real(real64), private, allocatable, dimension(:) :: m_upper
@@ -50,16 +50,16 @@ module nonlin_least_squares
 
     type, extends(constrained_equation_solver) :: constrained_least_squares_solver
         !! Defines a constrained least-squares solver using Powell's trust
-        !! region method.  The method seeks a correction $p$ that reduces the
-        !! residual vector $r(x)$ while remaining inside a trust region of size
-        !! $\Delta$ and the bounds $x^L \le x \le x^U$.  The trial step is
+        !! region method.  The method seeks a correction \(p\) that reduces the
+        !! residual vector \(r(x)\) while remaining inside a trust region of size
+        !! \(\Delta\) and the bounds \(x^L \le x \le x^U\).  The trial step is
         !! formed from a Gauss-Newton step
         !! $$ J p_{gn} = -r $$
         !! a steepest-descent step
         !! $$ p_{sd} = -\alpha g, \qquad g = J^T r, \qquad \alpha = \frac{\|g\|^2}{\|Jg\|^2} $$
         !! and a dogleg combination
         !! $$ p = p_{sd} + t \left( p_{gn} - p_{sd} \right) $$
-        !! with $t$ chosen so that $\|p\| = \Delta$.  If the trust-region step
+        !! with \(t\) chosen so that \(\|p\| = \Delta\).  If the trust-region step
         !! is rejected, a backtracking line search is used to improve the
         !! step acceptance.
         real(real64), private :: m_delta = 1.0d0

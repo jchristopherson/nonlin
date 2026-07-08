@@ -196,12 +196,12 @@
 <a id="ln-43" name="ln-43" href="#ln-43"></a>
 <a id="ln-44" name="ln-44" href="#ln-44"></a><span class="k">    type</span><span class="p">,</span><span class="w"> </span><span class="k">extends</span><span class="p">(</span><span class="n">line_search_solver</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">quasi_newton_solver</span>
 <a id="ln-45" name="ln-45" href="#ln-45"></a><span class="w">        </span><span class="c">!! Defines a quasi-Newton solver based upon Broyden&#39;s method.  The</span>
-<a id="ln-46" name="ln-46" href="#ln-46"></a><span class="w">        </span><span class="c">!! algorithm maintains an approximate Jacobian $B_k$ and updates the</span>
+<a id="ln-46" name="ln-46" href="#ln-46"></a><span class="w">        </span><span class="c">!! algorithm maintains an approximate Jacobian \(B_k\) and updates the</span>
 <a id="ln-47" name="ln-47" href="#ln-47"></a><span class="w">        </span><span class="c">!! iterate from the nonlinear system $F(x)=0$ using</span>
 <a id="ln-48" name="ln-48" href="#ln-48"></a><span class="w">        </span><span class="c">!! $$ B_k s_k = -F(x_k), \qquad x_{k+1} = x_k + s_k $$</span>
 <a id="ln-49" name="ln-49" href="#ln-49"></a><span class="w">        </span><span class="c">!! with the rank-one Jacobian correction</span>
 <a id="ln-50" name="ln-50" href="#ln-50"></a><span class="w">        </span><span class="c">!! $$ B_{k+1} = B_k + \frac{(y_k - B_k s_k)s_k^T}{s_k^T s_k} $$</span>
-<a id="ln-51" name="ln-51" href="#ln-51"></a><span class="w">        </span><span class="c">!! where $y_k = F(x_{k+1}) - F(x_k)$. </span>
+<a id="ln-51" name="ln-51" href="#ln-51"></a><span class="w">        </span><span class="c">!! where \(y_k = F(x_{k+1}) - F(x_k)\). </span>
 <a id="ln-52" name="ln-52" href="#ln-52"></a><span class="w">        </span><span class="kt">integer</span><span class="p">(</span><span class="n">int32</span><span class="p">),</span><span class="w"> </span><span class="k">private</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">m_jDelta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span>
 <a id="ln-53" name="ln-53" href="#ln-53"></a><span class="w">            </span><span class="c">!! The number of iterations that may pass between Jacobian</span>
 <a id="ln-54" name="ln-54" href="#ln-54"></a><span class="w">            </span><span class="c">!! calculation.</span>
@@ -215,13 +215,13 @@
 <a id="ln-62" name="ln-62" href="#ln-62"></a><span class="w">        </span><span class="c">!! Defines a Newton solver for systems of nonlinear equations.  At each</span>
 <a id="ln-63" name="ln-63" href="#ln-63"></a><span class="w">        </span><span class="c">!! iteration the correction is obtained from the linearized system</span>
 <a id="ln-64" name="ln-64" href="#ln-64"></a><span class="w">        </span><span class="c">!! $$ J(x_k) \Delta x_k = -F(x_k), \qquad x_{k+1} = x_k + \Delta x_k $$</span>
-<a id="ln-65" name="ln-65" href="#ln-65"></a><span class="w">        </span><span class="c">!! where $J(x_k)$ is the Jacobian matrix of $F$.</span>
+<a id="ln-65" name="ln-65" href="#ln-65"></a><span class="w">        </span><span class="c">!! where \(J(x_k)\) is the Jacobian matrix of \(F\).</span>
 <a id="ln-66" name="ln-66" href="#ln-66"></a><span class="w">    </span><span class="k">contains</span>
 <a id="ln-67" name="ln-67" href="#ln-67"></a><span class="k">        procedure</span><span class="p">,</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">solve</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">ns_solve</span>
 <a id="ln-68" name="ln-68" href="#ln-68"></a><span class="w">    </span><span class="k">end type</span>
 <a id="ln-69" name="ln-69" href="#ln-69"></a>
 <a id="ln-70" name="ln-70" href="#ln-70"></a><span class="k">    type</span><span class="p">,</span><span class="w"> </span><span class="k">extends</span><span class="p">(</span><span class="n">equation_solver_1var</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">brent_solver</span>
-<a id="ln-71" name="ln-71" href="#ln-71"></a><span class="w">        </span><span class="c">!! Defines a derivative-free solver for a scalar equation $f(x)=0$</span>
+<a id="ln-71" name="ln-71" href="#ln-71"></a><span class="w">        </span><span class="c">!! Defines a derivative-free solver for a scalar equation \(f(x)=0\)</span>
 <a id="ln-72" name="ln-72" href="#ln-72"></a><span class="w">        </span><span class="c">!! based on Brent&#39;s method.  The method combines bisection with secant</span>
 <a id="ln-73" name="ln-73" href="#ln-73"></a><span class="w">        </span><span class="c">!! and inverse quadratic interpolation to maintain a bracket and</span>
 <a id="ln-74" name="ln-74" href="#ln-74"></a><span class="w">        </span><span class="c">!! converge to a root.</span>
@@ -230,7 +230,7 @@
 <a id="ln-77" name="ln-77" href="#ln-77"></a><span class="w">    </span><span class="k">end type</span>
 <a id="ln-78" name="ln-78" href="#ln-78"></a>
 <a id="ln-79" name="ln-79" href="#ln-79"></a><span class="k">    type</span><span class="p">,</span><span class="w"> </span><span class="k">extends</span><span class="p">(</span><span class="n">equation_solver_1var</span><span class="p">)</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">newton_1var_solver</span>
-<a id="ln-80" name="ln-80" href="#ln-80"></a><span class="w">        </span><span class="c">!! Defines a safeguarded Newton solver for a scalar equation $f(x)=0$.</span>
+<a id="ln-80" name="ln-80" href="#ln-80"></a><span class="w">        </span><span class="c">!! Defines a safeguarded Newton solver for a scalar equation \(f(x)=0\).</span>
 <a id="ln-81" name="ln-81" href="#ln-81"></a><span class="w">        </span><span class="c">!! The iteration uses the Newton update</span>
 <a id="ln-82" name="ln-82" href="#ln-82"></a><span class="w">        </span><span class="c">!! $$ x_{k+1} = x_k - \frac{f(x_k)}{f&#39;(x_k)} $$</span>
 <a id="ln-83" name="ln-83" href="#ln-83"></a><span class="w">        </span><span class="c">!! and retains a bracketing interval so that the step remains bounded</span>
@@ -1404,7 +1404,7 @@
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-07-08 17:48              </p>
+ on 2026-07-08 18:01              </p>
           </div>
         </div>
         <br>

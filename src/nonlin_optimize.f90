@@ -27,7 +27,7 @@ module nonlin_optimize
         !! Defines a direct-search optimizer based on Nelder and Mead's simplex
         !! method.  The algorithm maintains a simplex of $n+1$ vertices and
         !! updates it by reflection, expansion, contraction, and shrinking
-        !! steps to reduce the objective value $f(x)$.
+        !! steps to reduce the objective value \(f(x)\).
         real(real64), private, allocatable, dimension(:,:) :: m_simplex
             !! The simplex vertices.
         real(real64), private :: m_initSize = 1.0d0
@@ -44,8 +44,8 @@ module nonlin_optimize
 
     type, abstract, extends(equation_optimizer) :: line_search_optimizer
         !! A base class for optimizers that improve a trial step with a line
-        !! search.  The search direction $p_k$ is combined with a step length
-        !! $\alpha_k$ through
+        !! search.  The search direction \(p_k\) is combined with a step length
+        !! \(\alpha_k\) through
         !! $$ x_{k+1} = x_k + \alpha_k p_k $$
         !! and the accepted step satisfies a sufficient decrease condition.
         class(line_search), private, allocatable :: m_lineSearch
@@ -72,7 +72,7 @@ module nonlin_optimize
         !! minimization of smooth functions of multiple variables.  The method
         !! uses a quasi-Newton inverse Hessian approximation and the update
         !! $$ B_{k+1} = B_k + \frac{y_k y_k^T}{y_k^T s_k} - \frac{B_k s_k s_k^T B_k}{s_k^T B_k s_k} $$
-        !! with $s_k = x_{k+1}-x_k$ and $y_k = \nabla f(x_{k+1})-\nabla f(x_k)$. 
+        !! with \(s_k = x_{k+1}-x_k\) and \(y_k = \nabla f(x_{k+1})-\nabla f(x_k)\). 
         !!
         !! See Also:
         !!
