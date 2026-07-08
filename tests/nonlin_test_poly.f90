@@ -256,4 +256,51 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
+    ! Tests the polynomial division routine
+    function test_poly_divide() result(check)
+        ! Parameters
+        real(real64), parameter :: tol = 1.0d-8
+
+        ! Local Variables
+        logical :: check
+        type(polynomial) :: p1, p2, q, r, q_ans, r_ans
+        real(real64), allocatable, dimension(:) :: a, b, c, d
+
+        ! Initialization
+        p1 = polynomial([0.0d0, 1.0d0, 0.0d0, 1.0d0]) ! x^3 + x
+        p2 = polynomial([1.0d0, 1.0d0]) ! x + 1
+
+        ! Expected quotient: x^2 - x + 2
+        q_ans = polynomial([2.0d0, -1.0d0, 1.0d0])
+        ! Expected remainder: -2
+        r_ans = polynomial([-2.0d0])
+
+        ! Divide p1 by p2
+        call p1%divide(p2, q, r)
+
+        ! Test
+        a = q%get_all()
+        b = q_ans%get_all()
+        c = r%get_all()
+        d = r_ans%get_all()
+        if (.not.assert(a, b, tol) .or. .not.assert(c, d, tol)) then
+            check = .false.
+            print 100, "Test Failed: Polynomial Division"
+            print 100, "Expected quotient:"
+            print *, b
+            print 100, "Computed quotient:"
+            print *, a
+            print 100, "Expected remainder:"
+            print *, d
+            print 100, "Computed remainder:"
+            print *, c
+        else
+            check = .true.
+        end if
+
+        ! Formatting
+100     format(A)
+    end function
+
+! ------------------------------------------------------------------------------
 end module
