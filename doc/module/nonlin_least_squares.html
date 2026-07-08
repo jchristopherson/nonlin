@@ -152,16 +152,16 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
-                  <li class="list-inline-item">ferror</li>
-                  <li class="list-inline-item"><a href='nonlin_single_var.html'>nonlin_single_var</a></li>
                   <li class="list-inline-item"><a href='nonlin_solve.html'>nonlin_solve</a></li>
+                  <li class="list-inline-item"><a href='nonlin_types.html'>nonlin_types</a></li>
+                  <li class="list-inline-item"><a href='nonlin_multi_eqn_mult_var.html'>nonlin_multi_eqn_mult_var</a></li>
+                  <li class="list-inline-item">linalg</li>
+                  <li class="list-inline-item"><a href='nonlin_single_var.html'>nonlin_single_var</a></li>
                   <li class="list-inline-item"><a href='nonlin_helper.html'>nonlin_helper</a></li>
+                  <li class="list-inline-item">ferror</li>
                   <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_fortran_env'>iso_fortran_env</a></li>
                   <li class="list-inline-item"><a href='nonlin_error_handling.html'>nonlin_error_handling</a></li>
                   <li class="list-inline-item">blas</li>
-                  <li class="list-inline-item"><a href='nonlin_multi_eqn_mult_var.html'>nonlin_multi_eqn_mult_var</a></li>
-                  <li class="list-inline-item">linalg</li>
-                  <li class="list-inline-item"><a href='nonlin_types.html'>nonlin_types</a></li>
               </ul>
             </li>
         </ul>
@@ -188,8 +188,10 @@
       </h3>
     </div>
     <div class="card-body">
-      <p>A least-squares solver that implements limits (constraints) on the
-solution variables.</p>
+      <p>A least-squares solver that enforces bounds on the solution values,
+typically expressed as $x_i^L \le x_i \le x_i^U$.  The solver
+applies the bounds during the iteration so that each trial step
+remains feasible.</p>
 
 
 
@@ -204,7 +206,7 @@ solution variables.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance~2'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
                 <td></td>
               </tr>
               <tr>
@@ -219,12 +221,12 @@ solution variables.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_max_fcn_evals~3'>get_max_fcn_evals</a></strong> => es_get_max_eval</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_max_fcn_evals'>get_max_fcn_evals</a></strong> => es_get_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status~3'>get_print_status</a></strong> => es_get_print_status</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status'>get_print_status</a></strong> => es_get_print_status</td>
                 <td></td>
               </tr>
               <tr>
@@ -239,12 +241,12 @@ solution variables.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance~2'>get_var_tolerance</a></strong> => es_get_var_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance'>get_var_tolerance</a></strong> => es_get_var_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance~2'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
                 <td></td>
               </tr>
               <tr>
@@ -259,12 +261,12 @@ solution variables.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_max_fcn_evals~3'>set_max_fcn_evals</a></strong> => es_set_max_eval</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_max_fcn_evals'>set_max_fcn_evals</a></strong> => es_set_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status~3'>set_print_status</a></strong> => es_set_print_status</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status'>set_print_status</a></strong> => es_set_print_status</td>
                 <td></td>
               </tr>
               <tr>
@@ -279,12 +281,12 @@ solution variables.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance~2'>set_var_tolerance</a></strong> => es_set_var_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance'>set_var_tolerance</a></strong> => es_set_var_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\least_squares_solver.html#boundprocedure-solve~8'>solve</a></strong> => lss_solve</td>
+  <strong><a href='..\type\least_squares_solver.html#boundprocedure-solve~4'>solve</a></strong> => lss_solve</td>
                 <td></td>
               </tr>
           </tbody>
@@ -303,10 +305,18 @@ solution variables.</p>
     </div>
     <div class="card-body">
       <p>Defines a constrained least-squares solver using Powell's trust
-region method.  In the event the trust-region approach is slow to
-converge a backtracking type line search will be utilized.  The
-solver also utilizes a Coleman-Li scaling approach that works to
-improve stability when the solution is near a constraint.</p><a href="../type/constrained_least_squares_solver.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+region method.  The method seeks a correction $p$ that reduces the
+residual vector $r(x)$ while remaining inside a trust region of size
+$\Delta$ and the bounds $x^L \le x \le x^U$.  The trial step is
+formed from a Gauss-Newton step
+<script type="math/tex; mode=display"> J p_{gn} = -r </script>
+a steepest-descent step
+<script type="math/tex; mode=display"> p_{sd} = -\alpha g, \qquad g = J^T r, \qquad \alpha = \frac{\|g\|^2}{\|Jg\|^2} </script>
+and a dogleg combination
+<script type="math/tex; mode=display"> p = p_{sd} + t \left( p_{gn} - p_{sd} \right) </script>
+with $t$ chosen so that $|p| = \Delta$.  If the trust-region step
+is rejected, a backtracking line search is used to improve the
+step acceptance.</p>
 
 
 
@@ -321,7 +331,7 @@ improve stability when the solution is near a constraint.</p><a href="../type/co
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance~2'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
                 <td></td>
               </tr>
               <tr>
@@ -336,12 +346,12 @@ improve stability when the solution is near a constraint.</p><a href="../type/co
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_max_fcn_evals~3'>get_max_fcn_evals</a></strong> => es_get_max_eval</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_max_fcn_evals'>get_max_fcn_evals</a></strong> => es_get_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status~3'>get_print_status</a></strong> => es_get_print_status</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status'>get_print_status</a></strong> => es_get_print_status</td>
                 <td></td>
               </tr>
               <tr>
@@ -361,12 +371,12 @@ improve stability when the solution is near a constraint.</p><a href="../type/co
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance~2'>get_var_tolerance</a></strong> => es_get_var_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance'>get_var_tolerance</a></strong> => es_get_var_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance~2'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
                 <td></td>
               </tr>
               <tr>
@@ -381,12 +391,12 @@ improve stability when the solution is near a constraint.</p><a href="../type/co
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_max_fcn_evals~3'>set_max_fcn_evals</a></strong> => es_set_max_eval</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_max_fcn_evals'>set_max_fcn_evals</a></strong> => es_set_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status~3'>set_print_status</a></strong> => es_set_print_status</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status'>set_print_status</a></strong> => es_set_print_status</td>
                 <td></td>
               </tr>
               <tr>
@@ -406,12 +416,12 @@ improve stability when the solution is near a constraint.</p><a href="../type/co
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance~2'>set_var_tolerance</a></strong> => es_set_var_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance'>set_var_tolerance</a></strong> => es_set_var_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\constrained_least_squares_solver.html#boundprocedure-solve~9'>solve</a></strong> => cls_solve</td>
+  <strong><a href='..\type\constrained_least_squares_solver.html#boundprocedure-solve~5'>solve</a></strong> => cls_solve</td>
                 <td></td>
               </tr>
           </tbody>
@@ -429,8 +439,10 @@ improve stability when the solution is near a constraint.</p><a href="../type/co
       </h3>
     </div>
     <div class="card-body">
-      <p>Defines a Levenberg-Marquardt based solver for unconstrained
-least-squares problems.</p>
+      <p>Defines a Levenberg-Marquardt solver for unconstrained least-squares
+problems.  The update is obtained from the damped normal equations
+<script type="math/tex; mode=display"> (J^T J + \lambda I) \Delta x = -J^T r </script>
+where $r(x)$ is the residual vector and $x_{k+1}=x_k+\Delta x$.</p>
 
 
 
@@ -440,7 +452,7 @@ least-squares problems.</p>
           <tbody>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance~2'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
                 <td></td>
               </tr>
               <tr>
@@ -450,12 +462,12 @@ least-squares problems.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_max_fcn_evals~3'>get_max_fcn_evals</a></strong> => es_get_max_eval</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_max_fcn_evals'>get_max_fcn_evals</a></strong> => es_get_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status~3'>get_print_status</a></strong> => es_get_print_status</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status'>get_print_status</a></strong> => es_get_print_status</td>
                 <td></td>
               </tr>
               <tr>
@@ -465,12 +477,12 @@ least-squares problems.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance~2'>get_var_tolerance</a></strong> => es_get_var_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance'>get_var_tolerance</a></strong> => es_get_var_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance~2'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
                 <td></td>
               </tr>
               <tr>
@@ -480,12 +492,12 @@ least-squares problems.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_max_fcn_evals~3'>set_max_fcn_evals</a></strong> => es_set_max_eval</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_max_fcn_evals'>set_max_fcn_evals</a></strong> => es_set_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status~3'>set_print_status</a></strong> => es_set_print_status</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status'>set_print_status</a></strong> => es_set_print_status</td>
                 <td></td>
               </tr>
               <tr>
@@ -495,12 +507,12 @@ least-squares problems.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance~2'>set_var_tolerance</a></strong> => es_set_var_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance'>set_var_tolerance</a></strong> => es_set_var_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\least_squares_solver.html#boundprocedure-solve~8'>solve</a></strong> => lss_solve</td>
+  <strong><a href='..\type\least_squares_solver.html#boundprocedure-solve~4'>solve</a></strong> => lss_solve</td>
                 <td></td>
               </tr>
           </tbody>
@@ -530,7 +542,7 @@ least-squares problems.</p>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-07-08 17:44              </p>
+ on 2026-07-08 17:48              </p>
           </div>
         </div>
         <br>

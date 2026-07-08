@@ -130,21 +130,21 @@
       </a>
       <div id="boundprocs-0" class="collapse">
         <div class="list-group list-group-flush">
-            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-get_line_search~2">get_line_search</a>
-            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-get_max_fcn_evals">get_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-get_print_status">get_print_status</a>
+            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-get_line_search">get_line_search</a>
+            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-get_max_fcn_evals~2">get_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-get_print_status~2">get_print_status</a>
             <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-get_tolerance">get_tolerance</a>
-            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-get_use_line_search~2">get_use_line_search</a>
-            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-get_var_tolerance~3">get_var_tolerance</a>
-            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-is_line_search_defined~2">is_line_search_defined</a>
-            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-set_default_line_search~2">set_default_line_search</a>
-            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-set_line_search~2">set_line_search</a>
-            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-set_max_fcn_evals">set_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-set_print_status">set_print_status</a>
+            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-get_use_line_search">get_use_line_search</a>
+            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-get_var_tolerance~2">get_var_tolerance</a>
+            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-is_line_search_defined">is_line_search_defined</a>
+            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-set_default_line_search">set_default_line_search</a>
+            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-set_line_search">set_line_search</a>
+            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-set_max_fcn_evals~2">set_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-set_print_status~2">set_print_status</a>
             <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-set_tolerance">set_tolerance</a>
-            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-set_use_line_search~2">set_use_line_search</a>
-            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-set_var_tolerance~3">set_var_tolerance</a>
-            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-solve~5">solve</a>
+            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-set_use_line_search">set_use_line_search</a>
+            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-set_var_tolerance~2">set_var_tolerance</a>
+            <a class="list-group-item" href="../type/line_search_optimizer.html#boundprocedure-solve~6">solve</a>
         </div>
       </div>
     </div>
@@ -160,8 +160,11 @@
     <div class="col-md-9" id='text'>
       <h2>
         type, public, extends(<a href='equation_optimizer.html'>equation_optimizer</a>) :: line_search_optimizer</h2>
-    <p>A class describing equation optimizers that use a line search
-algorithm to improve convergence behavior.</p>
+    <p>A base class for optimizers that improve a trial step with a line
+search.  The search direction $p_k$ is combined with a step length
+$\alpha_k$ through
+<script type="math/tex; mode=display"> x_{k+1} = x_k + \alpha_k p_k </script>
+and the accepted step satisfies a sufficient decrease condition.</p>
     <br>
 
     
@@ -172,7 +175,7 @@ algorithm to improve convergence behavior.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_line_search~2"></span>
+      <span class="anchor" id="boundprocedure-get_line_search"></span>
       <h3>
           procedure, public ::
   <strong>get_line_search</strong> => lso_get_line_search
@@ -240,7 +243,7 @@ algorithm to improve convergence behavior.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_max_fcn_evals"></span>
+      <span class="anchor" id="boundprocedure-get_max_fcn_evals~2"></span>
       <h3>
           procedure, public ::
   <strong>get_max_fcn_evals</strong> => oe_get_max_eval
@@ -298,7 +301,7 @@ algorithm to improve convergence behavior.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_print_status"></span>
+      <span class="anchor" id="boundprocedure-get_print_status~2"></span>
       <h3>
           procedure, public ::
   <strong>get_print_status</strong> => oe_get_print_status
@@ -414,7 +417,7 @@ algorithm to improve convergence behavior.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_use_line_search~2"></span>
+      <span class="anchor" id="boundprocedure-get_use_line_search"></span>
       <h3>
           procedure, public ::
   <strong>get_use_line_search</strong> => lso_get_use_search
@@ -472,7 +475,7 @@ algorithm to improve convergence behavior.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_var_tolerance~3"></span>
+      <span class="anchor" id="boundprocedure-get_var_tolerance~2"></span>
       <h3>
           procedure, public ::
   <strong>get_var_tolerance</strong> => lso_get_var_tol
@@ -530,7 +533,7 @@ algorithm to improve convergence behavior.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-is_line_search_defined~2"></span>
+      <span class="anchor" id="boundprocedure-is_line_search_defined"></span>
       <h3>
           procedure, public ::
   <strong>is_line_search_defined</strong> => lso_is_line_search_defined
@@ -588,7 +591,7 @@ algorithm to improve convergence behavior.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_default_line_search~2"></span>
+      <span class="anchor" id="boundprocedure-set_default_line_search"></span>
       <h3>
           procedure, public ::
   <strong>set_default_line_search</strong> => lso_set_default
@@ -642,7 +645,7 @@ module.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_line_search~2"></span>
+      <span class="anchor" id="boundprocedure-set_line_search"></span>
       <h3>
           procedure, public ::
   <strong>set_line_search</strong> => lso_set_line_search
@@ -710,7 +713,7 @@ module.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_max_fcn_evals"></span>
+      <span class="anchor" id="boundprocedure-set_max_fcn_evals~2"></span>
       <h3>
           procedure, public ::
   <strong>set_max_fcn_evals</strong> => oe_set_max_eval
@@ -778,7 +781,7 @@ module.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_print_status"></span>
+      <span class="anchor" id="boundprocedure-set_print_status~2"></span>
       <h3>
           procedure, public ::
   <strong>set_print_status</strong> => oe_set_print_status
@@ -914,7 +917,7 @@ module.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_use_line_search~2"></span>
+      <span class="anchor" id="boundprocedure-set_use_line_search"></span>
       <h3>
           procedure, public ::
   <strong>set_use_line_search</strong> => lso_set_use_search
@@ -982,7 +985,7 @@ module.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_var_tolerance~3"></span>
+      <span class="anchor" id="boundprocedure-set_var_tolerance~2"></span>
       <h3>
           procedure, public ::
   <strong>set_var_tolerance</strong> => lso_set_var_tol
@@ -1050,7 +1053,7 @@ module.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-solve~5"></span>
+      <span class="anchor" id="boundprocedure-solve~6"></span>
       <h3>
           procedure(<a href='..\interface\nonlin_optimize_fcn.html'>nonlin_optimize_fcn</a>), public, deferred, pass ::
   <strong>solve</strong>
@@ -1214,7 +1217,7 @@ the routine.</p>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-07-08 17:44              </p>
+ on 2026-07-08 17:48              </p>
           </div>
         </div>
         <br>

@@ -131,25 +131,25 @@
       <div id="boundprocs-0" class="collapse">
         <div class="list-group list-group-flush">
             <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-apply_limits">apply_limits</a>
-            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_fcn_tolerance~2">get_fcn_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_fcn_tolerance">get_fcn_tolerance</a>
             <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_gradient_tolerance">get_gradient_tolerance</a>
             <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_lower_limits">get_lower_limits</a>
-            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_max_fcn_evals~3">get_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_print_status~3">get_print_status</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_max_fcn_evals">get_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_print_status">get_print_status</a>
             <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_step_scaling_factor~2">get_step_scaling_factor</a>
             <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_trust_region_radius">get_trust_region_radius</a>
             <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_upper_limits">get_upper_limits</a>
-            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_var_tolerance~2">get_var_tolerance</a>
-            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_fcn_tolerance~2">set_fcn_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-get_var_tolerance">get_var_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_fcn_tolerance">set_fcn_tolerance</a>
             <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_gradient_tolerance">set_gradient_tolerance</a>
             <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_lower_limits">set_lower_limits</a>
-            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_max_fcn_evals~3">set_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_print_status~3">set_print_status</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_max_fcn_evals">set_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_print_status">set_print_status</a>
             <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_step_scaling_factor~2">set_step_scaling_factor</a>
             <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_trust_region_radius">set_trust_region_radius</a>
             <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_upper_limits">set_upper_limits</a>
-            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_var_tolerance~2">set_var_tolerance</a>
-            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-solve~9">solve</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-set_var_tolerance">set_var_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_least_squares_solver.html#boundprocedure-solve~5">solve</a>
         </div>
       </div>
     </div>
@@ -166,27 +166,18 @@
       <h2>
         type, public, extends(<a href='constrained_equation_solver.html'>constrained_equation_solver</a>) :: constrained_least_squares_solver</h2>
     <p>Defines a constrained least-squares solver using Powell's trust
-region method.  In the event the trust-region approach is slow to
-converge a backtracking type line search will be utilized.  The
-solver also utilizes a Coleman-Li scaling approach that works to
-improve stability when the solution is near a constraint.</p>
-<p>The trust region approach assumes a radius of <script type="math/tex">\Delta</script>, which can
-be initially defined by the user but is automatically altered by the
-solver, and is implemented as follows.</p>
-<p>Gauss-Newton Step (Solved via QR decomposition):
-<script type="math/tex; mode=display"> J \vec{p_{gn}} = -\vec{f} </script>
-</p>
-<p>The gradient vector for the steepest descent is calculated by
-utilizing the product of the Jacobian and the residual as follows.
-<script type="math/tex; mode=display"> \vec{g} = J \vec{f} </script>
-</p>
-<p>The steepest descent step is then as follows.
-<script type="math/tex; mode=display"> \vec{p_{sd}} = -\alpha \vec{g} </script>
-where <script type="math/tex"> \alpha = \frac{||\vec{g}||^{2}}{||J \vec{g}||^2} </script>.</p>
-<p>Finally, the dogleg is computed as follows.
-<script type="math/tex; mode=display"> \vec{p} = \vec{p_{sd}} + t \left( \vec{p_{gn}} - \vec{p_{sd}} 
-\right) </script>
-where <script type="math/tex">t</script> is found such that <script type="math/tex">|| \vec{p}|| = \Delta </script>.</p>
+region method.  The method seeks a correction $p$ that reduces the
+residual vector $r(x)$ while remaining inside a trust region of size
+$\Delta$ and the bounds $x^L \le x \le x^U$.  The trial step is
+formed from a Gauss-Newton step
+<script type="math/tex; mode=display"> J p_{gn} = -r </script>
+a steepest-descent step
+<script type="math/tex; mode=display"> p_{sd} = -\alpha g, \qquad g = J^T r, \qquad \alpha = \frac{\|g\|^2}{\|Jg\|^2} </script>
+and a dogleg combination
+<script type="math/tex; mode=display"> p = p_{sd} + t \left( p_{gn} - p_{sd} \right) </script>
+with $t$ chosen so that $|p| = \Delta$.  If the trust-region step
+is rejected, a backtracking line search is used to improve the
+step acceptance.</p>
     <br>
 
     
@@ -266,7 +257,7 @@ vector.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_fcn_tolerance~2"></span>
+      <span class="anchor" id="boundprocedure-get_fcn_tolerance"></span>
       <h3>
           procedure, public ::
   <strong>get_fcn_tolerance</strong> => es_get_fcn_tol
@@ -441,7 +432,7 @@ tolerance.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_max_fcn_evals~3"></span>
+      <span class="anchor" id="boundprocedure-get_max_fcn_evals"></span>
       <h3>
           procedure, public ::
   <strong>get_max_fcn_evals</strong> => es_get_max_eval
@@ -500,7 +491,7 @@ a single solve.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_print_status~3"></span>
+      <span class="anchor" id="boundprocedure-get_print_status"></span>
       <h3>
           procedure, public ::
   <strong>get_print_status</strong> => es_get_print_status
@@ -733,7 +724,7 @@ printed.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_var_tolerance~2"></span>
+      <span class="anchor" id="boundprocedure-get_var_tolerance"></span>
       <h3>
           procedure, public ::
   <strong>get_var_tolerance</strong> => es_get_var_tol
@@ -791,7 +782,7 @@ printed.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_fcn_tolerance~2"></span>
+      <span class="anchor" id="boundprocedure-set_fcn_tolerance"></span>
       <h3>
           procedure, public ::
   <strong>set_fcn_tolerance</strong> => es_set_fcn_tol
@@ -995,7 +986,7 @@ printed.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_max_fcn_evals~3"></span>
+      <span class="anchor" id="boundprocedure-set_max_fcn_evals"></span>
       <h3>
           procedure, public ::
   <strong>set_max_fcn_evals</strong> => es_set_max_eval
@@ -1064,7 +1055,7 @@ a single solve.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_print_status~3"></span>
+      <span class="anchor" id="boundprocedure-set_print_status"></span>
       <h3>
           procedure, public ::
   <strong>set_print_status</strong> => es_set_print_status
@@ -1337,7 +1328,7 @@ printed.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_var_tolerance~2"></span>
+      <span class="anchor" id="boundprocedure-set_var_tolerance"></span>
       <h3>
           procedure, public ::
   <strong>set_var_tolerance</strong> => es_set_var_tol
@@ -1405,7 +1396,7 @@ printed.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-solve~9"></span>
+      <span class="anchor" id="boundprocedure-solve~5"></span>
       <h3>
           procedure, public ::
   <strong>solve</strong> => cls_solve
@@ -1570,7 +1561,7 @@ the routine.</p>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-07-08 17:44              </p>
+ on 2026-07-08 17:48              </p>
           </div>
         </div>
         <br>

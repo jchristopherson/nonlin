@@ -24,8 +24,10 @@ module nonlin_optimize
     public :: bfgs
     
     type, extends(equation_optimizer) :: nelder_mead
-        !! Defines a solver based upon Nelder and Mead's simplex algorithm
-        !! for minimization of functions of multiple variables.
+        !! Defines a direct-search optimizer based on Nelder and Mead's simplex
+        !! method.  The algorithm maintains a simplex of $n+1$ vertices and
+        !! updates it by reflection, expansion, contraction, and shrinking
+        !! steps to reduce the objective value $f(x)$.
         real(real64), private, allocatable, dimension(:,:) :: m_simplex
             !! The simplex vertices.
         real(real64), private :: m_initSize = 1.0d0
@@ -41,8 +43,11 @@ module nonlin_optimize
     end type
 
     type, abstract, extends(equation_optimizer) :: line_search_optimizer
-        !! A class describing equation optimizers that use a line search
-        !! algorithm to improve convergence behavior.
+        !! A base class for optimizers that improve a trial step with a line
+        !! search.  The search direction $p_k$ is combined with a step length
+        !! $\alpha_k$ through
+        !! $$ x_{k+1} = x_k + \alpha_k p_k $$
+        !! and the accepted step satisfies a sufficient decrease condition.
         class(line_search), private, allocatable :: m_lineSearch
             !! The line search object.
         logical, private :: m_useLineSearch = .true.
@@ -63,8 +68,11 @@ module nonlin_optimize
     end type
 
     type, extends(line_search_optimizer) :: bfgs
-        !! Defines a Broyden–Fletcher–Goldfarb–Shanno (BFGS) solver for
-        !! minimization of functions of multiple variables.
+        !! Defines a Broyden–Fletcher–Goldfarb–Shanno (BFGS) optimizer for
+        !! minimization of smooth functions of multiple variables.  The method
+        !! uses a quasi-Newton inverse Hessian approximation and the update
+        !! $$ B_{k+1} = B_k + \frac{y_k y_k^T}{y_k^T s_k} - \frac{B_k s_k s_k^T B_k}{s_k^T B_k s_k} $$
+        !! with $s_k = x_{k+1}-x_k$ and $y_k = \nabla f(x_{k+1})-\nabla f(x_k)$. 
         !!
         !! See Also:
         !!

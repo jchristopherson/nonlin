@@ -154,15 +154,15 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
-                  <li class="list-inline-item"><a href='nonlin_linesearch.html'>nonlin_linesearch</a></li>
-                  <li class="list-inline-item">ferror</li>
-                  <li class="list-inline-item"><a href='nonlin_single_var.html'>nonlin_single_var</a></li>
-                  <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_fortran_env'>iso_fortran_env</a></li>
-                  <li class="list-inline-item"><a href='nonlin_helper.html'>nonlin_helper</a></li>
-                  <li class="list-inline-item"><a href='nonlin_error_handling.html'>nonlin_error_handling</a></li>
-                  <li class="list-inline-item"><a href='nonlin_multi_eqn_mult_var.html'>nonlin_multi_eqn_mult_var</a></li>
                   <li class="list-inline-item">linalg</li>
                   <li class="list-inline-item"><a href='nonlin_types.html'>nonlin_types</a></li>
+                  <li class="list-inline-item"><a href='nonlin_multi_eqn_mult_var.html'>nonlin_multi_eqn_mult_var</a></li>
+                  <li class="list-inline-item"><a href='nonlin_linesearch.html'>nonlin_linesearch</a></li>
+                  <li class="list-inline-item"><a href='nonlin_single_var.html'>nonlin_single_var</a></li>
+                  <li class="list-inline-item"><a href='nonlin_helper.html'>nonlin_helper</a></li>
+                  <li class="list-inline-item">ferror</li>
+                  <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_fortran_env'>iso_fortran_env</a></li>
+                  <li class="list-inline-item"><a href='nonlin_error_handling.html'>nonlin_error_handling</a></li>
               </ul>
             </li>
         </ul>
@@ -189,8 +189,10 @@
       </h3>
     </div>
     <div class="card-body">
-      <p>Defines a solver based upon Brent's method for solving an equation
-of one variable without using derivatives.</p>
+      <p>Defines a derivative-free solver for a scalar equation $f(x)=0$
+based on Brent's method.  The method combines bisection with secant
+and inverse quadratic interpolation to maintain a bracket and
+converge to a root.</p>
 
 
 
@@ -205,22 +207,22 @@ of one variable without using derivatives.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_fcn_tolerance'>get_fcn_tolerance</a></strong> => es1_get_fcn_tol</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_fcn_tolerance~2'>get_fcn_tolerance</a></strong> => es1_get_fcn_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_max_fcn_evals~2'>get_max_fcn_evals</a></strong> => es1_get_max_eval</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_max_fcn_evals~3'>get_max_fcn_evals</a></strong> => es1_get_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_print_status~2'>get_print_status</a></strong> => es1_get_print_status</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_print_status~3'>get_print_status</a></strong> => es1_get_print_status</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_var_tolerance'>get_var_tolerance</a></strong> => es1_get_var_tol</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_var_tolerance~3'>get_var_tolerance</a></strong> => es1_get_var_tol</td>
                 <td></td>
               </tr>
               <tr>
@@ -230,27 +232,27 @@ of one variable without using derivatives.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_fcn_tolerance'>set_fcn_tolerance</a></strong> => es1_set_fcn_tol</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_fcn_tolerance~2'>set_fcn_tolerance</a></strong> => es1_set_fcn_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_max_fcn_evals~2'>set_max_fcn_evals</a></strong> => es1_set_max_eval</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_max_fcn_evals~3'>set_max_fcn_evals</a></strong> => es1_set_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_print_status~2'>set_print_status</a></strong> => es1_set_print_status</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_print_status~3'>set_print_status</a></strong> => es1_set_print_status</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_var_tolerance'>set_var_tolerance</a></strong> => es1_set_var_tol</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_var_tolerance~3'>set_var_tolerance</a></strong> => es1_set_var_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\brent_solver.html#boundprocedure-solve~3'>solve</a></strong> => brent_solve</td>
+  <strong><a href='..\type\brent_solver.html#boundprocedure-solve~10'>solve</a></strong> => brent_solve</td>
                 <td></td>
               </tr>
           </tbody>
@@ -268,8 +270,13 @@ of one variable without using derivatives.</p>
       </h3>
     </div>
     <div class="card-body">
-      <p>A class describing nonlinear solvers that use a line search
-algorithm to improve convergence behavior.</p>
+      <p>A base class for nonlinear solvers that improve convergence by
+combining a search direction with a line search.  At each iteration
+the step is taken as
+<script type="math/tex; mode=display"> x_{k+1} = x_k + \alpha_k p_k </script>
+where the step length $\alpha_k$ is chosen to satisfy a sufficient
+decrease condition such as the Armijo rule
+<script type="math/tex; mode=display"> f(x_k + \alpha_k p_k) \le f(x_k) + c_1 \alpha_k \nabla f(x_k)^T p_k </script>. </p>
 
 
 
@@ -279,7 +286,7 @@ algorithm to improve convergence behavior.</p>
           <tbody>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance~2'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
                 <td></td>
               </tr>
               <tr>
@@ -289,42 +296,42 @@ algorithm to improve convergence behavior.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-get_line_search'>get_line_search</a></strong> => lss_get_line_search</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-get_line_search~2'>get_line_search</a></strong> => lss_get_line_search</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_max_fcn_evals~3'>get_max_fcn_evals</a></strong> => es_get_max_eval</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_max_fcn_evals'>get_max_fcn_evals</a></strong> => es_get_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status~3'>get_print_status</a></strong> => es_get_print_status</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status'>get_print_status</a></strong> => es_get_print_status</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-get_use_line_search'>get_use_line_search</a></strong> => lss_get_use_search</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-get_use_line_search~2'>get_use_line_search</a></strong> => lss_get_use_search</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance~2'>get_var_tolerance</a></strong> => es_get_var_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance'>get_var_tolerance</a></strong> => es_get_var_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-is_line_search_defined'>is_line_search_defined</a></strong> => lss_is_line_search_defined</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-is_line_search_defined~2'>is_line_search_defined</a></strong> => lss_is_line_search_defined</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_default_line_search'>set_default_line_search</a></strong> => lss_set_default</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_default_line_search~2'>set_default_line_search</a></strong> => lss_set_default</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance~2'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
                 <td></td>
               </tr>
               <tr>
@@ -334,32 +341,32 @@ algorithm to improve convergence behavior.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_line_search'>set_line_search</a></strong> => lss_set_line_search</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_line_search~2'>set_line_search</a></strong> => lss_set_line_search</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_max_fcn_evals~3'>set_max_fcn_evals</a></strong> => es_set_max_eval</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_max_fcn_evals'>set_max_fcn_evals</a></strong> => es_set_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status~3'>set_print_status</a></strong> => es_set_print_status</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status'>set_print_status</a></strong> => es_set_print_status</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_use_line_search'>set_use_line_search</a></strong> => lss_set_use_search</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_use_line_search~2'>set_use_line_search</a></strong> => lss_set_use_search</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance~2'>set_var_tolerance</a></strong> => es_set_var_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance'>set_var_tolerance</a></strong> => es_set_var_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure(<a href='..\interface\nonlin_solver.html'>nonlin_solver</a>), public, deferred, pass ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-solve~7'>solve</a></strong></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-solve'>solve</a></strong></td>
                 <td></td>
               </tr>
           </tbody>
@@ -377,10 +384,11 @@ algorithm to improve convergence behavior.</p>
       </h3>
     </div>
     <div class="card-body">
-      <p>Defines a solver based upon Newtons's method for solving an
-equation of one variable.  The algorithm uses a bisection method in
-conjunction with Newton's method in order to keep bounds upon the
-Newton iterations.</p>
+      <p>Defines a safeguarded Newton solver for a scalar equation $f(x)=0$.
+The iteration uses the Newton update
+<script type="math/tex; mode=display"> x_{k+1} = x_k - \frac{f(x_k)}{f'(x_k)} </script>
+and retains a bracketing interval so that the step remains bounded
+by the root bracket.</p>
 
 
 
@@ -395,22 +403,22 @@ Newton iterations.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_fcn_tolerance'>get_fcn_tolerance</a></strong> => es1_get_fcn_tol</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_fcn_tolerance~2'>get_fcn_tolerance</a></strong> => es1_get_fcn_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_max_fcn_evals~2'>get_max_fcn_evals</a></strong> => es1_get_max_eval</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_max_fcn_evals~3'>get_max_fcn_evals</a></strong> => es1_get_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_print_status~2'>get_print_status</a></strong> => es1_get_print_status</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_print_status~3'>get_print_status</a></strong> => es1_get_print_status</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_var_tolerance'>get_var_tolerance</a></strong> => es1_get_var_tol</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_var_tolerance~3'>get_var_tolerance</a></strong> => es1_get_var_tol</td>
                 <td></td>
               </tr>
               <tr>
@@ -420,27 +428,27 @@ Newton iterations.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_fcn_tolerance'>set_fcn_tolerance</a></strong> => es1_set_fcn_tol</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_fcn_tolerance~2'>set_fcn_tolerance</a></strong> => es1_set_fcn_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_max_fcn_evals~2'>set_max_fcn_evals</a></strong> => es1_set_max_eval</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_max_fcn_evals~3'>set_max_fcn_evals</a></strong> => es1_set_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_print_status~2'>set_print_status</a></strong> => es1_set_print_status</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_print_status~3'>set_print_status</a></strong> => es1_set_print_status</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_var_tolerance'>set_var_tolerance</a></strong> => es1_set_var_tol</td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_var_tolerance~3'>set_var_tolerance</a></strong> => es1_set_var_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\newton_1var_solver.html#boundprocedure-solve~4'>solve</a></strong> => newt1var_solve</td>
+  <strong><a href='..\type\newton_1var_solver.html#boundprocedure-solve~11'>solve</a></strong> => newt1var_solve</td>
                 <td></td>
               </tr>
           </tbody>
@@ -458,7 +466,10 @@ Newton iterations.</p>
       </h3>
     </div>
     <div class="card-body">
-      <p>Defines a Newton solver.</p>
+      <p>Defines a Newton solver for systems of nonlinear equations.  At each
+iteration the correction is obtained from the linearized system
+<script type="math/tex; mode=display"> J(x_k) \Delta x_k = -F(x_k), \qquad x_{k+1} = x_k + \Delta x_k </script>
+where $J(x_k)$ is the Jacobian matrix of $F$.</p>
 
 
 
@@ -468,7 +479,7 @@ Newton iterations.</p>
           <tbody>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance~2'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
                 <td></td>
               </tr>
               <tr>
@@ -478,42 +489,42 @@ Newton iterations.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-get_line_search'>get_line_search</a></strong> => lss_get_line_search</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-get_line_search~2'>get_line_search</a></strong> => lss_get_line_search</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_max_fcn_evals~3'>get_max_fcn_evals</a></strong> => es_get_max_eval</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_max_fcn_evals'>get_max_fcn_evals</a></strong> => es_get_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status~3'>get_print_status</a></strong> => es_get_print_status</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status'>get_print_status</a></strong> => es_get_print_status</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-get_use_line_search'>get_use_line_search</a></strong> => lss_get_use_search</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-get_use_line_search~2'>get_use_line_search</a></strong> => lss_get_use_search</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance~2'>get_var_tolerance</a></strong> => es_get_var_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance'>get_var_tolerance</a></strong> => es_get_var_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-is_line_search_defined'>is_line_search_defined</a></strong> => lss_is_line_search_defined</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-is_line_search_defined~2'>is_line_search_defined</a></strong> => lss_is_line_search_defined</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_default_line_search'>set_default_line_search</a></strong> => lss_set_default</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_default_line_search~2'>set_default_line_search</a></strong> => lss_set_default</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance~2'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
                 <td></td>
               </tr>
               <tr>
@@ -523,32 +534,32 @@ Newton iterations.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_line_search'>set_line_search</a></strong> => lss_set_line_search</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_line_search~2'>set_line_search</a></strong> => lss_set_line_search</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_max_fcn_evals~3'>set_max_fcn_evals</a></strong> => es_set_max_eval</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_max_fcn_evals'>set_max_fcn_evals</a></strong> => es_set_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status~3'>set_print_status</a></strong> => es_set_print_status</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status'>set_print_status</a></strong> => es_set_print_status</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_use_line_search'>set_use_line_search</a></strong> => lss_set_use_search</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_use_line_search~2'>set_use_line_search</a></strong> => lss_set_use_search</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance~2'>set_var_tolerance</a></strong> => es_set_var_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance'>set_var_tolerance</a></strong> => es_set_var_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\newton_solver.html#boundprocedure-solve~2'>solve</a></strong> => ns_solve</td>
+  <strong><a href='..\type\newton_solver.html#boundprocedure-solve~9'>solve</a></strong> => ns_solve</td>
                 <td></td>
               </tr>
           </tbody>
@@ -566,7 +577,13 @@ Newton iterations.</p>
       </h3>
     </div>
     <div class="card-body">
-      <p>Defines a quasi-Newton type solver based upon Broyden's method.</p>
+      <p>Defines a quasi-Newton solver based upon Broyden's method.  The
+algorithm maintains an approximate Jacobian $B_k$ and updates the
+iterate from the nonlinear system $F(x)=0$ using
+<script type="math/tex; mode=display"> B_k s_k = -F(x_k), \qquad x_{k+1} = x_k + s_k </script>
+with the rank-one Jacobian correction
+<script type="math/tex; mode=display"> B_{k+1} = B_k + \frac{(y_k - B_k s_k)s_k^T}{s_k^T s_k} </script>
+where $y_k = F(x_{k+1}) - F(x_k)$. </p>
 
 
 
@@ -576,7 +593,7 @@ Newton iterations.</p>
           <tbody>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance~2'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
                 <td></td>
               </tr>
               <tr>
@@ -591,42 +608,42 @@ Newton iterations.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-get_line_search'>get_line_search</a></strong> => lss_get_line_search</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-get_line_search~2'>get_line_search</a></strong> => lss_get_line_search</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_max_fcn_evals~3'>get_max_fcn_evals</a></strong> => es_get_max_eval</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_max_fcn_evals'>get_max_fcn_evals</a></strong> => es_get_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status~3'>get_print_status</a></strong> => es_get_print_status</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status'>get_print_status</a></strong> => es_get_print_status</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-get_use_line_search'>get_use_line_search</a></strong> => lss_get_use_search</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-get_use_line_search~2'>get_use_line_search</a></strong> => lss_get_use_search</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance~2'>get_var_tolerance</a></strong> => es_get_var_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance'>get_var_tolerance</a></strong> => es_get_var_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-is_line_search_defined'>is_line_search_defined</a></strong> => lss_is_line_search_defined</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-is_line_search_defined~2'>is_line_search_defined</a></strong> => lss_is_line_search_defined</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_default_line_search'>set_default_line_search</a></strong> => lss_set_default</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_default_line_search~2'>set_default_line_search</a></strong> => lss_set_default</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance~2'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
                 <td></td>
               </tr>
               <tr>
@@ -641,32 +658,32 @@ Newton iterations.</p>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_line_search'>set_line_search</a></strong> => lss_set_line_search</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_line_search~2'>set_line_search</a></strong> => lss_set_line_search</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_max_fcn_evals~3'>set_max_fcn_evals</a></strong> => es_set_max_eval</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_max_fcn_evals'>set_max_fcn_evals</a></strong> => es_set_max_eval</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status~3'>set_print_status</a></strong> => es_set_print_status</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status'>set_print_status</a></strong> => es_set_print_status</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_use_line_search'>set_use_line_search</a></strong> => lss_set_use_search</td>
+  <strong><a href='..\type\line_search_solver.html#boundprocedure-set_use_line_search~2'>set_use_line_search</a></strong> => lss_set_use_search</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance~2'>set_var_tolerance</a></strong> => es_set_var_tol</td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance'>set_var_tolerance</a></strong> => es_set_var_tol</td>
                 <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\quasi_newton_solver.html#boundprocedure-solve'>solve</a></strong> => qns_solve</td>
+  <strong><a href='..\type\quasi_newton_solver.html#boundprocedure-solve~8'>solve</a></strong> => qns_solve</td>
                 <td></td>
               </tr>
           </tbody>
@@ -696,7 +713,7 @@ Newton iterations.</p>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-07-08 17:44              </p>
+ on 2026-07-08 17:48              </p>
           </div>
         </div>
         <br>
