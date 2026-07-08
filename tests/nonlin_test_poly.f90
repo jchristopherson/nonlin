@@ -53,21 +53,15 @@ contains
     function test_poly_roots() result(check)
         ! Parameters
         real(real64), parameter :: tol = 1.0d-6
-        integer(int32), parameter :: order = 10
 
         ! Local Variables
         integer(int32) :: i
         type(polynomial) :: p
-        real(real64), dimension(order+1) :: coeff
         complex(real64), allocatable, dimension(:) :: rts, sol
         logical :: check
 
-        ! Define the polynomial
-        call random_number(coeff)
-        p = polynomial(order)
-        do i = 1, size(coeff)
-            call p%set(i, coeff(i))
-        end do
+        ! Define the polynomial (x**3 - 4 x**2 + x + 6 = 0, roots = 2, 3, -1)
+        p = polynomial([6.0d0, 1.0d0, -4.0d0, 1.0d0])
 
         ! Compute the roots via the polynomial routine
         rts = p%roots()
