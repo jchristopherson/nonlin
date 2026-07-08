@@ -10,7 +10,7 @@
     <meta name="author" content="Jason Christopherson" >
     <link rel="icon" href="../favicon.png">
 
-    <title>operator(*) &ndash; NONLIN</title>
+    <title>polynomial &ndash; NONLIN</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
@@ -62,7 +62,7 @@
 
     <div class="container">
   <div class="row">
-    <h1>operator(*)
+    <h1>polynomial
       <small>Interface</small>
       
     </h1>
@@ -74,7 +74,7 @@
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip"
                  data-bs-placement="bottom" data-html="true"
-                 title="<p> 2.4% of total for procedures.</p>Including implementation: 43 statements, 20.4% of total for procedures.">5 statements</a>
+                 title="<p> 1.9% of total for procedures.</p>Including implementation: 16 statements,  7.6% of total for procedures.">4 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -88,7 +88,7 @@
           <ol class="breadcrumb justify-content-end mb-0">
                 <li class="breadcrumb-item"><a href='..\sourcefile\nonlin_polynomials.f90.html'>nonlin_polynomials.f90</a></li>
                 <li class="breadcrumb-item"><a href='..\module\nonlin_polynomials.html'>nonlin_polynomials</a></li>
-            <li class="breadcrumb-item active" aria-current="page">operator(*)</li>
+            <li class="breadcrumb-item active" aria-current="page">polynomial</li>
           </ol>
         </nav>
       </div>
@@ -131,9 +131,8 @@
       </a>
       <div id="modprocs-0" class="collapse">
         <div class="list-group list-group-flush">
-            <a class="list-group-item" href="../interface/operator(ASTERISK).html#moduleprocedure-poly_poly_mult">poly_poly_mult</a>
-            <a class="list-group-item" href="../interface/operator(ASTERISK).html#moduleprocedure-poly_dbl_mult">poly_dbl_mult</a>
-            <a class="list-group-item" href="../interface/operator(ASTERISK).html#moduleprocedure-dbl_poly_mult">dbl_poly_mult</a>
+            <a class="list-group-item" href="../interface/polynomial.html#moduleprocedure-poly_init_1">poly_init_1</a>
+            <a class="list-group-item" href="../interface/polynomial.html#moduleprocedure-poly_init_2">poly_init_2</a>
         </div>
       </div>
     </div>
@@ -146,17 +145,17 @@
     </div>
 
     <div class="col-md-9" id='text'>
-      <h2>public interface operator(*)</h2>
-      <p>Defines polynomial multiplication</p>
-<br>
+      <h2>public interface polynomial</h2>
+      
+
 
 
         <h2>Module Procedures</h2>
             <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-poly_poly_mult"></span> <h3>private  function poly_poly_mult(x, y) result(z)  
+    <div class="card-header codesum"><span class="anchor" id="proc-poly_init_1"></span> <h3>private  function poly_init_1(order, err) result(rst)  
 </h3></div>
     <div class="card-body">
-        <p>Multiplies two polynomials.</p>
+        <p>Initializes a new <a href="..\type\polynomial.html">polynomial</a> instance.</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -171,32 +170,32 @@
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-x~42"></span>
-              class(<a href='..\type\polynomial.html'>polynomial</a>),
+              <span class="anchor" id="variable-order~7"></span>
+              integer(kind=int32),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
               
             </td>
             <td>::</td>
-            <td><strong>x</strong></td>
+            <td><strong>order</strong></td>
             <td>
-                <p>The left-hand-side argument.</p>
+                <p>The order of the polynomial (must be &gt;= 0).</p>
             </td>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-y~10"></span>
-              class(<a href='..\type\polynomial.html'>polynomial</a>),
+              <span class="anchor" id="variable-err~16"></span>
+              class(errors),
             </td>
-<td>intent(in)</td>
-              <td></td>            <td>
-              
+<td>intent(inout),</td>
+              <td>optional,</td>            <td>
+              target
             </td>
             <td>::</td>
-            <td><strong>y</strong></td>
+            <td><strong>err</strong></td>
             <td>
-                <p>The right-hand-side argument.</p>
+                <p>An error handling object.</p>
             </td>
         </tr>
     </tbody>
@@ -206,16 +205,16 @@
     Return Value
     <small>type(<a href='..\type\polynomial.html'>polynomial</a>)</small>
     </h4>
-    <p>The resulting polynomial.</p>
+    <p>The new <a href="..\type\polynomial.html">polynomial</a> object.</p>
 
     </div>
   </div>
 
             <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-poly_dbl_mult"></span> <h3>private  function poly_dbl_mult(x, y) result(z)  
+    <div class="card-header codesum"><span class="anchor" id="proc-poly_init_2"></span> <h3>private  function poly_init_2(c, err) result(rst)  
 </h3></div>
     <div class="card-body">
-        <p>Multiplies a polynomial by a scalar value.</p>
+        <p>Initializes a new <a href="..\type\polynomial.html">polynomial</a> instance.</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
@@ -230,32 +229,34 @@
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-x~43"></span>
-              class(<a href='..\type\polynomial.html'>polynomial</a>),
+              <span class="anchor" id="variable-c~8"></span>
+              real(kind=real64),
             </td>
-<td>intent(in)</td>
+<td>intent(in),</td>
               <td></td>            <td>
-              
+              dimension(:)
             </td>
             <td>::</td>
-            <td><strong>x</strong></td>
+            <td><strong>c</strong></td>
             <td>
-                <p>The left-hand-side argument.</p>
+                <p>The array of polynomial coefficients. The coefficients are
+established as follows: c(1) + c(2) * x + c(3) * x<strong>2 + ...
+c(n) * x</strong>n-1.</p>
             </td>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-y~11"></span>
-              real(kind=real64),
+              <span class="anchor" id="variable-err~17"></span>
+              class(errors),
             </td>
-<td>intent(in)</td>
-              <td></td>            <td>
-              
+<td>intent(inout),</td>
+              <td>optional,</td>            <td>
+              target
             </td>
             <td>::</td>
-            <td><strong>y</strong></td>
+            <td><strong>err</strong></td>
             <td>
-                <p>The right-hand-side argument.</p>
+                <p>An error handling object.</p>
             </td>
         </tr>
     </tbody>
@@ -265,66 +266,7 @@
     Return Value
     <small>type(<a href='..\type\polynomial.html'>polynomial</a>)</small>
     </h4>
-    <p>The resulting polynomial.</p>
-
-    </div>
-  </div>
-
-            <div class="card">
-    <div class="card-header codesum"><span class="anchor" id="proc-dbl_poly_mult"></span> <h3>private  function dbl_poly_mult(x, y) result(z)  
-</h3></div>
-    <div class="card-body">
-        <p>Multiplies a polynomial by a scalar value.</p>
-
-  <h4>Arguments</h4>
-      <table class="table table-striped varlist">
-    <thead>
-      <tr>
-        <th scope="col">Type</th>
-<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
-        <th scope="col"></th>
-        <th scope="col">Name</th>
-        <th scope="col"></th>
-    </thead>
-    <tbody>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-x~44"></span>
-              real(kind=real64),
-            </td>
-<td>intent(in)</td>
-              <td></td>            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>x</strong></td>
-            <td>
-                <p>The left-hand-side argument.</p>
-            </td>
-        </tr>
-        <tr>
-            <td>
-              <span class="anchor" id="variable-y~12"></span>
-              class(<a href='..\type\polynomial.html'>polynomial</a>),
-            </td>
-<td>intent(in)</td>
-              <td></td>            <td>
-              
-            </td>
-            <td>::</td>
-            <td><strong>y</strong></td>
-            <td>
-                <p>The right-hand-side argument.</p>
-            </td>
-        </tr>
-    </tbody>
-  </table>
-
-    <h4>
-    Return Value
-    <small>type(<a href='..\type\polynomial.html'>polynomial</a>)</small>
-    </h4>
-    <p>The resulting polynomial.</p>
+    <p>The new <a href="..\type\polynomial.html">polynomial</a> object.</p>
 
     </div>
   </div>

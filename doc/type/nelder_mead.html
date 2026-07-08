@@ -1,3 +1,5 @@
+<!-- -*- mode: jinja2 -*- -->
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -10,77 +12,53 @@
 
     <title>nelder_mead &ndash; NONLIN </title>
 
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link href="../css/pygments.css" rel="stylesheet">
     <link href="../css/font-awesome.min.css" rel="stylesheet">
     <link href="../css/local.css" rel="stylesheet">
       <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
 
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-        <![endif]-->
-
-         <script src="../js/jquery-2.1.3.min.js"></script>
-         <script src="../js/svg-pan-zoom.min.js"></script>
-
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
   </head>
 
   <body>
 
     <!-- Fixed navbar -->
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
           <a class="navbar-brand" href="../index.html">NONLIN </a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
-              <a href="#" class="dropdown-toggle"
-                 data-toggle="dropdown" role="button"
-                 aria-haspopup="true"
-                 aria-expanded="false">
-                 Contents <span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                    <li><a href="../lists/files.html">Source Files</a></li>
-                  <li><a href="../lists/modules.html">Modules</a></li>
-                  <li><a href="../lists/procedures.html">Procedures</a></li>
-                  <li><a href="../lists/types.html">Derived Types</a></li>
-              </ul>
-            </li>
-                <li class="visible-xs hidden-sm visible-lg">
-                  <a href="../lists/files.html">Source Files</a>
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
                 </li>
-              <li class="visible-xs hidden-sm visible-lg">
-                <a href="../lists/modules.html">Modules</a>
-              </li>
-              <li class="visible-xs hidden-sm visible-lg">
-                <a href="../lists/procedures.html">Procedures</a>
-              </li>
-              <li class="visible-xs hidden-sm visible-lg">
-                <a href="../lists/types.html">Derived Types</a>
-              </li>
-          </ul>
-            <form action="../search.html" class="navbar-form navbar-right" role="search">
-              <div class="form-group">
-                <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/types.html">Derived Types</a>
+                </li>
+            </ul>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
               </div>
-              <!--
-                  <button type="submit" class="btn btn-default">Submit</button>
-                  -->
-            </form>
-        </div><!--/.nav-collapse -->
-      </div>
-    </nav>
+          </div><!--/.nav-collapse -->
+        </div>
+      </nav>
+    </div>
 
     <div class="container">
   <div class="row">
@@ -88,33 +66,37 @@
       <small>Derived Type</small>
       
     </h1>
-      <div class="row" id="info-bar">
-    <div class="col-lg-12">
-      <div class="well well-sm">
+      <div class="container p-2 mb-4 bg-light border rounded-3">
+    <div class="row align-items-center justify-content-between" id="info-bar">
+      <div class="col">
         <ul class="list-inline" style="margin-bottom:0px;display:inline">
 
-          <li id="statements"><i class="fa fa-list-ol"></i>
-            <a data-toggle="tooltip"
-               data-placement="bottom" data-html="true"
-               title="<p> 4.9% of total for derived types.</p>Including implementation: 278 statements,  6.9% of total for derived types.">11 statements</a>
-          </li>
+            <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
+              <a data-bs-toggle="tooltip"
+                 data-bs-placement="bottom" data-html="true"
+                 title="<p> 4.8% of total for derived types.</p>Including implementation: 278 statements,  7.3% of total for derived types.">11 statements</a>
+            </li>
 
-            <li id="source-file">
+            <li class="list-inline-item" id="source-file">
               <i class="fa fa-code"></i>
               <a href="../src/nonlin_optimize.f90"> Source File</a>
             </li>
         </ul>
-        <ol class="breadcrumb in-well text-right">
-              <li><a href='../sourcefile/nonlin_optimize.f90.html'>nonlin_optimize.f90</a></li>
-              <li><a href='../module/nonlin_optimize.html'>nonlin_optimize</a></li>
-          <li class="active">nelder_mead</li>
-        </ol>
+      </div>
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-end mb-0">
+                <li class="breadcrumb-item"><a href='..\sourcefile\nonlin_optimize.f90.html'>nonlin_optimize.f90</a></li>
+                <li class="breadcrumb-item"><a href='..\module\nonlin_optimize.html'>nonlin_optimize</a></li>
+            <li class="breadcrumb-item active" aria-current="page">nelder_mead</li>
+          </ol>
+        </nav>
       </div>
     </div>
   </div>
   <script>
     $(function () {
-    $('[data-toggle="tooltip"]').tooltip()
+    $('[data-bs-toggle="tooltip"]').tooltip()
     })
   </script>
 
@@ -141,29 +123,29 @@
   
   
   
-      <div class="panel panel-primary">
-      <div class="panel-heading text-left">
-        <h3 class="panel-title">
-          <a data-toggle="collapse" href="#boundprocs-0">Type-Bound Procedures</a>
-        </h3>
-      </div>
-      <div id="boundprocs-0" class="panel-collapse collapse">
-        <div class="list-group">
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#boundprocs-0"
+         aria-expanded="false" aria-controls="boundprocs-0">
+         <h4 class="card-header bg-primary text-white">Type-Bound Procedures</h4>
+      </a>
+      <div id="boundprocs-0" class="collapse">
+        <div class="list-group list-group-flush">
             <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-get_initial_size">get_initial_size</a>
-            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-get_max_fcn_evals~3">get_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-get_print_status~2">get_print_status</a>
+            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-get_max_fcn_evals">get_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-get_print_status">get_print_status</a>
             <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-get_simplex">get_simplex</a>
             <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-get_tolerance">get_tolerance</a>
             <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-set_initial_size">set_initial_size</a>
-            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-set_max_fcn_evals~3">set_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-set_print_status~2">set_print_status</a>
+            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-set_max_fcn_evals">set_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-set_print_status">set_print_status</a>
             <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-set_simplex">set_simplex</a>
             <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-set_tolerance">set_tolerance</a>
-            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-solve~6">solve</a>
+            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-solve~10">solve</a>
         </div>
       </div>
     </div>
 
+  
   
 
 
@@ -172,72 +154,33 @@
     </div>
     
     <div class="col-md-9" id='text'>
-      <h2>type, public, extends(<a href='../type/equation_optimizer.html'>equation_optimizer</a>) :: nelder_mead</h2>
+      <h2>
+        type, public, extends(<a href='equation_optimizer.html'>equation_optimizer</a>) :: nelder_mead</h2>
     <p>Defines a solver based upon Nelder and Mead's simplex algorithm
 for minimization of functions of multiple variables.</p>
     <br>
-
-    <section class="visible-xs visible-sm hidden-md">
-        <h3>Contents</h3>
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-      <div class="panel panel-primary">
-      <div class="panel-heading text-left">
-        <h3 class="panel-title">
-          <a data-toggle="collapse" href="#boundprocs-1">Type-Bound Procedures</a>
-        </h3>
-      </div>
-      <div id="boundprocs-1" class="panel-collapse collapse">
-        <div class="list-group">
-            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-get_initial_size">get_initial_size</a>
-            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-get_max_fcn_evals~3">get_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-get_print_status~2">get_print_status</a>
-            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-get_simplex">get_simplex</a>
-            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-get_tolerance">get_tolerance</a>
-            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-set_initial_size">set_initial_size</a>
-            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-set_max_fcn_evals~3">set_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-set_print_status~2">set_print_status</a>
-            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-set_simplex">set_simplex</a>
-            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-set_tolerance">set_tolerance</a>
-            <a class="list-group-item" href="../type/nelder_mead.html#boundprocedure-solve~6">solve</a>
-        </div>
-      </div>
-    </div>
-
-  
-
-
-    </section>
-    <br class="visible-xs visible-sm hidden-md">
 
     
 
 
       <section>
         <h2>Type-Bound Procedures</h2>
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_initial_size"></span><h3>procedure, public :: <strong>get_initial_size</strong>  => nm_get_size         
-    </h3></div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-get_initial_size"></span>
+      <h3>
+          procedure, public ::
+  <strong>get_initial_size</strong> => nm_get_size
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private pure function nm_get_size(this) result(x)  
 </h3>
+
   <p>Gets the size of the initial simplex that will be utilized by
 the Nelder-Mead algorithm in the event that the user does not supply
 a simplex geometry, or if the user supplies an invalid simplex
@@ -247,17 +190,17 @@ geometry.</p>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/nelder_mead.html'>nelder_mead</a>),
+              class(<a href='nelder_mead.html'>nelder_mead</a>),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -266,7 +209,7 @@ geometry.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/nelder_mead.html">nelder_mead</a> object.</p>
+                <p>The <a href="..\type\nelder_mead.html">nelder_mead</a> object.</p>
             </td>
         </tr>
     </tbody>
@@ -282,31 +225,40 @@ geometry.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_max_fcn_evals~3"></span><h3>procedure, public :: <strong>get_max_fcn_evals</strong>  => oe_get_max_eval         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-get_max_fcn_evals"></span>
+      <h3>
+          procedure, public ::
+  <strong>get_max_fcn_evals</strong> => oe_get_max_eval
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private pure function oe_get_max_eval(this) result(n)  
 </h3>
+
   
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/equation_optimizer.html'>equation_optimizer</a>),
+              class(<a href='equation_optimizer.html'>equation_optimizer</a>),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -315,7 +267,7 @@ geometry.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/equation_optimizer.html">equation_optimizer</a> object.</p>
+                <p>The <a href="..\type\equation_optimizer.html">equation_optimizer</a> object.</p>
             </td>
         </tr>
     </tbody>
@@ -331,31 +283,40 @@ geometry.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_print_status~2"></span><h3>procedure, public :: <strong>get_print_status</strong>  => oe_get_print_status         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-get_print_status"></span>
+      <h3>
+          procedure, public ::
+  <strong>get_print_status</strong> => oe_get_print_status
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private pure function oe_get_print_status(this) result(x)  
 </h3>
+
   
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/equation_optimizer.html'>equation_optimizer</a>),
+              class(<a href='equation_optimizer.html'>equation_optimizer</a>),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -364,7 +325,7 @@ geometry.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/equation_optimizer.html">equation_optimizer</a> object.</p>
+                <p>The <a href="..\type\equation_optimizer.html">equation_optimizer</a> object.</p>
             </td>
         </tr>
     </tbody>
@@ -380,31 +341,40 @@ geometry.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_simplex"></span><h3>procedure, public :: <strong>get_simplex</strong>  => nm_get_simplex         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-get_simplex"></span>
+      <h3>
+          procedure, public ::
+  <strong>get_simplex</strong> => nm_get_simplex
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private pure function nm_get_simplex(this) result(p)  
 </h3>
+
   <p>Gets an N-by-(N+1) matrix containing the current simplex.</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/nelder_mead.html'>nelder_mead</a>),
+              class(<a href='nelder_mead.html'>nelder_mead</a>),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -413,7 +383,7 @@ geometry.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/nelder_mead.html">nelder_mead</a> object.</p>
+                <p>The <a href="..\type\nelder_mead.html">nelder_mead</a> object.</p>
             </td>
         </tr>
     </tbody>
@@ -430,31 +400,40 @@ the simplex is stored as its own column of this matrix.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_tolerance"></span><h3>procedure, public :: <strong>get_tolerance</strong>  => oe_get_tol         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-get_tolerance"></span>
+      <h3>
+          procedure, public ::
+  <strong>get_tolerance</strong> => oe_get_tol
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private pure function oe_get_tol(this) result(x)  
 </h3>
+
   
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/equation_optimizer.html'>equation_optimizer</a>),
+              class(<a href='equation_optimizer.html'>equation_optimizer</a>),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -463,7 +442,7 @@ the simplex is stored as its own column of this matrix.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/equation_optimizer.html">equation_optimizer</a> object.</p>
+                <p>The <a href="..\type\equation_optimizer.html">equation_optimizer</a> object.</p>
             </td>
         </tr>
     </tbody>
@@ -479,14 +458,23 @@ the simplex is stored as its own column of this matrix.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_initial_size"></span><h3>procedure, public :: <strong>set_initial_size</strong>  => nm_set_size         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-set_initial_size"></span>
+      <h3>
+          procedure, public ::
+  <strong>set_initial_size</strong> => nm_set_size
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private  subroutine nm_set_size(this, x)  
 </h3>
+
   <p>Sets the size of the initial simplex that will be utilized by
 the Nelder-Mead algorithm in the event that the user does not supply
 a simplex geometry, or if the user supplies an invalid simplex
@@ -496,17 +484,17 @@ geometry.</p>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/nelder_mead.html'>nelder_mead</a>),
+              class(<a href='nelder_mead.html'>nelder_mead</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -515,7 +503,7 @@ geometry.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/nelder_mead.html">nelder_mead</a> object.</p>
+                <p>The <a href="..\type\nelder_mead.html">nelder_mead</a> object.</p>
             </td>
         </tr>
         <tr>
@@ -541,31 +529,40 @@ geometry.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_max_fcn_evals~3"></span><h3>procedure, public :: <strong>set_max_fcn_evals</strong>  => oe_set_max_eval         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-set_max_fcn_evals"></span>
+      <h3>
+          procedure, public ::
+  <strong>set_max_fcn_evals</strong> => oe_set_max_eval
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private  subroutine oe_set_max_eval(this, n)  
 </h3>
+
   
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/equation_optimizer.html'>equation_optimizer</a>),
+              class(<a href='equation_optimizer.html'>equation_optimizer</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -574,7 +571,7 @@ geometry.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/equation_optimizer.html">equation_optimizer</a> object.</p>
+                <p>The <a href="..\type\equation_optimizer.html">equation_optimizer</a> object.</p>
             </td>
         </tr>
         <tr>
@@ -600,31 +597,40 @@ geometry.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_print_status~2"></span><h3>procedure, public :: <strong>set_print_status</strong>  => oe_set_print_status         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-set_print_status"></span>
+      <h3>
+          procedure, public ::
+  <strong>set_print_status</strong> => oe_set_print_status
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private  subroutine oe_set_print_status(this, x)  
 </h3>
+
   
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/equation_optimizer.html'>equation_optimizer</a>),
+              class(<a href='equation_optimizer.html'>equation_optimizer</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -633,7 +639,7 @@ geometry.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/equation_optimizer.html">equation_optimizer</a> object.</p>
+                <p>The <a href="..\type\equation_optimizer.html">equation_optimizer</a> object.</p>
             </td>
         </tr>
         <tr>
@@ -659,14 +665,23 @@ geometry.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_simplex"></span><h3>procedure, public :: <strong>set_simplex</strong>  => nm_set_simplex         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-set_simplex"></span>
+      <h3>
+          procedure, public ::
+  <strong>set_simplex</strong> => nm_set_simplex
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private  subroutine nm_set_simplex(this, x)  
 </h3>
+
   <p>Sets an N-by-(N+1) matrix as the current simplex.  Notice, if
 this matrix is different in size from the problem dimensionallity,
 the Nelder-Mead routine will replace it with an appropriately sized
@@ -676,17 +691,17 @@ matrix.</p>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/nelder_mead.html'>nelder_mead</a>),
+              class(<a href='nelder_mead.html'>nelder_mead</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -695,7 +710,7 @@ matrix.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/nelder_mead.html">nelder_mead</a> object.</p>
+                <p>The <a href="..\type\nelder_mead.html">nelder_mead</a> object.</p>
             </td>
         </tr>
         <tr>
@@ -722,31 +737,40 @@ coordinates of each vertex of the simplex.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_tolerance"></span><h3>procedure, public :: <strong>set_tolerance</strong>  => oe_set_tol         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-set_tolerance"></span>
+      <h3>
+          procedure, public ::
+  <strong>set_tolerance</strong> => oe_set_tol
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private  subroutine oe_set_tol(this, x)  
 </h3>
+
   
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/equation_optimizer.html'>equation_optimizer</a>),
+              class(<a href='equation_optimizer.html'>equation_optimizer</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -755,7 +779,7 @@ coordinates of each vertex of the simplex.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/equation_optimizer.html">equation_optimizer</a> object.</p>
+                <p>The <a href="..\type\equation_optimizer.html">equation_optimizer</a> object.</p>
             </td>
         </tr>
         <tr>
@@ -781,14 +805,23 @@ coordinates of each vertex of the simplex.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-solve~6"></span><h3>procedure, public :: <strong>solve</strong>  => nm_solve         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-solve~10"></span>
+      <h3>
+          procedure, public ::
+  <strong>solve</strong> => nm_solve
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private  subroutine nm_solve(this, fcn, x, fout, ib, args, err)  
 </h3>
+
   <p>Utilizes the Nelder-Mead simplex method for finding a minimum
 value of the specified function.</p>
 <p>The implementation of the Nelder-Mead algorithm presented here is a
@@ -819,17 +852,17 @@ is leveraged for this implemetation.</p>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/nelder_mead.html'>nelder_mead</a>),
+              class(<a href='nelder_mead.html'>nelder_mead</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -838,13 +871,13 @@ is leveraged for this implemetation.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/nelder_mead.html">nelder_mead</a> object.</p>
+                <p>The <a href="..\type\nelder_mead.html">nelder_mead</a> object.</p>
             </td>
         </tr>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/fcnnvar_helper.html'>fcnnvar_helper</a>),
+              class(<a href='fcnnvar_helper.html'>fcnnvar_helper</a>),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -853,7 +886,7 @@ is leveraged for this implemetation.</p>
             <td>::</td>
             <td><strong>fcn</strong></td>
             <td>
-                <p>The <a href="../type/fcnnvar_helper.html">fcnnvar_helper</a> object containing the equation to 
+                <p>The <a href="..\type\fcnnvar_helper.html">fcnnvar_helper</a> object containing the equation to 
 optimize.</p>
             </td>
         </tr>
@@ -892,7 +925,7 @@ function at x.</p>
         <tr>
             <td>
               <span class="anchor" ></span>
-              type(<a href='../type/iteration_behavior.html'>iteration_behavior</a>),
+              type(<a href='iteration_behavior.html'>iteration_behavior</a>),
             </td>
 <td></td>
               <td>optional</td>            <td>
@@ -943,6 +976,7 @@ obtain iteration performance statistics.</p>
     </ul>
   </div>
 
+          </div>
       </section>
 
     
@@ -953,32 +987,27 @@ obtain iteration performance statistics.</p>
     </div> <!-- /container -->
     <footer>
       <div class="container">
-        <div class="row">
-          <div class="col-xs-6 col-md-6"><p>NONLIN was developed by Jason Christopherson<br>&copy; 2026 
+        <div class="row justify-content-between">
+          <div class="col"><p>NONLIN was developed by Jason Christopherson<br>&copy; 2026 
 </p>
           </div>
-          <div class="col-xs-6 col-md-6">
-            <p class="text-right">
+          <div class="col">
+            <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-05-04 05:40              </p>
+ on 2026-07-08 17:44              </p>
           </div>
         </div>
         <br>
       </div> <!-- /container -->
     </footer>
 
-    <!-- Bootstrap core JavaScript
-         ================================================== -->
-         <!-- Placed at the end of the document so the pages load faster -->
-    <!--
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-        -->
-        <script src="../js/bootstrap.min.js"></script>
-        <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-        <script src="../js/ie10-viewport-bug-workaround.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>    
 
-        <!-- MathJax JavaScript
+    <!-- MathJax JavaScript
              ================================================== -->
              <!-- Placed at the end of the document so the pages load faster -->
         <script type="text/x-mathjax-config">

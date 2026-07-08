@@ -1233,7 +1233,9 @@ contains
                 xcnvrg = .true.
                 exit outer
             end if
-            if (fnorm <= ftol) then
+            if (abs(actred) <= ftol .and. abs(prered) <= ftol .and. &
+                0.5d0 * rho <= 1.0d0) &
+            then
                 converged = .true.
                 fcnvrg = .true.
                 exit outer
@@ -1431,7 +1433,7 @@ contains
         ! Initialization
         m = size(jac, 1)
         n = size(jac, 2)
-        allocate(pgn(n), psd(n), u(n), v(n), Jg(m))
+        allocate(pgn(n), psd(n), u(m), v(n), Jg(m))
 
         ! Compute the gradient vector
         call dgemv('T', m, n, 1.0d0, jac, m, f, 1, 0.0d0, g, 1)
