@@ -53,21 +53,15 @@ contains
     function test_poly_roots() result(check)
         ! Parameters
         real(real64), parameter :: tol = 1.0d-6
-        integer(int32), parameter :: order = 10
 
         ! Local Variables
         integer(int32) :: i
         type(polynomial) :: p
-        real(real64), dimension(order+1) :: coeff
         complex(real64), allocatable, dimension(:) :: rts, sol
         logical :: check
 
-        ! Define the polynomial
-        call random_number(coeff)
-        call p%initialize(order)
-        do i = 1, size(coeff)
-            call p%set(i, coeff(i))
-        end do
+        ! Define the polynomial (x**3 - 4 x**2 + x + 6 = 0, roots = 2, 3, -1)
+        p = polynomial([6.0d0, 1.0d0, -4.0d0, 1.0d0])
 
         ! Compute the roots via the polynomial routine
         rts = p%roots()
@@ -107,8 +101,8 @@ contains
         ! Define the polynomials
         call random_number(c1)
         call random_number(c2)
-        call p1%initialize(order1)
-        call p2%initialize(order2)
+        p1 = polynomial(order1)
+        p2 = polynomial(order2)
         do i = 1, size(c1)
             call p1%set(i, c1(i))
         end do
@@ -165,8 +159,8 @@ contains
         ! Define the polynomials
         call random_number(c1)
         call random_number(c2)
-        call p1%initialize(order1)
-        call p2%initialize(order2)
+        p1 = polynomial(order1)
+        p2 = polynomial(order2)
         do i = 1, size(c1)
             call p1%set(i, c1(i))
         end do
@@ -217,9 +211,8 @@ contains
         real(real64), parameter :: tol = 1.0d-8
 
         ! Initialization
-        call p1%initialize(3)
-        call p2%initialize(2)
-        call ans%initialize(5)
+        p1 = polynomial(3)
+        p2 = polynomial(2)
 
         ! Set p1 = 5 + 10x**2 + 6x**3
         call p1%set(1, 5.0d0)
@@ -233,12 +226,7 @@ contains
         call p2%set(3, 4.0d0)
 
         ! Answer: ans = 5 + 10x + 30x**2 + 26x**3 + 52x**4 + 24x**5
-        call ans%set(1, 5.0d0)
-        call ans%set(2, 10.0d0)
-        call ans%set(3, 30.0d0)
-        call ans%set(4, 26.0d0)
-        call ans%set(5, 52.0d0)
-        call ans%set(6, 24.0d0)
+        ans = polynomial([5.0d0, 10.0d0, 30.0d0, 26.0d0, 52.0d0, 24.0d0])
 
         ! Compute p1 * p2 = p3
         p3 = p1 * p2
@@ -253,6 +241,53 @@ contains
             print *, b
             print 100, "Computed:"
             print *, a
+        else
+            check = .true.
+        end if
+
+        ! Formatting
+100     format(A)
+    end function
+
+! ------------------------------------------------------------------------------
+    ! Tests the polynomial division routine
+    function test_poly_divide() result(check)
+        ! Parameters
+        real(real64), parameter :: tol = 1.0d-8
+
+        ! Local Variables
+        logical :: check
+        type(polynomial) :: p1, p2, q, r, q_ans, r_ans
+        real(real64), allocatable, dimension(:) :: a, b, c, d
+
+        ! Initialization
+        p1 = polynomial([0.0d0, 1.0d0, 0.0d0, 1.0d0]) ! x^3 + x
+        p2 = polynomial([1.0d0, 1.0d0]) ! x + 1
+
+        ! Expected quotient: x^2 - x + 2
+        q_ans = polynomial([2.0d0, -1.0d0, 1.0d0])
+        ! Expected remainder: -2
+        r_ans = polynomial([-2.0d0])
+
+        ! Divide p1 by p2
+        call p1%divide(p2, q, r)
+
+        ! Test
+        a = q%get_all()
+        b = q_ans%get_all()
+        c = r%get_all()
+        d = r_ans%get_all()
+        if (.not.assert(a, b, tol) .or. .not.assert(c, d, tol)) then
+            check = .false.
+            print 100, "Test Failed: Polynomial Division"
+            print 100, "Expected quotient:"
+            print *, b
+            print 100, "Computed quotient:"
+            print *, a
+            print 100, "Expected remainder:"
+            print *, d
+            print 100, "Computed remainder:"
+            print *, c
         else
             check = .true.
         end if

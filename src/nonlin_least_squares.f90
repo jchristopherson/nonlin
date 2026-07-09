@@ -19,8 +19,10 @@ module nonlin_least_squares
 ! TYPES
 ! ------------------------------------------------------------------------------
     type, extends(equation_solver) :: least_squares_solver
-        !! Defines a Levenberg-Marquardt based solver for unconstrained
-        !! least-squares problems.
+        !! Defines a Levenberg-Marquardt solver for unconstrained least-squares
+        !! problems.  The update is obtained from the damped normal equations
+        !! $$ (J^T J + \lambda I) \Delta x = -J^T r $$
+        !! where \(r(x)\) is the residual vector and \(x_{k+1}=x_k+\Delta x\).
         real(real64), private :: m_factor = 100.0d0
             !! Initial step bounding factor
     contains
@@ -30,8 +32,10 @@ module nonlin_least_squares
     end type
 
     type, abstract, extends(least_squares_solver) :: constrained_equation_solver
-        !! A least-squares solver that implements limits (constraints) on the
-        !! solution variables.
+        !! A least-squares solver that enforces bounds on the solution values,
+        !! typically expressed as \(x_i^L \le x_i \le x_i^U\).  The solver
+        !! applies the bounds during the iteration so that each trial step
+        !! remains feasible.
         real(real64), private, allocatable, dimension(:) :: m_upper
             !! An upper set of parameter bounds.
         real(real64), private, allocatable, dimension(:) :: m_lower
@@ -46,30 +50,18 @@ module nonlin_least_squares
 
     type, extends(constrained_equation_solver) :: constrained_least_squares_solver
         !! Defines a constrained least-squares solver using Powell's trust
-        !! region method.  In the event the trust-region approach is slow to
-        !! converge a backtracking type line search will be utilized.  The
-        !! solver also utilizes a Coleman-Li scaling approach that works to
-        !! improve stability when the solution is near a constraint.
-        !!
-        !! The trust region approach assumes a radius of \(\Delta\), which can
-        !! be initially defined by the user but is automatically altered by the
-        !! solver, and is implemented as follows.
-        !!
-        !! Gauss-Newton Step (Solved via QR decomposition):
-        !! $$ J \vec{p_{gn}} = -\vec{f} $$
-        !!
-        !! The gradient vector for the steepest descent is calculated by
-        !! utilizing the product of the Jacobian and the residual as follows.
-        !! $$ \vec{g} = J \vec{f} $$
-        !!
-        !! The steepest descent step is then as follows.
-        !! $$ \vec{p_{sd}} = -\alpha \vec{g} $$
-        !! where \( \alpha = \frac{||\vec{g}||^{2}}{||J \vec{g}||^2} \).
-        !!
-        !! Finally, the dogleg is computed as follows.
-        !! $$ \vec{p} = \vec{p_{sd}} + t \left( \vec{p_{gn}} - \vec{p_{sd}} 
-        !! \right) $$
-        !! where \(t\) is found such that \(|| \vec{p}|| = \Delta \).
+        !! region method.  The method seeks a correction \(p\) that reduces the
+        !! residual vector \(r(x)\) while remaining inside a trust region of size
+        !! \(\Delta\) and the bounds \(x^L \le x \le x^U\).  The trial step is
+        !! formed from a Gauss-Newton step
+        !! $$ J p_{gn} = -r $$
+        !! a steepest-descent step
+        !! $$ p_{sd} = -\alpha g, \qquad g = J^T r, \qquad \alpha = \frac{\|g\|^2}{\|Jg\|^2} $$
+        !! and a dogleg combination
+        !! $$ p = p_{sd} + t \left( p_{gn} - p_{sd} \right) $$
+        !! with \(t\) chosen so that \(\|p\| = \Delta\).  If the trust-region step
+        !! is rejected, a backtracking line search is used to improve the
+        !! step acceptance.
         real(real64), private :: m_delta = 1.0d0
             !! The damping parameter.
         real(real64), private :: m_scaling = 1.0d0

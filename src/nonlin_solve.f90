@@ -19,8 +19,13 @@ module nonlin_solve
     public :: newton_1var_solver
 
     type, abstract, extends(equation_solver) :: line_search_solver
-        !! A class describing nonlinear solvers that use a line search
-        !! algorithm to improve convergence behavior.
+        !! A base class for nonlinear solvers that improve convergence by
+        !! combining a search direction with a line search.  At each iteration
+        !! the step is taken as
+        !! $$ x_{k+1} = x_k + \alpha_k p_k $$
+        !! where the step length $\alpha_k$ is chosen to satisfy a sufficient
+        !! decrease condition such as the Armijo rule
+        !! $$ f(x_k + \alpha_k p_k) \le f(x_k) + c_1 \alpha_k \nabla f(x_k)^T p_k $$. 
         class(line_search), private, allocatable :: m_lineSearch
             !! The line search module.
         logical, private :: m_useLineSearch = .true.
@@ -37,7 +42,13 @@ module nonlin_solve
     end type
 
     type, extends(line_search_solver) :: quasi_newton_solver
-        !! Defines a quasi-Newton type solver based upon Broyden's method.
+        !! Defines a quasi-Newton solver based upon Broyden's method.  The
+        !! algorithm maintains an approximate Jacobian \(B_k\) and updates the
+        !! iterate from the nonlinear system $F(x)=0$ using
+        !! $$ B_k s_k = -F(x_k), \qquad x_{k+1} = x_k + s_k $$
+        !! with the rank-one Jacobian correction
+        !! $$ B_{k+1} = B_k + \frac{(y_k - B_k s_k)s_k^T}{s_k^T s_k} $$
+        !! where \(y_k = F(x_{k+1}) - F(x_k)\). 
         integer(int32), private :: m_jDelta = 5
             !! The number of iterations that may pass between Jacobian
             !! calculation.
@@ -48,23 +59,29 @@ module nonlin_solve
     end type
     
     type, extends(line_search_solver) :: newton_solver
-        !! Defines a Newton solver.
+        !! Defines a Newton solver for systems of nonlinear equations.  At each
+        !! iteration the correction is obtained from the linearized system
+        !! $$ J(x_k) \Delta x_k = -F(x_k), \qquad x_{k+1} = x_k + \Delta x_k $$
+        !! where \(J(x_k)\) is the Jacobian matrix of \(F\).
     contains
         procedure, public :: solve => ns_solve
     end type
 
     type, extends(equation_solver_1var) :: brent_solver
-        !! Defines a solver based upon Brent's method for solving an equation
-        !! of one variable without using derivatives.
+        !! Defines a derivative-free solver for a scalar equation \(f(x)=0\)
+        !! based on Brent's method.  The method combines bisection with secant
+        !! and inverse quadratic interpolation to maintain a bracket and
+        !! converge to a root.
     contains
         procedure, public :: solve => brent_solve
     end type
 
     type, extends(equation_solver_1var) :: newton_1var_solver
-        !! Defines a solver based upon Newtons's method for solving an
-        !! equation of one variable.  The algorithm uses a bisection method in
-        !! conjunction with Newton's method in order to keep bounds upon the
-        !! Newton iterations.
+        !! Defines a safeguarded Newton solver for a scalar equation \(f(x)=0\).
+        !! The iteration uses the Newton update
+        !! $$ x_{k+1} = x_k - \frac{f(x_k)}{f'(x_k)} $$
+        !! and retains a bracketing interval so that the step remains bounded
+        !! by the root bracket.
     contains
         procedure, public :: solve => newt1var_solve
     end type

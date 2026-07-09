@@ -58,12 +58,18 @@ module nonlin_polynomials
         procedure, public :: get => get_poly_coefficient
         procedure, public :: get_all => get_poly_coefficients
         procedure, public :: set => set_poly_coefficient
+        procedure, public :: divide => poly_divide
 
         procedure, private :: evaluate_real => poly_eval_double
         procedure, private :: evaluate_complex => poly_eval_complex
         procedure, private :: init_poly
         procedure, private :: init_poly_coeffs
     end type
+
+    interface polynomial
+        module procedure :: poly_init_1
+        module procedure :: poly_init_2
+    end interface
 
 contains
 ! ******************************************************************************
@@ -779,79 +785,154 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
+    subroutine poly_divide(this, divisor, quotient, remainder, err)
+        !! Divides one polynomial by another and returns the quotient and
+        !! remainder.
+        class(polynomial), intent(in) :: this
+            !! The numerator polynomial.
+        class(polynomial), intent(in) :: divisor
+            !! The denominator polynomial.
+        class(polynomial), intent(out) :: quotient
+            !! The quotient polynomial.
+        class(polynomial), intent(out) :: remainder
+            !! The remainder polynomial.
+        class(errors), intent(inout), optional, target :: err
+            !! An error handling object.
 
-! Example Polynomial Code (Coefficients go from lowest order to highest)
-! src: https://github.com/JuliaMath/Polynomials.jl
-!
-! function *{T,S}(p1::Poly{T}, p2::Poly{S})
-!     if p1.var != p2.var
-!         error("Polynomials must have same variable")
-!     end
-!     R = promote_type(T,S)
-!     n = length(p1)-1
-!     m = length(p2)-1
-!     a = zeros(R,m+n+1)
+        ! Parameters
+        real(real64), parameter :: zero = 0.0d0
 
-!     for i = 0:n
-!         for j = 0:m
-!             a[i+j+1] += p1[i] * p2[j]
-!         end
-!     end
-!     Poly(a,p1.var)
-! end
+        ! Local Variables
+        integer(int32) :: i, j, n, m, q_order, r_order, last_nonzero
+        real(real64) :: coeff, lead
+        real(real64), allocatable, dimension(:) :: num_coeffs
+        real(real64), allocatable, dimension(:) :: den_coeffs
+        real(real64), allocatable, dimension(:) :: q_coeffs
+        real(real64), allocatable, dimension(:) :: r_coeffs
+        class(errors), pointer :: errmgr
+        type(errors), target :: deferr
 
-! ## older . operators, hack to avoid warning on v0.6
-! dot_operators = quote
-!     @compat Base.:.+{T<:Number}(c::T, p::Poly) = +(p, c)
-!     @compat Base.:.+{T<:Number}(p::Poly, c::T) = +(p, c)
-!     @compat Base.:.-{T<:Number}(p::Poly, c::T) = +(p, -c)
-!     @compat Base.:.-{T<:Number}(c::T, p::Poly) = +(p, -c)
-!     @compat Base.:.*{T<:Number,S}(c::T, p::Poly{S}) = Poly(c * p.a, p.var)
-!     @compat Base.:.*{T<:Number,S}(p::Poly{S}, c::T) = Poly(p.a * c, p.var)
-! end
-! VERSION < v"0.6.0-dev" && eval(dot_operators)
+        ! Initialization
+        if (present(err)) then
+            errmgr => err
+        else
+            errmgr => deferr
+        end if
 
+        call quotient%initialize(0, errmgr)
+        if (errmgr%has_error_occurred()) return
+        call remainder%initialize(0, errmgr)
+        if (errmgr%has_error_occurred()) return
 
-! # are any values NaN
-! hasnan(p::Poly) = reduce(|, (@compat isnan.(p.a)))
+        ! Input Check
+        if (this%order() == -1) return
+        if (divisor%order() == -1) then
+            call errmgr%report_error("poly_divide", &
+                "Division by a zero polynomial is not supported.", &
+                NL_INVALID_INPUT_ERROR)
+            return
+        end if
 
-! function divrem{T, S}(num::Poly{T}, den::Poly{S})
-!     if num.var != den.var
-!         error("Polynomials must have same variable")
-!     end
-!     m = length(den)-1
-!     if m == 0 && den[0] == 0
-!         throw(DivideError())
-!     end
-!     R = typeof(one(T)/one(S))
-!     n = length(num)-1
-!     deg = n-m+1
-!     if deg <= 0
-!         return convert(Poly{R}, zero(num)), convert(Poly{R}, num)
-!     end
+        ! Process
+        num_coeffs = this%get_all()
+        den_coeffs = divisor%get_all()
+        lead = den_coeffs(size(den_coeffs))
+        if (abs(lead) <= epsilon(lead)) then
+            call errmgr%report_error("poly_divide", &
+                "Division by a zero polynomial is not supported.", &
+                NL_INVALID_INPUT_ERROR)
+            return
+        end if
 
-!     aQ = zeros(R, deg)
-!     # aR = deepcopy(num.a)
-!     # @show num.a
-!     aR = R[ num.a[i] for i = 1:n+1 ]
-!     for i = n:-1:m
-!         quot = aR[i+1] / den[m]
-!         aQ[i-m+1] = quot
-!         for j = 0:m
-!             elem = den[j]*quot
-!             aR[i-(m-j)+1] -= elem
-!         end
-!     end
-!     pQ = Poly(aQ, num.var)
-!     pR = Poly(aR, num.var)
+        n = size(num_coeffs) - 1
+        m = size(den_coeffs) - 1
 
-!     return pQ, pR
-! end
+        if (n < m) then
+            call remainder%initialize(n)
+            do i = 1, n + 1
+                call remainder%set(i, num_coeffs(i))
+            end do
+            return
+        end if
 
-! div(num::Poly, den::Poly) = divrem(num, den)[1]
-! rem(num::Poly, den::Poly) = divrem(num, den)[2]
+        allocate(q_coeffs(n - m + 1))
+        allocate(r_coeffs(n + 1))
+        q_coeffs = zero
+        r_coeffs = zero
+        r_coeffs = num_coeffs
 
-! ==(p1::Poly, p2::Poly) = (p1.var == p2.var && p1.a == p2.a)
-! ==(p1::Poly, n::Number) = (coeffs(p1) == [n])
-! ==(n::Number, p1::Poly) = (p1 == n)
+        do i = n - m, 0, -1
+            coeff = r_coeffs(i + m + 1) / lead
+            q_coeffs(i + 1) = coeff
+            do j = 1, m + 1
+                r_coeffs(i + j) = r_coeffs(i + j) - coeff * den_coeffs(j)
+            end do
+        end do
+
+        ! Trim any leading zero coefficients from the quotient.
+        last_nonzero = 0
+        do i = size(q_coeffs), 1, -1
+            if (abs(q_coeffs(i)) > epsilon(q_coeffs(i))) then
+                last_nonzero = i
+                exit
+            end if
+        end do
+        if (last_nonzero == 0) then
+            call quotient%initialize(0)
+        else
+            q_order = last_nonzero - 1
+            call quotient%initialize(q_order)
+            do i = 1, last_nonzero
+                call quotient%set(i, q_coeffs(i))
+            end do
+        end if
+
+        ! Trim any leading zero coefficients from the remainder.
+        last_nonzero = 0
+        do i = size(r_coeffs), 1, -1
+            if (abs(r_coeffs(i)) > epsilon(r_coeffs(i))) then
+                last_nonzero = i
+                exit
+            end if
+        end do
+        if (last_nonzero == 0) then
+            call remainder%initialize(0)
+        else
+            r_order = last_nonzero - 1
+            call remainder%initialize(r_order)
+            do i = 1, last_nonzero
+                call remainder%set(i, r_coeffs(i))
+            end do
+        end if
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    function poly_init_1(order, err) result(rst)
+        !! Initializes a new [[polynomial]] instance.
+        integer(int32), intent(in) :: order
+            !! The order of the polynomial (must be >= 0).
+        class(errors), intent(inout), optional, target :: err
+            !! An error handling object.
+        type(polynomial) :: rst
+            !! The new [[polynomial]] object.
+
+        call rst%initialize(order, err = err)
+    end function
+
+! ------------------------------------------------------------------------------
+    function poly_init_2(c, err) result(rst)
+        !! Initializes a new [[polynomial]] instance.
+        real(real64), intent(in), dimension(:) :: c
+            !! The array of polynomial coefficients. The coefficients are
+            !! established as follows: c(1) + c(2) * x + c(3) * x**2 + ...
+            !! c(n) * x**n-1.
+        class(errors), intent(inout), optional, target :: err
+            !! An error handling object.
+        type(polynomial) :: rst
+            !! The new [[polynomial]] object.
+
+        call rst%initialize(c, err = err)
+    end function
+
+! ------------------------------------------------------------------------------
 end module
