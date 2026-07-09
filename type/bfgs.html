@@ -1,3 +1,5 @@
+<!-- -*- mode: jinja2 -*- -->
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -10,77 +12,53 @@
 
     <title>bfgs &ndash; NONLIN </title>
 
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link href="../css/pygments.css" rel="stylesheet">
     <link href="../css/font-awesome.min.css" rel="stylesheet">
     <link href="../css/local.css" rel="stylesheet">
       <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
 
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-        <![endif]-->
-
-         <script src="../js/jquery-2.1.3.min.js"></script>
-         <script src="../js/svg-pan-zoom.min.js"></script>
-
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
   </head>
 
   <body>
 
     <!-- Fixed navbar -->
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
+    <div class="container-fluid mb-sm-4 mb-xl-2">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
           <a class="navbar-brand" href="../index.html">NONLIN </a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
-              <a href="#" class="dropdown-toggle"
-                 data-toggle="dropdown" role="button"
-                 aria-haspopup="true"
-                 aria-expanded="false">
-                 Contents <span class="caret"></span>
-              </a>
-              <ul class="dropdown-menu">
-                    <li><a href="../lists/files.html">Source Files</a></li>
-                  <li><a href="../lists/modules.html">Modules</a></li>
-                  <li><a href="../lists/procedures.html">Procedures</a></li>
-                  <li><a href="../lists/types.html">Derived Types</a></li>
-              </ul>
-            </li>
-                <li class="visible-xs hidden-sm visible-lg">
-                  <a href="../lists/files.html">Source Files</a>
+          <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar"
+                  aria-expanded="false" aria-controls="navbar" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon">
+          </button>
+
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="navbar-nav">
+                  <li class="nav-item">
+                    <a class="nav-link" href="../lists/files.html">Source Files</a>
+                  </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/modules.html">Modules</a>
                 </li>
-              <li class="visible-xs hidden-sm visible-lg">
-                <a href="../lists/modules.html">Modules</a>
-              </li>
-              <li class="visible-xs hidden-sm visible-lg">
-                <a href="../lists/procedures.html">Procedures</a>
-              </li>
-              <li class="visible-xs hidden-sm visible-lg">
-                <a href="../lists/types.html">Derived Types</a>
-              </li>
-          </ul>
-            <form action="../search.html" class="navbar-form navbar-right" role="search">
-              <div class="form-group">
-                <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/procedures.html">Procedures</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="../lists/types.html">Derived Types</a>
+                </li>
+            </ul>
+              <div class="d-flex align-items-end flex-grow-1">
+                <form action="../search.html" role="search" class="ms-auto">
+                  <input type="text" class="form-control" aria-label="Search" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+                </form>
               </div>
-              <!--
-                  <button type="submit" class="btn btn-default">Submit</button>
-                  -->
-            </form>
-        </div><!--/.nav-collapse -->
-      </div>
-    </nav>
+          </div><!--/.nav-collapse -->
+        </div>
+      </nav>
+    </div>
 
     <div class="container">
   <div class="row">
@@ -88,33 +66,37 @@
       <small>Derived Type</small>
       
     </h1>
-      <div class="row" id="info-bar">
-    <div class="col-lg-12">
-      <div class="well well-sm">
+      <div class="container p-2 mb-4 bg-light border rounded-3">
+    <div class="row align-items-center justify-content-between" id="info-bar">
+      <div class="col">
         <ul class="list-inline" style="margin-bottom:0px;display:inline">
 
-          <li id="statements"><i class="fa fa-list-ol"></i>
-            <a data-toggle="tooltip"
-               data-placement="bottom" data-html="true"
-               title="<p> 1.8% of total for derived types.</p>Including implementation: 244 statements,  6.0% of total for derived types.">4 statements</a>
-          </li>
+            <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
+              <a data-bs-toggle="tooltip"
+                 data-bs-placement="bottom" data-html="true"
+                 title="<p> 1.8% of total for derived types.</p>Including implementation: 244 statements,  6.4% of total for derived types.">4 statements</a>
+            </li>
 
-            <li id="source-file">
+            <li class="list-inline-item" id="source-file">
               <i class="fa fa-code"></i>
               <a href="../src/nonlin_optimize.f90"> Source File</a>
             </li>
         </ul>
-        <ol class="breadcrumb in-well text-right">
-              <li><a href='../sourcefile/nonlin_optimize.f90.html'>nonlin_optimize.f90</a></li>
-              <li><a href='../module/nonlin_optimize.html'>nonlin_optimize</a></li>
-          <li class="active">bfgs</li>
-        </ol>
+      </div>
+      <div class="col">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb justify-content-end mb-0">
+                <li class="breadcrumb-item"><a href='..\sourcefile\nonlin_optimize.f90.html'>nonlin_optimize.f90</a></li>
+                <li class="breadcrumb-item"><a href='..\module\nonlin_optimize.html'>nonlin_optimize</a></li>
+            <li class="breadcrumb-item active" aria-current="page">bfgs</li>
+          </ol>
+        </nav>
       </div>
     </div>
   </div>
   <script>
     $(function () {
-    $('[data-toggle="tooltip"]').tooltip()
+    $('[data-bs-toggle="tooltip"]').tooltip()
     })
   </script>
 
@@ -141,33 +123,33 @@
   
   
   
-      <div class="panel panel-primary">
-      <div class="panel-heading text-left">
-        <h3 class="panel-title">
-          <a data-toggle="collapse" href="#boundprocs-0">Type-Bound Procedures</a>
-        </h3>
-      </div>
-      <div id="boundprocs-0" class="panel-collapse collapse">
-        <div class="list-group">
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#boundprocs-0"
+         aria-expanded="false" aria-controls="boundprocs-0">
+         <h4 class="card-header bg-primary text-white">Type-Bound Procedures</h4>
+      </a>
+      <div id="boundprocs-0" class="collapse">
+        <div class="list-group list-group-flush">
             <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_line_search">get_line_search</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_max_fcn_evals~3">get_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_print_status~2">get_print_status</a>
+            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_max_fcn_evals">get_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_print_status">get_print_status</a>
             <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_tolerance">get_tolerance</a>
             <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_use_line_search">get_use_line_search</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_var_tolerance~2">get_var_tolerance</a>
+            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_var_tolerance">get_var_tolerance</a>
             <a class="list-group-item" href="../type/bfgs.html#boundprocedure-is_line_search_defined">is_line_search_defined</a>
             <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_default_line_search">set_default_line_search</a>
             <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_line_search">set_line_search</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_max_fcn_evals~3">set_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_print_status~2">set_print_status</a>
+            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_max_fcn_evals">set_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_print_status">set_print_status</a>
             <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_tolerance">set_tolerance</a>
             <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_use_line_search">set_use_line_search</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_var_tolerance~2">set_var_tolerance</a>
+            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_var_tolerance">set_var_tolerance</a>
             <a class="list-group-item" href="../type/bfgs.html#boundprocedure-solve~5">solve</a>
         </div>
       </div>
     </div>
 
+  
   
 
 
@@ -176,9 +158,13 @@
     </div>
     
     <div class="col-md-9" id='text'>
-      <h2>type, public, extends(<a href='../type/line_search_optimizer.html'>line_search_optimizer</a>) :: bfgs</h2>
-    <p>Defines a Broyden–Fletcher–Goldfarb–Shanno (BFGS) solver for
-minimization of functions of multiple variables.</p>
+      <h2>
+        type, public, extends(<a href='line_search_optimizer.html'>line_search_optimizer</a>) :: bfgs</h2>
+    <p>Defines a Broyden–Fletcher–Goldfarb–Shanno (BFGS) optimizer for
+minimization of smooth functions of multiple variables.  The method
+uses a quasi-Newton inverse Hessian approximation and the update
+<script type="math/tex; mode=display"> B_{k+1} = B_k + \frac{y_k y_k^T}{y_k^T s_k} - \frac{B_k s_k s_k^T B_k}{s_k^T B_k s_k} </script>
+with <script type="math/tex">s_k = x_{k+1}-x_k</script> and <script type="math/tex">y_k = \nabla f(x_{k+1})-\nabla f(x_k)</script>. </p>
 <p>See Also:</p>
 <ul>
 <li>
@@ -193,88 +179,44 @@ minimization of functions of multiple variables.</p>
 </ul>
     <br>
 
-    <section class="visible-xs visible-sm hidden-md">
-        <h3>Contents</h3>
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-      <div class="panel panel-primary">
-      <div class="panel-heading text-left">
-        <h3 class="panel-title">
-          <a data-toggle="collapse" href="#boundprocs-1">Type-Bound Procedures</a>
-        </h3>
-      </div>
-      <div id="boundprocs-1" class="panel-collapse collapse">
-        <div class="list-group">
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_line_search">get_line_search</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_max_fcn_evals~3">get_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_print_status~2">get_print_status</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_tolerance">get_tolerance</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_use_line_search">get_use_line_search</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-get_var_tolerance~2">get_var_tolerance</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-is_line_search_defined">is_line_search_defined</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_default_line_search">set_default_line_search</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_line_search">set_line_search</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_max_fcn_evals~3">set_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_print_status~2">set_print_status</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_tolerance">set_tolerance</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_use_line_search">set_use_line_search</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-set_var_tolerance~2">set_var_tolerance</a>
-            <a class="list-group-item" href="../type/bfgs.html#boundprocedure-solve~5">solve</a>
-        </div>
-      </div>
-    </div>
-
-  
-
-
-    </section>
-    <br class="visible-xs visible-sm hidden-md">
-
     
 
 
       <section>
         <h2>Type-Bound Procedures</h2>
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_line_search"></span><h3>procedure, public :: <strong>get_line_search</strong>  => lso_get_line_search         
-    </h3></div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-get_line_search"></span>
+      <h3>
+          procedure, public ::
+  <strong>get_line_search</strong> => lso_get_line_search
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private  subroutine lso_get_line_search(this, ls)  
 </h3>
+
   <p>Gets the line search module.</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/line_search_optimizer.html'>line_search_optimizer</a>),
+              class(<a href='line_search_optimizer.html'>line_search_optimizer</a>),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -283,13 +225,13 @@ minimization of functions of multiple variables.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/line_search_optimizer.html">line_search_optimizer</a> object.</p>
+                <p>The <a href="..\type\line_search_optimizer.html">line_search_optimizer</a> object.</p>
             </td>
         </tr>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/line_search.html'>line_search</a>),
+              class(<a href='line_search.html'>line_search</a>),
             </td>
 <td>intent(out),</td>
               <td></td>            <td>
@@ -298,7 +240,7 @@ minimization of functions of multiple variables.</p>
             <td>::</td>
             <td><strong>ls</strong></td>
             <td>
-                <p>The <a href="../type/line_search.html">line_search</a> object.</p>
+                <p>The <a href="..\type\line_search.html">line_search</a> object.</p>
             </td>
         </tr>
     </tbody>
@@ -309,31 +251,40 @@ minimization of functions of multiple variables.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_max_fcn_evals~3"></span><h3>procedure, public :: <strong>get_max_fcn_evals</strong>  => oe_get_max_eval         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-get_max_fcn_evals"></span>
+      <h3>
+          procedure, public ::
+  <strong>get_max_fcn_evals</strong> => oe_get_max_eval
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private pure function oe_get_max_eval(this) result(n)  
 </h3>
+
   
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/equation_optimizer.html'>equation_optimizer</a>),
+              class(<a href='equation_optimizer.html'>equation_optimizer</a>),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -342,7 +293,7 @@ minimization of functions of multiple variables.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/equation_optimizer.html">equation_optimizer</a> object.</p>
+                <p>The <a href="..\type\equation_optimizer.html">equation_optimizer</a> object.</p>
             </td>
         </tr>
     </tbody>
@@ -358,31 +309,40 @@ minimization of functions of multiple variables.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_print_status~2"></span><h3>procedure, public :: <strong>get_print_status</strong>  => oe_get_print_status         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-get_print_status"></span>
+      <h3>
+          procedure, public ::
+  <strong>get_print_status</strong> => oe_get_print_status
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private pure function oe_get_print_status(this) result(x)  
 </h3>
+
   
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/equation_optimizer.html'>equation_optimizer</a>),
+              class(<a href='equation_optimizer.html'>equation_optimizer</a>),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -391,7 +351,7 @@ minimization of functions of multiple variables.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/equation_optimizer.html">equation_optimizer</a> object.</p>
+                <p>The <a href="..\type\equation_optimizer.html">equation_optimizer</a> object.</p>
             </td>
         </tr>
     </tbody>
@@ -407,31 +367,40 @@ minimization of functions of multiple variables.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_tolerance"></span><h3>procedure, public :: <strong>get_tolerance</strong>  => oe_get_tol         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-get_tolerance"></span>
+      <h3>
+          procedure, public ::
+  <strong>get_tolerance</strong> => oe_get_tol
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private pure function oe_get_tol(this) result(x)  
 </h3>
+
   
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/equation_optimizer.html'>equation_optimizer</a>),
+              class(<a href='equation_optimizer.html'>equation_optimizer</a>),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -440,7 +409,7 @@ minimization of functions of multiple variables.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/equation_optimizer.html">equation_optimizer</a> object.</p>
+                <p>The <a href="..\type\equation_optimizer.html">equation_optimizer</a> object.</p>
             </td>
         </tr>
     </tbody>
@@ -456,31 +425,40 @@ minimization of functions of multiple variables.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_use_line_search"></span><h3>procedure, public :: <strong>get_use_line_search</strong>  => lso_get_use_search         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-get_use_line_search"></span>
+      <h3>
+          procedure, public ::
+  <strong>get_use_line_search</strong> => lso_get_use_search
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private pure function lso_get_use_search(this) result(x)  
 </h3>
+
   <p>Gets a value determining if a line-search should be employed.</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/line_search_optimizer.html'>line_search_optimizer</a>),
+              class(<a href='line_search_optimizer.html'>line_search_optimizer</a>),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -489,7 +467,7 @@ minimization of functions of multiple variables.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/line_search_optimizer.html">line_search_optimizer</a> object.</p>
+                <p>The <a href="..\type\line_search_optimizer.html">line_search_optimizer</a> object.</p>
             </td>
         </tr>
     </tbody>
@@ -505,31 +483,40 @@ minimization of functions of multiple variables.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-get_var_tolerance~2"></span><h3>procedure, public :: <strong>get_var_tolerance</strong>  => lso_get_var_tol         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-get_var_tolerance"></span>
+      <h3>
+          procedure, public ::
+  <strong>get_var_tolerance</strong> => lso_get_var_tol
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private pure function lso_get_var_tol(this) result(x)  
 </h3>
+
   <p>Gets the convergence on change in variable tolerance.</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/line_search_optimizer.html'>line_search_optimizer</a>),
+              class(<a href='line_search_optimizer.html'>line_search_optimizer</a>),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -538,7 +525,7 @@ minimization of functions of multiple variables.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/line_search_optimizer.html">line_search_optimizer</a> object.</p>
+                <p>The <a href="..\type\line_search_optimizer.html">line_search_optimizer</a> object.</p>
             </td>
         </tr>
     </tbody>
@@ -554,31 +541,40 @@ minimization of functions of multiple variables.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-is_line_search_defined"></span><h3>procedure, public :: <strong>is_line_search_defined</strong>  => lso_is_line_search_defined         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-is_line_search_defined"></span>
+      <h3>
+          procedure, public ::
+  <strong>is_line_search_defined</strong> => lso_is_line_search_defined
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private pure function lso_is_line_search_defined(this) result(x)  
 </h3>
+
   <p>Tests to see if a line search module is defined.</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/line_search_optimizer.html'>line_search_optimizer</a>),
+              class(<a href='line_search_optimizer.html'>line_search_optimizer</a>),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -587,7 +583,7 @@ minimization of functions of multiple variables.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/line_search_optimizer.html">line_search_optimizer</a> object.</p>
+                <p>The <a href="..\type\line_search_optimizer.html">line_search_optimizer</a> object.</p>
             </td>
         </tr>
     </tbody>
@@ -603,14 +599,23 @@ minimization of functions of multiple variables.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_default_line_search"></span><h3>procedure, public :: <strong>set_default_line_search</strong>  => lso_set_default         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-set_default_line_search"></span>
+      <h3>
+          procedure, public ::
+  <strong>set_default_line_search</strong> => lso_set_default
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private  subroutine lso_set_default(this)  
 </h3>
+
   <p>Establishes a default line_search object for the line search
 module.</p>
 
@@ -618,17 +623,17 @@ module.</p>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/line_search_optimizer.html'>line_search_optimizer</a>),
+              class(<a href='line_search_optimizer.html'>line_search_optimizer</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -637,7 +642,7 @@ module.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/line_search_optimizer.html">line_search_optimizer</a> object.</p>
+                <p>The <a href="..\type\line_search_optimizer.html">line_search_optimizer</a> object.</p>
             </td>
         </tr>
     </tbody>
@@ -648,31 +653,40 @@ module.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_line_search"></span><h3>procedure, public :: <strong>set_line_search</strong>  => lso_set_line_search         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-set_line_search"></span>
+      <h3>
+          procedure, public ::
+  <strong>set_line_search</strong> => lso_set_line_search
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private  subroutine lso_set_line_search(this, ls)  
 </h3>
+
   <p>Sets the line search module.</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/line_search_optimizer.html'>line_search_optimizer</a>),
+              class(<a href='line_search_optimizer.html'>line_search_optimizer</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -681,13 +695,13 @@ module.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/line_search_optimizer.html">line_search_optimizer</a> object.</p>
+                <p>The <a href="..\type\line_search_optimizer.html">line_search_optimizer</a> object.</p>
             </td>
         </tr>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/line_search.html'>line_search</a>),
+              class(<a href='line_search.html'>line_search</a>),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -696,7 +710,7 @@ module.</p>
             <td>::</td>
             <td><strong>ls</strong></td>
             <td>
-                <p>The <a href="../type/line_search.html">line_search</a> object.</p>
+                <p>The <a href="..\type\line_search.html">line_search</a> object.</p>
             </td>
         </tr>
     </tbody>
@@ -707,31 +721,40 @@ module.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_max_fcn_evals~3"></span><h3>procedure, public :: <strong>set_max_fcn_evals</strong>  => oe_set_max_eval         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-set_max_fcn_evals"></span>
+      <h3>
+          procedure, public ::
+  <strong>set_max_fcn_evals</strong> => oe_set_max_eval
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private  subroutine oe_set_max_eval(this, n)  
 </h3>
+
   
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/equation_optimizer.html'>equation_optimizer</a>),
+              class(<a href='equation_optimizer.html'>equation_optimizer</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -740,7 +763,7 @@ module.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/equation_optimizer.html">equation_optimizer</a> object.</p>
+                <p>The <a href="..\type\equation_optimizer.html">equation_optimizer</a> object.</p>
             </td>
         </tr>
         <tr>
@@ -766,31 +789,40 @@ module.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_print_status~2"></span><h3>procedure, public :: <strong>set_print_status</strong>  => oe_set_print_status         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-set_print_status"></span>
+      <h3>
+          procedure, public ::
+  <strong>set_print_status</strong> => oe_set_print_status
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private  subroutine oe_set_print_status(this, x)  
 </h3>
+
   
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/equation_optimizer.html'>equation_optimizer</a>),
+              class(<a href='equation_optimizer.html'>equation_optimizer</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -799,7 +831,7 @@ module.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/equation_optimizer.html">equation_optimizer</a> object.</p>
+                <p>The <a href="..\type\equation_optimizer.html">equation_optimizer</a> object.</p>
             </td>
         </tr>
         <tr>
@@ -825,31 +857,40 @@ module.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_tolerance"></span><h3>procedure, public :: <strong>set_tolerance</strong>  => oe_set_tol         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-set_tolerance"></span>
+      <h3>
+          procedure, public ::
+  <strong>set_tolerance</strong> => oe_set_tol
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private  subroutine oe_set_tol(this, x)  
 </h3>
+
   
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/equation_optimizer.html'>equation_optimizer</a>),
+              class(<a href='equation_optimizer.html'>equation_optimizer</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -858,7 +899,7 @@ module.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/equation_optimizer.html">equation_optimizer</a> object.</p>
+                <p>The <a href="..\type\equation_optimizer.html">equation_optimizer</a> object.</p>
             </td>
         </tr>
         <tr>
@@ -884,31 +925,40 @@ module.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_use_line_search"></span><h3>procedure, public :: <strong>set_use_line_search</strong>  => lso_set_use_search         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-set_use_line_search"></span>
+      <h3>
+          procedure, public ::
+  <strong>set_use_line_search</strong> => lso_set_use_search
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private  subroutine lso_set_use_search(this, x)  
 </h3>
+
   <p>Sets a value determining if a line-search should be employed.</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/line_search_optimizer.html'>line_search_optimizer</a>),
+              class(<a href='line_search_optimizer.html'>line_search_optimizer</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -917,7 +967,7 @@ module.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/line_search_optimizer.html">line_search_optimizer</a> object.</p>
+                <p>The <a href="..\type\line_search_optimizer.html">line_search_optimizer</a> object.</p>
             </td>
         </tr>
         <tr>
@@ -943,31 +993,40 @@ module.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-set_var_tolerance~2"></span><h3>procedure, public :: <strong>set_var_tolerance</strong>  => lso_set_var_tol         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-set_var_tolerance"></span>
+      <h3>
+          procedure, public ::
+  <strong>set_var_tolerance</strong> => lso_set_var_tol
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private  subroutine lso_set_var_tol(this, x)  
 </h3>
+
   <p>Sets the convergence on change in variable tolerance.</p>
 
   <h4>Arguments</h4>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/line_search_optimizer.html'>line_search_optimizer</a>),
+              class(<a href='line_search_optimizer.html'>line_search_optimizer</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -976,7 +1035,7 @@ module.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/line_search_optimizer.html">line_search_optimizer</a> object.</p>
+                <p>The <a href="..\type\line_search_optimizer.html">line_search_optimizer</a> object.</p>
             </td>
         </tr>
         <tr>
@@ -1002,14 +1061,23 @@ module.</p>
     </ul>
   </div>
 
-            <div class="panel panel-default">
-    <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-solve~5"></span><h3>procedure, public :: <strong>solve</strong>  => bfgs_solve         
-    </h3></div>
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-solve~5"></span>
+      <h3>
+          procedure, public ::
+  <strong>solve</strong> => bfgs_solve
+        
+      </h3>
+    </div>
     <ul class="list-group">
         <li class="list-group-item">
                   <h3>
     private  subroutine bfgs_solve(this, fcn, x, fout, ib, args, err)  
 </h3>
+
   <p>Utilizes the Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm
 for finding a minimum value of the specified function.</p>
 
@@ -1017,17 +1085,17 @@ for finding a minimum value of the specified function.</p>
       <table class="table table-striped varlist">
     <thead>
       <tr>
-        <th>Type</th>
-<th>Intent</th><th>Optional</th>        <th>Attributes</th>
-        <th></th>
-        <th>Name</th>
-        <th></th>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
     </thead>
     <tbody>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/bfgs.html'>bfgs</a>),
+              class(<a href='bfgs.html'>bfgs</a>),
             </td>
 <td>intent(inout)</td>
               <td></td>            <td>
@@ -1036,13 +1104,13 @@ for finding a minimum value of the specified function.</p>
             <td>::</td>
             <td><strong>this</strong></td>
             <td>
-                <p>The <a href="../type/bfgs.html">bfgs</a> object.</p>
+                <p>The <a href="..\type\bfgs.html">bfgs</a> object.</p>
             </td>
         </tr>
         <tr>
             <td>
               <span class="anchor" ></span>
-              class(<a href='../type/fcnnvar_helper.html'>fcnnvar_helper</a>),
+              class(<a href='fcnnvar_helper.html'>fcnnvar_helper</a>),
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -1051,7 +1119,7 @@ for finding a minimum value of the specified function.</p>
             <td>::</td>
             <td><strong>fcn</strong></td>
             <td>
-                <p>The <a href="../type/fcnnvar_helper.html">fcnnvar_helper</a> object containing the equation to 
+                <p>The <a href="..\type\fcnnvar_helper.html">fcnnvar_helper</a> object containing the equation to 
 optimize.</p>
             </td>
         </tr>
@@ -1090,7 +1158,7 @@ function at x.</p>
         <tr>
             <td>
               <span class="anchor" ></span>
-              type(<a href='../type/iteration_behavior.html'>iteration_behavior</a>),
+              type(<a href='iteration_behavior.html'>iteration_behavior</a>),
             </td>
 <td></td>
               <td>optional</td>            <td>
@@ -1141,6 +1209,7 @@ obtain iteration performance statistics.</p>
     </ul>
   </div>
 
+          </div>
       </section>
 
     
@@ -1151,32 +1220,27 @@ obtain iteration performance statistics.</p>
     </div> <!-- /container -->
     <footer>
       <div class="container">
-        <div class="row">
-          <div class="col-xs-6 col-md-6"><p>NONLIN was developed by Jason Christopherson<br>&copy; 2026 
+        <div class="row justify-content-between">
+          <div class="col"><p>NONLIN was developed by Jason Christopherson<br>&copy; 2026 
 </p>
           </div>
-          <div class="col-xs-6 col-md-6">
-            <p class="text-right">
+          <div class="col">
+            <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-05-04 05:40              </p>
+ on 2026-07-08 18:01              </p>
           </div>
         </div>
         <br>
       </div> <!-- /container -->
     </footer>
 
-    <!-- Bootstrap core JavaScript
-         ================================================== -->
-         <!-- Placed at the end of the document so the pages load faster -->
-    <!--
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-        -->
-        <script src="../js/bootstrap.min.js"></script>
-        <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-        <script src="../js/ie10-viewport-bug-workaround.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>    
 
-        <!-- MathJax JavaScript
+    <!-- MathJax JavaScript
              ================================================== -->
              <!-- Placed at the end of the document so the pages load faster -->
         <script type="text/x-mathjax-config">
