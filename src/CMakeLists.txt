@@ -24,7 +24,7 @@ include(FetchContent)
 find_package(BLAS)
 find_package(LAPACK)
 find_package(ferror QUIET)
-find_package(linalg 1.8.9 QUIET)
+find_package(linalg 1.8.10 QUIET)
 
 if (NOT BLAS_FOUND OR NOT LAPACK_FOUND)
   message(STATUS "BLAS/LAPACK could not be found.  A reference version will be employed.")
