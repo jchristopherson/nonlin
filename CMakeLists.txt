@@ -3,16 +3,16 @@ cmake_minimum_required(VERSION 3.24)
 project(
     nonlin
     LANGUAGES Fortran
-    VERSION 2.1.4
+    VERSION 2.1.5
 )
 set(CMAKE_Fortran_STANDARD 2018)
 set(CMAKE_Fortran_STANDARD_REQUIRED TRUE)
 
-# Source
-add_subdirectory(src)
-
 # Confgiure everything
 add_subdirectory(configure)
+
+# Source
+add_subdirectory(src)
 
 # Installation Instructions
 install(
