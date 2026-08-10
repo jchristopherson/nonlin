@@ -244,11 +244,7 @@ contains
         end do
 
         ! Solve: A * coeffs = y
-        call solve_least_squares(a, y, err = errmgr)
-        if (errmgr%has_error_occurred()) return
-
-        ! Extract the coefficients from the first order+1 elements of Y
-        this%m_coeffs = y(1:ncols)
+        this%m_coeffs = solve_least_squares(a, y)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -321,12 +317,8 @@ contains
         end do
 
         ! Solve: A * coeffs = y
-        call solve_least_squares(a, y, err = errmgr)
-        if (errmgr%has_error_occurred()) return
-
-        ! Extract the coefficients from the first order+1 elements of Y
         this%m_coeffs(1) = zero
-        this%m_coeffs(2:ncols+1) = y(1:ncols)
+        this%m_coeffs(2:ncols+1) = solve_least_squares(a, y)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -434,7 +426,7 @@ contains
         !! of the polynomial companion matrix.
         class(polynomial), intent(in) :: this
             !! The [[polynomial]] object.
-        complex(real64), dimension(this%order()) :: z
+        complex(real64), allocatable, dimension(:) :: z
             !! The roots of the polynomial.
         class(errors), intent(inout), optional, target :: err
             !! An error handling object.
@@ -454,7 +446,7 @@ contains
 
         ! Compute the eigenvalues of the companion matrix.  The eigenvalues are
         ! the roots of the polynomial.
-        call eigen(c, z, err = err)
+        call eigen(c, vals = z)
     end function
 
 ! ------------------------------------------------------------------------------

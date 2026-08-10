@@ -1138,8 +1138,7 @@ contains
             end if
 
             ! Compute the QR factorization of J
-            qr = jac
-            call qr_factor(qr, tau)
+            call qr_factor(jac, tau = tau, qr = qr)
 
             ! Compute the scaling factors
             call coleman_li_scaling(x, xl, xu, s)
@@ -1425,15 +1424,14 @@ contains
         ! Initialization
         m = size(jac, 1)
         n = size(jac, 2)
-        allocate(pgn(n), psd(n), u(m), v(n), Jg(m))
+        allocate(pgn(n), psd(n), u(n), v(n), Jg(m))
 
         ! Compute the gradient vector
         call dgemv('T', m, n, 1.0d0, jac, m, f, 1, 0.0d0, g, 1)
 
         ! Solve the linear system for the Gauss-Newton step
-        u = f
-        call solve_qr(qr, tau, u)   ! solution stored in u(1:n)
-        pgn = -u(1:n)
+        u = solve_qr(qr, tau, f)
+        pgn = -u
         pgnnorm = scaled_norm(pgn, s)
 
         ! Is it enough, or do we need to try a steepest decsent step?
@@ -1453,11 +1451,11 @@ contains
                 ! Go ahead and use the steepest descent step
                 p = (delta / psdnorm) * psd
             else
-                u(1:n) = pgn - psd
-                u(1:n) = s * u(1:n)
+                u = pgn - psd
+                u = s * u
                 v = s * psd
-                a = dot_product(u(1:n), u(1:n))
-                b = 2.0d0 * dot_product(u(1:n), v)
+                a = dot_product(u, u)
+                b = 2.0d0 * dot_product(u, v)
                 c = dot_product(v, v) - delta**2
                 if (a <= 0.0d0) then
                     p = psd

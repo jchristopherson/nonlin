@@ -15,7 +15,7 @@ module nonlin_optimize
     use nonlin_types
     use lapack
     use linalg, only : rank1_update, tri_mtx_mult, cholesky_rank1_update, &
-        cholesky_rank1_downdate, solve_cholesky
+        cholesky_rank1_downdate, solve_cholesky, cholesky_factor
     use linalg_errors, only : LA_MATRIX_FORMAT_ERROR
     implicit none
     private
@@ -779,17 +779,19 @@ contains
                 call dsymv('u', n, one, b, n, dx, 1, zero, bdx, 1)
 
                 ! Perform the actual update
-                if (ydx > small) then
+                if (ydx > small .and. iter > 1) then
                     ! Compute the rank 1 update and downdate
                     u = y / sqrt(ydx)
                     v = bdx / sqrt(dot_product(dx, bdx))
                     call cholesky_rank1_update(r, u)
                     call cholesky_rank1_downdate(r, v)
-                end if ! Else just skip the update
+                else
+                    ! Compute the factorization
+                    r = cholesky_factor(b, .true.)
+                end if
 
                 ! Compute the solution to: B * dx = -g = (R**T * R) * dx
-                dx = -g
-                call solve_cholesky(.true., r, dx)
+                dx = solve_cholesky(.true., r, -g)
 
                 ! Print iteration status
                 if (this%get_print_status()) then

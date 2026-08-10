@@ -196,7 +196,7 @@ contains
         logical :: restart, xcnvrg, fcnvrg, gcnvrg, check
         integer(int32) :: i, neqn, nvar, flag, lw1, lw2, lw3, neval, iter, &
             maxeval, jcount, njac
-        real(real64), allocatable, dimension(:) :: work, tau, dx, df, fvold, &
+        real(real64), allocatable, dimension(:) :: work, dx, df, fvold, &
             xold, s
         real(real64), allocatable, dimension(:,:) :: q, r, b
         real(real64) :: test, f, fold, temp, ftol, xtol, gtol, &
@@ -275,7 +275,6 @@ contains
         ! Local Memory Allocation
         allocate(q(neqn, neqn), stat = flag)
         if (flag == 0) allocate(r(neqn, nvar), stat = flag)
-        if (flag == 0) allocate(tau(min(neqn, nvar)), stat = flag)
         if (flag == 0) allocate(b(neqn, nvar), stat = flag)
         if (flag == 0) allocate(df(neqn), stat = flag)
         if (flag == 0) allocate(fvold(neqn), stat = flag)
@@ -288,10 +287,8 @@ contains
                 "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
             return
         end if
-        call qr_factor(r, tau, work, lw1)
-        call form_qr(r, tau, q, work, lw2)
         call fcn%jacobian(x, b, fv = fvec, olwork = lw3, args = args)
-        allocate(work(max(lw1, lw2, lw3)), stat = flag)
+        allocate(work(lw3), stat = flag)
         if (flag /= 0) then
             ! ERROR: Out of memory
             call errmgr%report_error("qns_solve", &
@@ -329,9 +326,7 @@ contains
                     njac = njac + 1
 
                     ! Compute the QR factorization, and form Q & R
-                    r = b ! Copy the Jacobian - we'll need it later
-                    call qr_factor(r, tau, work)
-                    call form_qr(r, tau, q, work)
+                    call qr_factor(b, q = q, r = r)
 
                     ! Reset the Jacobian iteration counter
                     jcount = 0
@@ -370,8 +365,8 @@ contains
                 ! Now we have R * DX = -Q**T * F, and since R is upper
                 ! triangular, the solution is readily computed.  The solution
                 ! will be stored in the first NVAR elements of DF
-                call solve_triangular_system(.true., .false., .true., r, &
-                    df(1:nvar))
+                df(1:nvar) = solve_triangular_system(.true., .false., .true., &
+                    r, df(1:nvar))
 
                 ! Ensure the new solution estimate is heading in a sensible
                 ! direction.  If not, it is likely time to update the Jacobian
@@ -551,7 +546,7 @@ contains
         integer(int32) :: i, neqn, nvar, lwork, flag, neval, iter, maxeval, njac
         integer(int32), allocatable, dimension(:) :: ipvt
         real(real64), allocatable, dimension(:) :: dir, grad, xold, work
-        real(real64), allocatable, dimension(:,:) :: jac
+        real(real64), allocatable, dimension(:,:) :: jac, lu
         real(real64) :: ftol, xtol, gtol, f, fold, stpmax, xnorm, fnorm, temp, test
         type(iteration_behavior) :: lib
         class(errors), pointer :: errmgr
@@ -673,7 +668,7 @@ contains
                 end do
 
                 ! Compute the LU factorization of the Jacobian
-                call lu_factor(jac, ipvt, errmgr)
+                call lu_factor(jac, ipvt = ipvt, lu = lu)
                 if (errmgr%has_warning_occurred()) then
                     ! The Jacobian is singular - warning was issued already, so
                     ! simply exit the routine.  Do not return as a return at
@@ -686,11 +681,8 @@ contains
                 xold = x
                 fold = f
 
-                ! Define the right-hand-side for the linear system
-                dir = -fvec
-
                 ! Solve the linear system of equations
-                call solve_lu(jac, ipvt, dir)
+                dir = solve_lu(lu, ipvt, -fvec)
 
                 ! Apply the line search if needed
                 if (this%get_use_line_search()) then
