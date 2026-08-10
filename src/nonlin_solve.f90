@@ -273,28 +273,16 @@ contains
         end if
 
         ! Local Memory Allocation
-        allocate(q(neqn, neqn), stat = flag)
-        if (flag == 0) allocate(r(neqn, nvar), stat = flag)
-        if (flag == 0) allocate(b(neqn, nvar), stat = flag)
-        if (flag == 0) allocate(df(neqn), stat = flag)
-        if (flag == 0) allocate(fvold(neqn), stat = flag)
-        if (flag == 0) allocate(xold(nvar), stat = flag)
-        if (flag == 0) allocate(dx(nvar), stat = flag)
-        if (flag == 0) allocate(s(neqn), stat = flag)
-        if (flag /= 0) then
-            ! ERROR: Out of memory
-            call errmgr%report_error("qns_solve", &
-                "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
-            return
-        end if
+        allocate( &
+            b(neqn, nvar), &
+            df(neqn), &
+            fvold(neqn), &
+            xold(nvar), &
+            dx(nvar), &
+            s(neqn) &
+        )
         call fcn%jacobian(x, b, fv = fvec, olwork = lw3, args = args)
-        allocate(work(lw3), stat = flag)
-        if (flag /= 0) then
-            ! ERROR: Out of memory
-            call errmgr%report_error("qns_solve", &
-                "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
-            return
-        end if
+        allocate(work(lw3))
 
         ! Test to see if the initial guess is a root
         call fcn%fcn(x, fvec, args)
@@ -343,7 +331,7 @@ contains
                     ! Compute the new Q and R matrices for the rank1 update:
                     ! B' = B + ALPHA * S * DX**T
                     call rank1_update(one, s, dx, b)
-                    call qr_rank1_update(q, r, s, dx) ! S & DX overwritten
+                    call qr_rank1_update(q, r, s, dx)
 
                     ! Increment the counter tracking how many iterations have
                     ! passed since the last Jacobian recalculation
@@ -619,21 +607,14 @@ contains
         end if
 
         ! Local Memory Allocation
-        allocate(ipvt(nvar), stat = flag)
-        if (flag == 0) allocate(dir(nvar), stat = flag)
-        if (flag == 0) allocate(grad(nvar), stat = flag)
-        if (flag == 0) allocate(xold(nvar), stat = flag)
-        if (flag == 0) allocate(jac(nvar, neqn), stat = flag)
-        if (flag == 0) then
-            call fcn%jacobian(x, jac, fv = fvec, olwork = lwork, args = args)
-            allocate(work(lwork), stat = flag)
-        end if
-        if (flag /= 0) then
-            ! ERROR: Out of memory
-            call errmgr%report_error("ns_solve", &
-                "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
-            return
-        end if
+        allocate( &
+            dir(nvar), &
+            grad(nvar), &
+            xold(nvar), &
+            jac(nvar, neqn) &
+        )
+        call fcn%jacobian(x, jac, fv = fvec, olwork = lwork, args = args)
+        allocate(work(lwork))
 
         ! Test to see if the initial guess is a root
         call fcn%fcn(x, fvec, args)

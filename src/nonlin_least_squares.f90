@@ -227,24 +227,18 @@ contains
         end if
 
         ! Local Memory Allocation
-        allocate(jpvt(nvar), stat = flag)
-        if (flag == 0) allocate(jac(neqn, nvar), stat = flag)
-        if (flag == 0) allocate(diag(nvar), stat = flag)
-        if (flag == 0) allocate(qtf(nvar), stat = flag)
-        if (flag == 0) allocate(wa1(nvar), stat = flag)
-        if (flag == 0) allocate(wa2(nvar), stat = flag)
-        if (flag == 0) allocate(wa3(nvar), stat = flag)
-        if (flag == 0) allocate(wa4(neqn), stat = flag)
-        if (flag == 0) then
-            call fcn%jacobian(x, jac, fv = fvec, olwork = lwork)
-            allocate(w(lwork), stat = flag)
-        end if
-        if (flag /= 0) then
-            ! ERROR: Out of memory
-            call errmgr%report_error("qns_solve", &
-                "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
-            return
-        end if
+        allocate( &
+            jpvt(nvar), &
+            jac(neqn, nvar), &
+            diag(nvar), &
+            qtf(nvar), &
+            wa1(nvar), &
+            wa2(nvar), &
+            wa3(nvar), &
+            wa4(neqn) &
+        )
+        call fcn%jacobian(x, jac, fv = fvec, olwork = lwork)
+        allocate(w(lwork))
 
         ! Evaluate the function at the starting point, and calculate its norm
         call fcn%fcn(x, fvec, args)
@@ -1103,14 +1097,12 @@ contains
 
         ! Local Memory Allocations
         allocate( &
-            tau(min(neqn, nvar)), &
             Jp(neqn), &
             s(nvar), &
             g(nvar), &
             p(nvar), &
             xnew(nvar), &
             fnew(neqn), &
-            qr(neqn, nvar), &
             jac(neqn, nvar) &
         )
 

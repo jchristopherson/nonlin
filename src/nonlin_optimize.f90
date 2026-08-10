@@ -213,17 +213,13 @@ contains
         end if
 
         ! Local Memory Allocation
-        allocate(f(npts), stat = flag)
-        if (flag == 0) allocate(pcent(ndim), stat = flag)
-        if (flag == 0) allocate(pmin(ndim), stat = flag)
-        if (flag == 0) allocate(work(ndim), stat = flag)
-        if (buildSimplex .and. flag == 0) allocate(this%m_simplex(ndim, npts))
-        if (flag /= 0) then
-            ! ERROR: Out of memory
-            call errmgr%report_error("nm_solve", &
-                "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
-            return
-        end if
+        allocate( &
+            f(npts), &
+            pcent(ndim), &
+            pmin(ndim), &
+            work(ndim) &
+        )
+        if (buildSimplex) allocate(this%m_simplex(ndim, npts))
 
         ! Define the initial simplex, if needed
         if (buildSimplex) then
@@ -679,22 +675,18 @@ contains
         end if
 
         ! Local Memory Allocation
-        allocate(g(n), stat = flag)
-        if (flag == 0) allocate(dx(n), stat = flag)
-        if (flag == 0) allocate(u(n), stat = flag)
-        if (flag == 0) allocate(v(n), stat = flag)
-        if (flag == 0) allocate(y(n), stat = flag)
-        if (flag == 0) allocate(bdx(n), stat = flag)
-        if (flag == 0) allocate(gold(n), stat = flag)
-        if (flag == 0) allocate(xnew(n), stat = flag)
-        if (flag == 0) allocate(b(n,n), stat = flag)
-        if (flag == 0) allocate(r(n,n), stat = flag)
-        if (flag /= 0) then
-            ! ERROR: Memory Error
-            call errmgr%report_error("bfgs_solve", &
-                "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
-            return
-        end if
+        allocate( &
+            g(n), &
+            dx(n), &
+            u(n), &
+            v(n), &
+            y(n), &
+            bdx(n), &
+            gold(n), &
+            xnew(n), &
+            b(n,n), &
+            r(n,n) &
+        )
 
         ! Process
         fp = fcn%fcn(x, args)

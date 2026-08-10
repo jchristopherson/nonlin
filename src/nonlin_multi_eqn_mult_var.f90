@@ -235,8 +235,6 @@ contains
             !!  - 0: No error has occurred.
             !!
             !!  - n: A positive integer denoting the index of an invalid input.
-            !!
-            !!  - -1: Indicates internal memory allocation failed.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -313,12 +311,7 @@ contains
                     call this%fcn(x, fptr, args)
                 end if
             else
-                allocate(wrk(lwork), stat = flag)
-                if (flag /= 0) then
-                    ! ERROR: Memory issues
-                    if (present(err)) err = -1
-                    return
-                end if
+                allocate(wrk(lwork))
                 f1ptr => wrk(1:m)
                 if (present(fv)) then
                     fptr => fv(1:m)
