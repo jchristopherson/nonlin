@@ -34,6 +34,6 @@ program example
     res = maxval(err)
 
     ! Print out the coefficients
-    print '(AI0AF12.10)', ("c", i - 1, " = ", p%get(i), i = 1, 4)
-    print '(AF7.5)', "Max Residual: ", res
+    print '(A,I0,A,F12.10)', ("c", i - 1, " = ", p%get(i), i = 1, 4)
+    print '(A,F7.5)', "Max Residual: ", res
 end program

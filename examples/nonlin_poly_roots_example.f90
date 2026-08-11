@@ -20,7 +20,7 @@ program example
 
     ! Display the results
     do i = 1, size(rts)
-        print '(AI0AF9.6AF9.6A)', "Root ", i, " = (", real(rts(i), real64), &
+        print '(A,I0,A,F9.6,A,F9.6,A)', "Root ", i, " = (", real(rts(i), real64), &
             ", ", aimag(rts(i)), ")"
     end do
 end program
