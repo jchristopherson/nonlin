@@ -12,14 +12,29 @@
 
     <title>nonlin_solve &ndash; NONLIN</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-    <link href="../css/pygments.css" rel="stylesheet">
-    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Font Awesome -->
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/brands.min.css" rel="stylesheet">
+    <link href="../css/regular.min.css" rel="stylesheet">
+    <link href="../css/solid.min.css" rel="stylesheet">
+    <link href="../css/v4-font-face.min.css" rel="stylesheet">
+    <link href="../css/v4-shims.min.css" rel="stylesheet">
+    <!-- MathJax -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } }
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async
+            integrity="sha256-DViIOMYdwlM/axqoGDPeUyf0urLoHMN4QACBKyB58Uw=" crossorigin="anonymous"></script>
+    <!-- Other scripts and stylesheets -->
     <link href="../css/local.css" rel="stylesheet">
-      <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
-
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <link href="../css/pygments.css" rel="stylesheet">
     <script src="../js/svg-pan-zoom.min.js"></script>
   </head>
 
@@ -72,9 +87,8 @@
         <ul class="list-inline" style="margin-bottom:0px;display:inline">
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
-              <a data-bs-toggle="tooltip"
-                 data-bs-placement="bottom" data-html="true"
-                 title="19.7% of total for modules and submodules.">766 statements</a>
+              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                 title="18.5% of total for modules and submodules.">639 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -94,9 +108,11 @@
     </div>
   </div>
   <script>
-    $(function () {
-    $('[data-bs-toggle="tooltip"]').tooltip()
-    })
+    // Enable Bootstrap tooltips
+    (function () {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    })();
   </script>
 
   </div>
@@ -154,15 +170,14 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
+                  <li class="list-inline-item"><a href='nonlin_single_var.html'>nonlin_single_var</a></li>
+                  <li class="list-inline-item"><a href='nonlin_linesearch.html'>nonlin_linesearch</a></li>
+                  <li class="list-inline-item"><a href='nonlin_types.html'>nonlin_types</a></li>
                   <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_fortran_env'>iso_fortran_env</a></li>
                   <li class="list-inline-item"><a href='nonlin_helper.html'>nonlin_helper</a></li>
-                  <li class="list-inline-item"><a href='nonlin_linesearch.html'>nonlin_linesearch</a></li>
-                  <li class="list-inline-item"><a href='nonlin_error_handling.html'>nonlin_error_handling</a></li>
-                  <li class="list-inline-item">ferror</li>
-                  <li class="list-inline-item"><a href='nonlin_types.html'>nonlin_types</a></li>
-                  <li class="list-inline-item"><a href='nonlin_multi_eqn_mult_var.html'>nonlin_multi_eqn_mult_var</a></li>
                   <li class="list-inline-item">linalg</li>
-                  <li class="list-inline-item"><a href='nonlin_single_var.html'>nonlin_single_var</a></li>
+                  <li class="list-inline-item"><a href='nonlin_multi_eqn_mult_var.html'>nonlin_multi_eqn_mult_var</a></li>
+                  <li class="list-inline-item"><a href='nonlin_error_handling.html'>nonlin_error_handling</a></li>
               </ul>
             </li>
         </ul>
@@ -203,57 +218,57 @@ converge to a root.</p>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_diff_tolerance'>get_diff_tolerance</a></strong> => es1_get_diff_tol</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_fcn_tolerance~2'>get_fcn_tolerance</a></strong> => es1_get_fcn_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_fcn_tolerance'>get_fcn_tolerance</a></strong> => es1_get_fcn_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_max_fcn_evals~4'>get_max_fcn_evals</a></strong> => es1_get_max_eval</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_max_fcn_evals~2'>get_max_fcn_evals</a></strong> => es1_get_max_eval</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_print_status~3'>get_print_status</a></strong> => es1_get_print_status</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_print_status~2'>get_print_status</a></strong> => es1_get_print_status</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_var_tolerance~3'>get_var_tolerance</a></strong> => es1_get_var_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_var_tolerance'>get_var_tolerance</a></strong> => es1_get_var_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_diff_tolerance'>set_diff_tolerance</a></strong> => es1_set_diff_tol</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_fcn_tolerance~2'>set_fcn_tolerance</a></strong> => es1_set_fcn_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_fcn_tolerance'>set_fcn_tolerance</a></strong> => es1_set_fcn_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_max_fcn_evals~4'>set_max_fcn_evals</a></strong> => es1_set_max_eval</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_max_fcn_evals~2'>set_max_fcn_evals</a></strong> => es1_set_max_eval</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_print_status~3'>set_print_status</a></strong> => es1_set_print_status</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_print_status~2'>set_print_status</a></strong> => es1_set_print_status</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_var_tolerance~3'>set_var_tolerance</a></strong> => es1_set_var_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_var_tolerance'>set_var_tolerance</a></strong> => es1_set_var_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\brent_solver.html#boundprocedure-solve~8'>solve</a></strong> => brent_solve</td>
-                <td></td>
+  <strong><a href='..\type\brent_solver.html#boundprocedure-solve~9'>solve</a></strong> => brent_solve</td>
+                  <td></td>
               </tr>
           </tbody>
         </table>
@@ -264,7 +279,7 @@ converge to a root.</p>
     <div class="card-header codesum">
       <span class="anchor" id="type-line_search_solver"></span>
       <h3>
-        type, public, extends(<a href='..\type\equation_solver.html'>equation_solver</a>)&nbsp;::&nbsp;
+        type, public, abstract, extends(<a href='..\type\equation_solver.html'>equation_solver</a>)&nbsp;::&nbsp;
         <a href='..\type\line_search_solver.html'>line_search_solver</a>
         
       </h3>
@@ -286,88 +301,88 @@ decrease condition such as the Armijo rule
           <tbody>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance~2'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_solver.html#boundprocedure-get_gradient_tolerance'>get_gradient_tolerance</a></strong> => es_get_grad_tol</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-get_line_search~2'>get_line_search</a></strong> => lss_get_line_search</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_solver.html#boundprocedure-get_max_fcn_evals~3'>get_max_fcn_evals</a></strong> => es_get_max_eval</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status~2'>get_print_status</a></strong> => es_get_print_status</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status~3'>get_print_status</a></strong> => es_get_print_status</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-get_use_line_search~2'>get_use_line_search</a></strong> => lss_get_use_search</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance~2'>get_var_tolerance</a></strong> => es_get_var_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance~3'>get_var_tolerance</a></strong> => es_get_var_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-is_line_search_defined~2'>is_line_search_defined</a></strong> => lss_is_line_search_defined</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-set_default_line_search~2'>set_default_line_search</a></strong> => lss_set_default</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance~2'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_solver.html#boundprocedure-set_gradient_tolerance'>set_gradient_tolerance</a></strong> => es_set_grad_tol</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-set_line_search~2'>set_line_search</a></strong> => lss_set_line_search</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_solver.html#boundprocedure-set_max_fcn_evals~3'>set_max_fcn_evals</a></strong> => es_set_max_eval</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status~2'>set_print_status</a></strong> => es_set_print_status</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status~3'>set_print_status</a></strong> => es_set_print_status</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-set_use_line_search~2'>set_use_line_search</a></strong> => lss_set_use_search</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance~2'>set_var_tolerance</a></strong> => es_set_var_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance~3'>set_var_tolerance</a></strong> => es_set_var_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure(<a href='..\interface\nonlin_solver.html'>nonlin_solver</a>), public, deferred, pass ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-solve~10'>solve</a></strong></td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-solve~11'>solve</a></strong></td>
+                  <td></td>
               </tr>
           </tbody>
         </table>
@@ -399,57 +414,57 @@ by the root bracket.</p>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_diff_tolerance'>get_diff_tolerance</a></strong> => es1_get_diff_tol</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_fcn_tolerance~2'>get_fcn_tolerance</a></strong> => es1_get_fcn_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_fcn_tolerance'>get_fcn_tolerance</a></strong> => es1_get_fcn_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_max_fcn_evals~4'>get_max_fcn_evals</a></strong> => es1_get_max_eval</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_max_fcn_evals~2'>get_max_fcn_evals</a></strong> => es1_get_max_eval</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_print_status~3'>get_print_status</a></strong> => es1_get_print_status</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_print_status~2'>get_print_status</a></strong> => es1_get_print_status</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_var_tolerance~3'>get_var_tolerance</a></strong> => es1_get_var_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-get_var_tolerance'>get_var_tolerance</a></strong> => es1_get_var_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_diff_tolerance'>set_diff_tolerance</a></strong> => es1_set_diff_tol</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_fcn_tolerance~2'>set_fcn_tolerance</a></strong> => es1_set_fcn_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_fcn_tolerance'>set_fcn_tolerance</a></strong> => es1_set_fcn_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_max_fcn_evals~4'>set_max_fcn_evals</a></strong> => es1_set_max_eval</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_max_fcn_evals~2'>set_max_fcn_evals</a></strong> => es1_set_max_eval</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_print_status~3'>set_print_status</a></strong> => es1_set_print_status</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_print_status~2'>set_print_status</a></strong> => es1_set_print_status</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_var_tolerance~3'>set_var_tolerance</a></strong> => es1_set_var_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver_1var.html#boundprocedure-set_var_tolerance'>set_var_tolerance</a></strong> => es1_set_var_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\newton_1var_solver.html#boundprocedure-solve~9'>solve</a></strong> => newt1var_solve</td>
-                <td></td>
+  <strong><a href='..\type\newton_1var_solver.html#boundprocedure-solve~10'>solve</a></strong> => newt1var_solve</td>
+                  <td></td>
               </tr>
           </tbody>
         </table>
@@ -479,88 +494,88 @@ where <script type="math/tex">J(x_k)</script> is the Jacobian matrix of <script 
           <tbody>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance~2'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_solver.html#boundprocedure-get_gradient_tolerance'>get_gradient_tolerance</a></strong> => es_get_grad_tol</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-get_line_search~2'>get_line_search</a></strong> => lss_get_line_search</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_solver.html#boundprocedure-get_max_fcn_evals~3'>get_max_fcn_evals</a></strong> => es_get_max_eval</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status~2'>get_print_status</a></strong> => es_get_print_status</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status~3'>get_print_status</a></strong> => es_get_print_status</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-get_use_line_search~2'>get_use_line_search</a></strong> => lss_get_use_search</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance~2'>get_var_tolerance</a></strong> => es_get_var_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance~3'>get_var_tolerance</a></strong> => es_get_var_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-is_line_search_defined~2'>is_line_search_defined</a></strong> => lss_is_line_search_defined</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-set_default_line_search~2'>set_default_line_search</a></strong> => lss_set_default</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance~2'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_solver.html#boundprocedure-set_gradient_tolerance'>set_gradient_tolerance</a></strong> => es_set_grad_tol</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-set_line_search~2'>set_line_search</a></strong> => lss_set_line_search</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_solver.html#boundprocedure-set_max_fcn_evals~3'>set_max_fcn_evals</a></strong> => es_set_max_eval</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status~2'>set_print_status</a></strong> => es_set_print_status</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status~3'>set_print_status</a></strong> => es_set_print_status</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-set_use_line_search~2'>set_use_line_search</a></strong> => lss_set_use_search</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance~2'>set_var_tolerance</a></strong> => es_set_var_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance~3'>set_var_tolerance</a></strong> => es_set_var_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\newton_solver.html#boundprocedure-solve~7'>solve</a></strong> => ns_solve</td>
-                <td></td>
+  <strong><a href='..\type\newton_solver.html#boundprocedure-solve~8'>solve</a></strong> => ns_solve</td>
+                  <td></td>
               </tr>
           </tbody>
         </table>
@@ -593,98 +608,98 @@ where <script type="math/tex">y_k = F(x_{k+1}) - F(x_k)</script>. </p>
           <tbody>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_fcn_tolerance~2'>get_fcn_tolerance</a></strong> => es_get_fcn_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_solver.html#boundprocedure-get_gradient_tolerance'>get_gradient_tolerance</a></strong> => es_get_grad_tol</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\quasi_newton_solver.html#boundprocedure-get_jacobian_interval'>get_jacobian_interval</a></strong> => qns_get_jac_interval</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-get_line_search~2'>get_line_search</a></strong> => lss_get_line_search</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_solver.html#boundprocedure-get_max_fcn_evals~3'>get_max_fcn_evals</a></strong> => es_get_max_eval</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status~2'>get_print_status</a></strong> => es_get_print_status</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_print_status~3'>get_print_status</a></strong> => es_get_print_status</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-get_use_line_search~2'>get_use_line_search</a></strong> => lss_get_use_search</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance~2'>get_var_tolerance</a></strong> => es_get_var_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-get_var_tolerance~3'>get_var_tolerance</a></strong> => es_get_var_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-is_line_search_defined~2'>is_line_search_defined</a></strong> => lss_is_line_search_defined</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-set_default_line_search~2'>set_default_line_search</a></strong> => lss_set_default</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_fcn_tolerance~2'>set_fcn_tolerance</a></strong> => es_set_fcn_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_solver.html#boundprocedure-set_gradient_tolerance'>set_gradient_tolerance</a></strong> => es_set_grad_tol</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\quasi_newton_solver.html#boundprocedure-set_jacobian_interval'>set_jacobian_interval</a></strong> => qns_set_jac_interval</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-set_line_search~2'>set_line_search</a></strong> => lss_set_line_search</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_solver.html#boundprocedure-set_max_fcn_evals~3'>set_max_fcn_evals</a></strong> => es_set_max_eval</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status~2'>set_print_status</a></strong> => es_set_print_status</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_print_status~3'>set_print_status</a></strong> => es_set_print_status</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\line_search_solver.html#boundprocedure-set_use_line_search~2'>set_use_line_search</a></strong> => lss_set_use_search</td>
-                <td></td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance~2'>set_var_tolerance</a></strong> => es_set_var_tol</td>
-                <td></td>
+  <strong><a href='..\type\equation_solver.html#boundprocedure-set_var_tolerance~3'>set_var_tolerance</a></strong> => es_set_var_tol</td>
+                  <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\quasi_newton_solver.html#boundprocedure-solve~6'>solve</a></strong> => qns_solve</td>
-                <td></td>
+  <strong><a href='..\type\quasi_newton_solver.html#boundprocedure-solve~7'>solve</a></strong> => qns_solve</td>
+                  <td></td>
               </tr>
           </tbody>
         </table>
@@ -706,40 +721,21 @@ where <script type="math/tex">y_k = F(x_{k+1}) - F(x_k)</script>. </p>
     <footer>
       <div class="container">
         <div class="row justify-content-between">
-          <div class="col"><p>NONLIN was developed by Jason Christopherson<br>&copy; 2026 
+          <div class="col">
+            <p>
+              NONLIN
+ was developed by Jason Christopherson<br>              &copy; 2026 
 </p>
           </div>
           <div class="col">
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-07-08 18:01              </p>
+ on 2026-08-11 10:14 -0500             </p>
           </div>
         </div>
         <br>
       </div> <!-- /container -->
     </footer>
-
-    <!-- Bootstrap core JavaScript -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>    
-
-    <!-- MathJax JavaScript
-             ================================================== -->
-             <!-- Placed at the end of the document so the pages load faster -->
-        <script type="text/x-mathjax-config">
-          MathJax.Hub.Config({
-          TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
-          jax: ['input/TeX','input/MathML','output/HTML-CSS'],
-          extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
-          });
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-          <script src="../tipuesearch/tipuesearch_content.js"></script>
-          <script src="../tipuesearch/tipuesearch_set.js"></script>
-          <script src="../tipuesearch/tipuesearch.js"></script>
-
   </body>
 </html>

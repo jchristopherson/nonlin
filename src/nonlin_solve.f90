@@ -6,7 +6,6 @@ module nonlin_solve
     use nonlin_linesearch
     use nonlin_helper
     use nonlin_types
-    use ferror
     use linalg, only : qr_factor, form_qr, qr_rank1_update, lu_factor, &
         rank1_update, mtx_mult, recip_mult_array, solve_triangular_system, &
         solve_lu
@@ -154,18 +153,20 @@ contains
 ! ******************************************************************************
 ! QUASI_NEWTON_SOLVER
 ! ------------------------------------------------------------------------------
-    subroutine qns_solve(this, fcn, x, fvec, ib, args, err)
+    subroutine qns_solve(this, fcn, x, fvec, ib, args)
         !! Applies the quasi-Newton's method developed by Broyden in 
         !! conjunction with a backtracking type line search to solve N equations
         !! of N unknowns.
         !!
         !! See Also:
         !!
-        !! - [Broyden's Paper](http://www.ams.org/journals/mcom/1965-19-092/S0025-5718-1965-0198670-6/S0025-5718-1965-0198670-6.pdf)
+        !! - <a href="http://www.ams.org/journals/mcom/1965-19-092/S0025-5718-1965-0198670-6/S0025-5718-1965-0198670-6.pdf"
+        !! target="_blank">Broyden's Paper</a>
         !!
-        !! - [Wikipedia](https://en.wikipedia.org/wiki/Broyden%27s_method)
+        !! - <a href="https://en.wikipedia.org/wiki/Broyden%27s_method"
+        !! target="_blank">Wikipedia</a>
         !!
-        !! - [Numerical Recipes](http://numerical.recipes/)
+        !! - <a href="http://numerical.recipes/ target="_blank">Numerical Recipes</a>
         class(quasi_newton_solver), intent(inout) :: this
             !! The [[quasi_newton_solver]] object.
         class(vecfcn_helper), intent(in) :: fcn
@@ -183,8 +184,6 @@ contains
         class(*), intent(inout), optional :: args
             !! An optional argument to allow the user to communicate with
             !! fcn.
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -194,17 +193,14 @@ contains
 
         ! Local Variables
         logical :: restart, xcnvrg, fcnvrg, gcnvrg, check
-        integer(int32) :: i, neqn, nvar, flag, lw1, lw2, lw3, neval, iter, &
+        integer(int32) :: i, neqn, nvar, flag, neval, iter, &
             maxeval, jcount, njac
-        real(real64), allocatable, dimension(:) :: work, tau, dx, df, fvold, &
+        real(real64), allocatable, dimension(:) :: dx, df, fvold, &
             xold, s
         real(real64), allocatable, dimension(:,:) :: q, r, b
         real(real64) :: test, f, fold, temp, ftol, xtol, gtol, &
             stpmax, x2, xnorm, fnorm
         type(iteration_behavior) :: lib
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
-        character(len = 256) :: errmsg
         class(line_search), allocatable :: ls
 
         ! Initialization
@@ -230,11 +226,6 @@ contains
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = gcnvrg
         end if
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
         if (this%get_use_line_search()) then
             if (.not.this%is_line_search_defined()) &
                 call this%set_default_line_search()
@@ -242,62 +233,25 @@ contains
         end if
 
         ! Input Check
-        if (.not.fcn%is_fcn_defined()) then
-            ! ERROR: No function is defined
-            call errmgr%report_error("qns_solve", &
-                "No function has been defined.", &
-                NL_INVALID_OPERATION_ERROR)
-            return
-        end if
-        if (nvar /= neqn) then
-            ! ERROR: # of equations doesn't match # of variables
-            write(errmsg, 100) "The number of equations (", neqn, &
-                ") does not match the number of unknowns (", nvar, ")."
-            call errmgr%report_error("qns_solve", trim(errmsg), &
-                NL_INVALID_INPUT_ERROR)
-            return
-        end if
+        if (.not.fcn%is_fcn_defined()) error stop NL_UNDEFINED_FUNCTION_ERROR
+        if (nvar /= neqn) error stop NL_INVALID_INPUT_ERROR
         flag = 0
         if (size(x) /= nvar) then
             flag = 3
         else if (size(fvec) /= neqn) then
             flag = 4
         end if
-        if (flag /= 0) then
-            ! One of the input arrays is not sized correctly
-            write(errmsg, 101) "Input number ", flag, &
-                " is not sized correctly."
-            call errmgr%report_error("qns_solve", trim(errmsg), &
-                NL_ARRAY_SIZE_ERROR)
-            return
-        end if
+        if (flag /= 0) error stop flag
 
         ! Local Memory Allocation
-        allocate(q(neqn, neqn), stat = flag)
-        if (flag == 0) allocate(r(neqn, nvar), stat = flag)
-        if (flag == 0) allocate(tau(min(neqn, nvar)), stat = flag)
-        if (flag == 0) allocate(b(neqn, nvar), stat = flag)
-        if (flag == 0) allocate(df(neqn), stat = flag)
-        if (flag == 0) allocate(fvold(neqn), stat = flag)
-        if (flag == 0) allocate(xold(nvar), stat = flag)
-        if (flag == 0) allocate(dx(nvar), stat = flag)
-        if (flag == 0) allocate(s(neqn), stat = flag)
-        if (flag /= 0) then
-            ! ERROR: Out of memory
-            call errmgr%report_error("qns_solve", &
-                "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
-            return
-        end if
-        call qr_factor(r, tau, work, lw1)
-        call form_qr(r, tau, q, work, lw2)
-        call fcn%jacobian(x, b, fv = fvec, olwork = lw3, args = args)
-        allocate(work(max(lw1, lw2, lw3)), stat = flag)
-        if (flag /= 0) then
-            ! ERROR: Out of memory
-            call errmgr%report_error("qns_solve", &
-                "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
-            return
-        end if
+        allocate( &
+            b(neqn, nvar), &
+            df(neqn), &
+            fvold(neqn), &
+            xold(nvar), &
+            dx(nvar), &
+            s(neqn) &
+        )
 
         ! Test to see if the initial guess is a root
         call fcn%fcn(x, fvec, args)
@@ -325,13 +279,11 @@ contains
                 ! Compute or update the Jacobian
                 if (restart) then
                     ! Compute the Jacobian
-                    call fcn%jacobian(x, b, fvec, work, args = args)
+                    call fcn%jacobian(x, b, fvec, args = args)
                     njac = njac + 1
 
                     ! Compute the QR factorization, and form Q & R
-                    r = b ! Copy the Jacobian - we'll need it later
-                    call qr_factor(r, tau, work)
-                    call form_qr(r, tau, q, work)
+                    call qr_factor(b, q = q, r = r)
 
                     ! Reset the Jacobian iteration counter
                     jcount = 0
@@ -348,7 +300,7 @@ contains
                     ! Compute the new Q and R matrices for the rank1 update:
                     ! B' = B + ALPHA * S * DX**T
                     call rank1_update(one, s, dx, b)
-                    call qr_rank1_update(q, r, s, dx) ! S & DX overwritten
+                    call qr_rank1_update(q, r, s, dx)
 
                     ! Increment the counter tracking how many iterations have
                     ! passed since the last Jacobian recalculation
@@ -370,8 +322,8 @@ contains
                 ! Now we have R * DX = -Q**T * F, and since R is upper
                 ! triangular, the solution is readily computed.  The solution
                 ! will be stored in the first NVAR elements of DF
-                call solve_triangular_system(.true., .false., .true., r, &
-                    df(1:nvar))
+                df(1:nvar) = solve_triangular_system(.true., .false., .true., &
+                    r, df(1:nvar))
 
                 ! Ensure the new solution estimate is heading in a sensible
                 ! direction.  If not, it is likely time to update the Jacobian
@@ -393,7 +345,7 @@ contains
                     ! Apply the line search
                     call limit_search_vector(df(1:nvar), stpmax)
                     call ls%search(fcn, xold, dx, df(1:nvar), x, fvec, fold, &
-                        f, lib, args = args, err = errmgr)
+                        f, lib, args = args)
                     neval = neval + lib%fcn_count
                 else
                     ! No line search - just update the solution estimate
@@ -420,17 +372,7 @@ contains
                         if (restart) then
                             ! We've already tried recalculating a new Jacobian,
                             ! issue a warning
-                            write(errmsg, 102) &
-                                "It appears the solution has settled to " // &
-                                "a point where the slope of the gradient " // &
-                                "is effectively zero.  " // new_line('c') // &
-                                "Function evaluations performed: ", neval, &
-                                "." // new_line('c') // &
-                                "Change in Variable: ", xnorm, &
-                                new_line('c') // "Residual: ", fnorm
-                            call errmgr%report_warning("nqs_solve", &
-                                trim(errmsg), NL_SPURIOUS_CONVERGENCE_ERROR)
-                            exit
+                            error stop NL_SPURIOUS_CONVERGENCE_ERROR
                         else
                             ! Try computing a new Jacobian
                             restart = .true.
@@ -478,18 +420,8 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, 102) "The algorithm failed to " // &
-                "converge.  Function evaluations performed: ", neval, &
-                "." // new_line('c') // "Change in Variable: ", xnorm, &
-                new_line('c') // "Residual: ", fnorm
-            call errmgr%report_error("qns_solve", trim(errmsg), &
-                NL_CONVERGENCE_ERROR)
+            error stop NL_CONVERGENCE_ERROR
         end if
-
-        ! Format
-100     format(A, I0, A, I0, A)
-101     format(A, I0, A)
-102     format(A, I0, A, E10.3, A, E10.3)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -517,7 +449,7 @@ contains
 ! ******************************************************************************
 ! NEWTON_SOLVER
 ! ------------------------------------------------------------------------------
-    subroutine ns_solve(this, fcn, x, fvec, ib, args, err)
+    subroutine ns_solve(this, fcn, x, fvec, ib, args)
         !! Applies Newton's method in conjunction with a backtracking type
         !! line search to solve N equations of N unknowns.
         class(newton_solver), intent(inout) :: this
@@ -536,8 +468,6 @@ contains
             !! obtain iteration performance statistics.
         class(*), intent(inout), optional :: args
             !! An optional argument to allow the user to communicate with fcn.
-        class(errors), intent(inout), optional, target :: err
-            !! An error-handling object.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -548,15 +478,12 @@ contains
 
         ! Local Variables
         logical :: check, xcnvrg, fcnvrg, gcnvrg
-        integer(int32) :: i, neqn, nvar, lwork, flag, neval, iter, maxeval, njac
+        integer(int32) :: i, neqn, nvar, flag, neval, iter, maxeval, njac
         integer(int32), allocatable, dimension(:) :: ipvt
-        real(real64), allocatable, dimension(:) :: dir, grad, xold, work
-        real(real64), allocatable, dimension(:,:) :: jac
+        real(real64), allocatable, dimension(:) :: dir, grad, xold
+        real(real64), allocatable, dimension(:,:) :: jac, lu
         real(real64) :: ftol, xtol, gtol, f, fold, stpmax, xnorm, fnorm, temp, test
         type(iteration_behavior) :: lib
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
-        character(len = 256) :: errmsg
         class(line_search), allocatable :: ls
 
         ! Initialization
@@ -581,11 +508,6 @@ contains
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = gcnvrg
         end if
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
         if (this%get_use_line_search()) then
             if (.not.this%is_line_search_defined()) &
                 call this%set_default_line_search()
@@ -593,52 +515,24 @@ contains
         end if
 
         ! Input Checking
-        if (.not.fcn%is_fcn_defined()) then
-            ! ERROR: No function is defined
-            call errmgr%report_error("ns_solve", &
-                "No function has been defined.", &
-                NL_INVALID_OPERATION_ERROR)
-            return
-        end if
-        if (nvar /= neqn) then
-            ! ERROR: # of equations doesn't match # of variables
-            write(errmsg, 100) "The number of equations (", neqn, &
-                ") does not match the number of unknowns (", nvar, ")."
-            call errmgr%report_error("ns_solve", trim(errmsg), &
-                NL_INVALID_INPUT_ERROR)
-            return
-        end if
+        if (.not.fcn%is_fcn_defined()) error stop NL_UNDEFINED_FUNCTION_ERROR
+        if (nvar /= neqn) error stop NL_INVALID_INPUT_ERROR
         flag = 0
         if (size(x) /= nvar) then
             flag = 3
         else if (size(fvec) /= neqn) then
             flag = 4
         end if
-        if (flag /= 0) then
-            ! One of the input arrays is not sized correctly
-            write(errmsg, 101) "Input number ", flag, &
-                " is not sized correctly."
-            call errmgr%report_error("ns_solve", trim(errmsg), &
-                NL_ARRAY_SIZE_ERROR)
-            return
-        end if
+        if (flag /= 0) error stop flag
 
         ! Local Memory Allocation
-        allocate(ipvt(nvar), stat = flag)
-        if (flag == 0) allocate(dir(nvar), stat = flag)
-        if (flag == 0) allocate(grad(nvar), stat = flag)
-        if (flag == 0) allocate(xold(nvar), stat = flag)
-        if (flag == 0) allocate(jac(nvar, neqn), stat = flag)
-        if (flag == 0) then
-            call fcn%jacobian(x, jac, fv = fvec, olwork = lwork, args = args)
-            allocate(work(lwork), stat = flag)
-        end if
-        if (flag /= 0) then
-            ! ERROR: Out of memory
-            call errmgr%report_error("ns_solve", &
-                "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
-            return
-        end if
+        allocate( &
+            dir(nvar), &
+            grad(nvar), &
+            xold(nvar), &
+            jac(nvar, neqn) &
+        )
+        call fcn%jacobian(x, jac, fv = fvec, args = args)
 
         ! Test to see if the initial guess is a root
         call fcn%fcn(x, fvec, args)
@@ -664,7 +558,7 @@ contains
                 iter = iter + 1
 
                 ! Compute the Jacobian
-                call fcn%jacobian(x, jac, fvec, work, args = args)
+                call fcn%jacobian(x, jac, fvec, args = args)
                 njac = njac + 1
 
                 ! Compute the gradient
@@ -673,24 +567,14 @@ contains
                 end do
 
                 ! Compute the LU factorization of the Jacobian
-                call lu_factor(jac, ipvt, errmgr)
-                if (errmgr%has_warning_occurred()) then
-                    ! The Jacobian is singular - warning was issued already, so
-                    ! simply exit the routine.  Do not return as a return at
-                    ! this point would not allow for proper updating of the
-                    ! iteration tracking parameters
-                    exit
-                end if
+                call lu_factor(jac, ipvt = ipvt, lu = lu)
 
                 ! Store previous iteration values
                 xold = x
                 fold = f
 
-                ! Define the right-hand-side for the linear system
-                dir = -fvec
-
                 ! Solve the linear system of equations
-                call solve_lu(jac, ipvt, dir)
+                dir = solve_lu(lu, ipvt, -fvec)
 
                 ! Apply the line search if needed
                 if (this%get_use_line_search()) then
@@ -701,7 +585,7 @@ contains
                     ! Apply the line search
                     call limit_search_vector(dir, stpmax)
                     call ls%search(fcn, xold, grad, dir, x, fvec, &
-                        fold, f, lib, args = args, err = errmgr)
+                        fold, f, lib, args = args)
                     neval = neval + lib%fcn_count
                 else
                     ! No line search - just update the solution estimate
@@ -720,16 +604,7 @@ contains
                 else if (gcnvrg) then
                     ! The solution appears to have settled at a point where
                     ! the gradient has a zero slope
-                    write(errmsg, 102) &
-                        "It appears the solution has settled to " // &
-                        "a point where the slope of the gradient " // &
-                        "is effectively zero.  " // new_line('c') // &
-                        "Function evaluations performed: ", neval, &
-                        "." // new_line('c') // &
-                        "Change in Variable: ", xnorm, &
-                        new_line('c') // "Residual: ", fnorm
-                    call errmgr%report_warning("ns_solve", trim(errmsg), &
-                        NL_SPURIOUS_CONVERGENCE_ERROR)
+                    error stop NL_SPURIOUS_CONVERGENCE_ERROR
                 end if
 
                 ! Print status
@@ -758,36 +633,26 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, 102) "The algorithm failed to " // &
-                "converge.  Function evaluations performed: ", neval, &
-                "." // new_line('c') // "Change in Variable: ", xnorm, &
-                new_line('c') // "Residual: ", fnorm
-            call errmgr%report_error("ns_solve", trim(errmsg), &
-                NL_CONVERGENCE_ERROR)
+            error stop NL_CONVERGENCE_ERROR
         end if
-
-        ! Formatting
-100     format(A, I0, A, I0, A)
-101     format(A, I0, A)
-102     format(A, I0, A, E10.3, A, E10.3)
     end subroutine
 
 ! ******************************************************************************
 ! BRENT_SOLVER
 ! ------------------------------------------------------------------------------
-    subroutine brent_solve(this, fcn, x, lim, f, ib, args, err)
+    subroutine brent_solve(this, fcn, x, lim, f, ib, args)
         !! Solves an equation of one variable using Brent's method.
         !!
         !! See Also
         !!
-        !! - [Wikipedia](https://en.wikipedia.org/wiki/Brent%27s_method)
+        !! - <a href="https://en.wikipedia.org/wiki/Brent%27s_method" 
+        !! target="_blank">Wikipedia</a>
         !!
-        !! - [Numerical Recipes](http://numerical.recipes/)
+        !! - <a href="http://numerical.recipes/ target="_blank">Numerical Recipes</a>
         !!
-        !! - R.P. Brent, "Algorithms for Minimization without Derivatives,"
-        !!      Dover Publications, January 2002. ISBN 0-486-41998-3.
-        !!      Further information available
-        !!      [here](https://maths-people.anu.edu.au/~brent/pub/pub011.html).
+        !! - <a href="https://maths-people.anu.edu.au/~brent/pub/pub011.html"
+        !! target="_blank">R.P. Brent, "Algorithms for Minimization without 
+        !! Derivatives."</a>
         class(brent_solver), intent(inout) :: this
             !! The [[brent_solver]] object.
         class(fcn1var_helper), intent(in) :: fcn
@@ -806,8 +671,6 @@ contains
             !! obtain iteration performance statistics.
         class(*), intent(inout), optional :: args
             !! An optional argument to allow the user to communicate with fcn.
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -821,9 +684,6 @@ contains
         integer(int32) :: neval, maxeval, flag, iter
         real(real64) :: ftol, xtol, a, b, c, fa, fb, fc, p, q, r, s, xm, e, d, &
             mn1, mn2, eps, tol1, temp
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
-        character(len = 256) :: errmsg
 
         ! Initialization
         fcnvrg = .false.
@@ -847,29 +707,10 @@ contains
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = .false.
         end if
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
 
         ! Input Check
-        if (.not.fcn%is_fcn_defined()) then
-            ! ERROR: No function is defined
-            call errmgr%report_error("brent_solve", &
-                "No function has been defined.", &
-                NL_INVALID_OPERATION_ERROR)
-            return
-        end if
-        if (abs(a - b) < eps) then
-            ! ERROR: Search limits are too tight
-            write(errmsg, 100) "Search limits have no " // &
-                "appreciable difference between them.  Lower Limit: ", a, &
-                ", Upper Limit: ", b
-            call errmgr%report_error("brent_solve", trim(errmsg), &
-                NL_INVALID_OPERATION_ERROR)
-            return
-        end if
+        if (.not.fcn%is_fcn_defined()) error stop NL_UNDEFINED_FUNCTION_ERROR
+        if (abs(a - b) < eps) error stop NL_INVALID_INPUT_ERROR
 
         ! Process
         flag = 0
@@ -989,23 +830,14 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, 101) "The algorithm failed to " // &
-                "converge.  Function evaluations performed: ", neval, &
-                "." // new_line('c') // "Change in Variable: ", xm, &
-                new_line('c') // "Residual: ", fb
-            call errmgr%report_error("brent_solve", trim(errmsg), &
-                NL_CONVERGENCE_ERROR)
+            error stop NL_CONVERGENCE_ERROR
         end if
-
-        ! Formatting
-100     format(A, E10.3, A, E10.3)
-101     format(A, I0, A, E10.3, A, E10.3)
     end subroutine
 
 ! ******************************************************************************
 ! NEWTON_1VAR_SOLVER
 ! ------------------------------------------------------------------------------
-    subroutine newt1var_solve(this, fcn, x, lim, f, ib, args, err)
+    subroutine newt1var_solve(this, fcn, x, lim, f, ib, args)
         !! Solves an equation of one variable using Newton's method.
         class(newton_1var_solver), intent(inout) :: this
             !! The [[newton_1var_solver]] object.
@@ -1025,8 +857,6 @@ contains
             !! obtain iteration performance statistics.
         class(*), intent(inout), optional :: args
             !! An optional argument to allow the user to communicate with fcn.
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -1038,9 +868,6 @@ contains
         integer(int32) :: neval, ndiff, maxeval, flag, iter
         real(real64) :: ftol, xtol, dtol, xh, xl, fh, fl, x1, x2, eps, dxold, &
             dx, df, temp, ff
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
-        character(len = 256) :: errmsg
 
         ! Initialization
         fcnvrg = .false.
@@ -1063,32 +890,13 @@ contains
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = dcnvrg
         end if
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
         x1 = min(lim%x1, lim%x2)
         x2 = max(lim%x1, lim%x2)
         eps = epsilon(eps)
 
         ! Input Check
-        if (.not.fcn%is_fcn_defined()) then
-            ! ERROR: No function is defined
-            call errmgr%report_error("brent_solve", &
-                "No function has been defined.", &
-                NL_INVALID_OPERATION_ERROR)
-            return
-        end if
-        if (abs(x1 - x2) < eps) then
-            ! ERROR: Search limits are too tight
-            write(errmsg, 100) "Search limits have no " // &
-                "appreciable difference between them.  Lower Limit: ", x1, &
-                ", Upper Limit: ", x2
-            call errmgr%report_error("brent_solve", trim(errmsg), &
-                NL_INVALID_OPERATION_ERROR)
-            return
-        end if
+        if (.not.fcn%is_fcn_defined()) error stop NL_UNDEFINED_FUNCTION_ERROR
+        if (abs(x1 - x2) < eps) error stop NL_INVALID_INPUT_ERROR
 
         ! See if the root is one of the end points
         flag = 0
@@ -1219,17 +1027,8 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, 101) "The algorithm failed to " // &
-                "converge.  Function evaluations performed: ", neval, &
-                "." // new_line('c') // "Root estimate: ", x, &
-                new_line('c') // "Residual: ", ff
-            call errmgr%report_error("newt1var_solve", trim(errmsg), &
-                NL_CONVERGENCE_ERROR)
+            error stop NL_CONVERGENCE_ERROR
         end if
-
-        ! Format
-100     format(A, E10.3, A, E10.3)
-101     format(A, I0, A, E10.3, A, E10.3)
     end subroutine
 
 end module
