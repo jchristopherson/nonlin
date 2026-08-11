@@ -1,7 +1,7 @@
 module nonlin_multi_var
     use iso_fortran_env
     use nonlin_types
-    use ferror
+    use nonlin_error_handling
     implicit none
     private
     public :: fcnnvar
@@ -76,7 +76,7 @@ module nonlin_multi_var
     end type
 
     interface
-        subroutine nonlin_optimize_fcn(this, fcn, x, fout, ib, args, err)
+        subroutine nonlin_optimize_fcn(this, fcn, x, fout, ib, args)
             !! Describes the interface of a routine for optimizing an
             !! equation of N variables.
             use, intrinsic :: iso_fortran_env, only : real64
@@ -101,8 +101,6 @@ module nonlin_multi_var
             class(*), intent(inout), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
-            class(errors), intent(inout), optional, target :: err
-                !! An error handling object.
         end subroutine
     end interface
 contains
@@ -182,7 +180,7 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    subroutine fnh_grad_fcn(this, x, g, fv, args, err)
+    subroutine fnh_grad_fcn(this, x, g, fv, args)
         !! Computes the gradient of the function.
         class(fcnnvar_helper), intent(in) :: this
             !! The [[fcnnvar_helper]] object.
@@ -198,15 +196,6 @@ contains
         class(*), intent(inout), optional :: args
             !! An optional argument to allow the user to communicate with
             !! the routine.
-        integer(int32), intent(out), optional :: err
-            !! An optional integer output that can be used to determine error 
-            !! status.  If not used, and an error is encountered, the routine
-            !! simply returns silently.  If used, the following error codes 
-            !! identify error status:
-            !!
-            !!  - 0: No error has occurred.
-            !!
-            !!  - n: A positive integer denoting the index of an invalid input.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -216,8 +205,6 @@ contains
         real(real64) :: eps, epsmch, h, temp, f, f1
 
         ! Initialization
-        if (present(err)) err = 0
-        ! n = this%m_nvar
         n = this%get_variable_count()
 
         ! Input Checking
@@ -227,14 +214,10 @@ contains
         else if (size(g) /= n) then
             flag = 3
         end if
-        if (flag /= 0) then
-            ! ERROR: Incorrectly sized input arrays
-            if (present(err)) err = flag
-            return
-        end if
+        if (flag /= 0) error stop flag
 
         ! Process
-        if (.not.this%is_fcn_defined()) return
+        if (.not.this%is_fcn_defined()) error stop NL_UNDEFINED_FUNCTION_ERROR
         if (this%is_gradient_defined()) then
             ! Call the user-defined gradient routine
             call this%m_grad(x, g, args)

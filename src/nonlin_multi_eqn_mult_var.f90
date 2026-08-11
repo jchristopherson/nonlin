@@ -1,7 +1,7 @@
 module nonlin_multi_eqn_mult_var
     use iso_fortran_env
     use nonlin_types
-    use ferror
+    use nonlin_error_handling
     implicit none
     private
     public :: vecfcn
@@ -91,11 +91,10 @@ module nonlin_multi_eqn_mult_var
     end type
 
     interface
-        subroutine nonlin_solver(this, fcn, x, fvec, ib, args, err)
+        subroutine nonlin_solver(this, fcn, x, fvec, ib, args)
             !! Describes the interface of a nonlinear equation solver.
             use, intrinsic :: iso_fortran_env, only : real64
             use nonlin_types, only : iteration_behavior
-            use ferror, only : errors
             import equation_solver
             import vecfcn_helper
             class(equation_solver), intent(inout) :: this
@@ -117,8 +116,6 @@ module nonlin_multi_eqn_mult_var
             class(*), intent(inout), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
-            class(errors), intent(inout), optional, target :: err
-                !! An error handling object.
         end subroutine
     end interface
 
@@ -198,7 +195,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    subroutine vfh_jac_fcn(this, x, jac, fv, work, olwork, args, err)
+    subroutine vfh_jac_fcn(this, x, jac, fv, args)
         !! Executes the routine containing the Jacobian matrix if
         !! supplied.  If not supplied, the Jacobian is computed via finite
         !! differences.
@@ -213,28 +210,9 @@ contains
         real(real64), intent(in), dimension(:), optional, target :: fv
             !! An optional M-element array containing the function values at x. 
             !! If not supplied, the function values are computed at x.
-        real(real64), intent(out), dimension(:), optional, target :: work
-            !! An optional input, that if provided, prevents any local memory 
-            !! allocation.  If not provided, the memory required is allocated
-            !! within.  If provided, the length of the array must be at least
-            !! olwork.  Notice, a workspace array is only utilized if the user 
-            !! does not provide a routine for computing the Jacobian.
-        integer(int32), intent(out), optional :: olwork
-            !! An optional output used to determine workspace size. If supplied, 
-            !! the routine determines the optimal size for work, and returns 
-            !! without performing any actual calculations.
         class(*), intent(inout), optional :: args
             !! An optional argument to allow the user to communicate with
             !! the routine.
-        integer(int32), intent(out), optional :: err
-            !! An optional integer output that can be used to determine
-            !! error status.  If not used, and an error is encountered, the 
-            !! routine simply returns silently.  If used, the following error 
-            !! codes identify error status:
-            !!
-            !!  - 0: No error has occurred.
-            !!
-            !!  - n: A positive integer denoting the index of an invalid input.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -246,9 +224,6 @@ contains
         real(real64), allocatable, target, dimension(:) :: wrk
 
         ! Initialization
-        if (present(err)) err = 0
-        ! m = this%m_nfcn
-        ! n = this%m_nvar
         m = this%get_equation_count()
         n = this%get_variable_count()
 
@@ -259,21 +234,11 @@ contains
         else if (size(jac, 1) /= m .or. size(jac, 2) /= n) then
             flag = 3
         end if
-        if (flag /= 0) then
-            ! ERROR: Incorrectly sized input arrays
-            if (present(err)) err = flag
-            return
-        end if
+        if (flag /= 0) error stop flag
 
         ! Process
-        if (.not.this%is_fcn_defined()) return
+        if (.not.this%is_fcn_defined()) error stop NL_UNDEFINED_FUNCTION_ERROR
         if (associated(this%m_jac)) then
-            ! Workspace Query
-            if (present(olwork)) then
-                olwork = 0
-                return
-            end if
-
             ! Call the user-defined Jacobian routine
             call this%m_jac(x, jac, args)
         else
@@ -284,41 +249,14 @@ contains
                 lwork = 2 * m
             end if
 
-            if (present(olwork)) then
-                ! The user is just making a workspace query.  Simply return the
-                ! workspace length, and exit the routine.
-                olwork = lwork
-                return
-            end if
-
             ! Local Memory Allocation
-            if (present(work)) then
-                if (size(work) < lwork) then
-                    ! ERROR: Workspace is too small
-                    if (present(err)) err = 5
-                    return
-                end if
-                f1ptr => work(1:m)
-                if (present(fv)) then
-                    if (size(fv) < m) then
-                        ! ERROR: Function vector too small
-                        if (present(err)) err = 4
-                        return
-                    end if
-                    fptr => fv(1:m)
-                else
-                    fptr => work(m+1:2*m)
-                    call this%fcn(x, fptr, args)
-                end if
+            allocate(wrk(lwork))
+            f1ptr => wrk(1:m)
+            if (present(fv)) then
+                fptr => fv(1:m)
             else
-                allocate(wrk(lwork))
-                f1ptr => wrk(1:m)
-                if (present(fv)) then
-                    fptr => fv(1:m)
-                else
-                    fptr => wrk(m+1:2*m)
-                    call this%fcn(x, fptr, args)
-                end if
+                fptr => wrk(m+1:2*m)
+                call this%fcn(x, fptr, args)
             end if
 
             ! Establish step size factors

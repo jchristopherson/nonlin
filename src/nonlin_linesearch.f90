@@ -7,7 +7,6 @@ module nonlin_linesearch
     use nonlin_types
     use nonlin_multi_eqn_mult_var
     use nonlin_multi_var
-    use ferror, only : errors
     implicit none
     private
     public :: line_search
@@ -148,7 +147,7 @@ contains
 
 ! ------------------------------------------------------------------------------
     subroutine ls_search_mimo(this, fcn, xold, grad, dir, x, fvec, fold, fx, &
-            ib, args, err)
+            ib, args)
         !! Utilizes an inexact, backtracking line search to find a point as
         !! far along the specified direction vector that is usable for 
         !! unconstrained minimization problems.
@@ -183,8 +182,6 @@ contains
             !! obtain iteration performance statistics.
         class(*), intent(inout), optional :: args
             !! An optional argument to allow the user to communicate with fcn.
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -198,9 +195,6 @@ contains
         integer(int32) :: i, m, n, neval, niter, flag, maxeval
         real(real64) :: alam, alam1, alamin, f1, slope, temp, test, tmplam, &
             alpha, tolx, lambdamin, f, fo
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
-        character(len = 128) :: errmsg
 
         ! Initialization
         xcnvrg = .false.
@@ -221,20 +215,9 @@ contains
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = .false.
         end if
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
 
         ! Input Checking
-        if (.not.fcn%is_fcn_defined()) then
-            ! ERROR: No function is defined
-            call errmgr%report_error("ls_search_mimo", &
-                "No function has been defined.", &
-                NL_INVALID_OPERATION_ERROR)
-            return
-        end if
+        if (.not.fcn%is_fcn_defined()) error stop NL_UNDEFINED_FUNCTION_ERROR
         flag = 0
         if (size(xold) /= n) then
             flag = 3
@@ -247,14 +230,7 @@ contains
         else if (size(fvec) /= m) then
             flag = 7
         end if
-        if (flag /= 0) then
-            ! One of the input arrays is not sized correctly
-            write(errmsg, 100) "Input number ", flag, &
-                " is not sized correctly."
-            call errmgr%report_error("ls_search_mimo", trim(errmsg), &
-                NL_ARRAY_SIZE_ERROR)
-            return
-        end if
+        if (flag /= 0) error stop flag
 
         ! Compute 1/2 F * F (* = dot product) if not provided
         if (present(fold)) then
@@ -270,11 +246,7 @@ contains
         slope = dot_product(grad, dir)
         if (slope >= zero) then
             ! ERROR: The slope should not be pointing uphill - invalid direction
-            call errmgr%report_error("ls_search_mimo", &
-                "The search direction vector appears to be pointing in " // &
-                "an uphill direction -  away from a minimum.", &
-                NL_DIVERGENT_BEHAVIOR_ERROR)
-            return
+            error stop NL_DIVERGENT_BEHAVIOR_ERROR
         end if
 
         ! Compute the minimum lambda value (length along the search direction)
@@ -305,12 +277,7 @@ contains
                 ! issue.
                 if (norm2(x - xold) == zero) then
                     ! The line search fully backtracked
-                    call errmgr%report_warning("ls_search_mimo", &
-                        "The line search appears to have fully " // &
-                        "backtracked.  As such, check results carefully, " // &
-                        "and/or consider attempting the solve without " // &
-                        "the line search.", &
-                        NL_CONVERGENCE_ERROR)
+                    error stop NL_CONVERGENCE_ERROR
                 end if
                 x = xold
                 xcnvrg = .true.
@@ -351,19 +318,13 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, 100) "The line search failed to " // &
-                "converge.  Function evaluations performed: ", neval, "."
-            call errmgr%report_error("ls_search_mimo", trim(errmsg), &
-                NL_CONVERGENCE_ERROR)
+            error stop NL_CONVERGENCE_ERROR
         end if
-
-        ! Formatting
-100     format(A, I0, A)
     end subroutine
 
 ! ------------------------------------------------------------------------------
     subroutine ls_search_miso(this, fcn, xold, grad, dir, x, fold, fx, &
-            ib, args, err)
+            ib, args)
         !! Utilizes an inexact, backtracking line search to find a point as far 
         !! along the specified direction vector that is usable for unconstrained
         !! minimization problems.
@@ -392,8 +353,6 @@ contains
             !! obtain iteration performance statistics.
         class(*), intent(inout), optional :: args
             !! An optional argument to allow the user to communicate with fcn.
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -407,9 +366,6 @@ contains
         integer(int32) :: i, n, neval, niter, flag, maxeval
         real(real64) :: alam, alam1, alamin, f1, slope, temp, test, tmplam, &
             alpha, tolx, lambdamin, f, fo
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
-        character(len = 128) :: errmsg
 
         ! Initialization
         xcnvrg = .false.
@@ -429,20 +385,9 @@ contains
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = .false.
         end if
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
 
         ! Input Checking
-        if (.not.fcn%is_fcn_defined()) then
-            ! ERROR: No function is defined
-            call errmgr%report_error("ls_search_miso", &
-                "No function has been defined.", &
-                NL_INVALID_OPERATION_ERROR)
-            return
-        end if
+        if (.not.fcn%is_fcn_defined()) error stop NL_UNDEFINED_FUNCTION_ERROR
         flag = 0
         if (size(xold) /= n) then
             flag = 3
@@ -453,14 +398,7 @@ contains
         else if (size(x) /= n) then
             flag = 6
         end if
-        if (flag /= 0) then
-            ! One of the input arrays is not sized correctly
-            write(errmsg, 100) "Input number ", flag, &
-                " is not sized correctly."
-            call errmgr%report_error("ls_search_miso", trim(errmsg), &
-                NL_ARRAY_SIZE_ERROR)
-            return
-        end if
+        if (flag /= 0) error stop flag
 
         ! Establish the "old" function value
         if (present(fold)) then
@@ -475,11 +413,7 @@ contains
         slope = dot_product(grad, dir)
         if (slope >= zero) then
             ! ERROR: The slope should not be pointing uphill - invalid direction
-            call errmgr%report_error("ls_search_miso", &
-                "The search direction vector appears to be pointing in " // &
-                "an uphill direction -  away from a minimum.", &
-                NL_DIVERGENT_BEHAVIOR_ERROR)
-            return
+            error stop NL_DIVERGENT_BEHAVIOR_ERROR
         end if
 
         ! Compute the minimum lambda value (length along the search direction)
@@ -509,12 +443,7 @@ contains
                 ! issue.
                 if (norm2(x - xold) == zero) then
                     ! The line search fully backtracked
-                    call errmgr%report_warning("ls_search_miso", &
-                        "The line search appears to have fully " // &
-                        "backtracked.  As such, check results carefully, " // &
-                        "and/or consider attempting the solve without " // &
-                        "the line search.", &
-                        NL_CONVERGENCE_ERROR)
+                    error stop NL_CONVERGENCE_ERROR
                 end if
                 x = xold
                 xcnvrg = .true.
@@ -555,14 +484,8 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, 100) "The line search failed to " // &
-                "converge.  Function evaluations performed: ", neval, "."
-            call errmgr%report_error("ls_search_miso", trim(errmsg), &
-                NL_CONVERGENCE_ERROR)
+            error stop NL_CONVERGENCE_ERROR
         end if
-
-        ! Formatting
-100     format(A, I0, A)
     end subroutine
 
 ! ------------------------------------------------------------------------------

@@ -6,7 +6,6 @@ module nonlin_least_squares
     use nonlin_helper
     use nonlin_single_var, only : fcn1var_helper, fcn1var
     use nonlin_solve, only : brent_solver
-    use ferror, only : errors
     use linalg, only : qr_factor, solve_qr
     use blas, only : dgemv, dgemm
     implicit none
@@ -116,7 +115,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    subroutine lss_solve(this, fcn, x, fvec, ib, args, err)
+    subroutine lss_solve(this, fcn, x, fvec, ib, args)
         !! Applies the Levenberg-Marquardt method to solve the nonlinear
         !! least-squares problem.  This routines is based upon the MINPACK 
         !! routine LMDIF.
@@ -138,8 +137,6 @@ contains
         class(*), intent(inout), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -160,10 +157,7 @@ contains
             sm, temp, gnorm, pnorm, fnorm1, actred, temp1, temp2, prered, &
             dirder, ratio
         real(real64), allocatable, dimension(:,:) :: jac
-        real(real64), allocatable, dimension(:) :: diag, qtf, wa1, wa2, wa3, wa4, w
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
-        character(len = 256) :: errmsg
+        real(real64), allocatable, dimension(:) :: diag, qtf, wa1, wa2, wa3, wa4
 
         ! Initialization
         xcnvrg = .false.
@@ -189,42 +183,17 @@ contains
             ib%converge_on_zero_diff = gcnvrg
             ib%gradient_count = 0
         end if
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
 
         ! Input Check
-        if (.not.fcn%is_fcn_defined()) then
-            ! ERROR: No function is defined
-            call errmgr%report_error("lss_solve", &
-                "No function has been defined.", &
-                NL_INVALID_OPERATION_ERROR)
-            return
-        end if
-        if (nvar > neqn) then
-            ! ERROR: System is underdetermined
-            call errmgr%report_error("lss_solve", "The solver cannot " // &
-                "solve the underdetermined problem.  The number of " // &
-                "unknowns must not exceed the number of equations.", &
-                NL_INVALID_INPUT_ERROR)
-            return
-        end if
+        if (.not.fcn%is_fcn_defined()) error stop NL_UNDEFINED_FUNCTION_ERROR
+        if (nvar > neqn) error stop NL_UNDERDEFINED_PROBLEM_ERROR
         flag = 0
         if (size(x) /= nvar) then
             flag = 3
         else if (size(fvec) /= neqn) then
             flag = 4
         end if
-        if (flag /= 0) then
-            ! One of the input arrays is not sized correctly
-            write(errmsg, 100) "Input number ", flag, &
-                " is not sized correctly."
-            call errmgr%report_error("lss_solve", trim(errmsg), &
-                NL_ARRAY_SIZE_ERROR)
-            return
-        end if
+        if (flag /= 0) error stop flag
 
         ! Local Memory Allocation
         allocate( &
@@ -237,8 +206,6 @@ contains
             wa3(nvar), &
             wa4(neqn) &
         )
-        call fcn%jacobian(x, jac, fv = fvec, olwork = lwork)
-        allocate(w(lwork))
 
         ! Evaluate the function at the starting point, and calculate its norm
         call fcn%fcn(x, fvec, args)
@@ -251,7 +218,7 @@ contains
         flag = 0
         do
             ! Evaluate the Jacobian
-            call fcn%jacobian(x, jac, fvec, w, args = args)
+            call fcn%jacobian(x, jac, fvec, args = args)
             njac = njac + 1
 
             ! Compute the QR factorization of the Jacobian
@@ -419,17 +386,8 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, 101) "The algorithm failed to " // &
-                "converge.  Function evaluations performed: ", neval, &
-                "." // new_line('c') // "Change in Variable: ", xnorm, &
-                new_line('c') // "Residual: ", fnorm
-            call errmgr%report_error("lss_solve", trim(errmsg), &
-                flag)
+            error stop NL_CONVERGENCE_ERROR
         end if
-
-        ! Formatting
-100     format(A, I0, A)
-101     format(A, I0, A, E10.3, A, E10.3)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -977,7 +935,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    subroutine cls_solve(this, fcn, x, fvec, ib, args, err)
+    subroutine cls_solve(this, fcn, x, fvec, ib, args)
         !! Applies the constrained least-squares solver to solve the nonlinear
         !! least-squares problem.
         class(constrained_least_squares_solver), intent(inout) :: this
@@ -998,8 +956,6 @@ contains
         class(*), intent(inout), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: delta_max = 1.0d3
@@ -1016,9 +972,6 @@ contains
         real(real64), allocatable, dimension(:) :: tau, Jp, s, g, p, xnew, &
             fnew, xl, xu
         real(real64), allocatable, dimension(:,:) :: qr, jac
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
-        character(len = 256) :: errmsg
         
         ! Initialization
         converged = .false.
@@ -1036,11 +989,6 @@ contains
         maxeval = this%get_max_fcn_evals()
         xl = this%get_lower_limits()
         xu = this%get_upper_limits()
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
 
         if (present(ib)) then
             ib%iter_count = iter
@@ -1053,35 +1001,15 @@ contains
         end if
 
         ! Input Check
-        if (.not.fcn%is_fcn_defined()) then
-            ! ERROR: No function is defined
-            call errmgr%report_error("cls_solve", &
-                "No function has been defined.", &
-                NL_INVALID_OPERATION_ERROR)
-            return
-        end if
-        if (nvar > neqn) then
-            ! ERROR: System is underdetermined
-            call errmgr%report_error("cls_solve", "The solver cannot " // &
-                "solve the underdetermined problem.  The number of " // &
-                "unknowns must not exceed the number of equations.", &
-                NL_INVALID_INPUT_ERROR)
-            return
-        end if
+        if (.not.fcn%is_fcn_defined()) error stop NL_UNDEFINED_FUNCTION_ERROR
+        if (nvar > neqn) error stop NL_UNDERDEFINED_PROBLEM_ERROR
         flag = 0
         if (size(x) /= nvar) then
             flag = 3
         else if (size(fvec) /= neqn) then
             flag = 4
         end if
-        if (flag /= 0) then
-            ! One of the input arrays is not sized correctly
-            write(errmsg, 100) "Input number ", flag, &
-                " is not sized correctly."
-            call errmgr%report_error("cls_solve", trim(errmsg), &
-                NL_ARRAY_SIZE_ERROR)
-            return
-        end if
+        if (flag /= 0) error stop flag
 
         ! Check the limit arrays
         if (size(xl) /= nvar) then
@@ -1243,17 +1171,8 @@ contains
 
         ! Check for convergence issues
         if (.not.converged) then
-            write(errmsg, 101) "The algorithm failed to " // &
-                "converge.  Function evaluations performed: ", neval, &
-                "." // new_line('c') // "Change in Variable: ", xnorm, &
-                new_line('c') // "Residual: ", fnorm
-            call errmgr%report_error("cls_solve", trim(errmsg), &
-                flag)
+            error stop NL_CONVERGENCE_ERROR
         end if
-
-        ! Formatting
-100     format(A, I0, A)
-101     format(A, I0, A, E10.3, A, E10.3)
     end subroutine
 
 ! ******************************************************************************

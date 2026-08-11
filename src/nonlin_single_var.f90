@@ -1,7 +1,6 @@
 module nonlin_single_var
     use iso_fortran_env
     use nonlin_types
-    use ferror
     implicit none
     private
     public :: fcn1var
@@ -69,12 +68,11 @@ module nonlin_single_var
     end type
 
     interface
-        subroutine nonlin_solver_1var(this, fcn, x, lim, f, ib, args, err)
+        subroutine nonlin_solver_1var(this, fcn, x, lim, f, ib, args)
             !! Describes the interface of a solver for an equation of one
             !! variable.
             use, intrinsic :: iso_fortran_env, only : real64
             use nonlin_types, only : iteration_behavior, value_pair
-            use ferror, only : errors
             import equation_solver_1var
             import fcn1var_helper
             class(equation_solver_1var), intent(inout) :: this
@@ -95,8 +93,6 @@ module nonlin_single_var
             class(*), intent(inout), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
-            class(errors), intent(inout), optional, target :: err
-                !! An error handling object.
         end subroutine
     end interface
 

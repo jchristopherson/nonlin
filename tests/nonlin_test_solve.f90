@@ -3,7 +3,6 @@
 module nonlin_test_solve
     use iso_fortran_env
     use nonlin
-    use ferror, only : errors
     implicit none
     private
     public :: test_quasinewton_1
@@ -594,17 +593,11 @@ contains
         real(real64) :: x(2), f(2), ic(2, 2)
         integer(int32) :: i
         logical :: check
-        type(errors) :: errmgr
 
         ! Initialization
         check = .true.
         fcn => fcn2
         call obj%set_fcn(fcn, 2, 2)
-
-        ! Do not terminate testing if the solution does not converge.  This
-        ! routine may have a bit of issue with this problem.  It can take
-        ! many iterations to converge.
-        call errmgr%set_exit_on_error(.false.)
 
         ! Increase the number of iterations allowed
         call solver%set_max_fcn_evals(1000)
@@ -616,7 +609,7 @@ contains
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
             x = ic(i,:)
-            call solver%solve(obj, x, f, ib, err = errmgr)
+            call solver%solve(obj, x, f, ib)
             if (.not.is_ans_2(x, 1.0d-6)) then
                 check = .false.
                 print 100, "Least Squares Solver Failed: Test 2-", i
@@ -1043,17 +1036,11 @@ contains
         real(real64) :: x(2), f(2), ic(2, 2)
         integer(int32) :: i
         logical :: check
-        type(errors) :: errmgr
 
         ! Initialization
         check = .true.
         fcn => fcn2
         call obj%set_fcn(fcn, 2, 2)
-
-        ! Do not terminate testing if the solution does not converge.  This
-        ! routine may have a bit of issue with this problem.  It can take
-        ! many iterations to converge.
-        call errmgr%set_exit_on_error(.false.)
 
         ! Increase the number of iterations allowed
         call solver%set_max_fcn_evals(5000)
@@ -1065,7 +1052,7 @@ contains
         ! Process - Cycle over each different initial condition set
         do i = 1, size(ic, 1)
             x = ic(i,:)
-            call solver%solve(obj, x, f, ib, err = errmgr)
+            call solver%solve(obj, x, f, ib)
             if (.not.is_ans_2(x, 1.0d-6)) then
                 check = .false.
                 print 100, "Constrained Least Squares Solver Failed: Test 2-", i
