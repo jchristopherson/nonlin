@@ -1,7 +1,6 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
-find_dependency(ferror QUIET)
 find_dependency(linalg QUIET)
 
 

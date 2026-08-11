@@ -6,7 +6,6 @@ module nonlin_least_squares
     use nonlin_helper
     use nonlin_single_var, only : fcn1var_helper, fcn1var
     use nonlin_solve, only : brent_solver
-    use ferror, only : errors
     use linalg, only : qr_factor, solve_qr
     use blas, only : dgemv, dgemm
     implicit none
@@ -116,7 +115,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    subroutine lss_solve(this, fcn, x, fvec, ib, args, err)
+    subroutine lss_solve(this, fcn, x, fvec, ib, args)
         !! Applies the Levenberg-Marquardt method to solve the nonlinear
         !! least-squares problem.  This routines is based upon the MINPACK 
         !! routine LMDIF.
@@ -138,8 +137,6 @@ contains
         class(*), intent(inout), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -160,10 +157,7 @@ contains
             sm, temp, gnorm, pnorm, fnorm1, actred, temp1, temp2, prered, &
             dirder, ratio
         real(real64), allocatable, dimension(:,:) :: jac
-        real(real64), allocatable, dimension(:) :: diag, qtf, wa1, wa2, wa3, wa4, w
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
-        character(len = 256) :: errmsg
+        real(real64), allocatable, dimension(:) :: diag, qtf, wa1, wa2, wa3, wa4
 
         ! Initialization
         xcnvrg = .false.
@@ -189,62 +183,29 @@ contains
             ib%converge_on_zero_diff = gcnvrg
             ib%gradient_count = 0
         end if
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
 
         ! Input Check
-        if (.not.fcn%is_fcn_defined()) then
-            ! ERROR: No function is defined
-            call errmgr%report_error("lss_solve", &
-                "No function has been defined.", &
-                NL_INVALID_OPERATION_ERROR)
-            return
-        end if
-        if (nvar > neqn) then
-            ! ERROR: System is underdetermined
-            call errmgr%report_error("lss_solve", "The solver cannot " // &
-                "solve the underdetermined problem.  The number of " // &
-                "unknowns must not exceed the number of equations.", &
-                NL_INVALID_INPUT_ERROR)
-            return
-        end if
+        if (.not.fcn%is_fcn_defined()) error stop NL_UNDEFINED_FUNCTION_ERROR
+        if (nvar > neqn) error stop NL_UNDERDEFINED_PROBLEM_ERROR
         flag = 0
         if (size(x) /= nvar) then
             flag = 3
         else if (size(fvec) /= neqn) then
             flag = 4
         end if
-        if (flag /= 0) then
-            ! One of the input arrays is not sized correctly
-            write(errmsg, 100) "Input number ", flag, &
-                " is not sized correctly."
-            call errmgr%report_error("lss_solve", trim(errmsg), &
-                NL_ARRAY_SIZE_ERROR)
-            return
-        end if
+        if (flag /= 0) error stop flag
 
         ! Local Memory Allocation
-        allocate(jpvt(nvar), stat = flag)
-        if (flag == 0) allocate(jac(neqn, nvar), stat = flag)
-        if (flag == 0) allocate(diag(nvar), stat = flag)
-        if (flag == 0) allocate(qtf(nvar), stat = flag)
-        if (flag == 0) allocate(wa1(nvar), stat = flag)
-        if (flag == 0) allocate(wa2(nvar), stat = flag)
-        if (flag == 0) allocate(wa3(nvar), stat = flag)
-        if (flag == 0) allocate(wa4(neqn), stat = flag)
-        if (flag == 0) then
-            call fcn%jacobian(x, jac, fv = fvec, olwork = lwork)
-            allocate(w(lwork), stat = flag)
-        end if
-        if (flag /= 0) then
-            ! ERROR: Out of memory
-            call errmgr%report_error("qns_solve", &
-                "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
-            return
-        end if
+        allocate( &
+            jpvt(nvar), &
+            jac(neqn, nvar), &
+            diag(nvar), &
+            qtf(nvar), &
+            wa1(nvar), &
+            wa2(nvar), &
+            wa3(nvar), &
+            wa4(neqn) &
+        )
 
         ! Evaluate the function at the starting point, and calculate its norm
         call fcn%fcn(x, fvec, args)
@@ -257,7 +218,7 @@ contains
         flag = 0
         do
             ! Evaluate the Jacobian
-            call fcn%jacobian(x, jac, fvec, w, args = args)
+            call fcn%jacobian(x, jac, fvec, args = args)
             njac = njac + 1
 
             ! Compute the QR factorization of the Jacobian
@@ -425,17 +386,8 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, 101) "The algorithm failed to " // &
-                "converge.  Function evaluations performed: ", neval, &
-                "." // new_line('c') // "Change in Variable: ", xnorm, &
-                new_line('c') // "Residual: ", fnorm
-            call errmgr%report_error("lss_solve", trim(errmsg), &
-                flag)
+            error stop NL_CONVERGENCE_ERROR
         end if
-
-        ! Formatting
-100     format(A, I0, A)
-101     format(A, I0, A, E10.3, A, E10.3)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -983,7 +935,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    subroutine cls_solve(this, fcn, x, fvec, ib, args, err)
+    subroutine cls_solve(this, fcn, x, fvec, ib, args)
         !! Applies the constrained least-squares solver to solve the nonlinear
         !! least-squares problem.
         class(constrained_least_squares_solver), intent(inout) :: this
@@ -1004,8 +956,6 @@ contains
         class(*), intent(inout), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: delta_max = 1.0d3
@@ -1022,9 +972,6 @@ contains
         real(real64), allocatable, dimension(:) :: tau, Jp, s, g, p, xnew, &
             fnew, xl, xu
         real(real64), allocatable, dimension(:,:) :: qr, jac
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
-        character(len = 256) :: errmsg
         
         ! Initialization
         converged = .false.
@@ -1042,11 +989,6 @@ contains
         maxeval = this%get_max_fcn_evals()
         xl = this%get_lower_limits()
         xu = this%get_upper_limits()
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
 
         if (present(ib)) then
             ib%iter_count = iter
@@ -1059,35 +1001,15 @@ contains
         end if
 
         ! Input Check
-        if (.not.fcn%is_fcn_defined()) then
-            ! ERROR: No function is defined
-            call errmgr%report_error("cls_solve", &
-                "No function has been defined.", &
-                NL_INVALID_OPERATION_ERROR)
-            return
-        end if
-        if (nvar > neqn) then
-            ! ERROR: System is underdetermined
-            call errmgr%report_error("cls_solve", "The solver cannot " // &
-                "solve the underdetermined problem.  The number of " // &
-                "unknowns must not exceed the number of equations.", &
-                NL_INVALID_INPUT_ERROR)
-            return
-        end if
+        if (.not.fcn%is_fcn_defined()) error stop NL_UNDEFINED_FUNCTION_ERROR
+        if (nvar > neqn) error stop NL_UNDERDEFINED_PROBLEM_ERROR
         flag = 0
         if (size(x) /= nvar) then
             flag = 3
         else if (size(fvec) /= neqn) then
             flag = 4
         end if
-        if (flag /= 0) then
-            ! One of the input arrays is not sized correctly
-            write(errmsg, 100) "Input number ", flag, &
-                " is not sized correctly."
-            call errmgr%report_error("cls_solve", trim(errmsg), &
-                NL_ARRAY_SIZE_ERROR)
-            return
-        end if
+        if (flag /= 0) error stop flag
 
         ! Check the limit arrays
         if (size(xl) /= nvar) then
@@ -1103,14 +1025,12 @@ contains
 
         ! Local Memory Allocations
         allocate( &
-            tau(min(neqn, nvar)), &
             Jp(neqn), &
             s(nvar), &
             g(nvar), &
             p(nvar), &
             xnew(nvar), &
             fnew(neqn), &
-            qr(neqn, nvar), &
             jac(neqn, nvar) &
         )
 
@@ -1138,8 +1058,7 @@ contains
             end if
 
             ! Compute the QR factorization of J
-            qr = jac
-            call qr_factor(qr, tau)
+            call qr_factor(jac, tau = tau, qr = qr)
 
             ! Compute the scaling factors
             call coleman_li_scaling(x, xl, xu, s)
@@ -1252,17 +1171,8 @@ contains
 
         ! Check for convergence issues
         if (.not.converged) then
-            write(errmsg, 101) "The algorithm failed to " // &
-                "converge.  Function evaluations performed: ", neval, &
-                "." // new_line('c') // "Change in Variable: ", xnorm, &
-                new_line('c') // "Residual: ", fnorm
-            call errmgr%report_error("cls_solve", trim(errmsg), &
-                flag)
+            error stop NL_CONVERGENCE_ERROR
         end if
-
-        ! Formatting
-100     format(A, I0, A)
-101     format(A, I0, A, E10.3, A, E10.3)
     end subroutine
 
 ! ******************************************************************************
@@ -1425,15 +1335,14 @@ contains
         ! Initialization
         m = size(jac, 1)
         n = size(jac, 2)
-        allocate(pgn(n), psd(n), u(m), v(n), Jg(m))
+        allocate(pgn(n), psd(n), u(n), v(n), Jg(m))
 
         ! Compute the gradient vector
         call dgemv('T', m, n, 1.0d0, jac, m, f, 1, 0.0d0, g, 1)
 
         ! Solve the linear system for the Gauss-Newton step
-        u = f
-        call solve_qr(qr, tau, u)   ! solution stored in u(1:n)
-        pgn = -u(1:n)
+        u = solve_qr(qr, tau, f)
+        pgn = -u
         pgnnorm = scaled_norm(pgn, s)
 
         ! Is it enough, or do we need to try a steepest decsent step?
@@ -1453,11 +1362,11 @@ contains
                 ! Go ahead and use the steepest descent step
                 p = (delta / psdnorm) * psd
             else
-                u(1:n) = pgn - psd
-                u(1:n) = s * u(1:n)
+                u = pgn - psd
+                u = s * u
                 v = s * psd
-                a = dot_product(u(1:n), u(1:n))
-                b = 2.0d0 * dot_product(u(1:n), v)
+                a = dot_product(u, u)
+                b = 2.0d0 * dot_product(u, v)
                 c = dot_product(v, v) - delta**2
                 if (a <= 0.0d0) then
                     p = psd

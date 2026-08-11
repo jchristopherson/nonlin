@@ -24,7 +24,6 @@ nonlin = { git = "https://github.com/jchristopherson/nonlin" }
 Here is a list of external code libraries utilized by this library.
 - [BLAS](http://www.netlib.org/blas/)
 - [LAPACK](http://www.netlib.org/lapack/)
-- [FERROR](https://github.com/jchristopherson/ferror)
 - [LINALG](https://github.com/jchristopherson/linalg)
 
 ## Example 1
@@ -71,11 +70,11 @@ program  example
     call solver%solve(obj, x, f, ib)
 
     ! Display the output
-    print '(AF7.5AF7.5A)', "Solution: (", x(1), ", ", x(2), ")"
-    print '(AE9.3AE9.3A)', "Residual: (", f(1), ", ", f(2), ")"
-    print '(AI0)', "Iterations: ", ib%iter_count
-    print '(AI0)', "Function Evaluations: ", ib%fcn_count
-    print '(AI0)', "Jacobian Evaluations: ", ib%jacobian_count
+    print '(A,F7.5,A,F7.5,A)', "Solution: (", x(1), ", ", x(2), ")"
+    print '(A,E9.3,A,E9.3,A)', "Residual: (", f(1), ", ", f(2), ")"
+    print '(A,I0)', "Iterations: ", ib%iter_count
+    print '(A,I0)', "Function Evaluations: ", ib%fcn_count
+    print '(A,I0)', "Jacobian Evaluations: ", ib%jacobian_count
 
 contains
     ! Define the routine containing the equations to solve.  The equations are:
@@ -125,11 +124,11 @@ program example
     call solver%solve(obj, x, f)
 
     ! Display the output
-    print '(AF12.10)', "c0: ", x(4)
-    print '(AF12.10)', "c1: ", x(3)
-    print '(AF12.10)', "c2: ", x(2)
-    print '(AF12.10)', "c3: ", x(1)
-    print '(AF7.5)', "Max Residual: ", maxval(abs(f))
+    print '(A,F12.10)', "c0: ", x(4)
+    print '(A,F12.10)', "c1: ", x(3)
+    print '(A,F12.10)', "c2: ", x(2)
+    print '(A,F12.10)', "c3: ", x(1)
+    print '(A,F7.5)', "Max Residual: ", maxval(abs(f))
 
 contains
     ! The function containing the data to fit
@@ -211,8 +210,8 @@ program example
     res = maxval(err)
 
     ! Print out the coefficients
-    print '(AI0AF12.10)', ("c", i - 1, " = ", p%get(i), i = 1, 4)
-    print '(AF7.5)', "Max Residual: ", res
+    print '(A,I0,A,F12.10)', ("c", i - 1, " = ", p%get(i), i = 1, 4)
+    print '(A,F7.5)', "Max Residual: ", res
 end program
 ```
 The above program yields the following coefficients.
@@ -251,10 +250,10 @@ program example
     call solver%solve(obj, x, fout, ib)
 
      ! Display the output
-     print '(AF7.5AF7.5A)', "Minimum: (", x(1), ", ", x(2), ")"
-     print '(AE9.3)', "Function Value: ", fout
-     print '(AI0)', "Iterations: ", ib%iter_count
-     print '(AI0)', "Function Evaluations: ", ib%fcn_count
+     print '(A,F7.5,A,F7.5,A)', "Minimum: (", x(1), ", ", x(2), ")"
+     print '(A,E9.3)', "Function Value: ", fout
+     print '(A,I0)', "Iterations: ", ib%iter_count
+     print '(A,I0)', "Function Evaluations: ", ib%fcn_count
 contains
     ! Rosenbrock's Function
     function rosenbrock(x, args) result(f)

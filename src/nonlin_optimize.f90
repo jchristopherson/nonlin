@@ -8,14 +8,13 @@
 
 module nonlin_optimize
     use iso_fortran_env
-    use ferror
     use nonlin_linesearch
     use nonlin_error_handling
     use nonlin_multi_var
     use nonlin_types
     use lapack
     use linalg, only : rank1_update, tri_mtx_mult, cholesky_rank1_update, &
-        cholesky_rank1_downdate, solve_cholesky
+        cholesky_rank1_downdate, solve_cholesky, cholesky_factor
     use linalg_errors, only : LA_MATRIX_FORMAT_ERROR
     implicit none
     private
@@ -76,11 +75,14 @@ module nonlin_optimize
         !!
         !! See Also:
         !!
-        !! - [Wikipedia - BFGS Methods](https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%93Goldfarb%E2%80%93Shanno_algorithm)
+        !! - <a href="https://en.wikipedia.org/wiki/Broyden-Fletcher-Goldfarb-Shanno_algorithm"
+        !! target="_blank">Wikipedia - BFGS Methods</a>
         !!
-        !! - [Wikipedia - Quasi-Newton Methods](https://en.wikipedia.org/wiki/Quasi-Newton_method)
+        !! - <a href="https://en.wikipedia.org/wiki/Quasi-Newton_method"
+        !! target="_blank">Wikipedia - Quasi-Newton Methods</a>
         !!
-        !! - [minFunc](https://www.cs.ubc.ca/~schmidtm/Software/minFunc.html)
+        !! - <a href="https://www.cs.ubc.ca/~schmidtm/Software/minFunc.html"
+        !! target="_blank">minFunc</a>
     contains
         procedure, public :: solve => bfgs_solve
     end type
@@ -99,7 +101,7 @@ contains
 ! ******************************************************************************
 ! NELDER_MEAD
 ! ------------------------------------------------------------------------------
-    subroutine nm_solve(this, fcn, x, fout, ib, args, err)
+    subroutine nm_solve(this, fcn, x, fout, ib, args)
         !! Utilizes the Nelder-Mead simplex method for finding a minimum
         !! value of the specified function.
         !!
@@ -111,16 +113,17 @@ contains
         !!
         !! See Also:
         !!
-        !!  - Nelder, John A.; R. Mead (1965). "A simplex method for function
+        !! - Nelder, John A.; R. Mead (1965). "A simplex method for function
         !!      minimization". Computer Journal. 7: 308–313.
         !!
-        !!  - [Gao, Fuchang, Han, Lixing (2010). "Implementing the Nelder-Mead
-        !!      simplex algorithm with adaptive parameters."]
-        !!      (http://www.webpages.uidaho.edu/~fuchang/res/ANMS.pdf)
+        !! - <a href="http://www.webpages.uidaho.edu/~fuchang/res/ANMS.pdf" 
+        !! target="_blank">Gao, Fuchang, Han, Lixing (2010). "Implementing the
+        !! Nelder-Mead simplex algorithm with adaptive parameters."</a>
         !!
-        !!  - [Wikipedia](https://en.wikipedia.org/wiki/Nelder–Mead_method)
+        !! - <a href="https://en.wikipedia.org/wiki/Nelder–Mead_method" 
+        !! target="_blank">Wikipedia</a>
         !!
-        !!  - [Numerical Recipes](http://numerical.recipes/)
+        !! - <a href="http://numerical.recipes/ target="_blank">Numerical Recipes</a>
         class(nelder_mead), intent(inout) :: this
             !! The [[nelder_mead]] object.
         class(fcnnvar_helper), intent(in) :: fcn
@@ -137,8 +140,6 @@ contains
             !! obtain iteration performance statistics.
         class(*), intent(inout), optional :: args
             !! An optional argument to allow the user to communicate with fcn.
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -152,9 +153,6 @@ contains
             maxeval
         real(real64) :: ftol, rtol, ftry, fsave, fval, swp
         real(real64), allocatable, dimension(:) :: f, pcent, pmin, work
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
-        character(len = 256) :: errmsg
 
         ! Initialization
         ndim = fcn%get_variable_count()
@@ -174,28 +172,10 @@ contains
             ib%converge_on_chng = .false.
             ib%converge_on_zero_diff = .false.
         end if
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
 
         ! Input Check
-        if (.not.fcn%is_fcn_defined()) then
-            ! ERROR: No function is defined
-            call errmgr%report_error("nm_solve", &
-                "No function has been defined.", &
-                NL_INVALID_OPERATION_ERROR)
-            return
-        end if
-        if (size(x) /= ndim) then
-            write(errmsg, 100) &
-                "It was expected to receive a coordinate vector of length ", &
-                ndim, " , but a vector of length ", size(x), " was received."
-            call errmgr%report_error("nm_solve", trim(errmsg), &
-                NL_INVALID_INPUT_ERROR)
-            return
-        end if
+        if (.not.fcn%is_fcn_defined()) error stop NL_UNDEFINED_FUNCTION_ERROR
+        if (size(x) /= ndim) error stop NL_INVALID_INPUT_ERROR
 
         ! Ensure that if an initial simplex was defined, that it is
         ! appropriately sized.  If not, simply create a new simplex of the
@@ -213,17 +193,13 @@ contains
         end if
 
         ! Local Memory Allocation
-        allocate(f(npts), stat = flag)
-        if (flag == 0) allocate(pcent(ndim), stat = flag)
-        if (flag == 0) allocate(pmin(ndim), stat = flag)
-        if (flag == 0) allocate(work(ndim), stat = flag)
-        if (buildSimplex .and. flag == 0) allocate(this%m_simplex(ndim, npts))
-        if (flag /= 0) then
-            ! ERROR: Out of memory
-            call errmgr%report_error("nm_solve", &
-                "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
-            return
-        end if
+        allocate( &
+            f(npts), &
+            pcent(ndim), &
+            pmin(ndim), &
+            work(ndim) &
+        )
+        if (buildSimplex) allocate(this%m_simplex(ndim, npts))
 
         ! Define the initial simplex, if needed
         if (buildSimplex) then
@@ -330,10 +306,10 @@ contains
             ! Print iteration status
             if (this%get_print_status()) then
                 print *, ""
-                print 101, "Iteration: ", iter
-                print 101, "Function Evaluations: ", neval
-                print 102, "Function Value: ", fval
-                print 102, "Convergence Parameter: ", rtol
+                print "(A, I0)", "Iteration: ", iter
+                print "(A, I0)", "Function Evaluations: ", neval
+                print "(A, E10.3)", "Function Value: ", fval
+                print "(A, E10.3)", "Convergence Parameter: ", rtol
             end if
 
             ! Ensure we haven't made too many function evaluations
@@ -359,20 +335,8 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, 103) &
-                "The algorithm failed to converge." // new_line('c') // &
-                "Function evaluations performed: ", neval, new_line('c') // &
-                "Convergence Parameter: ", rtol, new_line('c') // &
-                "Convergence Criteria: ", ftol
-            call errmgr%report_error("nm_solve", trim(errmsg), &
-                NL_CONVERGENCE_ERROR)
+            error stop NL_CONVERGENCE_ERROR
         end if
-
-        ! Formatting
-100     format(A, I0, A, I0, A)
-101     format(A, I0)
-102     format(A, E10.3)
-103     format(A, I0, A, E10.3, A, E10.3)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -590,7 +554,7 @@ contains
 ! ******************************************************************************
 ! BFGS
 ! ------------------------------------------------------------------------------
-    subroutine bfgs_solve(this, fcn, x, fout, ib, args, err)
+    subroutine bfgs_solve(this, fcn, x, fout, ib, args)
         !! Utilizes the Broyden-Fletcher-Goldfarb-Shanno (BFGS) algorithm
         !! for finding a minimum value of the specified function.
         class(bfgs), intent(inout) :: this
@@ -609,8 +573,6 @@ contains
             !! obtain iteration performance statistics.
         class(*), intent(inout), optional :: args
             !! An optional argument to allow the user to communicate with fcn.
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -625,9 +587,6 @@ contains
         real(real64) :: xtol, gtol, fp, stpmax, fret, xtest, gtest, temp, ydx
         real(real64), allocatable, dimension(:) :: g, dx, u, v, y, gold, xnew, bdx
         real(real64), allocatable, dimension(:,:) :: b, r
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
-        character(len = 256) :: errmsg
         type(iteration_behavior) :: lib
         class(line_search), allocatable :: ls
 
@@ -650,11 +609,6 @@ contains
             ib%converge_on_chng = xcnvrg
             ib%converge_on_zero_diff = gcnvrg
         end if
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
         if (this%get_use_line_search()) then
             if (.not.this%is_line_search_defined()) &
                 call this%set_default_line_search()
@@ -662,39 +616,22 @@ contains
         end if
 
         ! Input Check
-        if (.not.fcn%is_fcn_defined()) then
-            ! ERROR: No function is defined
-            call errmgr%report_error("bfgs_solve", &
-                "No function has been defined.", &
-                NL_INVALID_OPERATION_ERROR)
-            return
-        end if
-        if (size(x) /= n) then
-            write(errmsg, 100) &
-                "It was expected to receive a coordinate vector of length ", &
-                n, " , but a vector of length ", size(x), " was received."
-            call errmgr%report_error("bfgs_solve", trim(errmsg), &
-                NL_INVALID_INPUT_ERROR)
-            return
-        end if
+        if (.not.fcn%is_fcn_defined()) error stop NL_UNDEFINED_FUNCTION_ERROR
+        if (size(x) /= n) error stop NL_INVALID_INPUT_ERROR
 
         ! Local Memory Allocation
-        allocate(g(n), stat = flag)
-        if (flag == 0) allocate(dx(n), stat = flag)
-        if (flag == 0) allocate(u(n), stat = flag)
-        if (flag == 0) allocate(v(n), stat = flag)
-        if (flag == 0) allocate(y(n), stat = flag)
-        if (flag == 0) allocate(bdx(n), stat = flag)
-        if (flag == 0) allocate(gold(n), stat = flag)
-        if (flag == 0) allocate(xnew(n), stat = flag)
-        if (flag == 0) allocate(b(n,n), stat = flag)
-        if (flag == 0) allocate(r(n,n), stat = flag)
-        if (flag /= 0) then
-            ! ERROR: Memory Error
-            call errmgr%report_error("bfgs_solve", &
-                "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
-            return
-        end if
+        allocate( &
+            g(n), &
+            dx(n), &
+            u(n), &
+            v(n), &
+            y(n), &
+            bdx(n), &
+            gold(n), &
+            xnew(n), &
+            b(n,n), &
+            r(n,n) &
+        )
 
         ! Process
         fp = fcn%fcn(x, args)
@@ -726,7 +663,7 @@ contains
                 if (this%get_use_line_search()) then
                     call limit_search_vector(dx, stpmax)
                     call ls%search(fcn, x, g, dx, xnew, fp, fret, lib, &
-                        args = args, err = errmgr)
+                        args = args)
                     neval = neval + lib%fcn_count
                     fp = fret
                 else
@@ -779,26 +716,28 @@ contains
                 call dsymv('u', n, one, b, n, dx, 1, zero, bdx, 1)
 
                 ! Perform the actual update
-                if (ydx > small) then
+                if (ydx > small .and. iter > 1) then
                     ! Compute the rank 1 update and downdate
                     u = y / sqrt(ydx)
                     v = bdx / sqrt(dot_product(dx, bdx))
                     call cholesky_rank1_update(r, u)
                     call cholesky_rank1_downdate(r, v)
-                end if ! Else just skip the update
+                else
+                    ! Compute the factorization
+                    r = cholesky_factor(b, .true.)
+                end if
 
                 ! Compute the solution to: B * dx = -g = (R**T * R) * dx
-                dx = -g
-                call solve_cholesky(.true., r, dx)
+                dx = solve_cholesky(.true., r, -g)
 
                 ! Print iteration status
                 if (this%get_print_status()) then
                     print *, ""
-                    print 101, "Iteration: ", iter
-                    print 101, "Function Evaluations: ", neval
-                    print 102, "Function Value: ", fp
-                    print 102, "Change in Variable: ", xtest
-                    print 102, "Gradient: ", gtest
+                    print "(A, I0)", "Iteration: ", iter
+                    print "(A, I0)", "Function Evaluations: ", neval
+                    print "(A, E10.3)", "Function Value: ", fp
+                    print "(A, E10.3)", "Change in Variable: ", xtest
+                    print "(A, E10.3)", "Gradient: ", gtest
                 end if
 
                 ! Ensure we haven't made too many function evaluations
@@ -825,21 +764,8 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            write(errmsg, 103) &
-                "The algorithm failed to converge." // new_line('c') // &
-                "Function evaluations performed: ", neval, new_line('c') // &
-                "Function Value: ", fp, new_line('c') // &
-                "Change in Variable: ", xtest, new_line('c') // &
-                "Gradient: ", gtest
-            call errmgr%report_error("bfgs_solve", trim(errmsg), &
-                NL_CONVERGENCE_ERROR)
+            error stop NL_CONVERGENCE_ERROR
         end if
-
-        ! Formatting
-100     format(A, I0, A, I0, A)
-101     format(A, I0)
-102     format(A, E10.3)
-103     format(A, I0, A, E10.3, A, E10.3, A, E10.3)
     end subroutine
 
 ! ------------------------------------------------------------------------------

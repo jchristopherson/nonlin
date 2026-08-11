@@ -12,14 +12,29 @@
 
     <title>line_search &ndash; NONLIN </title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-    <link href="../css/pygments.css" rel="stylesheet">
-    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Font Awesome -->
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/brands.min.css" rel="stylesheet">
+    <link href="../css/regular.min.css" rel="stylesheet">
+    <link href="../css/solid.min.css" rel="stylesheet">
+    <link href="../css/v4-font-face.min.css" rel="stylesheet">
+    <link href="../css/v4-shims.min.css" rel="stylesheet">
+    <!-- MathJax -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } }
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async
+            integrity="sha256-DViIOMYdwlM/axqoGDPeUyf0urLoHMN4QACBKyB58Uw=" crossorigin="anonymous"></script>
+    <!-- Other scripts and stylesheets -->
     <link href="../css/local.css" rel="stylesheet">
-      <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
-
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <link href="../css/pygments.css" rel="stylesheet">
     <script src="../js/svg-pan-zoom.min.js"></script>
   </head>
 
@@ -72,9 +87,8 @@
         <ul class="list-inline" style="margin-bottom:0px;display:inline">
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
-              <a data-bs-toggle="tooltip"
-                 data-bs-placement="bottom" data-html="true"
-                 title="<p> 6.6% of total for derived types.</p>Including implementation: 303 statements,  8.0% of total for derived types.">15 statements</a>
+              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                 title="<p> 6.6% of total for derived types.</p>Including implementation: 265 statements,  7.9% of total for derived types.">15 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -95,9 +109,11 @@
     </div>
   </div>
   <script>
-    $(function () {
-    $('[data-bs-toggle="tooltip"]').tooltip()
-    })
+    // Enable Bootstrap tooltips
+    (function () {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    })();
   </script>
 
   </div>
@@ -131,13 +147,13 @@
       <div id="boundprocs-0" class="collapse">
         <div class="list-group list-group-flush">
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-get_distance_factor">get_distance_factor</a>
-            <a class="list-group-item" href="../type/line_search.html#boundprocedure-get_max_fcn_evals~2">get_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/line_search.html#boundprocedure-get_max_fcn_evals~4">get_max_fcn_evals</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-get_scaling_factor">get_scaling_factor</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-ls_search_mimo">ls_search_mimo</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-ls_search_miso">ls_search_miso</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-search">search</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-set_distance_factor">set_distance_factor</a>
-            <a class="list-group-item" href="../type/line_search.html#boundprocedure-set_max_fcn_evals~2">set_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/line_search.html#boundprocedure-set_max_fcn_evals~4">set_max_fcn_evals</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-set_scaling_factor">set_scaling_factor</a>
         </div>
       </div>
@@ -152,7 +168,7 @@
     </div>
     
     <div class="col-md-9" id='text'>
-      <h2>
+      <h2 id="type-def-statement">
         type, public :: line_search</h2>
     <p>Defines a type capable of performing an inexact, backtracking line
 search to find a point as far along the specified direction vector 
@@ -160,16 +176,19 @@ that is usable for unconstrained minimization problems.</p>
 <p>See Also:</p>
 <ul>
 <li>
-<p><a href="https://en.wikipedia.org/wiki/Backtracking_line_search">Wikipedia</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Backtracking_line_search"
+target="_blank">Wikipedia</a></p>
 </li>
 <li>
-<p><a href="https://people.maths.ox.ac.uk/hauser/hauser_lecture2.pdf">Oxfford Lecture Notes</a></p>
+<p><a href="https://people.maths.ox.ac.uk/hauser/hauser_lecture2.pdf"
+target="_blank">Oxford Lecture Notes</a></p>
 </li>
 <li>
-<p><a href="https://reference.wolfram.com/language/tutorial/UnconstrainedOptimizationLineSearchMethods.html">Wolfram</a></p>
+<p><a href="https://reference.wolfram.com/language/tutorial/UnconstrainedOptimizationLineSearchMethods.html"
+target="_blank">Wolfram</a></p>
 </li>
 <li>
-<p><a href="http://numerical.recipes/">Numerical Recipes</a></p>
+<p><a href="http://numerical.recipes/" target="_blank">Numerical Recipes</a></p>
 </li>
 </ul>
     <br>
@@ -189,9 +208,9 @@ that is usable for unconstrained minimization problems.</p>
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
     private pure function ls_get_dist(this) result(x)  
 </h3>
 
@@ -234,24 +253,24 @@ search direction vector is practical.</p>
     <p>The distance factor.  A value of 1 indicates the full length
 of the vector.</p>
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_max_fcn_evals~2"></span>
+      <span class="anchor" id="boundprocedure-get_max_fcn_evals~4"></span>
       <h3>
           procedure, public ::
   <strong>get_max_fcn_evals</strong> => ls_get_max_eval
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
     private pure function ls_get_max_eval(this) result(n)  
 </h3>
 
@@ -293,8 +312,8 @@ single line search.</p>
     </h4>
     <p>The maximum number of function evaluations.</p>
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
@@ -308,9 +327,9 @@ single line search.</p>
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
     private pure function ls_get_scale(this) result(x)  
 </h3>
 
@@ -355,8 +374,8 @@ and <script type="math/tex">\lambda</script> is the scaling factor.</p>
     </h4>
     <p>The scaling factor.</p>
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
@@ -370,10 +389,10 @@ and <script type="math/tex">\lambda</script> is the scaling factor.</p>
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
-    private  subroutine ls_search_mimo(this, fcn, xold, grad, dir, x, fvec, fold, fx, ib, args, err)  
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
+    private  subroutine ls_search_mimo(this, fcn, xold, grad, dir, x, fvec, fold, fx, ib, args)  
 </h3>
 
   <p>Utilizes an inexact, backtracking line search to find a point as
@@ -565,27 +584,12 @@ obtain iteration performance statistics.</p>
                 <p>An optional argument to allow the user to communicate with fcn.</p>
             </td>
         </tr>
-        <tr>
-            <td>
-              <span class="anchor" ></span>
-              class(errors),
-            </td>
-<td>intent(inout),</td>
-              <td>optional,</td>            <td>
-              target
-            </td>
-            <td>::</td>
-            <td><strong>err</strong></td>
-            <td>
-                <p>An error handling object.</p>
-            </td>
-        </tr>
     </tbody>
   </table>
 
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
@@ -599,10 +603,10 @@ obtain iteration performance statistics.</p>
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
-    private  subroutine ls_search_miso(this, fcn, xold, grad, dir, x, fold, fx, ib, args, err)  
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
+    private  subroutine ls_search_miso(this, fcn, xold, grad, dir, x, fold, fx, ib, args)  
 </h3>
 
   <p>Utilizes an inexact, backtracking line search to find a point as far 
@@ -775,27 +779,12 @@ obtain iteration performance statistics.</p>
                 <p>An optional argument to allow the user to communicate with fcn.</p>
             </td>
         </tr>
-        <tr>
-            <td>
-              <span class="anchor" ></span>
-              class(errors),
-            </td>
-<td>intent(inout),</td>
-              <td>optional,</td>            <td>
-              target
-            </td>
-            <td>::</td>
-            <td><strong>err</strong></td>
-            <td>
-                <p>An error handling object.</p>
-            </td>
-        </tr>
     </tbody>
   </table>
 
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
@@ -805,14 +794,14 @@ obtain iteration performance statistics.</p>
       <span class="anchor" id="boundprocedure-search"></span>
       <h3>
           generic, public ::
-  <strong>search</strong> => <a href='D:\Code\nonlin\doc\type\line_search.html#boundprocedure-ls_search_mimo'>ls_search_mimo</a>, <a href='D:\Code\nonlin\doc\type\line_search.html#boundprocedure-ls_search_miso'>ls_search_miso</a>
+  <strong>search</strong> => <a href='C:\Users\jason.christopherson\git\nonlin\doc\type\line_search.html#boundprocedure-ls_search_mimo'>ls_search_mimo</a>, <a href='C:\Users\jason.christopherson\git\nonlin\doc\type\line_search.html#boundprocedure-ls_search_miso'>ls_search_miso</a>
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
-    private  subroutine ls_search_mimo(this, fcn, xold, grad, dir, x, fvec, fold, fx, ib, args, err)  
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
+    private  subroutine ls_search_mimo(this, fcn, xold, grad, dir, x, fvec, fold, fx, ib, args)  
 </h3>
 
   <p>Utilizes an inexact, backtracking line search to find a point as
@@ -1004,29 +993,14 @@ obtain iteration performance statistics.</p>
                 <p>An optional argument to allow the user to communicate with fcn.</p>
             </td>
         </tr>
-        <tr>
-            <td>
-              <span class="anchor" ></span>
-              class(errors),
-            </td>
-<td>intent(inout),</td>
-              <td>optional,</td>            <td>
-              target
-            </td>
-            <td>::</td>
-            <td><strong>err</strong></td>
-            <td>
-                <p>An error handling object.</p>
-            </td>
-        </tr>
     </tbody>
   </table>
 
 
-        </li>
-        <li class="list-group-item">
-                  <h3>
-    private  subroutine ls_search_miso(this, fcn, xold, grad, dir, x, fold, fx, ib, args, err)  
+          </li>
+          <li class="list-group-item">
+                    <h3>
+    private  subroutine ls_search_miso(this, fcn, xold, grad, dir, x, fold, fx, ib, args)  
 </h3>
 
   <p>Utilizes an inexact, backtracking line search to find a point as far 
@@ -1199,27 +1173,12 @@ obtain iteration performance statistics.</p>
                 <p>An optional argument to allow the user to communicate with fcn.</p>
             </td>
         </tr>
-        <tr>
-            <td>
-              <span class="anchor" ></span>
-              class(errors),
-            </td>
-<td>intent(inout),</td>
-              <td>optional,</td>            <td>
-              target
-            </td>
-            <td>::</td>
-            <td><strong>err</strong></td>
-            <td>
-                <p>An error handling object.</p>
-            </td>
-        </tr>
     </tbody>
   </table>
 
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
@@ -1233,9 +1192,9 @@ obtain iteration performance statistics.</p>
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
     private  subroutine ls_set_dist(this, x)  
 </h3>
 
@@ -1289,24 +1248,24 @@ set [0.1, 1.0).</p>
   </table>
 
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_max_fcn_evals~2"></span>
+      <span class="anchor" id="boundprocedure-set_max_fcn_evals~4"></span>
       <h3>
           procedure, public ::
   <strong>set_max_fcn_evals</strong> => ls_set_max_eval
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
     private  subroutine ls_set_max_eval(this, x)  
 </h3>
 
@@ -1358,8 +1317,8 @@ single line search.</p>
   </table>
 
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
@@ -1373,9 +1332,9 @@ single line search.</p>
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
     private  subroutine ls_set_scale(this, x)  
 </h3>
 
@@ -1430,8 +1389,8 @@ and <script type="math/tex">\lambda</script> is the scaling factor.</p>
   </table>
 
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
@@ -1446,40 +1405,21 @@ and <script type="math/tex">\lambda</script> is the scaling factor.</p>
     <footer>
       <div class="container">
         <div class="row justify-content-between">
-          <div class="col"><p>NONLIN was developed by Jason Christopherson<br>&copy; 2026 
+          <div class="col">
+            <p>
+              NONLIN
+ was developed by Jason Christopherson<br>              &copy; 2026 
 </p>
           </div>
           <div class="col">
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-07-08 18:01              </p>
+ on 2026-08-11 10:14 -0500             </p>
           </div>
         </div>
         <br>
       </div> <!-- /container -->
     </footer>
-
-    <!-- Bootstrap core JavaScript -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>    
-
-    <!-- MathJax JavaScript
-             ================================================== -->
-             <!-- Placed at the end of the document so the pages load faster -->
-        <script type="text/x-mathjax-config">
-          MathJax.Hub.Config({
-          TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
-          jax: ['input/TeX','input/MathML','output/HTML-CSS'],
-          extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
-          });
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-          <script src="../tipuesearch/tipuesearch_content.js"></script>
-          <script src="../tipuesearch/tipuesearch_set.js"></script>
-          <script src="../tipuesearch/tipuesearch.js"></script>
-
   </body>
 </html>

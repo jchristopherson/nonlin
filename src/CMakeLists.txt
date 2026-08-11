@@ -23,8 +23,7 @@ include(FetchContent)
 
 find_package(BLAS)
 find_package(LAPACK)
-find_package(ferror QUIET)
-find_package(linalg 1.8.10 QUIET)
+find_package(linalg 2.0.0 QUIET)
 
 if (NOT BLAS_FOUND OR NOT LAPACK_FOUND)
   message(STATUS "BLAS/LAPACK could not be found.  A reference version will be employed.")
@@ -38,20 +37,6 @@ if (NOT BLAS_FOUND OR NOT LAPACK_FOUND)
   set(BUILD_LAPACK_BLAS TRUE)
 else()
     set(BUILD_LAPACK_BLAS FALSE)
-endif()
-
-if (NOT ferror_FOUND)
-    message(STATUS "FERROR could not be found.  A reference version will be employed.")
-    FetchContent_Declare(
-        ferror
-        GIT_REPOSITORY "https://github.com/jchristopherson/ferror"
-    )
-    FetchContent_MakeAvailable(ferror)
-    set(FERROR_LIBRARIES ferror)
-    set(BUILD_FERROR TRUE)
-else()
-    set(FERROR_LIBRARIES ferror::ferror)
-    set(BUILD_FERROR FALSE)
 endif()
 
 if (NOT linalg_FOUND)
@@ -74,7 +59,6 @@ target_link_libraries(
     PUBLIC
     ${BLAS_LIBRARIES}
     ${LAPACK_LIBRARIES}
-    ${FERROR_LIBRARIES}
     ${LINALG_LIBRARIES}
 )
 
@@ -110,13 +94,6 @@ install(
 install(DIRECTORY ${NONLIN_MOD_DIR} DESTINATION ${CMAKE_INSTALL_MODULEDIR})
 
 if (${BUILD_SHARED_LIBS})
-    if (${BUILD_FERROR})
-        install(TARGETS ${FERROR_LIBRARIES}
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        )
-    endif()
-
     if (${BUILD_LINALG})
         install(TARGETS ${LINALG_LIBRARIES}
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -131,13 +108,6 @@ if (${BUILD_SHARED_LIBS})
         )
     endif()
 else()
-    if (${BUILD_FERROR})
-        install(TARGETS ${FERROR_LIBRARIES}
-            RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        )
-    endif()
-
     if (${BUILD_LINALG})
         install(TARGETS ${LINALG_LIBRARIES}
             RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
