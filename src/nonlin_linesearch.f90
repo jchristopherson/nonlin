@@ -22,13 +22,16 @@ module nonlin_linesearch
         !!
         !! See Also:
         !!
-        !! - [Wikipedia](https://en.wikipedia.org/wiki/Backtracking_line_search)
+        !! - <a href="https://en.wikipedia.org/wiki/Backtracking_line_search"
+        !! target="_blank">Wikipedia</a>
         !!
-        !! - [Oxfford Lecture Notes](https://people.maths.ox.ac.uk/hauser/hauser_lecture2.pdf)
+        !! - <a href="https://people.maths.ox.ac.uk/hauser/hauser_lecture2.pdf"
+        !! target="_blank">Oxford Lecture Notes</a>
         !!
-        !! - [Wolfram](https://reference.wolfram.com/language/tutorial/UnconstrainedOptimizationLineSearchMethods.html)
+        !! - <a href="https://reference.wolfram.com/language/tutorial/UnconstrainedOptimizationLineSearchMethods.html"
+        !! target="_blank">Wolfram</a>
         !!
-        !! - [Numerical Recipes](http://numerical.recipes/)
+        !! - <a href="http://numerical.recipes/" target="_blank">Numerical Recipes</a>
         integer(int32), private :: m_maxEval = 100
             !! The maximum number of function evaluations allowed during a 
             !! single line search.

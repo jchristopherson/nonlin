@@ -12,14 +12,29 @@
 
     <title>brent_solver &ndash; NONLIN </title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-    <link href="../css/pygments.css" rel="stylesheet">
-    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Font Awesome -->
+    <link href="../css/fontawesome.min.css" rel="stylesheet">
+    <link href="../css/brands.min.css" rel="stylesheet">
+    <link href="../css/regular.min.css" rel="stylesheet">
+    <link href="../css/solid.min.css" rel="stylesheet">
+    <link href="../css/v4-font-face.min.css" rel="stylesheet">
+    <link href="../css/v4-shims.min.css" rel="stylesheet">
+    <!-- MathJax -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { equationNumbers: { autoNumber: "AMS" } }
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async
+            integrity="sha256-DViIOMYdwlM/axqoGDPeUyf0urLoHMN4QACBKyB58Uw=" crossorigin="anonymous"></script>
+    <!-- Other scripts and stylesheets -->
     <link href="../css/local.css" rel="stylesheet">
-      <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
-
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <link href="../css/pygments.css" rel="stylesheet">
     <script src="../js/svg-pan-zoom.min.js"></script>
   </head>
 
@@ -72,9 +87,8 @@
         <ul class="list-inline" style="margin-bottom:0px;display:inline">
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
-              <a data-bs-toggle="tooltip"
-                 data-bs-placement="bottom" data-html="true"
-                 title="<p> 1.8% of total for derived types.</p>Including implementation: 207 statements,  5.5% of total for derived types.">4 statements</a>
+              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+                 title="<p> 1.8% of total for derived types.</p>Including implementation: 188 statements,  5.6% of total for derived types.">4 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -95,9 +109,11 @@
     </div>
   </div>
   <script>
-    $(function () {
-    $('[data-bs-toggle="tooltip"]').tooltip()
-    })
+    // Enable Bootstrap tooltips
+    (function () {
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    })();
   </script>
 
   </div>
@@ -131,16 +147,16 @@
       <div id="boundprocs-0" class="collapse">
         <div class="list-group list-group-flush">
             <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-get_diff_tolerance">get_diff_tolerance</a>
-            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-get_fcn_tolerance~2">get_fcn_tolerance</a>
-            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-get_max_fcn_evals~4">get_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-get_print_status~3">get_print_status</a>
-            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-get_var_tolerance~3">get_var_tolerance</a>
+            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-get_fcn_tolerance">get_fcn_tolerance</a>
+            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-get_max_fcn_evals~2">get_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-get_print_status~2">get_print_status</a>
+            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-get_var_tolerance">get_var_tolerance</a>
             <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-set_diff_tolerance">set_diff_tolerance</a>
-            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-set_fcn_tolerance~2">set_fcn_tolerance</a>
-            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-set_max_fcn_evals~4">set_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-set_print_status~3">set_print_status</a>
-            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-set_var_tolerance~3">set_var_tolerance</a>
-            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-solve~8">solve</a>
+            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-set_fcn_tolerance">set_fcn_tolerance</a>
+            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-set_max_fcn_evals~2">set_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-set_print_status~2">set_print_status</a>
+            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-set_var_tolerance">set_var_tolerance</a>
+            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-solve~9">solve</a>
         </div>
       </div>
     </div>
@@ -154,7 +170,7 @@
     </div>
     
     <div class="col-md-9" id='text'>
-      <h2>
+      <h2 id="type-def-statement">
         type, public, extends(<a href='equation_solver_1var.html'>equation_solver_1var</a>) :: brent_solver</h2>
     <p>Defines a derivative-free solver for a scalar equation <script type="math/tex">f(x)=0</script>
 based on Brent's method.  The method combines bisection with secant
@@ -177,9 +193,9 @@ converge to a root.</p>
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
     private pure function es1_get_diff_tol(this) result(x)  
 </h3>
 
@@ -221,24 +237,24 @@ tolerance.</p>
     </h4>
     <p>The tolerance value.</p>
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_fcn_tolerance~2"></span>
+      <span class="anchor" id="boundprocedure-get_fcn_tolerance"></span>
       <h3>
           procedure, public ::
   <strong>get_fcn_tolerance</strong> => es1_get_fcn_tol
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
     private pure function es1_get_fcn_tol(this) result(x)  
 </h3>
 
@@ -279,24 +295,24 @@ tolerance.</p>
     </h4>
     <p>The tolerance value.</p>
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_max_fcn_evals~4"></span>
+      <span class="anchor" id="boundprocedure-get_max_fcn_evals~2"></span>
       <h3>
           procedure, public ::
   <strong>get_max_fcn_evals</strong> => es1_get_max_eval
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
     private pure function es1_get_max_eval(this) result(n)  
 </h3>
 
@@ -338,24 +354,24 @@ a single solve.</p>
     </h4>
     <p>The maximum number of function evaluations.</p>
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_print_status~3"></span>
+      <span class="anchor" id="boundprocedure-get_print_status~2"></span>
       <h3>
           procedure, public ::
   <strong>get_print_status</strong> => es1_get_print_status
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
     private pure function es1_get_print_status(this) result(x)  
 </h3>
 
@@ -397,24 +413,24 @@ printed.</p>
     </h4>
     <p>True if the iteration status should be printed; else, false.</p>
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_var_tolerance~3"></span>
+      <span class="anchor" id="boundprocedure-get_var_tolerance"></span>
       <h3>
           procedure, public ::
   <strong>get_var_tolerance</strong> => es1_get_var_tol
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
     private pure function es1_get_var_tol(this) result(x)  
 </h3>
 
@@ -455,8 +471,8 @@ printed.</p>
     </h4>
     <p>The tolerance value.</p>
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
@@ -470,9 +486,9 @@ printed.</p>
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
     private  subroutine es1_set_diff_tol(this, x)  
 </h3>
 
@@ -524,24 +540,24 @@ tolerance.</p>
   </table>
 
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_fcn_tolerance~2"></span>
+      <span class="anchor" id="boundprocedure-set_fcn_tolerance"></span>
       <h3>
           procedure, public ::
   <strong>set_fcn_tolerance</strong> => es1_set_fcn_tol
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
     private  subroutine es1_set_fcn_tol(this, x)  
 </h3>
 
@@ -592,24 +608,24 @@ tolerance.</p>
   </table>
 
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_max_fcn_evals~4"></span>
+      <span class="anchor" id="boundprocedure-set_max_fcn_evals~2"></span>
       <h3>
           procedure, public ::
   <strong>set_max_fcn_evals</strong> => es1_set_max_eval
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
     private  subroutine es1_set_max_eval(this, n)  
 </h3>
 
@@ -661,24 +677,24 @@ a single solve.</p>
   </table>
 
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_print_status~3"></span>
+      <span class="anchor" id="boundprocedure-set_print_status~2"></span>
       <h3>
           procedure, public ::
   <strong>set_print_status</strong> => es1_set_print_status
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
     private  subroutine es1_set_print_status(this, x)  
 </h3>
 
@@ -730,24 +746,24 @@ printed.</p>
   </table>
 
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_var_tolerance~3"></span>
+      <span class="anchor" id="boundprocedure-set_var_tolerance"></span>
       <h3>
           procedure, public ::
   <strong>set_var_tolerance</strong> => es1_set_var_tol
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
     private  subroutine es1_set_var_tol(this, x)  
 </h3>
 
@@ -798,41 +814,41 @@ printed.</p>
   </table>
 
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-solve~8"></span>
+      <span class="anchor" id="boundprocedure-solve~9"></span>
       <h3>
           procedure, public ::
   <strong>solve</strong> => brent_solve
         
       </h3>
     </div>
-    <ul class="list-group">
-        <li class="list-group-item">
-                  <h3>
-    private  subroutine brent_solve(this, fcn, x, lim, f, ib, args, err)  
+      <ul class="list-group">
+          <li class="list-group-item">
+                    <h3>
+    private  subroutine brent_solve(this, fcn, x, lim, f, ib, args)  
 </h3>
 
   <p>Solves an equation of one variable using Brent's method.</p>
 <p>See Also</p>
 <ul>
 <li>
-<p><a href="https://en.wikipedia.org/wiki/Brent%27s_method">Wikipedia</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Brent%27s_method" 
+target="_blank">Wikipedia</a></p>
 </li>
 <li>
-<p><a href="http://numerical.recipes/">Numerical Recipes</a></p>
+<p><a href="http://numerical.recipes/ target="_blank">Numerical Recipes</a></p>
 </li>
 <li>
-<p>R.P. Brent, "Algorithms for Minimization without Derivatives,"
-     Dover Publications, January 2002. ISBN 0-486-41998-3.
-     Further information available
-     <a href="https://maths-people.anu.edu.au/~brent/pub/pub011.html">here</a>.</p>
+<p><a href="https://maths-people.anu.edu.au/~brent/pub/pub011.html"
+target="_blank">R.P. Brent, "Algorithms for Minimization without 
+Derivatives."</a></p>
 </li>
 </ul>
 
@@ -956,27 +972,12 @@ obtain iteration performance statistics.</p>
                 <p>An optional argument to allow the user to communicate with fcn.</p>
             </td>
         </tr>
-        <tr>
-            <td>
-              <span class="anchor" ></span>
-              class(errors),
-            </td>
-<td>intent(inout),</td>
-              <td>optional,</td>            <td>
-              target
-            </td>
-            <td>::</td>
-            <td><strong>err</strong></td>
-            <td>
-                <p>An error handling object.</p>
-            </td>
-        </tr>
     </tbody>
   </table>
 
 
-        </li>
-    </ul>
+          </li>
+      </ul>
   </div>
 
           </div>
@@ -991,40 +992,21 @@ obtain iteration performance statistics.</p>
     <footer>
       <div class="container">
         <div class="row justify-content-between">
-          <div class="col"><p>NONLIN was developed by Jason Christopherson<br>&copy; 2026 
+          <div class="col">
+            <p>
+              NONLIN
+ was developed by Jason Christopherson<br>              &copy; 2026 
 </p>
           </div>
           <div class="col">
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-07-08 18:01              </p>
+ on 2026-08-11 10:14 -0500             </p>
           </div>
         </div>
         <br>
       </div> <!-- /container -->
     </footer>
-
-    <!-- Bootstrap core JavaScript -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>    
-
-    <!-- MathJax JavaScript
-             ================================================== -->
-             <!-- Placed at the end of the document so the pages load faster -->
-        <script type="text/x-mathjax-config">
-          MathJax.Hub.Config({
-          TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
-          jax: ['input/TeX','input/MathML','output/HTML-CSS'],
-          extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
-          });
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-          <script src="../tipuesearch/tipuesearch_content.js"></script>
-          <script src="../tipuesearch/tipuesearch_set.js"></script>
-          <script src="../tipuesearch/tipuesearch.js"></script>
-
   </body>
 </html>

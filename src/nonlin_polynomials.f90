@@ -326,9 +326,11 @@ contains
         !!
         !! See Also
         !!
-        !! - [Wikipedia](https://en.wikipedia.org/wiki/Companion_matrix)
+        !! - <a href="https://en.wikipedia.org/wiki/Companion_matrix"
+        !! target="_blank">Wikipedia</a>
         !!
-        !! - [Wolfram MathWorld](http://mathworld.wolfram.com/CompanionMatrix.html)
+        !! - <a href="http://mathworld.wolfram.com/CompanionMatrix.html"
+        !! target="_blank">Wolfram MathWorld</a>
         class(polynomial), intent(in) :: this
             !! The [[polynomial]] object.
         real(real64), dimension(this%order(), this%order()) :: c

@@ -1,7 +1,6 @@
 module nonlin_polynomials
     use iso_fortran_env
     use linalg, only : eigen, solve_least_squares
-    use ferror, only : errors
     use nonlin_error_handling
     implicit none
     private
@@ -75,54 +74,36 @@ contains
 ! ******************************************************************************
 ! POLYNOMIAL MEMBERS
 ! ------------------------------------------------------------------------------
-    subroutine init_poly(this, order, err)
+    pure subroutine init_poly(this, order)
         !! Initializes the polynomial instance.
         class(polynomial), intent(inout) :: this
             !! The [[polynomial]] object.
         integer(int32), intent(in) :: order
             !! The order of the polynomial (must be >= 0).
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
 
         ! Local Variables
-        integer(int32) :: n, istat
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
+        integer(int32) :: n
 
         ! Initialization
         n = order + 1
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
 
         ! Input Check
         if (order < 0) then
             ! ERROR: Negative order is not supported
-            call errmgr%report_error("init_polynomial", &
-                "A negative polynomial order is not supported.", &
-                NL_INVALID_INPUT_ERROR)
-            return
+            error stop 2
         end if
 
         ! Process
         if (allocated(this%m_coeffs)) deallocate(this%m_coeffs)
-        allocate(this%m_coeffs(n), stat = istat)
-        if (istat /= 0) then
-            ! ERROR: Out of memory
-            call errmgr%report_error("init_polynomial", &
-                "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
-            return
-        end if
+        allocate(this%m_coeffs(n))
         this%m_coeffs = zero
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    subroutine init_poly_coeffs(this, c, err)
+    pure subroutine init_poly_coeffs(this, c)
         !! Initializes the polynomial instance.
         class(polynomial), intent(inout) :: this
             !! The [[polynomial]] object.
@@ -130,25 +111,15 @@ contains
             !! The array of polynomial coefficients. The coefficients are
             !! established as follows: c(1) + c(2) * x + c(3) * x**2 + ...
             !! c(n) * x**n-1.
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
 
         ! Local Variables
         integer(int32) :: i, n
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
 
         ! Initialization
         n = size(c)
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
 
         ! Initialize the polynomial
-        call init_poly(this, n - 1, errmgr)
-        if (errmgr%has_error_occurred()) return
+        call init_poly(this, n - 1)
 
         ! Populate the polynomial coefficients
         do i = 1, n
@@ -172,7 +143,7 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    subroutine poly_fit(this, x, y, order, err)
+    pure subroutine poly_fit(this, x, y, order)
         !! Fits a polynomial of the specified order to the supplied data set.
         class(polynomial), intent(inout) :: this
             !! The [[polynomial]] object.
@@ -184,8 +155,6 @@ contains
             !! data points.  On output, the contents are overwritten.
         integer(int32), intent(in) :: order
             !! The order of the polynomial (must be >= 1).
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: one = 1.0d0
@@ -193,45 +162,27 @@ contains
         ! Local Variables
         integer(int32):: j, n, ncols, flag
         real(real64), pointer, dimension(:,:) :: a
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
 
         ! Initialization
         n = size(x)
         ncols = order + 1
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
 
         ! Input Check
         if (size(y) /= n) then
             ! ERROR: Array size mismatch
-            call errmgr%report_error("polynomial_fit", "Array size mismatch.", &
-                NL_ARRAY_SIZE_ERROR)
-            return
-        else if (order >= n .or. order < 1) then
+            error stop 3
+        end if
+        if (order >= n .or. order < 1) then
             ! ERROR: Requested order does not make sense
-            call errmgr%report_error("polynomial_fit", "The requested " // &
-                "polynomial order is not valid for this data set.", &
-                NL_INVALID_INPUT_ERROR)
-            return
+            error stop 4
         end if
 
         ! Local Memory Allocation
-        allocate(a(n,ncols), stat = flag)
-        if (flag /= 0) then
-            ! ERROR: Out of memory
-            call errmgr%report_error("polynomial_fit", &
-                "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
-            return
-        end if
+        allocate(a(n,ncols))
 
         ! Ensure the polynomial object is initialized and sized appropriately
         if (this%order() /= order) then
-            call this%initialize(order, errmgr)
-            if (errmgr%has_error_occurred()) return
+            call this%initialize(order)
         end if
 
         ! Populate A
@@ -244,15 +195,11 @@ contains
         end do
 
         ! Solve: A * coeffs = y
-        call solve_least_squares(a, y, err = errmgr)
-        if (errmgr%has_error_occurred()) return
-
-        ! Extract the coefficients from the first order+1 elements of Y
-        this%m_coeffs = y(1:ncols)
+        this%m_coeffs = solve_least_squares(a, y)
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    subroutine poly_fit_thru_zero(this, x, y, order, err)
+    pure subroutine poly_fit_thru_zero(this, x, y, order)
         !! Fits a polynomial of the specified order that passes through zero
         !! to the supplied data set.
         class(polynomial), intent(inout) :: this
@@ -265,7 +212,6 @@ contains
             !! variable data points.  On output, the contents are overwritten.
         integer(int32), intent(in) :: order
             !! The order of the polynomial (must be >= 1).
-        class(errors), intent(inout), optional, target :: err
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -273,45 +219,26 @@ contains
         ! Local Variables
         integer(int32):: j, n, ncols, flag
         real(real64), pointer, dimension(:,:) :: a
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
 
         ! Initialization
         n = size(x)
         ncols = order
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
 
         ! Input Check
         if (size(y) /= n) then
             ! ERROR: Array size mismatch
-            call errmgr%report_error("polynomial_fit_thru_zero", &
-                "Array size mismatch.", NL_ARRAY_SIZE_ERROR)
-            return
+            error stop 3
         else if (order >= n .or. order < 1) then
             ! ERROR: Requested order does not make sense
-            call errmgr%report_error("polynomial_fit_thru_zero", &
-                "The requested polynomial order is not valid for this " // &
-                "data set.", NL_INVALID_INPUT_ERROR)
-            return
+            error stop 4
         end if
 
         ! Local Memory Allocation
-        allocate(a(n,ncols), stat = flag)
-        if (flag /= 0) then
-            ! ERROR: Out of memory
-            call errmgr%report_error("polynomial_fit_thru_zero", &
-                "Insufficient memory available.", NL_OUT_OF_MEMORY_ERROR)
-            return
-        end if
+        allocate(a(n,ncols))
 
         ! Ensure the polynomial object is initialized and sized appropriately
         if (this%order() /= order) then
-            call this%initialize(order, errmgr)
-            if (errmgr%has_error_occurred()) return
+            call this%initialize(order)
         end if
 
         ! Populate A
@@ -321,16 +248,12 @@ contains
         end do
 
         ! Solve: A * coeffs = y
-        call solve_least_squares(a, y, err = errmgr)
-        if (errmgr%has_error_occurred()) return
-
-        ! Extract the coefficients from the first order+1 elements of Y
         this%m_coeffs(1) = zero
-        this%m_coeffs(2:ncols+1) = y(1:ncols)
+        this%m_coeffs(2:ncols+1) = solve_least_squares(a, y)
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    elemental function poly_eval_double(this, x) result(y)
+    pure elemental function poly_eval_double(this, x) result(y)
         !! Evaluates a polynomial at the specified points.
         class(polynomial), intent(in) :: this
             !! The [[polynomial]] object.
@@ -364,7 +287,7 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    elemental function poly_eval_complex(this, x) result(y)
+    pure elemental function poly_eval_complex(this, x) result(y)
         !! Evaluates a polynomial at the specified points.
         class(polynomial), intent(in) :: this
             !! The [[polynomial]] object.
@@ -403,9 +326,11 @@ contains
         !!
         !! See Also
         !!
-        !! - [Wikipedia](https://en.wikipedia.org/wiki/Companion_matrix)
+        !! - <a href="https://en.wikipedia.org/wiki/Companion_matrix"
+        !! target="_blank">Wikipedia</a>
         !!
-        !! - [Wolfram MathWorld](http://mathworld.wolfram.com/CompanionMatrix.html)
+        !! - <a href="http://mathworld.wolfram.com/CompanionMatrix.html"
+        !! target="_blank">Wolfram MathWorld</a>
         class(polynomial), intent(in) :: this
             !! The [[polynomial]] object.
         real(real64), dimension(this%order(), this%order()) :: c
@@ -429,15 +354,13 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    function poly_roots(this, err) result(z)
+    pure function poly_roots(this) result(z)
         !! Computes all the roots of a polynomial by computing the eigenvalues
         !! of the polynomial companion matrix.
         class(polynomial), intent(in) :: this
             !! The [[polynomial]] object.
-        complex(real64), dimension(this%order()) :: z
+        complex(real64), allocatable, dimension(:) :: z
             !! The roots of the polynomial.
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
 
         ! Local Variables
         integer(int32) :: n
@@ -454,11 +377,11 @@ contains
 
         ! Compute the eigenvalues of the companion matrix.  The eigenvalues are
         ! the roots of the polynomial.
-        call eigen(c, z, err = err)
+        call eigen(c, vals = z)
     end function
 
 ! ------------------------------------------------------------------------------
-    function get_poly_coefficient(this, ind, err) result(c)
+    pure function get_poly_coefficient(this, ind) result(c)
         !! Gets the requested polynomial coefficient by index.  The
         !! coefficient index is established as follows: c(1) + c(2) * x +
         !! c(3) * x**2 + ... c(n) * x**n-1.
@@ -466,33 +389,19 @@ contains
             !! The [[polynomial]] object.
         integer(int32), intent(in) :: ind
             !! The polynomial coefficient index.
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
         real(real64) :: c
             !! The requested coefficient.
 
-        ! Local Variables
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
-
         ! Initialization
         c = 0.0d0
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
 
         ! Quick Return
-        if (this%order() == -1) return
+        if (this%order() == -1) error stop NL_INVALID_OPERATION_ERROR
 
         ! Input Check
         if (ind <= 0 .or. ind > this%order() + 1) then
             ! ERROR: Index out of range
-            call errmgr%report_error("get_polynomial_coefficient", &
-                "The specified index is outside the bounds of the " // &
-                "coefficient array.", NL_INVALID_INPUT_ERROR)
-            return
+            error stop NL_INDEX_OUT_OF_RANGE_ERROR
         end if
 
         ! Get the coefficient
@@ -515,7 +424,7 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    subroutine set_poly_coefficient(this, ind, c, err)
+    pure subroutine set_poly_coefficient(this, ind, c)
         !! Sets the requested polynomial coefficient by index.  The
         !! coefficient index is established as follows: c(1) + c(2) * x +
         !! c(3) * x**2 + ... c(n) * x**n-1.
@@ -525,19 +434,6 @@ contains
             !! The polynomial coefficient index.
         real(real64), intent(in) :: c
             !! The polynomial coefficient.
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
-
-        ! Local Variables
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
-
-        ! Initialization
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
 
         ! Quick Return
         if (this%order() == -1) return
@@ -545,10 +441,7 @@ contains
         ! Input Check
         if (ind <= 0 .or. ind > this%order() + 1) then
             ! ERROR: Index out of range
-            call errmgr%report_error("set_polynomial_coefficient", &
-                "The specified index is outside the bounds of the " // &
-                "coefficient array.", NL_INVALID_INPUT_ERROR)
-            return
+            error stop NL_INDEX_OUT_OF_RANGE_ERROR
         end if
 
         ! Process
@@ -558,7 +451,7 @@ contains
 ! ******************************************************************************
 ! OPERATORS
 ! ------------------------------------------------------------------------------
-    subroutine poly_equals(x, y)
+    pure subroutine poly_equals(x, y)
         !! Assigns the contents of one polynomial to another.
         class(polynomial), intent(inout) :: x
             !! The assignee.
@@ -577,7 +470,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    subroutine poly_dbl_equals(x, y)
+    pure subroutine poly_dbl_equals(x, y)
         !! Assigns a number to each coefficient of the polynomial.
         class(polynomial), intent(inout) :: x
             !! The assignee.
@@ -595,7 +488,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    subroutine poly_equals_array(x, y)
+    pure subroutine poly_equals_array(x, y)
         !! Assigns the contents of an array as polynomial coefficients.
         class(polynomial), intent(inout) :: x
             !! The assignee.
@@ -605,7 +498,7 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    function poly_poly_add(x, y) result(z)
+    pure function poly_poly_add(x, y) result(z)
         !! Adds two polynomials.
         class(polynomial), intent(in) :: x
             !! The left-hand-side argument.
@@ -660,7 +553,7 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    function poly_poly_subtract(x, y) result(z)
+    pure function poly_poly_subtract(x, y) result(z)
         !! Subtracts two polynomials.
         class(polynomial), intent(in) :: x
             !! The left-hand-side argument.
@@ -715,7 +608,7 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    function poly_poly_mult(x, y) result(z)
+    pure function poly_poly_mult(x, y) result(z)
         !! Multiplies two polynomials.
         class(polynomial), intent(in) :: x
             !! The left-hand-side argument.
@@ -743,7 +636,7 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    function poly_dbl_mult(x, y) result(z)
+    pure function poly_dbl_mult(x, y) result(z)
         !! Multiplies a polynomial by a scalar value.
         class(polynomial), intent(in) :: x
             !! The left-hand-side argument.
@@ -764,7 +657,7 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    function dbl_poly_mult(x, y) result(z)
+    pure function dbl_poly_mult(x, y) result(z)
         !! Multiplies a polynomial by a scalar value.
         real(real64), intent(in) :: x
             !! The left-hand-side argument.
@@ -785,19 +678,17 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
-    subroutine poly_divide(this, divisor, quotient, remainder, err)
+    pure subroutine poly_divide(numerator, divisor, quotient, remainder)
         !! Divides one polynomial by another and returns the quotient and
         !! remainder.
-        class(polynomial), intent(in) :: this
+        class(polynomial), intent(in) :: numerator
             !! The numerator polynomial.
         class(polynomial), intent(in) :: divisor
             !! The denominator polynomial.
-        class(polynomial), intent(out) :: quotient
+        type(polynomial), intent(out) :: quotient
             !! The quotient polynomial.
-        class(polynomial), intent(out) :: remainder
+        type(polynomial), intent(out) :: remainder
             !! The remainder polynomial.
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
@@ -809,40 +700,21 @@ contains
         real(real64), allocatable, dimension(:) :: den_coeffs
         real(real64), allocatable, dimension(:) :: q_coeffs
         real(real64), allocatable, dimension(:) :: r_coeffs
-        class(errors), pointer :: errmgr
-        type(errors), target :: deferr
 
         ! Initialization
-        if (present(err)) then
-            errmgr => err
-        else
-            errmgr => deferr
-        end if
 
-        call quotient%initialize(0, errmgr)
-        if (errmgr%has_error_occurred()) return
-        call remainder%initialize(0, errmgr)
-        if (errmgr%has_error_occurred()) return
+        call quotient%initialize(0)
+        call remainder%initialize(0)
 
         ! Input Check
-        if (this%order() == -1) return
-        if (divisor%order() == -1) then
-            call errmgr%report_error("poly_divide", &
-                "Division by a zero polynomial is not supported.", &
-                NL_INVALID_INPUT_ERROR)
-            return
-        end if
+        if (numerator%order() == -1) error stop 1
+        if (divisor%order() == -1) error stop 2
 
         ! Process
-        num_coeffs = this%get_all()
+        num_coeffs = numerator%get_all()
         den_coeffs = divisor%get_all()
         lead = den_coeffs(size(den_coeffs))
-        if (abs(lead) <= epsilon(lead)) then
-            call errmgr%report_error("poly_divide", &
-                "Division by a zero polynomial is not supported.", &
-                NL_INVALID_INPUT_ERROR)
-            return
-        end if
+        if (abs(lead) <= epsilon(lead)) error stop NL_DIVIDE_BY_ZERO_ERROR
 
         n = size(num_coeffs) - 1
         m = size(den_coeffs) - 1
@@ -907,31 +779,27 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
-    function poly_init_1(order, err) result(rst)
+    function poly_init_1(order) result(rst)
         !! Initializes a new [[polynomial]] instance.
         integer(int32), intent(in) :: order
             !! The order of the polynomial (must be >= 0).
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
         type(polynomial) :: rst
             !! The new [[polynomial]] object.
 
-        call rst%initialize(order, err = err)
+        call rst%initialize(order)
     end function
 
 ! ------------------------------------------------------------------------------
-    function poly_init_2(c, err) result(rst)
+    function poly_init_2(c) result(rst)
         !! Initializes a new [[polynomial]] instance.
         real(real64), intent(in), dimension(:) :: c
             !! The array of polynomial coefficients. The coefficients are
             !! established as follows: c(1) + c(2) * x + c(3) * x**2 + ...
             !! c(n) * x**n-1.
-        class(errors), intent(inout), optional, target :: err
-            !! An error handling object.
         type(polynomial) :: rst
             !! The new [[polynomial]] object.
 
-        call rst%initialize(c, err = err)
+        call rst%initialize(c)
     end function
 
 ! ------------------------------------------------------------------------------

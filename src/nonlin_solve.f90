@@ -160,11 +160,13 @@ contains
         !!
         !! See Also:
         !!
-        !! - [Broyden's Paper](http://www.ams.org/journals/mcom/1965-19-092/S0025-5718-1965-0198670-6/S0025-5718-1965-0198670-6.pdf)
+        !! - <a href="http://www.ams.org/journals/mcom/1965-19-092/S0025-5718-1965-0198670-6/S0025-5718-1965-0198670-6.pdf"
+        !! target="_blank">Broyden's Paper</a>
         !!
-        !! - [Wikipedia](https://en.wikipedia.org/wiki/Broyden%27s_method)
+        !! - <a href="https://en.wikipedia.org/wiki/Broyden%27s_method"
+        !! target="_blank">Wikipedia</a>
         !!
-        !! - [Numerical Recipes](http://numerical.recipes/)
+        !! - <a href="http://numerical.recipes/ target="_blank">Numerical Recipes</a>
         class(quasi_newton_solver), intent(inout) :: this
             !! The [[quasi_newton_solver]] object.
         class(vecfcn_helper), intent(in) :: fcn
@@ -643,14 +645,14 @@ contains
         !!
         !! See Also
         !!
-        !! - [Wikipedia](https://en.wikipedia.org/wiki/Brent%27s_method)
+        !! - <a href="https://en.wikipedia.org/wiki/Brent%27s_method" 
+        !! target="_blank">Wikipedia</a>
         !!
-        !! - [Numerical Recipes](http://numerical.recipes/)
+        !! - <a href="http://numerical.recipes/ target="_blank">Numerical Recipes</a>
         !!
-        !! - R.P. Brent, "Algorithms for Minimization without Derivatives,"
-        !!      Dover Publications, January 2002. ISBN 0-486-41998-3.
-        !!      Further information available
-        !!      [here](https://maths-people.anu.edu.au/~brent/pub/pub011.html).
+        !! - <a href="https://maths-people.anu.edu.au/~brent/pub/pub011.html"
+        !! target="_blank">R.P. Brent, "Algorithms for Minimization without 
+        !! Derivatives."</a>
         class(brent_solver), intent(inout) :: this
             !! The [[brent_solver]] object.
         class(fcn1var_helper), intent(in) :: fcn

@@ -75,11 +75,14 @@ module nonlin_optimize
         !!
         !! See Also:
         !!
-        !! - [Wikipedia - BFGS Methods](https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%93Goldfarb%E2%80%93Shanno_algorithm)
+        !! - <a href="https://en.wikipedia.org/wiki/Broyden-Fletcher-Goldfarb-Shanno_algorithm"
+        !! target="_blank">Wikipedia - BFGS Methods</a>
         !!
-        !! - [Wikipedia - Quasi-Newton Methods](https://en.wikipedia.org/wiki/Quasi-Newton_method)
+        !! - <a href="https://en.wikipedia.org/wiki/Quasi-Newton_method"
+        !! target="_blank">Wikipedia - Quasi-Newton Methods</a>
         !!
-        !! - [minFunc](https://www.cs.ubc.ca/~schmidtm/Software/minFunc.html)
+        !! - <a href="https://www.cs.ubc.ca/~schmidtm/Software/minFunc.html"
+        !! target="_blank">minFunc</a>
     contains
         procedure, public :: solve => bfgs_solve
     end type
@@ -110,16 +113,17 @@ contains
         !!
         !! See Also:
         !!
-        !!  - Nelder, John A.; R. Mead (1965). "A simplex method for function
+        !! - Nelder, John A.; R. Mead (1965). "A simplex method for function
         !!      minimization". Computer Journal. 7: 308–313.
         !!
-        !!  - [Gao, Fuchang, Han, Lixing (2010). "Implementing the Nelder-Mead
-        !!      simplex algorithm with adaptive parameters."]
-        !!      (http://www.webpages.uidaho.edu/~fuchang/res/ANMS.pdf)
+        !! - <a href="http://www.webpages.uidaho.edu/~fuchang/res/ANMS.pdf" 
+        !! target="_blank">Gao, Fuchang, Han, Lixing (2010). "Implementing the
+        !! Nelder-Mead simplex algorithm with adaptive parameters."</a>
         !!
-        !!  - [Wikipedia](https://en.wikipedia.org/wiki/Nelder–Mead_method)
+        !! - <a href="https://en.wikipedia.org/wiki/Nelder–Mead_method" 
+        !! target="_blank">Wikipedia</a>
         !!
-        !!  - [Numerical Recipes](http://numerical.recipes/)
+        !! - <a href="http://numerical.recipes/ target="_blank">Numerical Recipes</a>
         class(nelder_mead), intent(inout) :: this
             !! The [[nelder_mead]] object.
         class(fcnnvar_helper), intent(in) :: fcn
