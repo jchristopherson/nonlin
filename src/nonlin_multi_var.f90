@@ -81,7 +81,6 @@ module nonlin_multi_var
             !! equation of N variables.
             use, intrinsic :: iso_fortran_env, only : real64
             use nonlin_types, only : iteration_behavior
-            use ferror, only : errors
             import equation_optimizer
             import fcnnvar_helper
             class(equation_optimizer), intent(inout) :: this
