@@ -33,6 +33,14 @@ jobs:
           - os: ubuntu-latest
             compiler: intel
             version: '2023.2'
+            shared: true\
+          - os: windows-latest
+            compiler: gcc
+            version: 'msys2'
+            shared: false
+          - os: windows-latest
+            compiler: gcc
+            version: 'msys2'
             shared: true
 
     steps:
@@ -40,6 +48,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Fortran toolchain
+        if: runner.os != 'Windows'
         uses: fortran-lang/setup-fortran@v1
         id: setup-fortran
         with:
@@ -47,10 +56,63 @@ jobs:
           version: ${{ matrix.version }}
           
       - name: Show compiler version
+        if: runner.os != 'Windows'
         shell: bash
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
           CC: ${{ steps.setup-fortran.outputs.cc }}
+        run: |
+          "$FC" --version
+
+      - name: Set up MSYS2 toolchain and BLAS/LAPACK (Windows)
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        id: msys2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc-fortran
+            mingw-w64-x86_64-openblas
+
+      - name: Add MinGW64 toolchain to PATH (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Add-Content $env:GITHUB_PATH "${{ steps.msys2.outputs.msys2-location }}\mingw64\bin"
+
+      - name: Provide BLAS/LAPACK linker aliases (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        env:
+          MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
+        run: |
+          LIB_DIR="$MSYS2_LOCATION/mingw64/lib"
+          OPENBLAS_LIB=""
+          for CANDIDATE in "$LIB_DIR/libopenblas.dll.a" "$LIB_DIR/libopenblas.a"; do
+            if [[ -f "$CANDIDATE" ]]; then
+              OPENBLAS_LIB="$CANDIDATE"
+              break
+            fi
+          done
+
+          if [[ -z "$OPENBLAS_LIB" ]]; then
+            echo "Unable to locate OpenBLAS library in $LIB_DIR"
+            ls -la "$LIB_DIR"/libopenblas* || true
+            exit 1
+          fi
+
+          ALIAS_DIR="$RUNNER_TEMP/blas-lapack-alias"
+          mkdir -p "$ALIAS_DIR"
+          cp "$OPENBLAS_LIB" "$ALIAS_DIR/libblas.a"
+          cp "$OPENBLAS_LIB" "$ALIAS_DIR/liblapack.a"
+          echo "LIBRARY_PATH=$ALIAS_DIR${LIBRARY_PATH:+:$LIBRARY_PATH}" >> "$GITHUB_ENV"
+
+      - name: Show compiler version
+        shell: bash
+        env:
+          FC: ${{ runner.os == 'Windows' && 'gfortran' || steps.setup-fortran.outputs.fc }}
+          CC: ${{ runner.os == 'Windows' && 'gcc' || steps.setup-fortran.outputs.cc }}
         run: |
           "$FC" --version
 
@@ -69,14 +131,22 @@ jobs:
       - name: Build NONLIN
         shell: bash
         env:
-          FC: ${{ steps.setup-fortran.outputs.fc }}
-          CC: ${{ steps.setup-fortran.outputs.cc }}
-          FPM_FC: ${{ steps.setup-fortran.outputs.fc }}
-          FPM_CC: ${{ steps.setup-fortran.outputs.cc }}
-          FPM_FLAGS: ${{ matrix.shared && '--flag=-fPIC' || '' }}
+          FC: ${{ runner.os == 'Windows' && 'gfortran' || steps.setup-fortran.outputs.fc }}
+          CC: ${{ runner.os == 'Windows' && 'gcc' || steps.setup-fortran.outputs.cc }}
+          FPM_FC: ${{ runner.os == 'Windows' && 'gfortran' || steps.setup-fortran.outputs.fc }}
+          FPM_CC: ${{ runner.os == 'Windows' && 'gcc' || steps.setup-fortran.outputs.cc }}
+          SHARED: ${{ matrix.shared }}
         run: |
-          if [[ -n "$FPM_FLAGS" ]]; then
-            fpm build $FPM_FLAGS
+          FLAGS=""
+          if [[ "$SHARED" == "true" ]]; then
+            if [[ "$RUNNER_OS" == "Windows" ]]; then
+              FLAGS="--flag=-Wl,--export-all-symbols"
+            else
+              FLAGS="--flag=-fPIC"
+            fi
+          fi
+          if [[ -n "$FLAGS" ]]; then
+            fpm build $FLAGS
           else
             fpm build
           fi
@@ -84,14 +154,22 @@ jobs:
       - name: Run tests
         shell: bash
         env:
-          FC: ${{ steps.setup-fortran.outputs.fc }}
-          CC: ${{ steps.setup-fortran.outputs.cc }}
-          FPM_FC: ${{ steps.setup-fortran.outputs.fc }}
-          FPM_CC: ${{ steps.setup-fortran.outputs.cc }}
-          FPM_FLAGS: ${{ matrix.shared && '--flag=-fPIC' || '' }}
+          FC: ${{ runner.os == 'Windows' && 'gfortran' || steps.setup-fortran.outputs.fc }}
+          CC: ${{ runner.os == 'Windows' && 'gcc' || steps.setup-fortran.outputs.cc }}
+          FPM_FC: ${{ runner.os == 'Windows' && 'gfortran' || steps.setup-fortran.outputs.fc }}
+          FPM_CC: ${{ runner.os == 'Windows' && 'gcc' || steps.setup-fortran.outputs.cc }}
+          SHARED: ${{ matrix.shared }}
         run: |
-          if [[ -n "$FPM_FLAGS" ]]; then
-            fpm test $FPM_FLAGS
+          FLAGS=""
+          if [[ "$SHARED" == "true" ]]; then
+            if [[ "$RUNNER_OS" == "Windows" ]]; then
+              FLAGS="--flag=-Wl,--export-all-symbols"
+            else
+              FLAGS="--flag=-fPIC"
+            fi
+          fi
+          if [[ -n "$FLAGS" ]]; then
+            fpm test $FLAGS
           else
             fpm test
           fi
