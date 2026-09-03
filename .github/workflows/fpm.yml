@@ -33,7 +33,7 @@ jobs:
           - os: ubuntu-latest
             compiler: intel
             version: '2023.2'
-            shared: true\
+            shared: true
           - os: windows-latest
             compiler: gcc
             version: 'msys2'
@@ -127,6 +127,20 @@ jobs:
         uses: fortran-lang/setup-fpm@v5
         with:
           fpm-version: 'v0.10.1'
+
+      - name: Correct linalg QRUPDATE workspace declaration (Intel)
+        if: matrix.compiler == 'intel'
+        shell: bash
+        run: |
+          fpm update
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("build/dependencies/linalg/src/qrupdate/zchinx.f")
+          old = "      double complex R(ldr,*),u(*),rw(*)"
+          new = "      double complex R(ldr,*),u(*)\n      double precision rw(*)"
+          assert old in path.read_text()
+          path.write_text(path.read_text().replace(old, new))
+          PY
 
       - name: Build NONLIN
         shell: bash
