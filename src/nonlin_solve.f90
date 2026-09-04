@@ -1,5 +1,6 @@
 module nonlin_solve
     use iso_fortran_env
+    use ieee_arithmetic, only : ieee_is_nan
     use nonlin_error_handling
     use nonlin_multi_eqn_mult_var
     use nonlin_single_var
@@ -347,6 +348,15 @@ contains
                     call ls%search(fcn, xold, dx, df(1:nvar), x, fvec, fold, &
                         f, lib, args = args)
                     neval = neval + lib%fcn_count
+                    if (ieee_is_nan(f)) then
+                        ! The line search failed to locate an acceptable
+                        ! point - force a Jacobian recalculation and retry
+                        restart = .true.
+                        if (this%get_print_status()) then
+                            call print_status(iter, neval, njac, xnorm, fnorm)
+                        end if
+                        cycle
+                    end if
                 else
                     ! No line search - just update the solution estimate
                     x = x + df(1:nvar)
@@ -587,6 +597,11 @@ contains
                     call ls%search(fcn, xold, grad, dir, x, fvec, &
                         fold, f, lib, args = args)
                     neval = neval + lib%fcn_count
+                    if (ieee_is_nan(f)) then
+                        ! The line search failed to locate an acceptable point
+                        flag = 1
+                        exit
+                    end if
                 else
                     ! No line search - just update the solution estimate
                     x = x + dir

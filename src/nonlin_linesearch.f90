@@ -197,7 +197,7 @@ contains
         real(real64), parameter :: three = 3.0d0
 
         ! Local Variables
-        logical :: xcnvrg, fcnvrg
+        logical :: xcnvrg, fcnvrg, failed
         integer(int32) :: i, m, n, neval, niter, flag, maxeval
         real(real64) :: alam, alam1, alamin, f1, slope, temp, test, tmplam, &
             alpha, tolx, lambdamin, f, fo
@@ -205,6 +205,7 @@ contains
         ! Initialization
         xcnvrg = .false.
         fcnvrg = .false.
+        failed = .false.
         neval = 0
         niter = 0
         m = fcn%get_equation_count()
@@ -251,8 +252,16 @@ contains
         ! Compute the slope parameter
         slope = dot_product(grad, dir)
         if (slope >= zero) then
-            ! ERROR: The slope should not be pointing uphill - invalid direction
-            fx = ieee_value(fx, ieee_quiet_nan)
+            ! ERROR: The slope should not be pointing uphill - invalid
+            ! direction.  Return the unchanged point so x and fvec are
+            ! well-defined for the caller.
+            x = xold
+            if (present(fold)) then
+                call fcn%fcn(x, fvec, args)
+                neval = neval + 1
+            end if
+            if (present(fx)) fx = ieee_value(fx, ieee_quiet_nan)
+            if (present(ib)) ib%fcn_count = neval
             return
         end if
 
@@ -284,7 +293,7 @@ contains
                 ! issue.
                 if (norm2(x - xold) == zero) then
                     ! The line search fully backtracked
-                    fx = ieee_value(fx, ieee_quiet_nan)
+                    failed = .true.
                 end if
                 x = xold
                 xcnvrg = .true.
@@ -324,9 +333,8 @@ contains
         end if
 
         ! Check for convergence issues
-        if (flag /= 0) then
-            fx = ieee_value(fx, ieee_quiet_nan)
-        end if
+        if (flag /= 0) failed = .true.
+        if (failed .and. present(fx)) fx = ieee_value(fx, ieee_quiet_nan)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -371,7 +379,7 @@ contains
         real(real64), parameter :: three = 3.0d0
 
         ! Local Variables
-        logical :: xcnvrg, fcnvrg
+        logical :: xcnvrg, fcnvrg, failed
         integer(int32) :: i, n, neval, niter, flag, maxeval
         real(real64) :: alam, alam1, alamin, f1, slope, temp, test, tmplam, &
             alpha, tolx, lambdamin, f, fo
@@ -379,6 +387,7 @@ contains
         ! Initialization
         xcnvrg = .false.
         fcnvrg = .false.
+        failed = .false.
         neval = 0
         niter = 0
         n = fcn%get_variable_count()
@@ -421,8 +430,11 @@ contains
         ! Compute the slope parameter
         slope = dot_product(grad, dir)
         if (slope >= zero) then
-            ! ERROR: The slope should not be pointing uphill - invalid direction
-            fx = ieee_value(fx, ieee_quiet_nan)
+            ! ERROR: The slope should not be pointing uphill - invalid
+            ! direction.  Return the unchanged point so x is well-defined
+            ! for the caller.
+            x = xold
+            if (present(fx)) fx = ieee_value(fx, ieee_quiet_nan)
             return
         end if
 
@@ -453,8 +465,7 @@ contains
                 ! issue.
                 if (norm2(x - xold) == zero) then
                     ! The line search fully backtracked
-                    fx = ieee_value(fx, ieee_quiet_nan)
-                    return
+                    failed = .true.
                 end if
                 x = xold
                 xcnvrg = .true.
@@ -494,9 +505,8 @@ contains
         end if
 
         ! Check for convergence issues
-        if (flag /= 0) then
-            fx = ieee_value(fx, ieee_quiet_nan)
-        end if
+        if (flag /= 0) failed = .true.
+        if (failed .and. present(fx)) fx = ieee_value(fx, ieee_quiet_nan)
     end subroutine
 
 ! ------------------------------------------------------------------------------

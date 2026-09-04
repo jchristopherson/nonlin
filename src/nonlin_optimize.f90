@@ -8,6 +8,7 @@
 
 module nonlin_optimize
     use iso_fortran_env
+    use ieee_arithmetic, only : ieee_is_nan
     use nonlin_linesearch
     use nonlin_error_handling
     use nonlin_multi_var
@@ -666,6 +667,11 @@ contains
                         args = args)
                     neval = neval + lib%fcn_count
                     fp = fret
+                    if (ieee_is_nan(fp)) then
+                        ! The line search failed to locate an acceptable point
+                        flag = 1
+                        exit
+                    end if
                 else
                     xnew = x + dx
                     fp = fcn%fcn(xnew, args)
