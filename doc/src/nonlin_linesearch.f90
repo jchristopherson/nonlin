@@ -7,6 +7,7 @@ module nonlin_linesearch
     use nonlin_types
     use nonlin_multi_eqn_mult_var
     use nonlin_multi_var
+    use ieee_arithmetic, only : ieee_value, ieee_quiet_nan
     implicit none
     private
     public :: line_search
@@ -179,7 +180,9 @@ contains
             !! relationship is computed. 
         real(real64), intent(out), optional :: fx
             !! The result of the operation: \( \frac{1}{2} \vec{f} \cdot 
-            !! \vec{f} \).
+            !! \vec{f} \).  If the iteration process does not converge, a
+            !! NaN value is returned.  The results given in ib, if supplied,
+            !! will also denote failure to converge.
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to
             !! obtain iteration performance statistics.
@@ -194,7 +197,7 @@ contains
         real(real64), parameter :: three = 3.0d0
 
         ! Local Variables
-        logical :: xcnvrg, fcnvrg
+        logical :: xcnvrg, fcnvrg, failed
         integer(int32) :: i, m, n, neval, niter, flag, maxeval
         real(real64) :: alam, alam1, alamin, f1, slope, temp, test, tmplam, &
             alpha, tolx, lambdamin, f, fo
@@ -202,6 +205,7 @@ contains
         ! Initialization
         xcnvrg = .false.
         fcnvrg = .false.
+        failed = .false.
         neval = 0
         niter = 0
         m = fcn%get_equation_count()
@@ -248,8 +252,17 @@ contains
         ! Compute the slope parameter
         slope = dot_product(grad, dir)
         if (slope >= zero) then
-            ! ERROR: The slope should not be pointing uphill - invalid direction
-            error stop NL_DIVERGENT_BEHAVIOR_ERROR
+            ! ERROR: The slope should not be pointing uphill - invalid
+            ! direction.  Return the unchanged point so x and fvec are
+            ! well-defined for the caller.
+            x = xold
+            if (present(fold)) then
+                call fcn%fcn(x, fvec, args)
+                neval = neval + 1
+            end if
+            if (present(fx)) fx = ieee_value(fx, ieee_quiet_nan)
+            if (present(ib)) ib%fcn_count = neval
+            return
         end if
 
         ! Compute the minimum lambda value (length along the search direction)
@@ -280,7 +293,7 @@ contains
                 ! issue.
                 if (norm2(x - xold) == zero) then
                     ! The line search fully backtracked
-                    error stop NL_CONVERGENCE_ERROR
+                    failed = .true.
                 end if
                 x = xold
                 xcnvrg = .true.
@@ -320,9 +333,8 @@ contains
         end if
 
         ! Check for convergence issues
-        if (flag /= 0) then
-            error stop NL_CONVERGENCE_ERROR
-        end if
+        if (flag /= 0) failed = .true.
+        if (failed .and. present(fx)) fx = ieee_value(fx, ieee_quiet_nan)
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -350,7 +362,9 @@ contains
             !! An optional input that provides the function value at xold.  If 
             !! not provided, fcn is evalauted at xold.
         real(real64), intent(out), optional :: fx
-            !! The value of the function as evaluated at x.
+            !! The value of the function as evaluated at x. If the iteration 
+            !! process does not converge, a NaN value is returned.  The results 
+            !! given in ib, if supplied, will also denote failure to converge.
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to
             !! obtain iteration performance statistics.
@@ -365,7 +379,7 @@ contains
         real(real64), parameter :: three = 3.0d0
 
         ! Local Variables
-        logical :: xcnvrg, fcnvrg
+        logical :: xcnvrg, fcnvrg, failed
         integer(int32) :: i, n, neval, niter, flag, maxeval
         real(real64) :: alam, alam1, alamin, f1, slope, temp, test, tmplam, &
             alpha, tolx, lambdamin, f, fo
@@ -373,6 +387,7 @@ contains
         ! Initialization
         xcnvrg = .false.
         fcnvrg = .false.
+        failed = .false.
         neval = 0
         niter = 0
         n = fcn%get_variable_count()
@@ -415,8 +430,12 @@ contains
         ! Compute the slope parameter
         slope = dot_product(grad, dir)
         if (slope >= zero) then
-            ! ERROR: The slope should not be pointing uphill - invalid direction
-            error stop NL_DIVERGENT_BEHAVIOR_ERROR
+            ! ERROR: The slope should not be pointing uphill - invalid
+            ! direction.  Return the unchanged point so x is well-defined
+            ! for the caller.
+            x = xold
+            if (present(fx)) fx = ieee_value(fx, ieee_quiet_nan)
+            return
         end if
 
         ! Compute the minimum lambda value (length along the search direction)
@@ -446,7 +465,7 @@ contains
                 ! issue.
                 if (norm2(x - xold) == zero) then
                     ! The line search fully backtracked
-                    error stop NL_CONVERGENCE_ERROR
+                    failed = .true.
                 end if
                 x = xold
                 xcnvrg = .true.
@@ -486,9 +505,8 @@ contains
         end if
 
         ! Check for convergence issues
-        if (flag /= 0) then
-            error stop NL_CONVERGENCE_ERROR
-        end if
+        if (flag /= 0) failed = .true.
+        if (failed .and. present(fx)) fx = ieee_value(fx, ieee_quiet_nan)
     end subroutine
 
 ! ------------------------------------------------------------------------------

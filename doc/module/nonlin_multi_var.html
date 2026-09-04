@@ -12,29 +12,14 @@
 
     <title>nonlin_multi_var &ndash; NONLIN</title>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <!-- Font Awesome -->
-    <link href="../css/fontawesome.min.css" rel="stylesheet">
-    <link href="../css/brands.min.css" rel="stylesheet">
-    <link href="../css/regular.min.css" rel="stylesheet">
-    <link href="../css/solid.min.css" rel="stylesheet">
-    <link href="../css/v4-font-face.min.css" rel="stylesheet">
-    <link href="../css/v4-shims.min.css" rel="stylesheet">
-    <!-- MathJax -->
-    <script type="text/x-mathjax-config">
-      MathJax.Hub.Config({
-        TeX: { equationNumbers: { autoNumber: "AMS" } }
-      });
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async
-            integrity="sha256-DViIOMYdwlM/axqoGDPeUyf0urLoHMN4QACBKyB58Uw=" crossorigin="anonymous"></script>
-    <!-- Other scripts and stylesheets -->
-    <link href="../css/local.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+      <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="../js/svg-pan-zoom.min.js"></script>
   </head>
 
@@ -87,7 +72,8 @@
         <ul class="list-inline" style="margin-bottom:0px;display:inline">
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
-              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+              <a data-bs-toggle="tooltip"
+                 data-bs-placement="bottom" data-html="true"
                  title=" 5.0% of total for modules and submodules.">173 statements</a>
             </li>
 
@@ -108,11 +94,9 @@
     </div>
   </div>
   <script>
-    // Enable Bootstrap tooltips
-    (function () {
-      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-    })();
+    $(function () {
+    $('[data-bs-toggle="tooltip"]').tooltip()
+    })
   </script>
 
   </div>
@@ -180,9 +164,9 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
-                  <li class="list-inline-item"><a href='nonlin_error_handling.html'>nonlin_error_handling</a></li>
                   <li class="list-inline-item"><a href='nonlin_types.html'>nonlin_types</a></li>
                   <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_fortran_env'>iso_fortran_env</a></li>
+                  <li class="list-inline-item"><a href='nonlin_error_handling.html'>nonlin_error_handling</a></li>
               </ul>
             </li>
         </ul>
@@ -224,7 +208,7 @@
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-x~2"></span>
+              <span class="anchor" id="variable-x~73"></span>
               real(kind=real64),
             </td>
 <td>intent(in),</td>
@@ -239,7 +223,7 @@
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-args"></span>
+              <span class="anchor" id="variable-args~21"></span>
               class(*),
             </td>
 <td>intent(inout),</td>
@@ -294,7 +278,7 @@ of an equation of N variables.</p>
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-x~3"></span>
+              <span class="anchor" id="variable-x~74"></span>
               real(kind=real64),
             </td>
 <td>intent(in),</td>
@@ -309,7 +293,7 @@ of an equation of N variables.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-g~2"></span>
+              <span class="anchor" id="variable-g~5"></span>
               real(kind=real64),
             </td>
 <td>intent(out),</td>
@@ -325,7 +309,7 @@ written as output.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-args~2"></span>
+              <span class="anchor" id="variable-args~22"></span>
               class(*),
             </td>
 <td>intent(inout),</td>
@@ -375,7 +359,7 @@ equation of N variables.</p>
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-this"></span>
+              <span class="anchor" id="variable-this~85"></span>
               class(<a href='..\type\equation_optimizer.html'>equation_optimizer</a>),
             </td>
 <td>intent(inout)</td>
@@ -390,7 +374,7 @@ equation of N variables.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-fcn~2"></span>
+              <span class="anchor" id="variable-fcn~19"></span>
               class(<a href='..\type\fcnnvar_helper.html'>fcnnvar_helper</a>),
             </td>
 <td>intent(in)</td>
@@ -406,7 +390,7 @@ optimize.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-x~4"></span>
+              <span class="anchor" id="variable-x~75"></span>
               real(kind=real64),
             </td>
 <td>intent(inout),</td>
@@ -422,7 +406,7 @@ output, the updated optimal point estimate.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-fout"></span>
+              <span class="anchor" id="variable-fout~3"></span>
               real(kind=real64),
             </td>
 <td>intent(out),</td>
@@ -438,7 +422,7 @@ the function at x.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-ib"></span>
+              <span class="anchor" id="variable-ib~13"></span>
               type(<a href='..\type\iteration_behavior.html'>iteration_behavior</a>),
             </td>
 <td></td>
@@ -454,7 +438,7 @@ obtain iteration performance statistics.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-args~3"></span>
+              <span class="anchor" id="variable-args~23"></span>
               class(*),
             </td>
 <td>intent(inout),</td>
@@ -486,7 +470,7 @@ the routine.</p>
     <div class="card-header codesum">
       <span class="anchor" id="type-equation_optimizer"></span>
       <h3>
-        type, public, abstract&nbsp;::&nbsp;
+        type, public&nbsp;::&nbsp;
         <a href='..\type\equation_optimizer.html'>equation_optimizer</a>
         
       </h3>
@@ -502,38 +486,38 @@ the routine.</p>
           <tbody>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-get_max_fcn_evals'>get_max_fcn_evals</a></strong> => oe_get_max_eval</td>
-                  <td></td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-get_max_fcn_evals~4'>get_max_fcn_evals</a></strong> => oe_get_max_eval</td>
+                <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-get_print_status'>get_print_status</a></strong> => oe_get_print_status</td>
-                  <td></td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-get_print_status~3'>get_print_status</a></strong> => oe_get_print_status</td>
+                <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_optimizer.html#boundprocedure-get_tolerance'>get_tolerance</a></strong> => oe_get_tol</td>
-                  <td></td>
+                <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-set_max_fcn_evals'>set_max_fcn_evals</a></strong> => oe_set_max_eval</td>
-                  <td></td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-set_max_fcn_evals~4'>set_max_fcn_evals</a></strong> => oe_set_max_eval</td>
+                <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-set_print_status'>set_print_status</a></strong> => oe_set_print_status</td>
-                  <td></td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-set_print_status~3'>set_print_status</a></strong> => oe_set_print_status</td>
+                <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\equation_optimizer.html#boundprocedure-set_tolerance'>set_tolerance</a></strong> => oe_set_tol</td>
-                  <td></td>
+                <td></td>
               </tr>
               <tr>
                 <td>  procedure(<a href='..\interface\nonlin_optimize_fcn.html'>nonlin_optimize_fcn</a>), public, deferred, pass ::
-  <strong><a href='..\type\equation_optimizer.html#boundprocedure-solve'>solve</a></strong></td>
-                  <td></td>
+  <strong><a href='..\type\equation_optimizer.html#boundprocedure-solve~11'>solve</a></strong></td>
+                <td></td>
               </tr>
           </tbody>
         </table>
@@ -560,38 +544,38 @@ the routine.</p>
           <tbody>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\fcnnvar_helper.html#boundprocedure-fcn'>fcn</a></strong> => fnh_fcn</td>
-                  <td></td>
+  <strong><a href='..\type\fcnnvar_helper.html#boundprocedure-fcn~18'>fcn</a></strong> => fnh_fcn</td>
+                <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\fcnnvar_helper.html#boundprocedure-get_variable_count'>get_variable_count</a></strong> => fnh_get_nvar</td>
-                  <td></td>
+  <strong><a href='..\type\fcnnvar_helper.html#boundprocedure-get_variable_count~2'>get_variable_count</a></strong> => fnh_get_nvar</td>
+                <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\fcnnvar_helper.html#boundprocedure-gradient'>gradient</a></strong> => fnh_grad_fcn</td>
-                  <td></td>
+                <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\fcnnvar_helper.html#boundprocedure-is_fcn_defined'>is_fcn_defined</a></strong> => fnh_is_fcn_defined</td>
-                  <td></td>
+  <strong><a href='..\type\fcnnvar_helper.html#boundprocedure-is_fcn_defined~3'>is_fcn_defined</a></strong> => fnh_is_fcn_defined</td>
+                <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\fcnnvar_helper.html#boundprocedure-is_gradient_defined'>is_gradient_defined</a></strong> => fnh_is_grad_defined</td>
-                  <td></td>
+                <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
-  <strong><a href='..\type\fcnnvar_helper.html#boundprocedure-set_fcn'>set_fcn</a></strong> => fnh_set_fcn</td>
-                  <td></td>
+  <strong><a href='..\type\fcnnvar_helper.html#boundprocedure-set_fcn~3'>set_fcn</a></strong> => fnh_set_fcn</td>
+                <td></td>
               </tr>
               <tr>
                 <td>  procedure, public ::
   <strong><a href='..\type\fcnnvar_helper.html#boundprocedure-set_gradient_fcn'>set_gradient_fcn</a></strong> => fnh_set_grad</td>
-                  <td></td>
+                <td></td>
               </tr>
           </tbody>
         </table>
@@ -613,21 +597,40 @@ the routine.</p>
     <footer>
       <div class="container">
         <div class="row justify-content-between">
-          <div class="col">
-            <p>
-              NONLIN
- was developed by Jason Christopherson<br>              &copy; 2026 
+          <div class="col"><p>NONLIN was developed by Jason Christopherson<br>&copy; 2026 
 </p>
           </div>
           <div class="col">
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-08-11 10:14 -0500             </p>
+ on 2026-09-03 20:38              </p>
           </div>
         </div>
         <br>
       </div> <!-- /container -->
     </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>    
+
+    <!-- MathJax JavaScript
+             ================================================== -->
+             <!-- Placed at the end of the document so the pages load faster -->
+        <script type="text/x-mathjax-config">
+          MathJax.Hub.Config({
+          TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+          jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+          extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+          });
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+          <script src="../tipuesearch/tipuesearch_content.js"></script>
+          <script src="../tipuesearch/tipuesearch_set.js"></script>
+          <script src="../tipuesearch/tipuesearch.js"></script>
+
   </body>
 </html>

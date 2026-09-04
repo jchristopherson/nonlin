@@ -12,29 +12,14 @@
 
     <title>constrained_equation_solver &ndash; NONLIN </title>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <!-- Font Awesome -->
-    <link href="../css/fontawesome.min.css" rel="stylesheet">
-    <link href="../css/brands.min.css" rel="stylesheet">
-    <link href="../css/regular.min.css" rel="stylesheet">
-    <link href="../css/solid.min.css" rel="stylesheet">
-    <link href="../css/v4-font-face.min.css" rel="stylesheet">
-    <link href="../css/v4-shims.min.css" rel="stylesheet">
-    <!-- MathJax -->
-    <script type="text/x-mathjax-config">
-      MathJax.Hub.Config({
-        TeX: { equationNumbers: { autoNumber: "AMS" } }
-      });
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async
-            integrity="sha256-DViIOMYdwlM/axqoGDPeUyf0urLoHMN4QACBKyB58Uw=" crossorigin="anonymous"></script>
-    <!-- Other scripts and stylesheets -->
-    <link href="../css/local.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+      <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="../js/svg-pan-zoom.min.js"></script>
   </head>
 
@@ -87,8 +72,9 @@
         <ul class="list-inline" style="margin-bottom:0px;display:inline">
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
-              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
-                 title="<p> 4.4% of total for derived types.</p>Including implementation: 313 statements,  9.4% of total for derived types.">10 statements</a>
+              <a data-bs-toggle="tooltip"
+                 data-bs-placement="bottom" data-html="true"
+                 title="<p> 4.4% of total for derived types.</p>Including implementation: 313 statements,  9.3% of total for derived types.">10 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -109,11 +95,9 @@
     </div>
   </div>
   <script>
-    // Enable Bootstrap tooltips
-    (function () {
-      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-    })();
+    $(function () {
+    $('[data-bs-toggle="tooltip"]').tooltip()
+    })
   </script>
 
   </div>
@@ -151,7 +135,7 @@
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_gradient_tolerance">get_gradient_tolerance</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_lower_limits">get_lower_limits</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_max_fcn_evals~3">get_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_print_status~3">get_print_status</a>
+            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_print_status~2">get_print_status</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_step_scaling_factor">get_step_scaling_factor</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_upper_limits">get_upper_limits</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_var_tolerance~3">get_var_tolerance</a>
@@ -159,11 +143,11 @@
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_gradient_tolerance">set_gradient_tolerance</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_lower_limits">set_lower_limits</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_max_fcn_evals~3">set_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_print_status~3">set_print_status</a>
+            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_print_status~2">set_print_status</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_step_scaling_factor">set_step_scaling_factor</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_upper_limits">set_upper_limits</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_var_tolerance~3">set_var_tolerance</a>
-            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-solve~3">solve</a>
+            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-solve~9">solve</a>
         </div>
       </div>
     </div>
@@ -177,8 +161,8 @@
     </div>
     
     <div class="col-md-9" id='text'>
-      <h2 id="type-def-statement">
-        type, public, abstract, extends(<a href='least_squares_solver.html'>least_squares_solver</a>) :: constrained_equation_solver</h2>
+      <h2>
+        type, public, extends(<a href='least_squares_solver.html'>least_squares_solver</a>) :: constrained_equation_solver</h2>
     <p>A least-squares solver that enforces bounds on the solution values,
 typically expressed as <script type="math/tex">x_i^L \le x_i \le x_i^U</script>.  The solver
 applies the bounds during the iteration so that each trial step
@@ -200,9 +184,9 @@ remains feasible.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  subroutine ces_apply_limits(this, x)  
 </h3>
 
@@ -254,8 +238,8 @@ vector.</p>
   </table>
 
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -269,9 +253,9 @@ vector.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private pure function es_get_fcn_tol(this) result(x)  
 </h3>
 
@@ -312,8 +296,8 @@ vector.</p>
     </h4>
     <p>The tolerance value.</p>
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -327,9 +311,9 @@ vector.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private pure function es_get_grad_tol(this) result(x)  
 </h3>
 
@@ -371,8 +355,8 @@ tolerance.</p>
     </h4>
     <p>The tolerance value.</p>
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -386,9 +370,9 @@ tolerance.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private pure function ces_get_lower_bounds(this) result(rst)  
 </h3>
 
@@ -429,8 +413,8 @@ tolerance.</p>
     </h4>
     <p>The limit array.</p>
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -444,9 +428,9 @@ tolerance.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private pure function es_get_max_eval(this) result(n)  
 </h3>
 
@@ -488,24 +472,24 @@ a single solve.</p>
     </h4>
     <p>The maximum number of function evaluations.</p>
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_print_status~3"></span>
+      <span class="anchor" id="boundprocedure-get_print_status~2"></span>
       <h3>
           procedure, public ::
   <strong>get_print_status</strong> => es_get_print_status
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private pure function es_get_print_status(this) result(x)  
 </h3>
 
@@ -547,8 +531,8 @@ printed.</p>
     </h4>
     <p>True if the iteration status should be printed; else, false.</p>
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -562,9 +546,9 @@ printed.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private pure function lss_get_factor(this) result(x)  
 </h3>
 
@@ -610,8 +594,8 @@ factor itself is used.</p>
     </h4>
     <p>The factor.</p>
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -625,9 +609,9 @@ factor itself is used.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private pure function ces_get_upper_bounds(this) result(rst)  
 </h3>
 
@@ -668,8 +652,8 @@ factor itself is used.</p>
     </h4>
     <p>The limit array.</p>
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -683,9 +667,9 @@ factor itself is used.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private pure function es_get_var_tol(this) result(x)  
 </h3>
 
@@ -726,8 +710,8 @@ factor itself is used.</p>
     </h4>
     <p>The tolerance value.</p>
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -741,9 +725,9 @@ factor itself is used.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  subroutine es_set_fcn_tol(this, x)  
 </h3>
 
@@ -794,8 +778,8 @@ factor itself is used.</p>
   </table>
 
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -809,9 +793,9 @@ factor itself is used.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  subroutine es_set_grad_tol(this, x)  
 </h3>
 
@@ -862,8 +846,8 @@ factor itself is used.</p>
   </table>
 
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -877,9 +861,9 @@ factor itself is used.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  subroutine ces_set_lower_bounds(this, x)  
 </h3>
 
@@ -930,8 +914,8 @@ factor itself is used.</p>
   </table>
 
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -945,9 +929,9 @@ factor itself is used.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  subroutine es_set_max_eval(this, n)  
 </h3>
 
@@ -999,24 +983,24 @@ a single solve.</p>
   </table>
 
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_print_status~3"></span>
+      <span class="anchor" id="boundprocedure-set_print_status~2"></span>
       <h3>
           procedure, public ::
   <strong>set_print_status</strong> => es_set_print_status
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  subroutine es_set_print_status(this, x)  
 </h3>
 
@@ -1068,8 +1052,8 @@ printed.</p>
   </table>
 
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -1083,9 +1067,9 @@ printed.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  subroutine lss_set_factor(this, x)  
 </h3>
 
@@ -1141,8 +1125,8 @@ factor itself is used.</p>
   </table>
 
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -1156,9 +1140,9 @@ factor itself is used.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  subroutine ces_set_upper_bounds(this, x)  
 </h3>
 
@@ -1209,8 +1193,8 @@ factor itself is used.</p>
   </table>
 
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -1224,9 +1208,9 @@ factor itself is used.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  subroutine es_set_var_tol(this, x)  
 </h3>
 
@@ -1277,24 +1261,24 @@ factor itself is used.</p>
   </table>
 
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-solve~3"></span>
+      <span class="anchor" id="boundprocedure-solve~9"></span>
       <h3>
           procedure, public ::
   <strong>solve</strong> => lss_solve
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  subroutine lss_solve(this, fcn, x, fvec, ib, args)  
 </h3>
 
@@ -1374,7 +1358,9 @@ N is the number of variables.</p>
             <td>
                 <p>An M-element array that, on output, will contain the values 
 of each equation as evaluated at the variable values given 
-in x.</p>
+in x.  If the iteration process does not converge, each
+element is returned as NaN, and, if supplied, ib will
+indicate a failure to converge.</p>
             </td>
         </tr>
         <tr>
@@ -1413,8 +1399,8 @@ the routine.</p>
   </table>
 
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -1429,21 +1415,40 @@ the routine.</p>
     <footer>
       <div class="container">
         <div class="row justify-content-between">
-          <div class="col">
-            <p>
-              NONLIN
- was developed by Jason Christopherson<br>              &copy; 2026 
+          <div class="col"><p>NONLIN was developed by Jason Christopherson<br>&copy; 2026 
 </p>
           </div>
           <div class="col">
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-08-11 10:14 -0500             </p>
+ on 2026-09-03 20:38              </p>
           </div>
         </div>
         <br>
       </div> <!-- /container -->
     </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>    
+
+    <!-- MathJax JavaScript
+             ================================================== -->
+             <!-- Placed at the end of the document so the pages load faster -->
+        <script type="text/x-mathjax-config">
+          MathJax.Hub.Config({
+          TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+          jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+          extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+          });
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+          <script src="../tipuesearch/tipuesearch_content.js"></script>
+          <script src="../tipuesearch/tipuesearch_set.js"></script>
+          <script src="../tipuesearch/tipuesearch.js"></script>
+
   </body>
 </html>
