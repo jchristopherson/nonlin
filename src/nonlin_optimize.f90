@@ -8,7 +8,7 @@
 
 module nonlin_optimize
     use iso_fortran_env
-    use ieee_arithmetic, only : ieee_is_nan
+    use ieee_arithmetic, only : ieee_is_nan, ieee_value, ieee_quiet_nan
     use nonlin_linesearch
     use nonlin_error_handling
     use nonlin_multi_var
@@ -135,7 +135,9 @@ contains
             !! the updated optimal point estimate.
         real(real64), intent(out), optional :: fout
             !! An optional output, that if provided, returns the value of the 
-            !! function at x.
+            !! function at x.  If the iteration process does not converge,
+            !! a NaN value is returned, and, if supplied, ib will indicate
+            !! a failure to converge.
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
@@ -336,7 +338,9 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            error stop NL_CONVERGENCE_ERROR
+            ! The solver failed to converge - signal via NaN.  The
+            ! iteration_behavior flags above already denote non-convergence.
+            if (present(fout)) fout = ieee_value(fout, ieee_quiet_nan)
         end if
     end subroutine
 
@@ -568,7 +572,9 @@ contains
             !! the updated optimal point estimate.
         real(real64), intent(out), optional :: fout
             !! An optional output, that if provided, returns the value of the 
-            !! function at x.
+            !! function at x.  If the iteration process does not converge,
+            !! a NaN value is returned, and, if supplied, ib will indicate
+            !! a failure to converge.
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
@@ -770,7 +776,9 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            error stop NL_CONVERGENCE_ERROR
+            ! The solver failed to converge - signal via NaN.  The
+            ! iteration_behavior flags above already denote non-convergence.
+            if (present(fout)) fout = ieee_value(fout, ieee_quiet_nan)
         end if
     end subroutine
 
