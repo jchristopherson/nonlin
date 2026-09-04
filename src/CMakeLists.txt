@@ -20,24 +20,7 @@ set(NONLIN_SOURCES ${NONLIN_SOURCES} PARENT_SCOPE)
 
 # Dependecies
 include(FetchContent)
-
-find_package(BLAS)
-find_package(LAPACK)
 find_package(linalg 2.0.0 QUIET)
-
-if (NOT BLAS_FOUND OR NOT LAPACK_FOUND)
-  message(STATUS "BLAS/LAPACK could not be found.  A reference version will be employed.")
-  FetchContent_Declare(
-      lapack
-      GIT_REPOSITORY "https://github.com/Reference-LAPACK/lapack"
-  )
-  FetchContent_MakeAvailable(lapack)
-  set(BLAS_LIBRARIES blas)
-  set(LAPACK_LIBRARIES lapack)
-  set(BUILD_LAPACK_BLAS TRUE)
-else()
-    set(BUILD_LAPACK_BLAS FALSE)
-endif()
 
 if (NOT linalg_FOUND)
     message(STATUS "LINALG could not be found.  A reference version will be employed.")
@@ -57,8 +40,6 @@ add_library(${PROJECT_NAME} ${NONLIN_SOURCES})
 target_link_libraries(
     ${PROJECT_NAME}
     PUBLIC
-    ${BLAS_LIBRARIES}
-    ${LAPACK_LIBRARIES}
     ${LINALG_LIBRARIES}
 )
 
