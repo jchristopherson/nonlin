@@ -7,6 +7,7 @@ module nonlin_linesearch
     use nonlin_types
     use nonlin_multi_eqn_mult_var
     use nonlin_multi_var
+    use ieee_arithmetic, only : ieee_value, ieee_quiet_nan
     implicit none
     private
     public :: line_search
@@ -179,7 +180,9 @@ contains
             !! relationship is computed. 
         real(real64), intent(out), optional :: fx
             !! The result of the operation: \( \frac{1}{2} \vec{f} \cdot 
-            !! \vec{f} \).
+            !! \vec{f} \).  If the iteration process does not converge, a
+            !! NaN value is returned.  The results given in ib, if supplied,
+            !! will also denote failure to converge.
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to
             !! obtain iteration performance statistics.
@@ -249,7 +252,8 @@ contains
         slope = dot_product(grad, dir)
         if (slope >= zero) then
             ! ERROR: The slope should not be pointing uphill - invalid direction
-            error stop NL_DIVERGENT_BEHAVIOR_ERROR
+            fx = ieee_value(fx, ieee_quiet_nan)
+            return
         end if
 
         ! Compute the minimum lambda value (length along the search direction)
@@ -280,7 +284,7 @@ contains
                 ! issue.
                 if (norm2(x - xold) == zero) then
                     ! The line search fully backtracked
-                    error stop NL_CONVERGENCE_ERROR
+                    fx = ieee_value(fx, ieee_quiet_nan)
                 end if
                 x = xold
                 xcnvrg = .true.
@@ -321,7 +325,7 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            error stop NL_CONVERGENCE_ERROR
+            fx = ieee_value(fx, ieee_quiet_nan)
         end if
     end subroutine
 
@@ -350,7 +354,9 @@ contains
             !! An optional input that provides the function value at xold.  If 
             !! not provided, fcn is evalauted at xold.
         real(real64), intent(out), optional :: fx
-            !! The value of the function as evaluated at x.
+            !! The value of the function as evaluated at x. If the iteration 
+            !! process does not converge, a NaN value is returned.  The results 
+            !! given in ib, if supplied, will also denote failure to converge.
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to
             !! obtain iteration performance statistics.
@@ -416,7 +422,8 @@ contains
         slope = dot_product(grad, dir)
         if (slope >= zero) then
             ! ERROR: The slope should not be pointing uphill - invalid direction
-            error stop NL_DIVERGENT_BEHAVIOR_ERROR
+            fx = ieee_value(fx, ieee_quiet_nan)
+            return
         end if
 
         ! Compute the minimum lambda value (length along the search direction)
@@ -446,7 +453,8 @@ contains
                 ! issue.
                 if (norm2(x - xold) == zero) then
                     ! The line search fully backtracked
-                    error stop NL_CONVERGENCE_ERROR
+                    fx = ieee_value(fx, ieee_quiet_nan)
+                    return
                 end if
                 x = xold
                 xcnvrg = .true.
@@ -487,7 +495,7 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            error stop NL_CONVERGENCE_ERROR
+            fx = ieee_value(fx, ieee_quiet_nan)
         end if
     end subroutine
 
