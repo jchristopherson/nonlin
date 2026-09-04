@@ -109,7 +109,12 @@ jobs:
           CC: ${{ steps.setup-fortran.outputs.cc }}
 
       - name: Build with CMake
-        run: cmake --build build --config ${{ env.BUILD_TYPE }}
+        shell: bash
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            export PATH="$PATH:${MSYS2_MINGW_BIN}"
+          fi
+          cmake --build build --config ${{ env.BUILD_TYPE }}
 
       - name: Test with CMake
         shell: bash
@@ -121,11 +126,20 @@ jobs:
           ctest --output-on-failure -C ${{ env.BUILD_TYPE }}
 
       - name: Install with CMake
-        run: cmake --install build --prefix ${{ github.workspace }}/install --config ${{ env.BUILD_TYPE }}
+        shell: bash
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            export PATH="$PATH:${MSYS2_MINGW_BIN}"
+          fi
+          cmake --install build --prefix ${{ github.workspace }}/install --config ${{ env.BUILD_TYPE }}
 
       - name: Verify install with CMake consumer
         shell: bash
         run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            export PATH="$PATH:${MSYS2_MINGW_BIN}"
+          fi
+
           mkdir -p consumer
           cat > consumer/CMakeLists.txt <<'EOF'
           cmake_minimum_required(VERSION 3.24)
