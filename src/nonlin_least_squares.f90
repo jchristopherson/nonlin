@@ -1,5 +1,6 @@
 module nonlin_least_squares
     use iso_fortran_env
+    use ieee_arithmetic, only : ieee_value, ieee_quiet_nan
     use nonlin_multi_eqn_mult_var
     use nonlin_error_handling
     use nonlin_types
@@ -130,7 +131,9 @@ contains
         real(real64), intent(out), dimension(:) :: fvec
             !! An M-element array that, on output, will contain the values 
             !! of each equation as evaluated at the variable values given 
-            !! in x.
+            !! in x.  If the iteration process does not converge, each
+            !! element is returned as NaN, and, if supplied, ib will
+            !! indicate a failure to converge.
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
@@ -386,7 +389,9 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            error stop NL_CONVERGENCE_ERROR
+            ! The solver failed to converge - signal via NaN.  The
+            ! iteration_behavior flags above already denote non-convergence.
+            fvec = ieee_value(fvec(1), ieee_quiet_nan)
         end if
     end subroutine
 
@@ -949,7 +954,9 @@ contains
         real(real64), intent(out), dimension(:) :: fvec
             !! An M-element array that, on output, will contain the values 
             !! of each equation as evaluated at the variable values given 
-            !! in x.
+            !! in x.  If the iteration process does not converge, each
+            !! element is returned as NaN, and, if supplied, ib will
+            !! indicate a failure to converge.
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
@@ -1171,7 +1178,9 @@ contains
 
         ! Check for convergence issues
         if (.not.converged) then
-            error stop NL_CONVERGENCE_ERROR
+            ! The solver failed to converge - signal via NaN.  The
+            ! iteration_behavior flags above already denote non-convergence.
+            fvec = ieee_value(fvec(1), ieee_quiet_nan)
         end if
     end subroutine
 

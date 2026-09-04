@@ -1,5 +1,6 @@
 module nonlin_solve
     use iso_fortran_env
+    use ieee_arithmetic, only : ieee_is_nan, ieee_value, ieee_quiet_nan
     use nonlin_error_handling
     use nonlin_multi_eqn_mult_var
     use nonlin_single_var
@@ -178,6 +179,9 @@ contains
         real(real64), intent(out), dimension(:) :: fvec
             !! An N-element array that, on output, will contain the values of 
             !! each equation as evaluated at the variable values given in x.
+            !! If the iteration process does not converge, each element is
+            !! returned as NaN, and, if supplied, ib will indicate a
+            !! failure to converge.
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
@@ -347,6 +351,15 @@ contains
                     call ls%search(fcn, xold, dx, df(1:nvar), x, fvec, fold, &
                         f, lib, args = args)
                     neval = neval + lib%fcn_count
+                    if (ieee_is_nan(f)) then
+                        ! The line search failed to locate an acceptable
+                        ! point - force a Jacobian recalculation and retry
+                        restart = .true.
+                        if (this%get_print_status()) then
+                            call print_status(iter, neval, njac, xnorm, fnorm)
+                        end if
+                        cycle
+                    end if
                 else
                     ! No line search - just update the solution estimate
                     x = x + df(1:nvar)
@@ -370,9 +383,10 @@ contains
                         ! The slope of the gradient is sufficiently close to
                         ! zero to cause issue.
                         if (restart) then
-                            ! We've already tried recalculating a new Jacobian,
-                            ! issue a warning
-                            error stop NL_SPURIOUS_CONVERGENCE_ERROR
+                            ! We've already tried recalculating a new
+                            ! Jacobian - the iteration has stalled
+                            flag = 1
+                            exit
                         else
                             ! Try computing a new Jacobian
                             restart = .true.
@@ -420,7 +434,9 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            error stop NL_CONVERGENCE_ERROR
+            ! The solver failed to converge - signal via NaN.  The
+            ! iteration_behavior flags above already denote non-convergence.
+            fvec = ieee_value(fvec(1), ieee_quiet_nan)
         end if
     end subroutine
 
@@ -463,6 +479,9 @@ contains
         real(real64), intent(out), dimension(:) :: fvec
             !! An N-element array that, on output, will contain the values of 
             !! each equation as evaluated at the variable values given in x.
+            !! If the iteration process does not converge, each element is
+            !! returned as NaN, and, if supplied, ib will indicate a
+            !! failure to converge.
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
@@ -587,6 +606,11 @@ contains
                     call ls%search(fcn, xold, grad, dir, x, fvec, &
                         fold, f, lib, args = args)
                     neval = neval + lib%fcn_count
+                    if (ieee_is_nan(f)) then
+                        ! The line search failed to locate an acceptable point
+                        flag = 1
+                        exit
+                    end if
                 else
                     ! No line search - just update the solution estimate
                     x = x + dir
@@ -603,8 +627,10 @@ contains
                     exit
                 else if (gcnvrg) then
                     ! The solution appears to have settled at a point where
-                    ! the gradient has a zero slope
-                    error stop NL_SPURIOUS_CONVERGENCE_ERROR
+                    ! the gradient has a zero slope - the iteration has
+                    ! stalled
+                    flag = 1
+                    exit
                 end if
 
                 ! Print status
@@ -633,7 +659,9 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            error stop NL_CONVERGENCE_ERROR
+            ! The solver failed to converge - signal via NaN.  The
+            ! iteration_behavior flags above already denote non-convergence.
+            fvec = ieee_value(fvec(1), ieee_quiet_nan)
         end if
     end subroutine
 
@@ -665,7 +693,9 @@ contains
             !! A [[value_pair]] object defining the search limits.
         real(real64), intent(out), optional :: f
             !! An optional parameter used to return the function residual as 
-            !! computed at x.
+            !! computed at x.  If the iteration process does not converge, a
+            !! NaN value is returned, and, if supplied, ib will indicate a
+            !! failure to converge.
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
@@ -830,7 +860,9 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            error stop NL_CONVERGENCE_ERROR
+            ! The solver failed to converge - signal via NaN.  The
+            ! iteration_behavior flags above already denote non-convergence.
+            if (present(f)) f = ieee_value(f, ieee_quiet_nan)
         end if
     end subroutine
 
@@ -851,7 +883,9 @@ contains
             !! A value_pair object defining the search limits.
         real(real64), intent(out), optional :: f
             !! An optional parameter used to return the function residual as 
-            !! computed at x.
+            !! computed at x.  If the iteration process does not converge, a
+            !! NaN value is returned, and, if supplied, ib will indicate a
+            !! failure to converge.
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
@@ -1027,7 +1061,9 @@ contains
 
         ! Check for convergence issues
         if (flag /= 0) then
-            error stop NL_CONVERGENCE_ERROR
+            ! The solver failed to converge - signal via NaN.  The
+            ! iteration_behavior flags above already denote non-convergence.
+            if (present(f)) f = ieee_value(f, ieee_quiet_nan)
         end if
     end subroutine
 

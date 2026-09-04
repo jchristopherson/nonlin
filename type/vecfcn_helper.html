@@ -12,29 +12,14 @@
 
     <title>vecfcn_helper &ndash; NONLIN </title>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <!-- Font Awesome -->
-    <link href="../css/fontawesome.min.css" rel="stylesheet">
-    <link href="../css/brands.min.css" rel="stylesheet">
-    <link href="../css/regular.min.css" rel="stylesheet">
-    <link href="../css/solid.min.css" rel="stylesheet">
-    <link href="../css/v4-font-face.min.css" rel="stylesheet">
-    <link href="../css/v4-shims.min.css" rel="stylesheet">
-    <!-- MathJax -->
-    <script type="text/x-mathjax-config">
-      MathJax.Hub.Config({
-        TeX: { equationNumbers: { autoNumber: "AMS" } }
-      });
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS-MML_HTMLorMML" async
-            integrity="sha256-DViIOMYdwlM/axqoGDPeUyf0urLoHMN4QACBKyB58Uw=" crossorigin="anonymous"></script>
-    <!-- Other scripts and stylesheets -->
-    <link href="../css/local.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+      <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <script src="../js/svg-pan-zoom.min.js"></script>
   </head>
 
@@ -87,7 +72,8 @@
         <ul class="list-inline" style="margin-bottom:0px;display:inline">
 
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
-              <a data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true"
+              <a data-bs-toggle="tooltip"
+                 data-bs-placement="bottom" data-html="true"
                  title="<p> 6.6% of total for derived types.</p>Including implementation: 108 statements,  3.2% of total for derived types.">15 statements</a>
             </li>
 
@@ -109,11 +95,9 @@
     </div>
   </div>
   <script>
-    // Enable Bootstrap tooltips
-    (function () {
-      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-    })();
+    $(function () {
+    $('[data-bs-toggle="tooltip"]').tooltip()
+    })
   </script>
 
   </div>
@@ -146,13 +130,13 @@
       </a>
       <div id="boundprocs-0" class="collapse">
         <div class="list-group list-group-flush">
-            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-fcn~17">fcn</a>
+            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-fcn~13">fcn</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-get_equation_count">get_equation_count</a>
-            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-get_variable_count~2">get_variable_count</a>
-            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-is_fcn_defined~3">is_fcn_defined</a>
+            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-get_variable_count">get_variable_count</a>
+            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-is_fcn_defined~2">is_fcn_defined</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-is_jacobian_defined">is_jacobian_defined</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-jacobian">jacobian</a>
-            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-set_fcn~3">set_fcn</a>
+            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-set_fcn~2">set_fcn</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-set_jacobian">set_jacobian</a>
         </div>
       </div>
@@ -167,7 +151,7 @@
     </div>
     
     <div class="col-md-9" id='text'>
-      <h2 id="type-def-statement">
+      <h2>
         type, public :: vecfcn_helper</h2>
     <p>Defines a type capable of encapsulating a system of nonlinear
 equations of the form: F(X) = 0.  This type is used to establish the
@@ -184,16 +168,16 @@ ancillary operations that may be needed by the solver.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-fcn~17"></span>
+      <span class="anchor" id="boundprocedure-fcn~13"></span>
       <h3>
           procedure, public ::
   <strong>fcn</strong> => vfh_fcn
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  subroutine vfh_fcn(this, x, f, args)  
 </h3>
 
@@ -278,8 +262,8 @@ the routine.</p>
   </table>
 
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -293,9 +277,9 @@ the routine.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  function vfh_get_nfcn(this) result(n)  
 </h3>
 
@@ -336,24 +320,24 @@ the routine.</p>
     </h4>
     <p>The function count.</p>
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_variable_count~2"></span>
+      <span class="anchor" id="boundprocedure-get_variable_count"></span>
       <h3>
           procedure, public ::
   <strong>get_variable_count</strong> => vfh_get_nvar
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  function vfh_get_nvar(this) result(n)  
 </h3>
 
@@ -394,24 +378,24 @@ the routine.</p>
     </h4>
     <p>The number of variables.</p>
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-is_fcn_defined~3"></span>
+      <span class="anchor" id="boundprocedure-is_fcn_defined~2"></span>
       <h3>
           procedure, public ::
   <strong>is_fcn_defined</strong> => vfh_is_fcn_defined
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  function vfh_is_fcn_defined(this) result(x)  
 </h3>
 
@@ -453,8 +437,8 @@ of equations to solve has been assigned.</p>
     </h4>
     <p>Returns true if the pointer has been assigned; else, false.</p>
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -468,9 +452,9 @@ of equations to solve has been assigned.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  function vfh_is_jac_defined(this) result(x)  
 </h3>
 
@@ -512,8 +496,8 @@ defined.</p>
     </h4>
     <p>Returns true if the pointer has been assigned; else, false.</p>
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -527,9 +511,9 @@ defined.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  subroutine vfh_jac_fcn(this, x, jac, fv, args)  
 </h3>
 
@@ -631,24 +615,24 @@ the routine.</p>
   </table>
 
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_fcn~3"></span>
+      <span class="anchor" id="boundprocedure-set_fcn~2"></span>
       <h3>
           procedure, public ::
   <strong>set_fcn</strong> => vfh_set_fcn
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  subroutine vfh_set_fcn(this, fcn, nfcn, nvar)  
 </h3>
 
@@ -730,8 +714,8 @@ equations to solve.</p>
   </table>
 
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -745,9 +729,9 @@ equations to solve.</p>
         
       </h3>
     </div>
-      <ul class="list-group">
-          <li class="list-group-item">
-                    <h3>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
     private  subroutine vfh_set_jac(this, jac)  
 </h3>
 
@@ -801,8 +785,8 @@ the default state).</p>
   </table>
 
 
-          </li>
-      </ul>
+        </li>
+    </ul>
   </div>
 
           </div>
@@ -817,21 +801,40 @@ the default state).</p>
     <footer>
       <div class="container">
         <div class="row justify-content-between">
-          <div class="col">
-            <p>
-              NONLIN
- was developed by Jason Christopherson<br>              &copy; 2026 
+          <div class="col"><p>NONLIN was developed by Jason Christopherson<br>&copy; 2026 
 </p>
           </div>
           <div class="col">
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-08-11 10:14 -0500             </p>
+ on 2026-09-03 20:38              </p>
           </div>
         </div>
         <br>
       </div> <!-- /container -->
     </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>    
+
+    <!-- MathJax JavaScript
+             ================================================== -->
+             <!-- Placed at the end of the document so the pages load faster -->
+        <script type="text/x-mathjax-config">
+          MathJax.Hub.Config({
+          TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+          jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+          extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+          });
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+          <script src="../tipuesearch/tipuesearch_content.js"></script>
+          <script src="../tipuesearch/tipuesearch_set.js"></script>
+          <script src="../tipuesearch/tipuesearch.js"></script>
+
   </body>
 </html>
