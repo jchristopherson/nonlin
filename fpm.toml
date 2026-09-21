@@ -1,6 +1,6 @@
 name = "nonlin"
 version = "2.2.1"
-license = "GPL-3.0"
+license = "MIT"
 author = "Jason Christopherson"
 maintainer = "Jason Christopherson"
 copyright = "Copyright 2017-2026, Jason Christopherson"
