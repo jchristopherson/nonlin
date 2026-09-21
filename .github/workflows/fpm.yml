@@ -64,7 +64,7 @@ jobs:
         run: |
           "$FC" --version
 
-      - name: Set up MSYS2 toolchain and BLAS/LAPACK (Windows)
+      - name: Set up MSYS2 toolchain and BLAS/LAPACK/ARPACK (Windows)
         if: runner.os == 'Windows'
         uses: msys2/setup-msys2@v2
         id: msys2
@@ -74,6 +74,7 @@ jobs:
           install: >-
             mingw-w64-x86_64-gcc-fortran
             mingw-w64-x86_64-openblas
+            mingw-w64-x86_64-arpack
 
       - name: Add MinGW64 toolchain to PATH (Windows)
         if: runner.os == 'Windows'
@@ -121,7 +122,7 @@ jobs:
         shell: bash
         run: |
           sudo apt-get update
-          sudo apt-get install -y libopenblas-dev liblapack-dev
+          sudo apt-get install -y libopenblas-dev liblapack-dev libarpack2-dev
 
       - name: Install fpm
         uses: fortran-lang/setup-fpm@v5
