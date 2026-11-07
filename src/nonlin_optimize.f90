@@ -149,7 +149,7 @@ contains
         !! - <a href="http://numerical.recipes/ target="_blank">Numerical Recipes</a>
         class(nelder_mead), intent(inout) :: this
             !! The [[nelder_mead]] object.
-        class(fcnnvar_helper), intent(in) :: fcn
+        class(fcnnvar_helper), intent(inout) :: fcn
             !! The [[fcnnvar_helper]] object containing the equation to 
             !! optimize.
         real(real64), intent(inout), dimension(:) :: x
@@ -374,7 +374,7 @@ contains
         !! estimate, the current high point is replaced with the new estimate.
         class(nelder_mead), intent(inout) :: this
             !! The [[nelder_mead]] object.
-        class(fcnnvar_helper), intent(in) :: fcn
+        class(fcnnvar_helper), intent(inout) :: fcn
             !! The function to evaluate.
         real(real64), intent(inout), dimension(:) :: y
             !! An array containing the function values at each vertex.
@@ -586,7 +586,7 @@ contains
         !! for finding a minimum value of the specified function.
         class(bfgs), intent(inout) :: this
             !! The [[bfgs]] object.
-        class(fcnnvar_helper), intent(in) :: fcn
+        class(fcnnvar_helper), intent(inout) :: fcn
             !! The [[fcnnvar_helper]] object containing the equation to 
             !! optimize.
         real(real64), intent(inout), dimension(:) :: x
