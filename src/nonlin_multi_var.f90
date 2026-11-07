@@ -154,6 +154,8 @@ contains
         else if (associated(this%m_autofcn)) then
             if (.not.this%m_workspace%validate_size(size(x), 1)) &
                 call this%m_workspace%resize(size(x), 1)
+            this%m_workspace%xd(1:size(x))%x = x
+            this%m_workspace%xd(1:size(x))%dx = 0.0d0
             f = this%m_autofcn(this%m_workspace%xd, args)
         end if
     end function

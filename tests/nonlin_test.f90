@@ -91,6 +91,9 @@ program main
     rst = test_nelder_mead_3()
     if (.not.rst) overall = .false.
 
+    rst = test_nelder_mead_ad()
+    if (.not.rst) overall = .false.
+
     rst = test_bfgs_1()
     if (.not.rst) overall = .false.
 
@@ -98,6 +101,9 @@ program main
     if (.not.rst) overall = .false.
 
     rst = test_bfgs_3()
+    if (.not.rst) overall = .false.
+
+    rst = test_bfgs_ad()
     if (.not.rst) overall = .false.
 
     rst = test_newton_3()
