@@ -43,7 +43,7 @@ contains
 ! ------------------------------------------------------------------------------
     function rosenbrock(x, args) result(f)
         real(real64), intent(in), dimension(:) :: x
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
         real(real64) :: f
         f = 1.0d2 * (x(2) - x(1)**2)**2 + (x(1) - 1.0d0)**2
     end function
@@ -51,7 +51,7 @@ contains
 ! ------------------------------------------------------------------------------
     function rosenbrock2(x, args) result(f)
         real(real64), intent(in), dimension(:) :: x
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
         real(real64) :: f, a
         select type (args)
         type is (real(real64))
@@ -63,7 +63,7 @@ contains
 ! ------------------------------------------------------------------------------
     function beale(x, args) result(f)
         real(real64), intent(in), dimension(:) :: x
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
         real(real64) :: f
         f = (1.5d0 - x(1) + x(1) * x(2))**2 + &
             (2.25d0 - x(1) + x(1) * x(2)**2)**2 + &

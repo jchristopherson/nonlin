@@ -38,7 +38,7 @@ module nonlin_multi_var
             use, intrinsic :: iso_fortran_env, only : real64
             real(real64), intent(in), dimension(:) :: x
                 !! An N-element array containing the independent variables.
-            class(*), intent(inout), optional :: args
+            class(*), intent(in), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
             real(real64) :: f
@@ -54,7 +54,7 @@ module nonlin_multi_var
             real(real64), intent(out), dimension(:) :: g
                 !! An N-element array where the gradient vector will be
                 !! written as output.
-            class(*), intent(inout), optional :: args
+            class(*), intent(in), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
         end subroutine
@@ -119,7 +119,7 @@ module nonlin_multi_var
             type(iteration_behavior), optional :: ib
                 !! An optional output, that if provided, allows the caller to 
                 !! obtain iteration performance statistics.
-            class(*), intent(inout), optional :: args
+            class(*), intent(in), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
         end subroutine
@@ -135,7 +135,7 @@ contains
         real(real64), intent(in), dimension(:) :: x
             !! The value of the independent variables at which the function
             !! should be evaluated.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with
             !! the routine.
         real(real64) :: f
@@ -214,7 +214,7 @@ contains
             !! output.
         real(real64), intent(in), optional :: fv
             !! An optional input providing the function value at x.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with
             !! the routine.
 

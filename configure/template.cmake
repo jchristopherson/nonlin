@@ -2,6 +2,7 @@
 
 include(CMakeFindDependencyMacro)
 find_dependency(linalg QUIET)
+find_dependency(autodiff QUIET)
 
 
 if(NOT TARGET "@PROJECT_NAME@::@PROJECT_NAME@")

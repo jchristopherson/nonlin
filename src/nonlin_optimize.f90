@@ -163,7 +163,7 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with fcn.
 
         ! Parameters
@@ -389,7 +389,7 @@ contains
         real(real64), intent(out), dimension(:) :: work
             !! An N-element workspace array where N is the number of dimensions
             !! of the problem.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with
             !! the routine.
         real(real64) :: ytry
@@ -600,7 +600,7 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with fcn.
 
         ! Parameters

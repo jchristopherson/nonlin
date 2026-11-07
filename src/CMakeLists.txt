@@ -20,7 +20,8 @@ set(NONLIN_SOURCES ${NONLIN_SOURCES} PARENT_SCOPE)
 
 # Dependecies
 include(FetchContent)
-find_package(linalg 2.3.0 QUIET)
+find_package(linalg 3.0.0 QUIET)
+find_package(autodiff 1.0.0 QUIET)
 
 if (NOT linalg_FOUND)
     message(STATUS "LINALG could not be found.  A reference version will be employed.")
@@ -36,11 +37,27 @@ else()
     set(BUILD_LINALG FALSE)
 endif()
 
+if (NOT autodiff_FOUND)
+    message(STATUS "AUTODIFF could not be found.  A reference version will be employed.")
+    FetchContent_Declare(
+        autodiff
+        GIT_REPOSITORY "https://github.com/jchristopherson/autodiff"
+        GIT_TAG "main"
+    )
+    FetchContent_MakeAvailable(autodiff)
+    set(AUTODIFF_LIBRARIES autodiff)
+    set(BUILD_AUTODIFF TRUE)
+else()
+    set(AUTODIFF_LIBRARIES autodiff::autodiff)
+    set(BUILD_AUTODIFF FALSE)
+endif()
+
 add_library(${PROJECT_NAME} ${NONLIN_SOURCES})
 target_link_libraries(
     ${PROJECT_NAME}
     PUBLIC
     ${LINALG_LIBRARIES}
+    ${AUTODIFF_LIBRARIES}
 )
 
 set_target_properties(
@@ -82,6 +99,13 @@ if (${BUILD_SHARED_LIBS})
         )
     endif()
 
+    if (${BUILD_AUTODIFF})
+        install(TARGETS ${AUTODIFF_LIBRARIES}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
+    endif()
+
     if (${BUILD_LAPACK_BLAS})
         install(TARGETS ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES}
             RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -91,6 +115,13 @@ if (${BUILD_SHARED_LIBS})
 else()
     if (${BUILD_LINALG})
         install(TARGETS ${LINALG_LIBRARIES}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
+    endif()
+
+    if (${BUILD_AUTODIFF})
+        install(TARGETS ${AUTODIFF_LIBRARIES}
             RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         )

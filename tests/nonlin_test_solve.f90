@@ -63,7 +63,7 @@ contains
     subroutine fcn1(x, f, args)
         real(real64), intent(in), dimension(:) :: x
         real(real64), intent(out), dimension(:) :: f
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
         f(1) = x(1)**2 + x(2)**2 - 34.0d0
         f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
     end subroutine
@@ -71,7 +71,7 @@ contains
     subroutine fcn1a(x, f, args)
         real(real64), intent(in), dimension(:) :: x
         real(real64), intent(out), dimension(:) :: f
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
         real(real64) :: a
         select type (args)
         type is (real(real64))
@@ -89,14 +89,14 @@ contains
     subroutine jac1(x, j, args)
         real(real64), intent(in), dimension(:) :: x
         real(real64), intent(out), dimension(:,:) :: j
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
         j = 2.0d0 * reshape([x(1), x(1), x(2), -2.0d0 * x(2)], [2, 2])
     end subroutine
 
     subroutine jac1a(x, j, args)
         real(real64), intent(in), dimension(:) :: x
         real(real64), intent(out), dimension(:,:) :: j
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
         real(real64) :: a
         select type (args)
         type is (real(real64))
@@ -131,7 +131,7 @@ contains
     subroutine fcn2(x, f, args)
         real(real64), intent(in), dimension(:) :: x
         real(real64), intent(out), dimension(:) :: f
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
         f(1) = x(2) - 10.0d0
         f(2) = x(1) * x(2) - 5e4
     end subroutine
@@ -156,7 +156,7 @@ contains
         ! Arguments
         real(real64), intent(in), dimension(:) :: x
         real(real64), intent(out), dimension(:) :: f
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
 
         ! Local Variables
         real(real64), dimension(21) :: xp, yp
@@ -186,14 +186,14 @@ contains
     ! f(x) = sin(x) / x, SOLUTION: x = n * pi for n = 0, 1, 2, 3, ...
     function f1var_1(x, args) result(f)
         real(real64), intent(in) :: x
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
         real(real64) :: f
         f = sin(x) / x
     end function
 
     function f1var_1a(x, args) result(f)
         real(real64), intent(in) :: x
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
         real(real64) :: f
         real(real64) :: a
         select type (args)

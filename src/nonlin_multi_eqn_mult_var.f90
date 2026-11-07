@@ -41,7 +41,7 @@ module nonlin_multi_eqn_mult_var
             real(real64), intent(out), dimension(:) :: f
                 !! An M-element array that, on output, contains the values
                 !! of the M functions.
-            class(*), intent(inout), optional :: args
+            class(*), intent(in), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
         end subroutine
@@ -54,7 +54,7 @@ module nonlin_multi_eqn_mult_var
                 !! An N-element array containing the independent variables.
             real(real64), intent(out), dimension(:,:) :: jac
                 !! An M-by-N matrix where the Jacobian will be written.
-            class(*), intent(inout), optional :: args
+            class(*), intent(in), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
         end subroutine
@@ -135,7 +135,7 @@ module nonlin_multi_eqn_mult_var
             type(iteration_behavior), optional :: ib
                 !! An optional output, that if provided, allows the caller to 
                 !! obtain iteration performance statistics.
-            class(*), intent(inout), optional :: args
+            class(*), intent(in), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
         end subroutine
@@ -208,9 +208,9 @@ contains
         real(real64), intent(out), dimension(:) :: f
             !! An M-element array that, on output, contains the values
             !! of the M functions.
-        class(*), intent(inout), optional :: args
-                !! An optional argument to allow the user to communicate with
-                !! the routine.
+        class(*), intent(in), optional :: args
+            !! An optional argument to allow the user to communicate with
+            !! the routine.
         if (this%is_fcn_defined()) then
             call this%m_fcn(x, f, args)
         end if
@@ -232,7 +232,7 @@ contains
         real(real64), intent(in), dimension(:), optional, target :: fv
             !! An optional M-element array containing the function values at x. 
             !! If not supplied, the function values are computed at x.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with
             !! the routine.
 

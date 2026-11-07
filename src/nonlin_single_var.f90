@@ -36,7 +36,7 @@ module nonlin_single_var
             use, intrinsic :: iso_fortran_env, only : real64
             real(real64), intent(in) :: x
                 !! The independent variable.
-            class(*), intent(inout), optional :: args
+            class(*), intent(in), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
             real(real64) :: f
@@ -112,7 +112,7 @@ module nonlin_single_var
             type(iteration_behavior), optional :: ib
                 !! An optional output, that if provided, allows the
                 !! caller to obtain iteration performance information.
-            class(*), intent(inout), optional :: args
+            class(*), intent(in), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
         end subroutine
@@ -129,7 +129,7 @@ contains
         real(real64), intent(in) :: x
             !! The value of the independent variable at which the function
             !! should be evaluated.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with
             !! the routine.
         real(real64) :: f
@@ -186,7 +186,7 @@ contains
             !! An optional input specifying the function value at x.  If 
             !! supplied, and the derivative is being estimated numerically, the 
             !! function will not be evaluated at x.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with
             !! the routine.
         real(real64) :: df
