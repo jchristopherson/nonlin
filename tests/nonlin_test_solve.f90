@@ -43,6 +43,7 @@ module nonlin_test_solve
     public :: test_brent_2
     public :: test_newton_1var_1
     public :: test_newton_1var_2
+    public :: test_scalar_solver_edge_cases
     public :: test_constrained_least_squares_1
     public :: test_constrained_least_squares_2
     public :: test_constrained_least_squares_3
@@ -201,6 +202,13 @@ contains
             a = args
         end select
         f = a * sin(x) / x
+    end function
+
+    function f1var_shifted(x, args) result(f)
+        real(real64), intent(in) :: x
+        class(*), intent(in), optional :: args
+        real(real64) :: f
+        f = x - 1.0d0
     end function
 
 ! ******************************************************************************
@@ -991,6 +999,64 @@ contains
 
         ! Formatting
 100     format(A, F8.5, A, F8.5)
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_scalar_solver_edge_cases() result(check)
+        type(brent_solver) :: brent
+        type(newton_1var_solver) :: newton
+        type(fcn1var_helper) :: obj
+        procedure(fcn1var), pointer :: fcn
+        type(value_pair) :: limits
+        type(iteration_behavior) :: ib
+        real(real64) :: x, f, scale
+        logical :: check
+
+        check = .true.
+        fcn => f1var_shifted
+        call obj%set_fcn(fcn)
+
+        ! Both interval endpoints should be accepted, even with reversed bounds.
+        limits%x1 = 2.0d0
+        limits%x2 = 1.0d0
+        call brent%solve(obj, x, limits, f, ib)
+        if (abs(x - 1.0d0) > 1.0d-12 .or. abs(f) > 1.0d-12 .or. &
+                .not.ib%converge_on_fcn) then
+            check = .false.
+            print *, "Test Failed: Brent solver did not accept a reversed endpoint root."
+        end if
+        call newton%solve(obj, x, limits, f, ib)
+        if (abs(x - 1.0d0) > 1.0d-12 .or. abs(f) > 1.0d-12 .or. &
+                .not.ib%converge_on_fcn) then
+            check = .false.
+            print *, "Test Failed: Newton solver did not accept a reversed endpoint root."
+        end if
+
+        ! Small residual scales must not make an interior root numerically invisible.
+        fcn => f1var_1a
+        call obj%set_fcn(fcn)
+        scale = 1.0d-20
+        limits%x1 = 1.5d0
+        limits%x2 = 5.0d0
+        call brent%set_fcn_tolerance(1.0d-30)
+        call newton%set_fcn_tolerance(1.0d-30)
+        call newton%set_diff_tolerance(1.0d-30)
+
+        call brent%solve(obj, x, limits, f, ib, args = scale)
+        if (abs(x - 3.141592653589793d0) > 1.0d-6 .or. &
+                abs(f) > 1.0d-30 .or. &
+                .not.(ib%converge_on_fcn .or. ib%converge_on_chng)) then
+            check = .false.
+            print *, "Test Failed: Brent solver was not robust to a small function scale."
+        end if
+
+        call newton%solve(obj, x, limits, f, ib, args = scale)
+        if (abs(x - 3.141592653589793d0) > 1.0d-6 .or. &
+                abs(f) > 1.0d-30 .or. &
+                .not.(ib%converge_on_fcn .or. ib%converge_on_chng)) then
+            check = .false.
+            print *, "Test Failed: Newton solver was not robust to a small function scale."
+        end if
     end function
 
 ! ------------------------------------------------------------------------------
