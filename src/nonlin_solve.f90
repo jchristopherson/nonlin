@@ -71,7 +71,7 @@ module nonlin_solve
         !! with the rank-one Jacobian correction
         !! $$ B_{k+1} = B_k + \frac{(y_k - B_k s_k)s_k^T}{s_k^T s_k} $$
         !! where \(y_k = F(x_{k+1}) - F(x_k)\). 
-        integer(int32), private :: m_jDelta = 5
+        integer, private :: m_jDelta = 5
             !! The number of iterations that may pass between Jacobian
             !! calculation.
     contains
@@ -219,7 +219,7 @@ contains
 
         ! Local Variables
         logical :: restart, xcnvrg, fcnvrg, gcnvrg, check
-        integer(int32) :: i, neqn, nvar, flag, neval, iter, &
+        integer :: i, neqn, nvar, flag, neval, iter, &
             maxeval, jcount, njac
         real(real64), allocatable, dimension(:) :: dx, df, fvold, &
             xold, s
@@ -497,7 +497,7 @@ contains
         !! recalculation of the Jacobian matrix.
         class(quasi_newton_solver), intent(in) :: this
             !! The [[quasi_newton_solver]] object.
-        integer(int32) :: n
+        integer :: n
             !! The number of iterations.
         n = this%m_jDelta
     end function
@@ -508,7 +508,7 @@ contains
         !! recalculation of the Jacobian matrix.
         class(quasi_newton_solver), intent(inout) :: this
             !! The [[quasi_newton_solver]] object.
-        integer(int32), intent(in) :: n
+        integer, intent(in) :: n
             !! The number of iterations.
         this%m_jDelta = n
     end subroutine
@@ -548,8 +548,8 @@ contains
 
         ! Local Variables
         logical :: check, xcnvrg, fcnvrg, gcnvrg
-        integer(int32) :: i, neqn, nvar, flag, neval, iter, maxeval, njac
-        integer(int32), allocatable, dimension(:) :: ipvt
+        integer :: i, neqn, nvar, flag, neval, iter, maxeval, njac
+        integer, allocatable, dimension(:) :: ipvt
         real(real64), allocatable, dimension(:) :: dir, grad, xold
         real(real64), allocatable, dimension(:,:) :: jac, lu
         real(real64) :: ftol, xtol, gtol, f, fold, stpmax, xnorm, fnorm, temp, test
@@ -780,7 +780,7 @@ contains
 
         ! Local Variables
         logical :: fcnvrg, xcnvrg
-        integer(int32) :: neval, maxeval, flag, iter
+        integer :: neval, maxeval, flag, iter
         real(real64) :: ftol, xtol, a, b, c, fa, fb, fc, p, q, r, s, xm, e, d, &
             mn1, mn2, eps, tol1, temp
 
@@ -968,7 +968,7 @@ contains
 
         ! Local Variables
         logical :: fcnvrg, xcnvrg, dcnvrg
-        integer(int32) :: neval, ndiff, maxeval, flag, iter
+        integer :: neval, ndiff, maxeval, flag, iter
         real(real64) :: ftol, xtol, dtol, xh, xl, fh, fl, x1, x2, eps, dxold, &
             dx, df, temp, ff
 

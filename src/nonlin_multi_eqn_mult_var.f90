@@ -77,9 +77,9 @@ module nonlin_multi_eqn_mult_var
         procedure(jacobianfcn), private, pointer, nopass :: m_jac => null()
             !! A pointer to the jacobian routine - null if no routine is 
             !! supplied.
-        integer(int32), private :: m_nfcn = 0
+        integer, private :: m_nfcn = 0
             !! The number of functions in m_fcn.
-        integer(int32), private :: m_nvar = 0
+        integer, private :: m_nvar = 0
             !! The number of variables in m_fcn.
         type(workspace), private :: m_workspace
             !! The AD workspace.
@@ -97,7 +97,7 @@ module nonlin_multi_eqn_mult_var
 
     type, abstract :: equation_solver
         !! A base class for various solvers of nonlinear systems of equations.
-        integer(int32), private :: m_maxEval = 100
+        integer, private :: m_maxEval = 100
             !! The maximum number of function evaluations allowed per solve.
         real(real64), private :: m_fcnTol = 1.0d-8
             !! The convergence criteria on function values.
@@ -161,9 +161,9 @@ contains
             !! The [[vecfcn_helper]] object.
         procedure(vecfcn), intent(in), pointer :: fcn
             !! The function pointer.
-        integer(int32), intent(in) :: nfcn
+        integer, intent(in) :: nfcn
             !! The number of functions.
-        integer(int32), intent(in) :: nvar
+        integer, intent(in) :: nvar
             !! The number of variables.
         this%m_fcn => fcn
         this%m_nfcn = nfcn
@@ -180,9 +180,9 @@ contains
             !! The [[vecfcn_helper]] object.
         procedure(vector_function), intent(in), pointer :: fcn
             !! The function pointer.
-        integer(int32), intent(in) :: nfcn
+        integer, intent(in) :: nfcn
             !! The number of functions.
-        integer(int32), intent(in) :: nvar
+        integer, intent(in) :: nvar
             !! The number of variables.
         this%m_autofcn => fcn
         this%m_nfcn = nfcn
@@ -276,7 +276,7 @@ contains
         real(real64), parameter :: zero = 0.0d0
 
         ! Local Variables
-        integer(int32) :: j, m, n, lwork, flag
+        integer :: j, m, n, lwork, flag
         real(real64) :: eps, epsmch, h, temp
         real(real64), pointer, dimension(:) :: fptr, f1ptr
         real(real64), allocatable, target, dimension(:) :: wrk
@@ -344,7 +344,7 @@ contains
         !! Gets the number of equations in this system.
         class(vecfcn_helper), intent(in) :: this
             !! The [[vecfcn_helper]] object.
-        integer(int32) :: n
+        integer :: n
             !! The function count.
         n = this%m_nfcn
     end function
@@ -354,7 +354,7 @@ contains
         !! Gets the number of variables in this system.
         class(vecfcn_helper), intent(in) :: this
             !! The [[vecfcn_helper]] object.
-        integer(int32) :: n
+        integer :: n
             !! The number of variables.
         n = this%m_nvar
     end function
@@ -367,7 +367,7 @@ contains
         !! a single solve.
         class(equation_solver), intent(in) :: this
             !! The [[equation_solver]] object.
-        integer(int32) :: n
+        integer :: n
             !! The maximum number of function evaluations.
         n = this%m_maxEval
     end function
@@ -378,7 +378,7 @@ contains
         !! a single solve.
         class(equation_solver), intent(inout) :: this
             !! The [[equation_solver]] object.
-        integer(int32), intent(in) :: n
+        integer, intent(in) :: n
             !! The maximum number of function evaluations.
         this%m_maxEval = n
     end subroutine

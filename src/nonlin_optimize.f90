@@ -112,9 +112,9 @@ module nonlin_optimize
 
     interface
         subroutine DSYMV(uplo, n, alpha, a, lda, x, incx, beta, y, incy)
-            use iso_fortran_env, only : int32, real64
+            use iso_fortran_env, only : real64
             character, intent(in) :: uplo
-            integer(int32), intent(in) :: n, lda, incx, incy
+            integer, intent(in) :: n, lda, incx, incy
             real(real64), intent(in) :: alpha, beta, a(lda,*), x(*)
             real(real64), intent(inout) :: y(*)
         end subroutine
@@ -174,7 +174,7 @@ contains
 
         ! Local Variables
         logical :: buildSimplex, fcnvrg
-        integer(int32) :: i, ihi, ilo, ihi2, ndim, npts, flag, neval, iter, &
+        integer :: i, ihi, ilo, ihi2, ndim, npts, flag, neval, iter, &
             maxeval
         real(real64) :: ftol, rtol, ftry, fsave, fval, swp
         real(real64), allocatable, dimension(:) :: f, pcent, pmin, work
@@ -380,11 +380,11 @@ contains
             !! An array containing the function values at each vertex.
         real(real64), intent(inout), dimension(:) :: pcent
             !! An array containing the centroid of vertex position information.
-        integer(int32), intent(in) :: ihi
+        integer, intent(in) :: ihi
             !! The index of the largest magnitude vertex.
         real(real64), intent(in) :: fac
             !! A scaling factor.
-        integer(int32), intent(inout) :: neval
+        integer, intent(inout) :: neval
             !! The number of function evaluations.
         real(real64), intent(out), dimension(:) :: work
             !! An N-element workspace array where N is the number of dimensions
@@ -399,7 +399,7 @@ contains
         real(real64), parameter :: one = 1.0d0
 
         ! Local Variables
-        integer(int32) :: i, ndim
+        integer :: i, ndim
         real(real64) :: fac1, fac2
 
         ! Initialization
@@ -433,7 +433,7 @@ contains
         real(real64), allocatable, dimension(:,:) :: p
             !! The N-by-(N+1) matrix containing the simplex.  Each vertex of 
             !! the simplex is stored as its own column of this matrix.
-        integer(int32) :: m, n
+        integer :: m, n
         if (allocated(this%m_simplex)) then
             m = size(this%m_simplex, 1)
             n = size(this%m_simplex, 2)
@@ -453,7 +453,7 @@ contains
         real(real64), dimension(:,:) :: x
             !! The simplex matrix.  Each column of the matrix must contain the
             !! coordinates of each vertex of the simplex.
-        integer(int32) :: m, n
+        integer :: m, n
         m = size(x, 1)
         n = size(x, 2)
         if (allocated(this%m_simplex)) then
@@ -612,7 +612,7 @@ contains
 
         ! Local Variables
         logical :: xcnvrg, gcnvrg
-        integer(int32) :: i, n, maxeval, neval, ngrad, flag, iter
+        integer :: i, n, maxeval, neval, ngrad, flag, iter
         real(real64) :: xtol, gtol, fp, stpmax, fret, xtest, gtest, temp, ydx
         real(real64), allocatable, dimension(:) :: g, dx, u, v, y, gold, xnew, bdx
         real(real64), allocatable, dimension(:,:) :: b, r

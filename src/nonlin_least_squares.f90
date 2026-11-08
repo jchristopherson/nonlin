@@ -175,9 +175,9 @@ contains
 
         ! Local Variables
         logical :: xcnvrg, fcnvrg, gcnvrg
-        integer(int32) :: i, neqn, nvar, flag, neval, iter, j, l, maxeval, &
+        integer :: i, neqn, nvar, flag, neval, iter, j, l, maxeval, &
             njac, lwork
-        integer(int32), allocatable, dimension(:) :: jpvt
+        integer, allocatable, dimension(:) :: jpvt
         real(real64) :: ftol, xtol, gtol, fac, eps, fnorm, par, xnorm, delta, &
             sm, temp, gnorm, pnorm, fnorm1, actred, temp1, temp2, prered, &
             dirder, ratio
@@ -444,7 +444,7 @@ contains
             !! QR factorization.  On output, the upper triangular portion is 
             !! unaltered, but the strict lower triangle contains the strict 
             !! upper triangle (transposed) of the matrix S.
-        integer(int32), intent(in), dimension(:) :: ipvt
+        integer, intent(in), dimension(:) :: ipvt
             !! An N-element array tracking the pivoting operations from the 
             !! original QR factorization.
         real(real64), intent(in), dimension(:) :: diag
@@ -619,7 +619,7 @@ contains
         logical, intent(in) :: pivot
             !! Set to true to utilize column pivoting; else, set to false for 
             !! no pivoting.
-        integer(int32), intent(out), dimension(:) :: ipvt
+        integer, intent(out), dimension(:) :: ipvt
             !! An N-element array that is used to contain the pivot indices 
             !! unless pivot is set to false.  In such event, this array is
             !! unused.
@@ -639,7 +639,7 @@ contains
         real(real64), parameter :: one = 1.0d0
 
         ! Local Variables
-        integer(int32) :: m, n, i, j, jp1, k, kmax, minmn
+        integer :: m, n, i, j, jp1, k, kmax, minmn
         real(real64) :: ajnorm, epsmch, sm, temp
 
         ! Initialization
@@ -718,7 +718,7 @@ contains
             !! factorization.  On output, the upper triangular portion is 
             !! unaltered, but the strict lower triangle contains the strict 
             !! upper triangle (transposed) of the matrix S.
-        integer(int32), intent(in), dimension(:) :: ipvt
+        integer, intent(in), dimension(:) :: ipvt
             !! An N-element array tracking the pivoting operations from the 
             !! original QR factorization.
         real(real64), intent(in), dimension(:) :: diag
@@ -741,7 +741,7 @@ contains
         real(real64), parameter :: half = 0.5d0
 
         ! Local Variables
-        integer(int32) :: n, i, j, jp1, k, kp1, l, nsing
+        integer :: n, i, j, jp1, k, kp1, l, nsing
         real(real64) :: cs, ctan, qtbpj, sn, sm, tn, temp
 
         ! Initialization
@@ -905,7 +905,7 @@ contains
             !! vector.
 
         ! Local Variables
-        integer(int32) :: i, nu, nl, n
+        integer :: i, nu, nl, n
         real(real64), allocatable, dimension(:) :: maxX, minX
 
         ! Process
@@ -1003,13 +1003,13 @@ contains
         ! Parameters
         real(real64), parameter :: delta_max = 1.0d3
         real(real64), parameter :: eta = 1.0d-1
-        integer(int32), parameter :: ls_max_iter = 10
+        integer, parameter :: ls_max_iter = 10
         real(real64), parameter :: ls_cl = 1.0d-4
         real(real64), parameter :: ls_beta = 0.5d0
 
         ! Local Variables
         logical :: converged, xcnvrg, fcnvrg, gcnvrg
-        integer(int32) :: k, neqn, nvar, neval, iter, njac, maxeval, flag
+        integer :: k, neqn, nvar, neval, iter, njac, maxeval, flag
         real(real64) :: xnorm, fnorm, gnorm, factor, fnewnorm, ftol, gtol, &
             xtol, actred, prered, rho, delta, stepscale, dderiv
         real(real64), allocatable, dimension(:) :: tau, Jp, s, g, p, xnew, &
@@ -1240,7 +1240,7 @@ contains
         real(real64) :: rst
             !! The largest possible alpha.
 
-        integer(int32) :: i, n
+        integer :: i, n
         real(real64) :: a
 
         n = size(x)
@@ -1284,7 +1284,7 @@ contains
         real(real64), parameter :: max_scale = 1.0d8
 
         ! Local Variables
-        integer(int32) :: i, n
+        integer :: i, n
         real(real64) :: di, big
 
         ! Process
@@ -1362,7 +1362,7 @@ contains
             !! The predicted reduction.
 
         ! Local Variables
-        integer(int32) :: m, n, column
+        integer :: m, n, column
         logical :: active_bound
         real(real64) :: alpha, pgnnorm, psdnorm, t, c1, c2, a, b, c, arg
         real(real64), allocatable, dimension(:) :: pgn, psd, u, v, Jg

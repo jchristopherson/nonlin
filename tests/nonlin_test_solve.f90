@@ -228,7 +228,7 @@ contains
         type(quasi_newton_solver) :: solver
         type(iteration_behavior) :: ib
         real(real64) :: x(2), f(2), ic(2, 2)
-        integer(int32) :: i
+        integer :: i
         logical :: check
 
         ! Initialization
@@ -277,7 +277,7 @@ contains
         type(quasi_newton_solver) :: solver
         type(iteration_behavior) :: ib
         real(real64) :: x(2), f(2), ic(2, 2)
-        integer(int32) :: i
+        integer :: i
         logical :: check
 
         ! Initialization
@@ -331,7 +331,7 @@ contains
         type(quasi_newton_solver) :: solver
         type(iteration_behavior) :: ib
         real(real64) :: x(2), f(2), ic(2, 2), a
-        integer(int32) :: i
+        integer :: i
         logical :: check
 
         ! Initialization
@@ -403,7 +403,7 @@ contains
         type(newton_solver) :: solver
         type(iteration_behavior) :: ib
         real(real64) :: x(2), f(2), ic(2, 2)
-        integer(int32) :: i
+        integer :: i
         logical :: check
 
         ! Initialization
@@ -452,7 +452,7 @@ contains
         type(newton_solver) :: solver
         type(iteration_behavior) :: ib
         real(real64) :: x(2), f(2), ic(2, 2)
-        integer(int32) :: i
+        integer :: i
         logical :: check
 
         ! Initialization
@@ -506,7 +506,7 @@ contains
         type(newton_solver) :: solver
         type(iteration_behavior) :: ib
         real(real64) :: x(2), f(2), ic(2, 2), a
-        integer(int32) :: i
+        integer :: i
         logical :: check
 
         ! Initialization
@@ -578,7 +578,7 @@ contains
         type(least_squares_solver) :: solver
         type(iteration_behavior) :: ib
         real(real64) :: x(2), f(2), ic(2, 2)
-        integer(int32) :: i
+        integer :: i
         logical :: check
 
         ! Initialization
@@ -627,7 +627,7 @@ contains
         type(least_squares_solver) :: solver
         type(iteration_behavior) :: ib
         real(real64) :: x(2), f(2), ic(2, 2)
-        integer(int32) :: i
+        integer :: i
         logical :: check
 
         ! Initialization
@@ -698,7 +698,7 @@ contains
         type(least_squares_solver) :: solver
         type(iteration_behavior) :: ib
         real(real64) :: x(2), f(2), ic(2, 2), a
-        integer(int32) :: i
+        integer :: i
         logical :: check
 
         ! Initialization
@@ -849,7 +849,7 @@ contains
         procedure(vecfcn), pointer :: fcn
         procedure(jacobianfcn), pointer :: jac
         real(real64), dimension(2) :: x, f, sol
-        integer(int32) :: i
+        integer :: i
         real(real64), parameter :: tol = 1.0d-5
 
         ! Initialization
@@ -894,7 +894,7 @@ contains
         procedure(vecfcn), pointer :: fcn
         procedure(jacobianfcn), pointer :: jac
         real(real64), dimension(2) :: x, f, sol
-        integer(int32) :: i
+        integer :: i
         real(real64), parameter :: tol = 1.0d-5
 
         ! Initialization
@@ -1074,7 +1074,7 @@ contains
         type(constrained_least_squares_solver) :: solver
         type(iteration_behavior) :: ib
         real(real64) :: x(2), f(2), ic(2, 2), big
-        integer(int32) :: i
+        integer :: i
         logical :: check
 
         ! Initialization
@@ -1128,7 +1128,7 @@ contains
         type(constrained_least_squares_solver) :: solver
         type(iteration_behavior) :: ib
         real(real64) :: x(2), f(2), ic(2, 2)
-        integer(int32) :: i
+        integer :: i
         logical :: check
 
         ! Initialization
@@ -1214,7 +1214,7 @@ contains
         type(constrained_least_squares_solver) :: solver
         type(iteration_behavior) :: ib
         real(real64) :: x(2), f(2), ic(2, 2), a
-        integer(int32) :: i
+        integer :: i
         logical :: check
 
         ! Initialization

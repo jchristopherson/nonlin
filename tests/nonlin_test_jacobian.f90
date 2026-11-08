@@ -119,7 +119,7 @@ contains
         procedure(jacobianfcn), pointer :: jac
         real(real64) :: numjac(2, 2), exact(2, 2), x(2)
         logical :: rst
-        integer(int32) :: i
+        integer :: i
 
         ! Parameters
         real(real64), parameter :: tol = 1.0d-4
@@ -210,7 +210,7 @@ contains
         procedure(jacobianfcn), pointer :: jac
         real(real64) :: numjac(2, 2), exact(2, 2), x(2), y
         logical :: rst
-        integer(int32) :: i
+        integer :: i
 
         ! Parameters
         real(real64), parameter :: tol = 1.0d-4

@@ -64,7 +64,7 @@ module nonlin_single_var
 
     type, abstract :: equation_solver_1var
         !! A base class for various solvers of equations of one variable.
-        integer(int32), private :: m_maxEval = 100
+        integer, private :: m_maxEval = 100
             !! The maximum number of function evaluations allowed per solve.
         real(real64), private :: m_fcnTol = 1.0d-8
             !! The convergence criteria on function value.
@@ -240,7 +240,7 @@ contains
         !! a single solve.
         class(equation_solver_1var), intent(in) :: this
             !! The [[equation_solver_1var]] object.
-        integer(int32) :: n
+        integer :: n
             !! The maximum number of function evaluations.
         n = this%m_maxEval
     end function
@@ -251,7 +251,7 @@ contains
         !! a single solve.
         class(equation_solver_1var), intent(inout) :: this
             !! The [[equation_solver_1var]] object.
-        integer(int32), intent(in) :: n
+        integer, intent(in) :: n
             !! The maximum number of function evaluations.
         this%m_maxEval = n
     end subroutine

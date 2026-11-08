@@ -35,7 +35,7 @@ contains
     ! Levenberg-Marquardt curve fitting.
     subroutine test_poly_fit()
         ! Local Variables
-        ! integer(int32) :: i
+        ! integer :: i
         real(real64), dimension(21) :: xp, yp, yf, yc, err
         real(real64) :: res
         type(polynomial) :: p
@@ -77,7 +77,7 @@ contains
         real(real64), parameter :: tol = 1.0d-6
 
         ! Local Variables
-        integer(int32) :: i
+        integer :: i
         type(polynomial) :: p
         complex(real64), allocatable, dimension(:) :: rts, sol
         logical :: check
@@ -108,12 +108,12 @@ contains
     ! Tests the polynomial addition routine
     function test_poly_add() result(check)
         ! Parameters
-        integer(int32), parameter :: order1 = 10
-        integer(int32), parameter :: order2 = 20
+        integer, parameter :: order1 = 10
+        integer, parameter :: order2 = 20
         real(real64), parameter :: tol = 1.0d-8
 
         ! Local Variables
-        integer(int32) :: i
+        integer :: i
         type(polynomial) :: p1, p2, p3
         real(real64), dimension(order1+1) :: c1
         real(real64), dimension(order2+1) :: c2
@@ -166,12 +166,12 @@ contains
     ! Tests the polynomial subtraction routine
     function test_poly_subtract() result(check)
         ! Parameters
-        integer(int32), parameter :: order1 = 10
-        integer(int32), parameter :: order2 = 20
+        integer, parameter :: order1 = 10
+        integer, parameter :: order2 = 20
         real(real64), parameter :: tol = 1.0d-8
 
         ! Local Variables
-        integer(int32) :: i
+        integer :: i
         type(polynomial) :: p1, p2, p3
         real(real64), dimension(order1+1) :: c1
         real(real64), dimension(order2+1) :: c2

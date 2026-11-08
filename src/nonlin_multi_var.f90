@@ -72,7 +72,7 @@ module nonlin_multi_var
             !! as primary, AD gradient secondary, and the fallback is FD.
         procedure(gradientfcn), private, pointer, nopass :: m_grad => null()
             !! A pointer to the gradient routine.
-        integer(int32), private :: m_nvar = 0
+        integer, private :: m_nvar = 0
             !! The number of variables in m_fcn.
         type(workspace), private :: m_workspace
             !! The AD workspace.
@@ -89,7 +89,7 @@ module nonlin_multi_var
 
     type, abstract :: equation_optimizer
         !! A base class for optimization of an equation of multiple variables.
-        integer(int32), private :: m_maxEval = 500
+        integer, private :: m_maxEval = 500
             !! The maximum number of function evaluations allowed.
         real(real64), private :: m_tol = 1.0d-12
             !! The error tolerance used to determine convergence.
@@ -176,7 +176,7 @@ contains
             !! The [[fcnnvar_helper]] object.
         procedure(fcnnvar), intent(in), pointer :: fcn
             !! The function pointer.
-        integer(int32), intent(in) :: nvar
+        integer, intent(in) :: nvar
             !! The number of variables in the function.
         this%m_fcn => fcn
         this%m_nvar = nvar
@@ -192,7 +192,7 @@ contains
             !! The [[fcnnvar_helper]] object.
         procedure(scalar_function), pointer, intent(in) :: fcn
             !! The function pointer.
-        integer(int32), intent(in) :: nvar
+        integer, intent(in) :: nvar
             !! The number of variables in the function.
         this%m_autofcn => fcn
         this%m_nvar = nvar
@@ -203,7 +203,7 @@ contains
         !! Gets the number of variables in this system.
         class(fcnnvar_helper), intent(in) :: this
             !! The [[fcnnvar_helper]] object.
-        integer(int32) :: n
+        integer :: n
             !! The number of variables.
         n = this%m_nvar
     end function
@@ -252,7 +252,7 @@ contains
         real(real64), parameter :: zero = 0.0d0
 
         ! Local Variables
-        integer(int32) :: j, n, flag
+        integer :: j, n, flag
         real(real64) :: eps, epsmch, h, temp, f, f1
 
         ! Initialization
@@ -308,7 +308,7 @@ contains
     pure function oe_get_max_eval(this) result(n)
         class(equation_optimizer), intent(in) :: this
             !! The [[equation_optimizer]] object.
-        integer(int32) :: n
+        integer :: n
             !! The maximum number of function evaluations.
         n = this%m_maxEval
     end function
@@ -317,7 +317,7 @@ contains
     subroutine oe_set_max_eval(this, n)
         class(equation_optimizer), intent(inout) :: this
             !! The [[equation_optimizer]] object.
-        integer(int32), intent(in) :: n
+        integer, intent(in) :: n
             !! The maximum number of function evaluations.
         this%m_maxEval = n
     end subroutine
