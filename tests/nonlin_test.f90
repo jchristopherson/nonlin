@@ -32,9 +32,16 @@ program main
 
     ! Local Variables
     logical :: rst, overall
+    character(32) :: test_name
 
     ! Initialization
     overall = .true.
+    call get_command_argument(1, test_name)
+    if (test_name == "jacobian_threads") then
+        rst = test_jacobian_threads()
+        if (.not.rst) stop -1
+        stop
+    end if
 
     ! Tests
     rst = test_jacobian_1()

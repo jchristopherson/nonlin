@@ -38,6 +38,15 @@ add_test(
     COMMAND $<TARGET_FILE:nonlin_test>
 )
 set_tests_properties(nonlin_test PROPERTIES TIMEOUT 30)
+add_test(
+    NAME nonlin_jacobian_threads
+    WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+    COMMAND $<TARGET_FILE:nonlin_test> jacobian_threads
+)
+set_tests_properties(nonlin_jacobian_threads PROPERTIES
+    TIMEOUT 30
+    ENVIRONMENT "OMP_DYNAMIC=FALSE;OMP_THREAD_LIMIT=8"
+)
 
 if (${BUILD_SHARED_LIBS} AND WIN32)
     add_custom_command(

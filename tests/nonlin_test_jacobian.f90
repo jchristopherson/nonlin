@@ -29,12 +29,16 @@ module nonlin_test_jacobian
     use fortran_test_helper
     use autodiff, only : dual, vector_function, assignment(=), &
         operator(+), operator(-), operator(*), operator(**)
+    use omp_lib, only : omp_get_thread_num, omp_get_num_threads, &
+        omp_get_dynamic, omp_set_dynamic
     implicit none
     private
     public :: test_jacobian_1
     public :: test_jacobian_2
     public :: test_vecfcn_ad
+    public :: test_jacobian_threads
     integer :: ad_calls = 0, user_jac_calls = 0
+    integer, dimension(8) :: thread_calls = 0, thread_teams = 0
 
 contains
 ! ******************************************************************************
@@ -395,5 +399,174 @@ contains
         call obj%set_fcn(real_fcn, 2, 2)
         rst = .not.obj%is_fcn_defined() .and. rst
         if (.not.rst) print *, "Test Failed: vecfcn_helper AD handling"
+    end function
+    subroutine record_jacobian_thread()
+        integer :: worker
+        worker = omp_get_thread_num() + 1
+!$omp atomic update
+        thread_calls(worker) = thread_calls(worker) + 1
+        thread_teams(worker) = omp_get_num_threads()
+    end subroutine
+
+    subroutine threaded_real_vector(x, f, args)
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(out), dimension(:) :: f
+        class(*), intent(in), optional :: args
+        real(real64) :: scale, weight
+        integer :: row, column, next
+        scale = 1.0d0
+        if (present(args)) then
+            select type (args)
+            type is (real(real64))
+                scale = args
+            end select
+        end if
+        call record_jacobian_thread()
+        do row = 1, size(f)
+            f(row) = scale
+            do column = 1, size(x)
+                next = mod(column, size(x)) + 1
+                weight = real(row + column, real64) / real(size(x) + size(f), real64)
+                f(row) = f(row) + scale * (weight * x(column)**2 + x(column) * x(next))
+            end do
+        end do
+    end subroutine
+
+    subroutine threaded_ad_vector(x, f, args)
+        type(dual), intent(in), dimension(:) :: x
+        type(dual), intent(out), dimension(:) :: f
+        class(*), intent(in), optional :: args
+        real(real64) :: scale, weight
+        integer :: row, column, next
+        scale = 1.0d0
+        if (present(args)) then
+            select type (args)
+            type is (real(real64))
+                scale = args
+            end select
+        end if
+        call record_jacobian_thread()
+        do row = 1, size(f)
+            f(row) = scale
+            do column = 1, size(x)
+                next = mod(column, size(x)) + 1
+                weight = real(row + column, real64) / real(size(x) + size(f), real64)
+                f(row) = f(row) + scale * (weight * x(column)**2 + x(column) * x(next))
+            end do
+        end do
+    end subroutine
+
+    subroutine threaded_exact_jacobian(x, jac, args)
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(out), dimension(:,:) :: jac
+        class(*), intent(in), optional :: args
+        real(real64) :: scale, weight
+        integer :: row, column, next
+        scale = 1.0d0
+        if (present(args)) then
+            select type (args)
+            type is (real(real64))
+                scale = args
+            end select
+        end if
+        jac = 0.0d0
+        do row = 1, size(jac, 1)
+            do column = 1, size(x)
+                next = mod(column, size(x)) + 1
+                weight = real(row + column, real64) / real(size(x) + size(jac, 1), real64)
+                jac(row,column) = jac(row,column) + scale * (2.0d0 * weight * x(column) + x(next))
+                jac(row,next) = jac(row,next) + scale * x(column)
+            end do
+        end do
+    end subroutine
+
+    function test_jacobian_threads() result(rst)
+        type(vecfcn_helper) :: obj
+        procedure(vecfcn), pointer :: real_fcn
+        procedure(vector_function), pointer :: auto_fcn
+        procedure(jacobianfcn), pointer :: user_jac
+        integer, parameter, dimension(6) :: threads = [1, 2, 4, 8, 2, 1]
+        integer, parameter, dimension(4) :: rows = [9, 3, 1, 5], columns = [6, 2, 1, 9]
+        real(real64), allocatable, dimension(:) :: x, saved_x, values
+        real(real64), allocatable, dimension(:,:) :: actual, exact, serial
+        real(real64), dimension(2) :: max_error
+        real(real64) :: tolerance, scale
+        integer :: mode, shape, setting, repetition, column, expected_calls, workers
+        logical :: rst, good, saved_dynamic
+
+        rst = .true.
+        max_error = 0.0d0
+        saved_dynamic = omp_get_dynamic()
+        call omp_set_dynamic(.false.)
+        real_fcn => threaded_real_vector
+        user_jac => threaded_exact_jacobian
+        call obj%set_thread_count(0)
+        rst = obj%get_thread_count() == 1 .and. rst
+        call obj%set_thread_count(-2)
+        rst = obj%get_thread_count() == 1 .and. rst
+        do mode = 1, 2
+            nullify(auto_fcn)
+            if (mode == 1) auto_fcn => threaded_ad_vector
+            do shape = 1, size(rows)
+                allocate(x(columns(shape)), saved_x(columns(shape)), values(rows(shape)), &
+                    actual(rows(shape),columns(shape)), exact(rows(shape),columns(shape)), &
+                    serial(rows(shape),columns(shape)))
+                call obj%set_fcn(real_fcn, rows(shape), columns(shape))
+                call obj%set_auto_fcn(auto_fcn, rows(shape), columns(shape))
+                do repetition = 1, 10
+                    scale = 0.5d0 + 0.1d0 * real(repetition, real64)
+                    do column = 1, size(x)
+                        x(column) = real(column - 2, real64) / real(repetition, real64)
+                    end do
+                    saved_x = x
+                    call threaded_exact_jacobian(x, exact, args = scale)
+                    call obj%fcn(x, values, args = scale)
+                    call obj%set_thread_count(1)
+                    call obj%jacobian(x, serial, fv = values, args = scale)
+                    tolerance = 1.0d-12
+                    if (mode == 2) tolerance = 1.0d-5
+                    do setting = 1, size(threads)
+                        call obj%set_thread_count(threads(setting))
+                        thread_calls = 0
+                        thread_teams = 0
+                        expected_calls = size(x)
+                        if (mod(repetition, 2) == 0) then
+                            call obj%jacobian(x, actual, fv = values, args = scale)
+                        else
+                            call obj%jacobian(x, actual, args = scale)
+                            if (mode == 2) expected_calls = expected_calls + 1
+                        end if
+                        workers = min(threads(setting), size(x))
+                        max_error(mode) = max(max_error(mode), maxval(abs(actual - exact)))
+                        good = maxval(abs(actual - exact)) < tolerance
+                        good = good .and. maxval(abs(actual - serial)) < tolerance
+                        good = good .and. all(x == saved_x)
+                        good = good .and. sum(thread_calls) == expected_calls
+                        good = good .and. count(thread_calls > 0) == workers
+                        good = good .and. maxval(thread_teams) == threads(setting)
+                        if (.not.good) then
+                            print *, "Threaded Jacobian failed: mode/shape/threads/repeat", &
+                                mode, shape, threads(setting), repetition
+                            print *, "Error/calls/workers:", maxval(abs(actual - exact)), &
+                                sum(thread_calls), count(thread_calls > 0)
+                        end if
+                        rst = good .and. rst
+                    end do
+                end do
+                call obj%set_jacobian(user_jac)
+                thread_calls = 0
+                call obj%jacobian(x, actual, args = scale)
+                rst = maxval(abs(actual - exact)) < 1.0d-12 .and. sum(thread_calls) == 0 .and. rst
+                nullify(user_jac)
+                call obj%set_jacobian(user_jac)
+                user_jac => threaded_exact_jacobian
+                deallocate(x, saved_x, values, actual, exact, serial)
+            end do
+        end do
+        call omp_set_dynamic(saved_dynamic)
+        if (rst) then
+            print *, "Threaded AD and FD Jacobians passed at 1, 2, 4, and 8 threads."
+            print *, "Maximum absolute error (AD, FD):", max_error
+        end if
     end function
 end module

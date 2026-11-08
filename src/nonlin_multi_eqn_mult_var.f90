@@ -381,6 +381,7 @@ contains
 !$          tid = omp_get_thread_num() + 1
 
             ! Compute the Jacobian - each thread has it's own workspace column
+!$omp do schedule(static)
             do j = 1, n
                 temp = this%m_xjwork(j,tid)
                 h = eps * abs(temp)
@@ -390,43 +391,8 @@ contains
                 this%m_xjwork(j,tid) = temp
                 jac(:,j) = (this%m_jwork(:,tid) - this%m_fwork) / h
             end do
-!$omp do schedule(static)
-            do j = 1, n
-                temp = x(j)
-                h = eps * abs(temp)
-                if (h == zero) h = eps
-                x(j) = temp + h
-                call this%fcn(x, this%m_jwork(:,1), args = args)
-                x(j) = temp
-                jac(:,j) = (this%m_jwork(:,1) - this%m_fwork) / h
-            end do
 !$omp end do
 !$omp end parallel
-
-            ! ! Local Memory Allocation
-            ! allocate(wrk(lwork))
-            ! f1ptr => wrk(1:m)
-            ! if (present(fv)) then
-            !     fptr => fv(1:m)
-            ! else
-            !     fptr => wrk(m+1:2*m)
-            !     call this%fcn(x, fptr, args)
-            ! end if
-
-            ! ! Establish step size factors
-            ! epsmch = epsilon(epsmch)
-            ! eps = sqrt(epsmch)
-
-            ! ! Compute the derivatives via finite differences
-            ! do j = 1, n
-            !     temp = x(j)
-            !     h = eps * abs(temp)
-            !     if (h == zero) h = eps
-            !     x(j) = temp + h
-            !     call this%fcn(x, f1ptr, args)
-            !     x(j) = temp
-            !     jac(:,j) = (f1ptr - fptr) / h
-            ! end do
         end if
     end subroutine
 
@@ -465,6 +431,8 @@ contains
     subroutine vfh_set_nthreads(this, n)
         !! Sets the maximum number of threads to use when evaluating the
         !! Jacobian matrix.
+        !! With multiple threads, function callbacks must be thread-safe.
+        !! Do not evaluate the same helper concurrently from separate callers.
         class(vecfcn_helper), intent(inout) :: this
             !! The [[vecfcn_helper]] object.
         integer, intent(in) :: n
