@@ -24,6 +24,7 @@ module nonlin_multi_var
     use iso_fortran_env
     use nonlin_types
     use nonlin_error_handling
+    use autodiff
     implicit none
     private
     public :: fcnnvar
@@ -38,7 +39,7 @@ module nonlin_multi_var
             use, intrinsic :: iso_fortran_env, only : real64
             real(real64), intent(in), dimension(:) :: x
                 !! An N-element array containing the independent variables.
-            class(*), intent(inout), optional :: args
+            class(*), intent(in), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
             real(real64) :: f
@@ -54,7 +55,7 @@ module nonlin_multi_var
             real(real64), intent(out), dimension(:) :: g
                 !! An N-element array where the gradient vector will be
                 !! written as output.
-            class(*), intent(inout), optional :: args
+            class(*), intent(in), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
         end subroutine
@@ -62,17 +63,24 @@ module nonlin_multi_var
 
     type fcnnvar_helper
         !! Defines a type capable of encapsulating an equation of N variables.
-        private
         procedure(fcnnvar), private, pointer, nopass :: m_fcn => null()
             !! A pointer to the target fcnnvar routine.
+        procedure(scalar_function), private, pointer, nopass :: m_autofcn => null()
+            !! A pointer to an AD implementation of m_fcn that, if supplied, will be
+            !! used in lieu of m_fcn, and will trigger an AD calculation of the gradient
+            !! unless m_grad is supplied.  The pecking order is user-defined gradient
+            !! as primary, AD gradient secondary, and the fallback is FD.
         procedure(gradientfcn), private, pointer, nopass :: m_grad => null()
             !! A pointer to the gradient routine.
-        integer(int32), private :: m_nvar = 0
+        integer, private :: m_nvar = 0
             !! The number of variables in m_fcn.
+        type(workspace), private :: m_workspace
+            !! The AD workspace.
     contains
         procedure, public :: fcn => fnh_fcn
         procedure, public :: is_fcn_defined => fnh_is_fcn_defined
         procedure, public :: set_fcn => fnh_set_fcn
+        procedure, public :: set_auto_fcn => fnh_set_auto_fcn
         procedure, public :: get_variable_count => fnh_get_nvar
         procedure, public :: set_gradient_fcn => fnh_set_grad
         procedure, public :: is_gradient_defined => fnh_is_grad_defined
@@ -81,7 +89,7 @@ module nonlin_multi_var
 
     type, abstract :: equation_optimizer
         !! A base class for optimization of an equation of multiple variables.
-        integer(int32), private :: m_maxEval = 500
+        integer, private :: m_maxEval = 500
             !! The maximum number of function evaluations allowed.
         real(real64), private :: m_tol = 1.0d-12
             !! The error tolerance used to determine convergence.
@@ -107,7 +115,7 @@ module nonlin_multi_var
             import fcnnvar_helper
             class(equation_optimizer), intent(inout) :: this
                 !! The [[equation_optimizer]] object.
-            class(fcnnvar_helper), intent(in) :: fcn
+            class(fcnnvar_helper), intent(inout) :: fcn
                 !! The [[fcnnvar_helper]] object containing the equation to
                 !! optimize.
             real(real64), intent(inout), dimension(:) :: x
@@ -119,7 +127,7 @@ module nonlin_multi_var
             type(iteration_behavior), optional :: ib
                 !! An optional output, that if provided, allows the caller to 
                 !! obtain iteration performance statistics.
-            class(*), intent(inout), optional :: args
+            class(*), intent(in), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
         end subroutine
@@ -130,18 +138,24 @@ contains
 ! ------------------------------------------------------------------------------
     function fnh_fcn(this, x, args) result(f)
         !! Executes the routine containing the function to evaluate.
-        class(fcnnvar_helper), intent(in) :: this
+        class(fcnnvar_helper), intent(inout) :: this
             !! The [[fcnnvar_helper]] object.
         real(real64), intent(in), dimension(:) :: x
             !! The value of the independent variables at which the function
             !! should be evaluated.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with
             !! the routine.
         real(real64) :: f
             !! The value of the function.
         if (associated(this%m_fcn)) then
             f = this%m_fcn(x, args)
+        else if (associated(this%m_autofcn)) then
+            if (.not.this%m_workspace%validate_size(size(x), 1)) &
+                call this%m_workspace%resize(size(x), 1)
+            this%m_workspace%xd(1:size(x))%x = x
+            this%m_workspace%xd(1:size(x))%dx = 0.0d0
+            f = this%m_autofcn(this%m_workspace%xd, args)
         end if
     end function
 
@@ -152,7 +166,7 @@ contains
             !! The [[fcnnvar_helper]] object.
         logical :: x
             !! Returns true if the pointer has been assigned; else, false.
-        x = associated(this%m_fcn)
+        x = associated(this%m_fcn) .or. associated(this%m_autofcn)
     end function
 
 ! ------------------------------------------------------------------------------
@@ -162,9 +176,25 @@ contains
             !! The [[fcnnvar_helper]] object.
         procedure(fcnnvar), intent(in), pointer :: fcn
             !! The function pointer.
-        integer(int32), intent(in) :: nvar
+        integer, intent(in) :: nvar
             !! The number of variables in the function.
         this%m_fcn => fcn
+        this%m_nvar = nvar
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    subroutine fnh_set_auto_fcn(this, fcn, nvar)
+        !! Establishes a pointer to the AD-compatible routine containing the
+        !! function.  If utilized, this will allow for computation of the
+        !! gradient, for applicable solvers, via AD.  However, a user-defined
+        !! gradient does take precedence over an AD generated gradient.
+        class(fcnnvar_helper), intent(inout) :: this
+            !! The [[fcnnvar_helper]] object.
+        procedure(scalar_function), pointer, intent(in) :: fcn
+            !! The function pointer.
+        integer, intent(in) :: nvar
+            !! The number of variables in the function.
+        this%m_autofcn => fcn
         this%m_nvar = nvar
     end subroutine
 
@@ -173,7 +203,7 @@ contains
         !! Gets the number of variables in this system.
         class(fcnnvar_helper), intent(in) :: this
             !! The [[fcnnvar_helper]] object.
-        integer(int32) :: n
+        integer :: n
             !! The number of variables.
         n = this%m_nvar
     end function
@@ -203,7 +233,7 @@ contains
 ! ------------------------------------------------------------------------------
     subroutine fnh_grad_fcn(this, x, g, fv, args)
         !! Computes the gradient of the function.
-        class(fcnnvar_helper), intent(in) :: this
+        class(fcnnvar_helper), intent(inout) :: this
             !! The [[fcnnvar_helper]] object.
         real(real64), intent(inout), dimension(:) :: x
             !! An N-element array containing the independent variables defining 
@@ -214,7 +244,7 @@ contains
             !! output.
         real(real64), intent(in), optional :: fv
             !! An optional input providing the function value at x.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with
             !! the routine.
 
@@ -222,7 +252,7 @@ contains
         real(real64), parameter :: zero = 0.0d0
 
         ! Local Variables
-        integer(int32) :: j, n, flag
+        integer :: j, n, flag
         real(real64) :: eps, epsmch, h, temp, f, f1
 
         ! Initialization
@@ -242,6 +272,11 @@ contains
         if (this%is_gradient_defined()) then
             ! Call the user-defined gradient routine
             call this%m_grad(x, g, args)
+        else if (associated(this%m_autofcn)) then
+            ! Use an AD gradient
+            if (.not.this%m_workspace%validate_size(size(x), 1)) &
+                call this%m_workspace%resize(size(x), 1)
+            call gradient(this%m_autofcn, x, g, work = this%m_workspace, args = args)
         else
             ! Compute the gradient via finite differences
             if (present(fv)) then
@@ -273,7 +308,7 @@ contains
     pure function oe_get_max_eval(this) result(n)
         class(equation_optimizer), intent(in) :: this
             !! The [[equation_optimizer]] object.
-        integer(int32) :: n
+        integer :: n
             !! The maximum number of function evaluations.
         n = this%m_maxEval
     end function
@@ -282,7 +317,7 @@ contains
     subroutine oe_set_max_eval(this, n)
         class(equation_optimizer), intent(inout) :: this
             !! The [[equation_optimizer]] object.
-        integer(int32), intent(in) :: n
+        integer, intent(in) :: n
             !! The maximum number of function evaluations.
         this%m_maxEval = n
     end subroutine

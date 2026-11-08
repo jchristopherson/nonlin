@@ -30,13 +30,13 @@ module nonlin_types
     type iteration_behavior
         !! Defines a set of parameters that describe the behavior of the
         !! iteration process.
-        integer(int32) :: iter_count
+        integer :: iter_count
             !! Specifies the number of iterations performed.
-        integer(int32) :: fcn_count
+        integer :: fcn_count
             !! Specifies the number of function evaluations performed.
-        integer(int32) :: jacobian_count
+        integer :: jacobian_count
             !! Specifies the number of Jacobian evaluations performed.
-        integer(int32) :: gradient_count
+        integer :: gradient_count
             !! Specifies the number of gradient vector evaluations performed.
         logical :: converge_on_fcn
             !! True if the solution converged as a result of a zero-valued

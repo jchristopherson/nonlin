@@ -22,7 +22,7 @@
 !
 module nonlin_least_squares
     use iso_fortran_env
-    use ieee_arithmetic, only : ieee_value, ieee_quiet_nan
+    use ieee_arithmetic, only : ieee_is_finite, ieee_value, ieee_quiet_nan
     use nonlin_multi_eqn_mult_var
     use nonlin_error_handling
     use nonlin_types
@@ -144,7 +144,7 @@ contains
         !! routine LMDIF.
         class(least_squares_solver), intent(inout) :: this
             !! The [[least_squares_solver]] object.
-        class(vecfcn_helper), intent(in) :: fcn
+        class(vecfcn_helper), intent(inout) :: fcn
             !! The [[vecfcn_helper]] object containing the equations to solve.
         real(real64), intent(inout), dimension(:) :: x
             !! On input, an N-element array containing an initial estimate 
@@ -159,7 +159,7 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
 
@@ -175,9 +175,9 @@ contains
 
         ! Local Variables
         logical :: xcnvrg, fcnvrg, gcnvrg
-        integer(int32) :: i, neqn, nvar, flag, neval, iter, j, l, maxeval, &
+        integer :: i, neqn, nvar, flag, neval, iter, j, l, maxeval, &
             njac, lwork
-        integer(int32), allocatable, dimension(:) :: jpvt
+        integer, allocatable, dimension(:) :: jpvt
         real(real64) :: ftol, xtol, gtol, fac, eps, fnorm, par, xnorm, delta, &
             sm, temp, gnorm, pnorm, fnorm1, actred, temp1, temp2, prered, &
             dirder, ratio
@@ -235,6 +235,11 @@ contains
         ! Evaluate the function at the starting point, and calculate its norm
         call fcn%fcn(x, fvec, args)
         neval = 1
+        flag = 0
+        if (.not.all(ieee_is_finite(x)) .or. .not.all(ieee_is_finite(fvec))) then
+            flag = NL_CONVERGENCE_ERROR
+            go to 900
+        end if
         fnorm = norm2(fvec)
 
         ! Process
@@ -245,6 +250,10 @@ contains
             ! Evaluate the Jacobian
             call fcn%jacobian(x, jac, fvec, args = args)
             njac = njac + 1
+            if (.not.all(ieee_is_finite(jac))) then
+                flag = NL_CONVERGENCE_ERROR
+                exit
+            end if
 
             ! Compute the QR factorization of the Jacobian
             call lmfactor(jac, .true., jpvt, wa1, wa2, wa3)
@@ -321,6 +330,10 @@ contains
                 ! Evaluate the function at X + P, and calculate its norm
                 call fcn%fcn(wa2, wa4, args)
                 neval = neval + 1
+                if (.not.all(ieee_is_finite(wa2)) .or. .not.all(ieee_is_finite(wa4))) then
+                    flag = NL_CONVERGENCE_ERROR
+                    exit
+                end if
                 fnorm1 = norm2(wa4)
 
                 ! Compute the scaled actual reduction
@@ -399,6 +412,7 @@ contains
             end if
         end do
 
+    900     continue
         ! Report out iteration statistics
         if (present(ib)) then
             ib%iter_count = iter
@@ -430,7 +444,7 @@ contains
             !! QR factorization.  On output, the upper triangular portion is 
             !! unaltered, but the strict lower triangle contains the strict 
             !! upper triangle (transposed) of the matrix S.
-        integer(int32), intent(in), dimension(:) :: ipvt
+        integer, intent(in), dimension(:) :: ipvt
             !! An N-element array tracking the pivoting operations from the 
             !! original QR factorization.
         real(real64), intent(in), dimension(:) :: diag
@@ -605,7 +619,7 @@ contains
         logical, intent(in) :: pivot
             !! Set to true to utilize column pivoting; else, set to false for 
             !! no pivoting.
-        integer(int32), intent(out), dimension(:) :: ipvt
+        integer, intent(out), dimension(:) :: ipvt
             !! An N-element array that is used to contain the pivot indices 
             !! unless pivot is set to false.  In such event, this array is
             !! unused.
@@ -625,7 +639,7 @@ contains
         real(real64), parameter :: one = 1.0d0
 
         ! Local Variables
-        integer(int32) :: m, n, i, j, jp1, k, kmax, minmn
+        integer :: m, n, i, j, jp1, k, kmax, minmn
         real(real64) :: ajnorm, epsmch, sm, temp
 
         ! Initialization
@@ -704,7 +718,7 @@ contains
             !! factorization.  On output, the upper triangular portion is 
             !! unaltered, but the strict lower triangle contains the strict 
             !! upper triangle (transposed) of the matrix S.
-        integer(int32), intent(in), dimension(:) :: ipvt
+        integer, intent(in), dimension(:) :: ipvt
             !! An N-element array tracking the pivoting operations from the 
             !! original QR factorization.
         real(real64), intent(in), dimension(:) :: diag
@@ -727,7 +741,7 @@ contains
         real(real64), parameter :: half = 0.5d0
 
         ! Local Variables
-        integer(int32) :: n, i, j, jp1, k, kp1, l, nsing
+        integer :: n, i, j, jp1, k, kp1, l, nsing
         real(real64) :: cs, ctan, qtbpj, sn, sm, tn, temp
 
         ! Initialization
@@ -891,7 +905,7 @@ contains
             !! vector.
 
         ! Local Variables
-        integer(int32) :: i, nu, nl, n
+        integer :: i, nu, nl, n
         real(real64), allocatable, dimension(:) :: maxX, minX
 
         ! Process
@@ -967,7 +981,7 @@ contains
         !! least-squares problem.
         class(constrained_least_squares_solver), intent(inout) :: this
             !! The [[constrained_least_squares_solver]] object.
-        class(vecfcn_helper), intent(in) :: fcn
+        class(vecfcn_helper), intent(inout) :: fcn
             !! The [[vecfcn_helper]] object containing the equations to solve.
         real(real64), intent(inout), dimension(:) :: x
             !! On input, an N-element array containing an initial estimate 
@@ -982,20 +996,20 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
 
         ! Parameters
         real(real64), parameter :: delta_max = 1.0d3
         real(real64), parameter :: eta = 1.0d-1
-        integer(int32), parameter :: ls_max_iter = 10
+        integer, parameter :: ls_max_iter = 10
         real(real64), parameter :: ls_cl = 1.0d-4
         real(real64), parameter :: ls_beta = 0.5d0
 
         ! Local Variables
         logical :: converged, xcnvrg, fcnvrg, gcnvrg
-        integer(int32) :: k, neqn, nvar, neval, iter, njac, maxeval, flag
+        integer :: k, neqn, nvar, neval, iter, njac, maxeval, flag
         real(real64) :: xnorm, fnorm, gnorm, factor, fnewnorm, ftol, gtol, &
             xtol, actred, prered, rho, delta, stepscale, dderiv
         real(real64), allocatable, dimension(:) :: tau, Jp, s, g, p, xnew, &
@@ -1067,11 +1081,11 @@ contains
         call this%apply_limits(x)
         call fcn%fcn(x, fvec, args)
         neval = 1
+        if (.not. is_finite_array(x) .or. .not. is_finite_array(fvec)) then
+            go to 900
+        end if
         fnorm = norm2(fvec)
         xnorm = norm2(x)
-        if (.not. is_finite_array(x) .or. .not. is_finite_array(fvec)) then
-            return
-        end if
 
         ! Process
         delta = this%get_trust_region_radius()
@@ -1080,6 +1094,7 @@ contains
             ! Evaluate the Jacobian
             call fcn%jacobian(x, jac, fv = fvec, args = args)
             njac = njac + 1
+            if (.not.all(ieee_is_finite(jac))) exit outer
 
             ! Print iteration status
             if (this%get_print_status()) then
@@ -1095,6 +1110,7 @@ contains
             ! Determine the step direction
             call dogleg(delta, x, fvec, jac, qr, tau, s, xl, xu, p, g, Jp, &
                 prered)
+            if (.not.all(ieee_is_finite(p)) .or. .not.all(ieee_is_finite(g))) exit outer
             xnorm = scaled_norm(p, s)
             gnorm = norm2(g)
             xnew = x + p
@@ -1188,6 +1204,7 @@ contains
             if (neval >= maxeval) exit outer
         end do outer
 
+    900     continue
         ! Report out iteration statistics
         if (present(ib)) then
             ib%iter_count = iter
@@ -1223,7 +1240,7 @@ contains
         real(real64) :: rst
             !! The largest possible alpha.
 
-        integer(int32) :: i, n
+        integer :: i, n
         real(real64) :: a
 
         n = size(x)
@@ -1267,7 +1284,7 @@ contains
         real(real64), parameter :: max_scale = 1.0d8
 
         ! Local Variables
-        integer(int32) :: i, n
+        integer :: i, n
         real(real64) :: di, big
 
         ! Process
@@ -1311,21 +1328,7 @@ contains
         logical :: rst
             !! Returns true if all values are finite; else, false.
 
-        ! Local Variables
-        integer(int32) :: i
-
-        ! Process
-        rst = .true.
-        do i = 1, size(x)
-            if (.not.(x(i) == x(i))) then
-                rst = .false.
-                exit
-            end if
-            if (abs(x(i)) == huge(0.0d0)) then
-                rst = .false.
-                exit
-            end if
-        end do
+        rst = all(ieee_is_finite(x))
     end function
 
 ! ------------------------------------------------------------------------------
@@ -1359,7 +1362,8 @@ contains
             !! The predicted reduction.
 
         ! Local Variables
-        integer(int32) :: m, n
+        integer :: m, n, column
+        logical :: active_bound
         real(real64) :: alpha, pgnnorm, psdnorm, t, c1, c2, a, b, c, arg
         real(real64), allocatable, dimension(:) :: pgn, psd, u, v, Jg
 
@@ -1371,9 +1375,26 @@ contains
         ! Compute the gradient vector
         call dgemv('T', m, n, 1.0d0, jac, m, f, 1, 0.0d0, g, 1)
 
-        ! Solve the linear system for the Gauss-Newton step
-        u = solve_qr(qr, tau, f)
-        pgn = -u
+        active_bound = .false.
+        do column = 1, n
+            if ((x(column) <= xl(column) .and. g(column) > 0.0d0) .or. &
+                (x(column) >= xu(column) .and. g(column) < 0.0d0) .or. &
+                xl(column) == xu(column)) then
+                g(column) = 0.0d0
+                active_bound = .true.
+            end if
+        end do
+        if (active_bound .or. all(g == 0.0d0)) then
+            call dgemv('N', m, n, 1.0d0, jac, m, g, 1, 0.0d0, Jg, 1)
+            c1 = dot_product(g, g)
+            c2 = dot_product(Jg, Jg)
+            alpha = 0.0d0
+            if (c2 > 0.0d0) alpha = c1 / c2
+            pgn = -alpha * g
+        else
+            u = solve_qr(qr, tau, f)
+            pgn = -u
+        end if
         pgnnorm = scaled_norm(pgn, s)
 
         ! Is it enough, or do we need to try a steepest decsent step?

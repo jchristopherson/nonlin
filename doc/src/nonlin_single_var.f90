@@ -36,7 +36,7 @@ module nonlin_single_var
             use, intrinsic :: iso_fortran_env, only : real64
             real(real64), intent(in) :: x
                 !! The independent variable.
-            class(*), intent(inout), optional :: args
+            class(*), intent(in), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
             real(real64) :: f
@@ -64,7 +64,7 @@ module nonlin_single_var
 
     type, abstract :: equation_solver_1var
         !! A base class for various solvers of equations of one variable.
-        integer(int32), private :: m_maxEval = 100
+        integer, private :: m_maxEval = 100
             !! The maximum number of function evaluations allowed per solve.
         real(real64), private :: m_fcnTol = 1.0d-8
             !! The convergence criteria on function value.
@@ -112,7 +112,7 @@ module nonlin_single_var
             type(iteration_behavior), optional :: ib
                 !! An optional output, that if provided, allows the
                 !! caller to obtain iteration performance information.
-            class(*), intent(inout), optional :: args
+            class(*), intent(in), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
         end subroutine
@@ -129,7 +129,7 @@ contains
         real(real64), intent(in) :: x
             !! The value of the independent variable at which the function
             !! should be evaluated.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with
             !! the routine.
         real(real64) :: f
@@ -186,7 +186,7 @@ contains
             !! An optional input specifying the function value at x.  If 
             !! supplied, and the derivative is being estimated numerically, the 
             !! function will not be evaluated at x.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with
             !! the routine.
         real(real64) :: df
@@ -240,7 +240,7 @@ contains
         !! a single solve.
         class(equation_solver_1var), intent(in) :: this
             !! The [[equation_solver_1var]] object.
-        integer(int32) :: n
+        integer :: n
             !! The maximum number of function evaluations.
         n = this%m_maxEval
     end function
@@ -251,7 +251,7 @@ contains
         !! a single solve.
         class(equation_solver_1var), intent(inout) :: this
             !! The [[equation_solver_1var]] object.
-        integer(int32), intent(in) :: n
+        integer, intent(in) :: n
             !! The maximum number of function evaluations.
         this%m_maxEval = n
     end subroutine

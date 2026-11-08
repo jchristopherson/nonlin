@@ -24,7 +24,7 @@
 ! - https://scicomp.stackexchange.com/questions/26330/backtracking-armijo-line-search-algorithm
 ! - https://ctk.math.ncsu.edu/
 module nonlin_linesearch
-    use, intrinsic :: iso_fortran_env, only : int32, real64
+    use, intrinsic :: iso_fortran_env, only : real64
     use nonlin_error_handling
     use nonlin_types
     use nonlin_multi_eqn_mult_var
@@ -55,7 +55,7 @@ module nonlin_linesearch
         !! target="_blank">Wolfram</a>
         !!
         !! - <a href="http://numerical.recipes/" target="_blank">Numerical Recipes</a>
-        integer(int32), private :: m_maxEval = 100
+        integer, private :: m_maxEval = 100
             !! The maximum number of function evaluations allowed during a 
             !! single line search.
         real(real64), private :: m_alpha = 1.0d-4
@@ -96,7 +96,7 @@ contains
         !! single line search.
         class(line_search), intent(in) :: this
             !! The [[line_search]] object.
-        integer(int32) :: n
+        integer :: n
             !! The maximum number of function evaluations.
         n = this%m_maxEval
     end function
@@ -107,7 +107,7 @@ contains
         !! single line search.
         class(line_search), intent(inout) :: this
             !! The [[line_search]] object.
-        integer(int32), intent(in) :: x
+        integer, intent(in) :: x
             !! The maximum number of function evaluations.
         this%m_maxEval = x
     end subroutine
@@ -179,7 +179,7 @@ contains
         !! unconstrained minimization problems.
         class(line_search), intent(in) :: this
             !! The [[line_search]] object.
-        class(vecfcn_helper), intent(in) :: fcn
+        class(vecfcn_helper), intent(inout) :: fcn
             !! A [[vecfcn_helper]] object containing the system of equations.
         real(real64), intent(in), dimension(:) :: xold
             !! An N-element array defining the initial point, where N is the 
@@ -208,7 +208,7 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to
             !! obtain iteration performance statistics.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with fcn.
 
         ! Parameters
@@ -220,7 +220,7 @@ contains
 
         ! Local Variables
         logical :: xcnvrg, fcnvrg, failed
-        integer(int32) :: i, m, n, neval, niter, flag, maxeval
+        integer :: i, m, n, neval, niter, flag, maxeval
         real(real64) :: alam, alam1, alamin, f1, slope, temp, test, tmplam, &
             alpha, tolx, lambdamin, f, fo
 
@@ -367,7 +367,7 @@ contains
         !! minimization problems.
         class(line_search), intent(in) :: this
             !! The [[line_search]] object.
-        class(fcnnvar_helper), intent(in) :: fcn
+        class(fcnnvar_helper), intent(inout) :: fcn
             !! A [[fcnnvar_helper]] object containing the system of equations.
         real(real64), intent(in), dimension(:) :: xold
             !! An N-element array defining the initial point, where N is the 
@@ -390,7 +390,7 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to
             !! obtain iteration performance statistics.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with fcn.
 
         ! Parameters
@@ -402,7 +402,7 @@ contains
 
         ! Local Variables
         logical :: xcnvrg, fcnvrg, failed
-        integer(int32) :: i, n, neval, niter, flag, maxeval
+        integer :: i, n, neval, niter, flag, maxeval
         real(real64) :: alam, alam1, alamin, f1, slope, temp, test, tmplam, &
             alpha, tolx, lambdamin, f, fo
 
@@ -536,7 +536,7 @@ contains
             slope) result(lam)
         !! Minimizes either the quadratic or cubic representation for a
         !! backtracking-type line search.
-        integer(int32), intent(in) :: mode
+        integer, intent(in) :: mode
             !! Set to 1 to apply the quadratic model; else, any other value
             !! will apply the cubic model.
         real(real64), intent(in) :: f0
