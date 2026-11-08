@@ -11,8 +11,9 @@ homepage = "https://github.com/jchristopherson/nonlin"
 source-dir = "src"
 
 [dependencies]
-ferror = { git = "https://github.com/jchristopherson/ferror" }
 linalg = { git = "https://github.com/jchristopherson/linalg" }
+autodiff = { git = "https://github.com/jchristopherson/autodiff", branch = "main" }
+openmp = "*"
 
 [dev-dependencies]
 fortran_test_helper = { git = "https://github.com/jchristopherson/fortran_test_helper" }
