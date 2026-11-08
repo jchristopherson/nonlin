@@ -83,6 +83,17 @@ module nonlin_multi_eqn_mult_var
             !! The number of variables in m_fcn.
         type(workspace), private :: m_workspace
             !! The AD workspace.
+        integer, private :: m_threads = 1
+            !! The number of threads to utilize when evaluating the Jacobian.
+            !! If greater than 1, columns may be evaluated in parallel.
+        real(real64), allocatable, dimension(:,:) :: m_jwork
+            !! An FD workspace for the Jacobian calculations with one column
+            !! available per thread.
+        real(real64), allocatable, dimension(:,:) :: m_xjwork
+            !! An FD workspace for the Jacobian calculations with one column
+            !! available per thread.
+        real(real64), allocatable, dimension(:) :: m_fwork
+            !! A function evaluation workspace array.
     contains
         procedure, public :: set_fcn => vfh_set_fcn
         procedure, public :: set_auto_fcn => vfh_set_auto_fcn
@@ -93,6 +104,8 @@ module nonlin_multi_eqn_mult_var
         procedure, public :: jacobian => vfh_jac_fcn
         procedure, public :: get_equation_count => vfh_get_nfcn
         procedure, public :: get_variable_count => vfh_get_nvar
+        procedure, public :: get_thread_count => vfh_get_nthreads
+        procedure, public :: set_thread_count => vfh_set_nthreads
     end type
 
     type, abstract :: equation_solver
@@ -240,8 +253,12 @@ contains
             !! An optional argument to allow the user to communicate with
             !! the routine.
         if (associated(this%m_autofcn)) then
-            if (.not.this%m_workspace%validate_size(size(x), size(f))) &
-                call this%m_workspace%resize(size(x), size(f))
+            if (.not.this%m_workspace%validate_size(size(x), size(f), &
+                nthreads = this%get_thread_count())) &
+            then
+                call this%m_workspace%resize(size(x), size(f), &
+                    nthreads = this%get_thread_count())
+            end if
             this%m_workspace%xd(1:size(x))%x = x
             this%m_workspace%xd(1:size(x))%dx = 0.0d0
             call this%m_autofcn(this%m_workspace%xd(1:size(x)), &
@@ -257,6 +274,7 @@ contains
         !! Executes the routine containing the Jacobian matrix if
         !! supplied.  Otherwise, uses AD when an AD-compatible function is
         !! registered, falling back to finite differences.
+!$ use omp_lib, only : omp_get_thread_num
         class(vecfcn_helper), intent(inout) :: this
             !! The [[vecfcn_helper]] object.
         real(real64), intent(inout), dimension(:) :: x
@@ -276,14 +294,13 @@ contains
         real(real64), parameter :: zero = 0.0d0
 
         ! Local Variables
-        integer :: j, m, n, lwork, flag
+        integer :: j, m, n, flag, nt, tid
         real(real64) :: eps, epsmch, h, temp
-        real(real64), pointer, dimension(:) :: fptr, f1ptr
-        real(real64), allocatable, target, dimension(:) :: wrk
 
         ! Initialization
         m = this%get_equation_count()
         n = this%get_variable_count()
+        nt = this%get_thread_count()
 
         ! Input Checking
         flag = 0
@@ -301,41 +318,115 @@ contains
             call this%m_jac(x, jac, args)
         else if (associated(this%m_autofcn)) then
             ! Compute the Jacobian via AD
-            if (.not.this%m_workspace%validate_size(size(x), size(jac, 1))) &
-                call this%m_workspace%resize(size(x), size(jac, 1))
-            call jacobian(this%m_autofcn, x, jac, work = this%m_workspace, args = args)
+            if (.not.this%m_workspace%validate_size(size(x), size(jac, 1), &
+                nthreads = this%get_thread_count())) &
+            then
+                call this%m_workspace%resize(size(x), size(jac, 1), &
+                    nthreads = this%get_thread_count())
+            end if
+            call jacobian(this%m_autofcn, x, jac, work = this%m_workspace, &
+                args = args, nthreads = this%get_thread_count())
         else
             ! Compute the Jacobian via finite differences
-            if (present(fv)) then
-                lwork = m
+            if (allocated(this%m_fwork)) then
+                if (size(this%m_fwork) /= m) then
+                    deallocate(this%m_fwork)
+                    allocate(this%m_fwork(m))
+                end if
             else
-                lwork = 2 * m
+                allocate(this%m_fwork(m))
+            end if
+            
+            if (allocated(this%m_jwork)) then
+                if (size(this%m_jwork, 1) /= m .or. &
+                    size(this%m_jwork, 2) /= nt) &
+                then
+                    deallocate(this%m_jwork)
+                    allocate(this%m_jwork(m, nt))
+                end if
+            else
+                allocate(this%m_jwork(m, nt))
             end if
 
-            ! Local Memory Allocation
-            allocate(wrk(lwork))
-            f1ptr => wrk(1:m)
-            if (present(fv)) then
-                fptr => fv(1:m)
+            ! Allocate a workspace for x for each thread
+            if (allocated(this%m_xjwork)) then
+                if (size(this%m_xjwork, 1) /= n .or. &
+                    size(this%m_xjwork, 2) /= nt) &
+                then
+                    deallocate(this%m_xjwork)
+                    allocate(this%m_xjwork(n, nt))
+                end if
             else
-                fptr => wrk(m+1:2*m)
-                call this%fcn(x, fptr, args)
+                allocate(this%m_xjwork(n, nt))
+            end if
+            
+            ! Store the variables in the workspace
+            do concurrent (j = 1:n)
+                this%m_xjwork(j,:) = x(j)
+            end do
+
+            ! Define the function values at x
+            if (present(fv)) then
+                this%m_fwork = fv
+            else
+                call this%fcn(x, this%m_fwork, args = args)
             end if
 
             ! Establish step size factors
             epsmch = epsilon(epsmch)
             eps = sqrt(epsmch)
 
-            ! Compute the derivatives via finite differences
+!$omp parallel num_threads(nt) default(shared) private(j, tid, h, temp)
+            tid = 1
+!$          tid = omp_get_thread_num() + 1
+
+            ! Compute the Jacobian - each thread has it's own workspace column
+            do j = 1, n
+                temp = this%m_xjwork(j,tid)
+                h = eps * abs(temp)
+                if (h == zero) h = eps
+                this%m_xjwork(j,tid) = temp + h
+                call this%fcn(this%m_xjwork(:,tid), this%m_jwork(:,tid), args = args)
+                this%m_xjwork(j,tid) = temp
+                jac(:,j) = (this%m_jwork(:,tid) - this%m_fwork) / h
+            end do
+!$omp do schedule(static)
             do j = 1, n
                 temp = x(j)
                 h = eps * abs(temp)
                 if (h == zero) h = eps
                 x(j) = temp + h
-                call this%fcn(x, f1ptr, args)
+                call this%fcn(x, this%m_jwork(:,1), args = args)
                 x(j) = temp
-                jac(:,j) = (f1ptr - fptr) / h
+                jac(:,j) = (this%m_jwork(:,1) - this%m_fwork) / h
             end do
+!$omp end do
+!$omp end parallel
+
+            ! ! Local Memory Allocation
+            ! allocate(wrk(lwork))
+            ! f1ptr => wrk(1:m)
+            ! if (present(fv)) then
+            !     fptr => fv(1:m)
+            ! else
+            !     fptr => wrk(m+1:2*m)
+            !     call this%fcn(x, fptr, args)
+            ! end if
+
+            ! ! Establish step size factors
+            ! epsmch = epsilon(epsmch)
+            ! eps = sqrt(epsmch)
+
+            ! ! Compute the derivatives via finite differences
+            ! do j = 1, n
+            !     temp = x(j)
+            !     h = eps * abs(temp)
+            !     if (h == zero) h = eps
+            !     x(j) = temp + h
+            !     call this%fcn(x, f1ptr, args)
+            !     x(j) = temp
+            !     jac(:,j) = (f1ptr - fptr) / h
+            ! end do
         end if
     end subroutine
 
@@ -358,6 +449,28 @@ contains
             !! The number of variables.
         n = this%m_nvar
     end function
+
+! ------------------------------------------------------------------------------
+    pure function vfh_get_nthreads(this) result(rst)
+        !! Gets the maximum number of threads to use when evaluating the 
+        !! Jacobian matrix.
+        class(vecfcn_helper), intent(in) :: this
+            !! The [[vecfcn_helper]] object.
+        integer :: rst
+            !! The number of threads allowed.
+        rst = this%m_threads
+    end function
+
+! --------------------
+    subroutine vfh_set_nthreads(this, n)
+        !! Sets the maximum number of threads to use when evaluating the
+        !! Jacobian matrix.
+        class(vecfcn_helper), intent(inout) :: this
+            !! The [[vecfcn_helper]] object.
+        integer, intent(in) :: n
+            !! The maximum allowed number of threads.
+        this%m_threads = max(1, n)
+    end subroutine
 
 ! ******************************************************************************
 ! EQUATION_SOLVER

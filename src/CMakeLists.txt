@@ -22,6 +22,7 @@ set(NONLIN_SOURCES ${NONLIN_SOURCES} PARENT_SCOPE)
 include(FetchContent)
 find_package(linalg 3.0.0 QUIET)
 find_package(autodiff 1.0.0 QUIET)
+find_package(OpenMP REQUIRED COMPONENTS Fortran)
 
 if (NOT linalg_FOUND)
     message(STATUS "LINALG could not be found.  A reference version will be employed.")
@@ -59,6 +60,21 @@ target_link_libraries(
     ${LINALG_LIBRARIES}
     ${AUTODIFF_LIBRARIES}
 )
+if (OpenMP_Fortran_FOUND)
+    target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_Fortran)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE USEOPENMP=1)
+
+    if (CMAKE_Fortran_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+        target_compile_options(${PROJECT_NAME} PUBLIC $<$<COMPILE_LANGUAGE:Fortran>:-fopenmp>)
+        target_link_options(${PROJECT_NAME} PUBLIC $<$<LINK_LANGUAGE:Fortran>:-fopenmp>)
+    elseif (CMAKE_Fortran_COMPILER_ID MATCHES "Intel|IntelLLVM")
+        target_compile_options(${PROJECT_NAME} PUBLIC $<$<COMPILE_LANGUAGE:Fortran>:-qopenmp>)
+        target_link_options(${PROJECT_NAME} PUBLIC $<$<LINK_LANGUAGE:Fortran>:-qopenmp>)
+    elseif (MSVC)
+        target_compile_options(${PROJECT_NAME} PUBLIC $<$<COMPILE_LANGUAGE:Fortran>:/openmp>)
+        target_link_options(${PROJECT_NAME} PUBLIC $<$<LINK_LANGUAGE:Fortran>:/openmp>)
+    endif()
+endif()
 
 set_target_properties(
     ${PROJECT_NAME}
