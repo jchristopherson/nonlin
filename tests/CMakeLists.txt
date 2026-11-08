@@ -5,6 +5,7 @@ set(nonlin_test_sources
     nonlin_test_solve.f90
     nonlin_test_poly.f90
     nonlin_test_optimize.f90
+    nonlin_test_simple.f90
     powell_badly_scaled.f90
 )
 

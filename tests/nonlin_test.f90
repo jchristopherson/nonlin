@@ -29,6 +29,7 @@ program main
     use nonlin_test_solve
     use nonlin_test_poly
     use nonlin_test_optimize
+    use nonlin_test_simple
 
     ! Local Variables
     logical :: rst, overall
@@ -162,6 +163,36 @@ program main
     if (.not.rst) overall = .false.
 
     rst = test_constrained_least_squares_bounds()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_brent_1()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_brent_2()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_newton_1var_1()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_newton_1var_2()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_newton_1()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_newton_2()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_newton_3()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_quasi_newton_1()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_quasi_newton_2()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_quasi_newton_3()
     if (.not.rst) overall = .false.
 
     ! End

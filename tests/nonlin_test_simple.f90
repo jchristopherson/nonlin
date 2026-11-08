@@ -1,0 +1,438 @@
+! MIT License
+!
+! Copyright (c) 2017-2026 Jason Christopherson
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+!
+! nonlin_test_simple.f90
+
+! Tests for the convenience solver functions provided by the nonlin_simple
+! module: solve_brent, solve_newton_1var, solve_newton, and solve_quasi_newton.
+module nonlin_test_simple
+    use iso_fortran_env
+    use nonlin
+    use nonlin_simple
+    use autodiff, only : dual, vector_function, assignment(=), &
+        operator(+), operator(-), operator(*), operator(**)
+    implicit none
+    private
+    public :: test_solve_brent_1
+    public :: test_solve_brent_2
+    public :: test_solve_newton_1var_1
+    public :: test_solve_newton_1var_2
+    public :: test_solve_newton_1
+    public :: test_solve_newton_2
+    public :: test_solve_newton_3
+    public :: test_solve_quasi_newton_1
+    public :: test_solve_quasi_newton_2
+    public :: test_solve_quasi_newton_3
+contains
+! ******************************************************************************
+! HELPER FUNCTIONS
+! ------------------------------------------------------------------------------
+    ! f(x) = sin(x) / x, SOLUTION: x = n * pi for n = 1, 2, 3, ...
+    function f_sin_over_x(x, args) result(f)
+        real(real64), intent(in) :: x
+        class(*), intent(in), optional :: args
+        real(real64) :: f
+        f = sin(x) / x
+    end function
+
+    ! f(x) = x**3 - a, SOLUTION: x = a**(1/3), with a supplied via args
+    function f_cubic_shifted(x, args) result(f)
+        real(real64), intent(in) :: x
+        class(*), intent(in), optional :: args
+        real(real64) :: f
+        real(real64) :: a
+        a = 0.0d0
+        if (present(args)) then
+            select type (args)
+            type is (real(real64))
+                a = args
+            end select
+        end if
+        f = x**3 - a
+    end function
+
+    ! Solution: x = +/-5, y = +/-3 when a = 2
+    ! x**2 + y**2 = 34
+    ! x**2 - a * y**2 = 7
+    subroutine ad_system_1(x, f, args)
+        type(dual), intent(in), dimension(:) :: x
+        type(dual), intent(out), dimension(:) :: f
+        class(*), intent(in), optional :: args
+        real(real64) :: a
+        a = 2.0d0
+        if (present(args)) then
+            select type (args)
+            type is (real(real64))
+                a = args
+            end select
+        end if
+        f(1) = x(1)**2 + x(2)**2 - 34.0d0
+        f(2) = x(1)**2 - a * x(2)**2 - 7.0d0
+    end subroutine
+
+    ! Solution: x(i) = sqrt(i) for i = 1, ..., size(x)
+    subroutine ad_diagonal_system(x, f, args)
+        type(dual), intent(in), dimension(:) :: x
+        type(dual), intent(out), dimension(:) :: f
+        class(*), intent(in), optional :: args
+        integer :: i
+        do i = 1, size(x)
+            f(i) = x(i)**2 - real(i, real64)
+        end do
+    end subroutine
+
+    ! Returns .true. if every element of x is within tol of the corresponding
+    ! element of ref.
+    pure function all_close(x, ref, tol) result(c)
+        real(real64), intent(in), dimension(:) :: x, ref
+        real(real64), intent(in) :: tol
+        logical :: c
+        c = all(abs(x - ref) <= tol)
+    end function
+
+! ******************************************************************************
+! BRENT'S METHOD
+! ------------------------------------------------------------------------------
+    function test_solve_brent_1() result(check)
+        ! Local Variables
+        procedure(fcn1var), pointer :: fcn
+        type(value_pair) :: bracket
+        real(real64) :: x
+        logical :: check
+
+        ! Parameters
+        real(real64), parameter :: pi = 3.141592653589793d0
+        real(real64), parameter :: tol = 1.0d-6
+
+        ! Initialization
+        check = .true.
+        bracket%x1 = 1.5d0
+        bracket%x2 = 5.0d0
+
+        ! Compute the solution
+        fcn => f_sin_over_x
+        x = solve_brent(fcn, bracket)
+
+        ! The solution on this interval should be: pi
+        if (abs(x - pi) > tol) then
+            check = .false.
+            print 100, &
+                "Test Failed: solve_brent Test 1.  Expected: ", pi, &
+                ", Found: ", x
+        end if
+
+        ! Formatting
+100     format(A, F12.8, A, F12.8)
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_solve_brent_2() result(check)
+        ! Local Variables
+        procedure(fcn1var), pointer :: fcn
+        type(value_pair) :: bracket
+        real(real64) :: x, a
+        logical :: check
+
+        ! Parameters
+        real(real64), parameter :: tol = 1.0d-6
+
+        ! Initialization
+        check = .true.
+        a = 8.0d0
+        bracket%x1 = 0.0d0
+        bracket%x2 = 5.0d0
+
+        ! Compute the solution.  The root is only reachable if args is
+        ! forwarded to the function.
+        fcn => f_cubic_shifted
+        x = solve_brent(fcn, bracket, args = a)
+
+        ! The solution should be: 2
+        if (abs(x - 2.0d0) > tol) then
+            check = .false.
+            print 100, &
+                "Test Failed: solve_brent Test 2.  Expected: ", 2.0d0, &
+                ", Found: ", x
+        end if
+
+        ! Formatting
+100     format(A, F12.8, A, F12.8)
+    end function
+
+! ******************************************************************************
+! NEWTON'S METHOD (1 VARIABLE)
+! ------------------------------------------------------------------------------
+    function test_solve_newton_1var_1() result(check)
+        ! Local Variables
+        procedure(fcn1var), pointer :: fcn
+        type(value_pair) :: bracket
+        real(real64) :: x
+        logical :: check
+
+        ! Parameters
+        real(real64), parameter :: pi = 3.141592653589793d0
+        real(real64), parameter :: tol = 1.0d-6
+
+        ! Initialization
+        check = .true.
+        bracket%x1 = 1.5d0
+        bracket%x2 = 5.0d0
+
+        ! Compute the solution
+        fcn => f_sin_over_x
+        x = solve_newton_1var(fcn, bracket)
+
+        ! The solution on this interval should be: pi
+        if (abs(x - pi) > tol) then
+            check = .false.
+            print 100, &
+                "Test Failed: solve_newton_1var Test 1.  Expected: ", pi, &
+                ", Found: ", x
+        end if
+
+        ! Formatting
+100     format(A, F12.8, A, F12.8)
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_solve_newton_1var_2() result(check)
+        ! Local Variables
+        procedure(fcn1var), pointer :: fcn
+        type(value_pair) :: bracket
+        real(real64) :: x, a
+        logical :: check
+
+        ! Parameters
+        real(real64), parameter :: tol = 1.0d-6
+
+        ! Initialization
+        check = .true.
+        a = 8.0d0
+        bracket%x1 = 0.0d0
+        bracket%x2 = 5.0d0
+
+        ! Compute the solution.  The root is only reachable if args is
+        ! forwarded to the function.
+        fcn => f_cubic_shifted
+        x = solve_newton_1var(fcn, bracket, args = a)
+
+        ! The solution should be: 2
+        if (abs(x - 2.0d0) > tol) then
+            check = .false.
+            print 100, &
+                "Test Failed: solve_newton_1var Test 2.  Expected: ", 2.0d0, &
+                ", Found: ", x
+        end if
+
+        ! Formatting
+100     format(A, F12.8, A, F12.8)
+    end function
+
+! ******************************************************************************
+! NEWTON'S METHOD (N VARIABLES)
+! ------------------------------------------------------------------------------
+    function test_solve_newton_1() result(check)
+        ! Local Variables
+        procedure(vector_function), pointer :: fcn
+        real(real64), dimension(2) :: x, xo, exact
+        logical :: check
+
+        ! Parameters
+        real(real64), parameter :: tol = 1.0d-6
+
+        ! Initialization
+        check = .true.
+        xo = [4.0d0, 2.0d0]
+        exact = [5.0d0, 3.0d0]
+
+        ! Compute the solution
+        fcn => ad_system_1
+        x = solve_newton(fcn, xo)
+
+        ! Test the solution
+        if (size(x) /= 2) then
+            check = .false.
+            print *, "Test Failed: solve_newton Test 1.  Wrong size: ", size(x)
+            return
+        end if
+        if (.not.all_close(x, exact, tol)) then
+            check = .false.
+            print *, "Test Failed: solve_newton Test 1.  Expected: ", exact, &
+                ", Found: ", x
+        end if
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_solve_newton_2() result(check)
+        ! Local Variables
+        procedure(vector_function), pointer :: fcn
+        real(real64), dimension(2) :: x, xo, exact
+        real(real64) :: a
+        logical :: check
+
+        ! Parameters
+        real(real64), parameter :: tol = 1.0d-6
+
+        ! Initialization
+        check = .true.
+        a = 3.0d0
+        xo = [5.0d0, 2.0d0]
+
+        ! With a = 3, the solution is x**2 = 27.25 and y**2 = 6.75.  The
+        ! solution with a = 2 (x = 5, y = 3) would indicate that args was
+        ! not forwarded to the function.
+        exact = [sqrt(27.25d0), sqrt(6.75d0)]
+
+        ! Compute the solution
+        fcn => ad_system_1
+        x = solve_newton(fcn, xo, args = a)
+
+        ! Test the solution
+        if (.not.all_close(x, exact, tol)) then
+            check = .false.
+            print *, "Test Failed: solve_newton Test 2.  Expected: ", exact, &
+                ", Found: ", x
+        end if
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_solve_newton_3() result(check)
+        ! Local Variables
+        procedure(vector_function), pointer :: fcn
+        real(real64), dimension(3) :: x, xo, exact
+        logical :: check
+
+        ! Parameters
+        real(real64), parameter :: tol = 1.0d-6
+
+        ! Initialization
+        check = .true.
+        xo = [2.0d0, 2.0d0, 2.0d0]
+        exact = sqrt([1.0d0, 2.0d0, 3.0d0])
+
+        ! Compute the solution
+        fcn => ad_diagonal_system
+        x = solve_newton(fcn, xo)
+
+        ! Test the solution
+        if (.not.all_close(x, exact, tol)) then
+            check = .false.
+            print *, "Test Failed: solve_newton Test 3.  Expected: ", exact, &
+                ", Found: ", x
+        end if
+    end function
+
+! ******************************************************************************
+! QUASI-NEWTON METHOD
+! ------------------------------------------------------------------------------
+    function test_solve_quasi_newton_1() result(check)
+        ! Local Variables
+        procedure(vector_function), pointer :: fcn
+        real(real64), dimension(2) :: x, xo, exact
+        logical :: check
+
+        ! Parameters
+        real(real64), parameter :: tol = 1.0d-6
+
+        ! Initialization
+        check = .true.
+        xo = [4.0d0, 2.0d0]
+        exact = [5.0d0, 3.0d0]
+
+        ! Compute the solution
+        fcn => ad_system_1
+        x = solve_quasi_newton(fcn, xo)
+
+        ! Test the solution
+        if (size(x) /= 2) then
+            check = .false.
+            print *, "Test Failed: solve_quasi_newton Test 1.  Wrong size: ", &
+                size(x)
+            return
+        end if
+        if (.not.all_close(x, exact, tol)) then
+            check = .false.
+            print *, "Test Failed: solve_quasi_newton Test 1.  Expected: ", &
+                exact, ", Found: ", x
+        end if
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_solve_quasi_newton_2() result(check)
+        ! Local Variables
+        procedure(vector_function), pointer :: fcn
+        real(real64), dimension(2) :: x, xo, exact
+        real(real64) :: a
+        logical :: check
+
+        ! Parameters
+        real(real64), parameter :: tol = 1.0d-6
+
+        ! Initialization
+        check = .true.
+        a = 3.0d0
+        xo = [5.0d0, 2.0d0]
+
+        ! With a = 3, the solution is x**2 = 27.25 and y**2 = 6.75.  The
+        ! solution with a = 2 (x = 5, y = 3) would indicate that args was
+        ! not forwarded to the function.
+        exact = [sqrt(27.25d0), sqrt(6.75d0)]
+
+        ! Compute the solution
+        fcn => ad_system_1
+        x = solve_quasi_newton(fcn, xo, args = a)
+
+        ! Test the solution
+        if (.not.all_close(x, exact, tol)) then
+            check = .false.
+            print *, "Test Failed: solve_quasi_newton Test 2.  Expected: ", &
+                exact, ", Found: ", x
+        end if
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_solve_quasi_newton_3() result(check)
+        ! Local Variables
+        procedure(vector_function), pointer :: fcn
+        real(real64), dimension(3) :: x, xo, exact
+        logical :: check
+
+        ! Parameters
+        real(real64), parameter :: tol = 1.0d-6
+
+        ! Initialization
+        check = .true.
+        xo = [2.0d0, 2.0d0, 2.0d0]
+        exact = sqrt([1.0d0, 2.0d0, 3.0d0])
+
+        ! Compute the solution
+        fcn => ad_diagonal_system
+        x = solve_quasi_newton(fcn, xo)
+
+        ! Test the solution
+        if (.not.all_close(x, exact, tol)) then
+            check = .false.
+            print *, "Test Failed: solve_quasi_newton Test 3.  Expected: ", &
+                exact, ", Found: ", x
+        end if
+    end function
+end module
