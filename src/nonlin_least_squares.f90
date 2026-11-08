@@ -22,7 +22,7 @@
 !
 module nonlin_least_squares
     use iso_fortran_env
-    use ieee_arithmetic, only : ieee_value, ieee_quiet_nan
+    use ieee_arithmetic, only : ieee_is_finite, ieee_value, ieee_quiet_nan
     use nonlin_multi_eqn_mult_var
     use nonlin_error_handling
     use nonlin_types
@@ -144,7 +144,7 @@ contains
         !! routine LMDIF.
         class(least_squares_solver), intent(inout) :: this
             !! The [[least_squares_solver]] object.
-        class(vecfcn_helper), intent(in) :: fcn
+        class(vecfcn_helper), intent(inout) :: fcn
             !! The [[vecfcn_helper]] object containing the equations to solve.
         real(real64), intent(inout), dimension(:) :: x
             !! On input, an N-element array containing an initial estimate 
@@ -235,6 +235,11 @@ contains
         ! Evaluate the function at the starting point, and calculate its norm
         call fcn%fcn(x, fvec, args)
         neval = 1
+        flag = 0
+        if (.not.all(ieee_is_finite(x)) .or. .not.all(ieee_is_finite(fvec))) then
+            flag = NL_CONVERGENCE_ERROR
+            go to 900
+        end if
         fnorm = norm2(fvec)
 
         ! Process
@@ -245,6 +250,10 @@ contains
             ! Evaluate the Jacobian
             call fcn%jacobian(x, jac, fvec, args = args)
             njac = njac + 1
+            if (.not.all(ieee_is_finite(jac))) then
+                flag = NL_CONVERGENCE_ERROR
+                exit
+            end if
 
             ! Compute the QR factorization of the Jacobian
             call lmfactor(jac, .true., jpvt, wa1, wa2, wa3)
@@ -321,6 +330,10 @@ contains
                 ! Evaluate the function at X + P, and calculate its norm
                 call fcn%fcn(wa2, wa4, args)
                 neval = neval + 1
+                if (.not.all(ieee_is_finite(wa2)) .or. .not.all(ieee_is_finite(wa4))) then
+                    flag = NL_CONVERGENCE_ERROR
+                    exit
+                end if
                 fnorm1 = norm2(wa4)
 
                 ! Compute the scaled actual reduction
@@ -399,6 +412,7 @@ contains
             end if
         end do
 
+    900     continue
         ! Report out iteration statistics
         if (present(ib)) then
             ib%iter_count = iter
@@ -967,7 +981,7 @@ contains
         !! least-squares problem.
         class(constrained_least_squares_solver), intent(inout) :: this
             !! The [[constrained_least_squares_solver]] object.
-        class(vecfcn_helper), intent(in) :: fcn
+        class(vecfcn_helper), intent(inout) :: fcn
             !! The [[vecfcn_helper]] object containing the equations to solve.
         real(real64), intent(inout), dimension(:) :: x
             !! On input, an N-element array containing an initial estimate 
@@ -1067,11 +1081,11 @@ contains
         call this%apply_limits(x)
         call fcn%fcn(x, fvec, args)
         neval = 1
+        if (.not. is_finite_array(x) .or. .not. is_finite_array(fvec)) then
+            go to 900
+        end if
         fnorm = norm2(fvec)
         xnorm = norm2(x)
-        if (.not. is_finite_array(x) .or. .not. is_finite_array(fvec)) then
-            return
-        end if
 
         ! Process
         delta = this%get_trust_region_radius()
@@ -1080,6 +1094,7 @@ contains
             ! Evaluate the Jacobian
             call fcn%jacobian(x, jac, fv = fvec, args = args)
             njac = njac + 1
+            if (.not.all(ieee_is_finite(jac))) exit outer
 
             ! Print iteration status
             if (this%get_print_status()) then
@@ -1095,6 +1110,7 @@ contains
             ! Determine the step direction
             call dogleg(delta, x, fvec, jac, qr, tau, s, xl, xu, p, g, Jp, &
                 prered)
+            if (.not.all(ieee_is_finite(p)) .or. .not.all(ieee_is_finite(g))) exit outer
             xnorm = scaled_norm(p, s)
             gnorm = norm2(g)
             xnew = x + p
@@ -1188,6 +1204,7 @@ contains
             if (neval >= maxeval) exit outer
         end do outer
 
+    900     continue
         ! Report out iteration statistics
         if (present(ib)) then
             ib%iter_count = iter
@@ -1311,21 +1328,7 @@ contains
         logical :: rst
             !! Returns true if all values are finite; else, false.
 
-        ! Local Variables
-        integer(int32) :: i
-
-        ! Process
-        rst = .true.
-        do i = 1, size(x)
-            if (.not.(x(i) == x(i))) then
-                rst = .false.
-                exit
-            end if
-            if (abs(x(i)) == huge(0.0d0)) then
-                rst = .false.
-                exit
-            end if
-        end do
+        rst = all(ieee_is_finite(x))
     end function
 
 ! ------------------------------------------------------------------------------
@@ -1359,7 +1362,8 @@ contains
             !! The predicted reduction.
 
         ! Local Variables
-        integer(int32) :: m, n
+        integer(int32) :: m, n, column
+        logical :: active_bound
         real(real64) :: alpha, pgnnorm, psdnorm, t, c1, c2, a, b, c, arg
         real(real64), allocatable, dimension(:) :: pgn, psd, u, v, Jg
 
@@ -1371,9 +1375,26 @@ contains
         ! Compute the gradient vector
         call dgemv('T', m, n, 1.0d0, jac, m, f, 1, 0.0d0, g, 1)
 
-        ! Solve the linear system for the Gauss-Newton step
-        u = solve_qr(qr, tau, f)
-        pgn = -u
+        active_bound = .false.
+        do column = 1, n
+            if ((x(column) <= xl(column) .and. g(column) > 0.0d0) .or. &
+                (x(column) >= xu(column) .and. g(column) < 0.0d0) .or. &
+                xl(column) == xu(column)) then
+                g(column) = 0.0d0
+                active_bound = .true.
+            end if
+        end do
+        if (active_bound .or. all(g == 0.0d0)) then
+            call dgemv('N', m, n, 1.0d0, jac, m, g, 1, 0.0d0, Jg, 1)
+            c1 = dot_product(g, g)
+            c2 = dot_product(Jg, Jg)
+            alpha = 0.0d0
+            if (c2 > 0.0d0) alpha = c1 / c2
+            pgn = -alpha * g
+        else
+            u = solve_qr(qr, tau, f)
+            pgn = -u
+        end if
         pgnnorm = scaled_norm(pgn, s)
 
         ! Is it enough, or do we need to try a steepest decsent step?

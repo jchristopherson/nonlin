@@ -25,6 +25,9 @@
 module nonlin_test_solve
     use iso_fortran_env
     use nonlin
+    use, intrinsic :: ieee_arithmetic
+    use autodiff, only : dual, vector_function, assignment(=), &
+        operator(+), operator(-), operator(*), operator(**)
     implicit none
     private
     public :: test_quasinewton_1
@@ -49,6 +52,9 @@ module nonlin_test_solve
     public :: test_constrained_least_squares_3
     public :: test_constrained_least_squares_4
     public :: test_constrained_least_squares_bounds
+    public :: test_vector_solvers_ad
+    public :: test_vector_solver_robustness
+    integer :: vector_ad_calls = 0, vector_jac_calls = 0
 contains
 ! ******************************************************************************
 ! TEST FUNCTIONS
@@ -1316,4 +1322,330 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
+    subroutine vector_ad_system(x, f, args)
+        type(dual), intent(in), dimension(:) :: x
+        type(dual), intent(out), dimension(:) :: f
+        class(*), intent(in), optional :: args
+        real(real64) :: coefficient
+        coefficient = 2.0d0
+        if (present(args)) then
+            select type (args)
+            type is (real(real64))
+                coefficient = args
+            end select
+        end if
+        vector_ad_calls = vector_ad_calls + 1
+        f(1) = x(1)**2 + x(2)**2 - 34.0d0
+        f(2) = x(1)**2 - coefficient * x(2)**2 - 7.0d0
+    end subroutine
+
+    subroutine vector_user_jacobian(x, jac, args)
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(out), dimension(:,:) :: jac
+        class(*), intent(in), optional :: args
+        real(real64) :: coefficient
+        coefficient = 2.0d0
+        if (present(args)) then
+            select type (args)
+            type is (real(real64))
+                coefficient = args
+            end select
+        end if
+        vector_jac_calls = vector_jac_calls + 1
+        jac = 2.0d0 * reshape([x(1), x(1), x(2), -coefficient * x(2)], [2,2])
+    end subroutine
+
+    subroutine make_vector_solver(which, solver)
+        integer, intent(in) :: which
+        class(equation_solver), allocatable, intent(out) :: solver
+        select case (which)
+        case (1, 2)
+            allocate(newton_solver :: solver)
+        case (3, 4)
+            allocate(quasi_newton_solver :: solver)
+        case (5)
+            allocate(least_squares_solver :: solver)
+        case (6)
+            allocate(constrained_least_squares_solver :: solver)
+        end select
+        select type (solver)
+        class is (line_search_solver)
+            call solver%set_use_line_search(which == 1 .or. which == 3)
+        end select
+        call solver%set_max_fcn_evals(5000)
+    end subroutine
+
+    subroutine vector_ad_nonfinite(x, f, args)
+        type(dual), intent(in), dimension(:) :: x
+        type(dual), intent(out), dimension(:) :: f
+        class(*), intent(in), optional :: args
+        integer :: mode
+        mode = 1
+        if (present(args)) then
+            select type (args)
+            type is (integer)
+                mode = args
+            end select
+        end if
+        vector_ad_calls = vector_ad_calls + 1
+        f%x = 1.0d0
+        f%dx = 0.0d0
+        select case (mode)
+        case (1)
+            f%x = ieee_value(0.0d0, ieee_quiet_nan)
+        case (2)
+            f%x = ieee_value(0.0d0, ieee_positive_inf)
+        case (3)
+            if (any(x%dx /= 0.0d0)) f%dx = ieee_value(0.0d0, ieee_quiet_nan)
+        case (4)
+            if (any(x%dx /= 0.0d0)) f%dx = ieee_value(0.0d0, ieee_positive_inf)
+        end select
+    end subroutine
+
+    subroutine vector_ad_fit(x, f, args)
+        type(dual), intent(in), dimension(:) :: x
+        type(dual), intent(out), dimension(:) :: f
+        class(*), intent(in), optional :: args
+        real(real64), parameter, dimension(3) :: observations = [1.0d0, 2.0d0, 4.0d0]
+        integer :: row
+        do row = 1, size(f)
+            f(row) = real(row - 1, real64) * x(1) + x(2) - observations(row)
+        end do
+    end subroutine
+
+    subroutine vector_ad_rank_deficient(x, f, args)
+        type(dual), intent(in), dimension(:) :: x
+        type(dual), intent(out), dimension(:) :: f
+        class(*), intent(in), optional :: args
+        f(1) = x(1) + x(2) - 3.0d0
+        f(2) = 2.0d0 * f(1)
+    end subroutine
+
+    subroutine vector_ad_scaled(x, f, args)
+        type(dual), intent(in), dimension(:) :: x
+        type(dual), intent(out), dimension(:) :: f
+        class(*), intent(in), optional :: args
+        f(1) = x(2) - 10.0d0
+        f(2) = x(1) * x(2) - 5.0d4
+    end subroutine
+
+    subroutine vector_ad_single(x, f, args)
+        type(dual), intent(in), dimension(:) :: x
+        type(dual), intent(out), dimension(:) :: f
+        class(*), intent(in), optional :: args
+        f(1) = x(1)**2 - 4.0d0
+    end subroutine
+
+    function test_vector_solver_robustness() result(rst)
+        class(equation_solver), allocatable :: solver
+        type(vecfcn_helper) :: obj
+        type(iteration_behavior) :: ib
+        procedure(vector_function), pointer :: auto_fcn
+        real(real64), dimension(2) :: x, values, low, high
+        real(real64), dimension(1) :: single_x, single_f
+        real(real64), dimension(3) :: fit_values, expected_fit
+        integer :: which, mode
+        logical :: rst, good
+
+        rst = .true.
+        do which = 1, 6
+            call make_vector_solver(which, solver)
+            call solver%set_max_fcn_evals(2)
+            auto_fcn => vector_ad_system
+            call obj%set_auto_fcn(auto_fcn, 2, 2)
+            x = [0.5d0, 1.0d0]
+            call solver%solve(obj, x, values, ib)
+            good = all(ieee_is_nan(values)) .and. .not.ib%converge_on_fcn &
+                .and. .not.ib%converge_on_chng .and. .not.ib%converge_on_zero_diff
+            good = good .and. ib%fcn_count >= 2 .and. ib%fcn_count <= 30
+            if (.not.good) print *, "AD evaluation-budget test failed:", which
+            rst = good .and. rst
+
+            auto_fcn => vector_ad_nonfinite
+            call obj%set_auto_fcn(auto_fcn, 2, 2)
+            do mode = 1, 4
+                vector_ad_calls = 0
+                x = 1.0d0
+                call solver%solve(obj, x, values, ib, args = mode)
+                good = all(ieee_is_nan(values)) .and. .not.ib%converge_on_fcn &
+                    .and. .not.ib%converge_on_chng .and. .not.ib%converge_on_zero_diff
+                good = good .and. ib%fcn_count == 1
+                if (mode <= 2) then
+                    good = good .and. ib%jacobian_count == 0 .and. vector_ad_calls == 1
+                else
+                    good = good .and. ib%jacobian_count == 1 .and. vector_ad_calls == 3
+                end if
+                if (.not.good) print *, "AD nonfinite-value test failed:", which, mode
+                rst = good .and. rst
+            end do
+
+            x = 1.0d0
+            call solver%solve(obj, x, values, ib, args = 5)
+            if (which <= 4) then
+                good = all(ieee_is_nan(values)) .and. .not.ib%converge_on_fcn &
+                    .and. .not.ib%converge_on_chng
+                good = good .and. ib%fcn_count <= 30 .and. ib%jacobian_count <= 2
+            else
+                good = all(ieee_is_finite(values)) .and. maxval(abs(values - 1.0d0)) < 1.0d-12
+                good = good .and. (ib%converge_on_zero_diff .or. ib%converge_on_chng)
+            end if
+            if (.not.good) print *, "AD zero-Jacobian test failed:", which
+            rst = good .and. rst
+
+            call solver%set_max_fcn_evals(5000)
+            auto_fcn => vector_ad_scaled
+            call obj%set_auto_fcn(auto_fcn, 2, 2)
+            x = 0.5d0
+            call solver%solve(obj, x, values, ib)
+            good = all(ieee_is_finite(x)) .and. all(ieee_is_finite(values))
+            good = good .and. maxval(abs(x - [5.0d3, 10.0d0])) < 1.0d-5
+            good = good .and. maxval(abs(values)) < 1.0d-5
+            if (.not.good) print *, "AD poorly-scaled test failed:", which, x, values
+            rst = good .and. rst
+
+            auto_fcn => vector_ad_single
+            call obj%set_auto_fcn(auto_fcn, 1, 1)
+            single_x = 0.5d0
+            call solver%solve(obj, single_x, single_f, ib)
+            good = all(ieee_is_finite(single_x)) .and. all(ieee_is_finite(single_f))
+            good = good .and. abs(single_x(1) - 2.0d0) < 1.0d-6 .and. abs(single_f(1)) < 1.0d-6
+            if (.not.good) print *, "AD one-variable test failed:", which, single_x, single_f
+            rst = good .and. rst
+
+            if (which <= 4) then
+                auto_fcn => vector_ad_rank_deficient
+                call obj%set_auto_fcn(auto_fcn, 2, 2)
+                call solver%set_max_fcn_evals(5)
+                x = 0.0d0
+                call solver%solve(obj, x, values, ib)
+                good = all(ieee_is_nan(values)) .or. &
+                    (all(ieee_is_finite(values)) .and. maxval(abs(values)) < 1.0d-6)
+                if (.not.good) print *, "AD singular-system termination test failed:", which
+                rst = good .and. rst
+            end if
+        end do
+
+        auto_fcn => vector_ad_fit
+        call obj%set_auto_fcn(auto_fcn, 3, 2)
+        expected_fit = [-1.0d0 / 6.0d0, 1.0d0 / 3.0d0, -1.0d0 / 6.0d0]
+        do which = 5, 6
+            call make_vector_solver(which, solver)
+            x = 0.0d0
+            call solver%solve(obj, x, fit_values, ib)
+            good = all(ieee_is_finite(x)) .and. all(ieee_is_finite(fit_values))
+            good = good .and. maxval(abs(x - [1.5d0, 5.0d0 / 6.0d0])) < 1.0d-6
+            good = good .and. maxval(abs(fit_values - expected_fit)) < 1.0d-6
+            if (.not.good) print *, "AD rectangular least-squares test failed:", which, x, fit_values
+            rst = good .and. rst
+        end do
+
+        call make_vector_solver(5, solver)
+        auto_fcn => vector_ad_rank_deficient
+        call obj%set_auto_fcn(auto_fcn, 2, 2)
+        x = 0.0d0
+        call solver%solve(obj, x, values, ib)
+        good = all(ieee_is_finite(x)) .and. all(ieee_is_finite(values))
+        good = good .and. abs(sum(x) - 3.0d0) < 1.0d-6
+        good = good .and. maxval(abs(values)) < 1.0d-6
+        if (.not.good) print *, "AD rank-deficient least-squares test failed:", x, values
+        rst = good .and. rst
+
+        call make_vector_solver(6, solver)
+        auto_fcn => vector_ad_fit
+        call obj%set_auto_fcn(auto_fcn, 3, 2)
+        low = [-2.0d0, -2.0d0]
+        high = [1.0d0, 3.0d0]
+        select type (solver)
+        type is (constrained_least_squares_solver)
+            call solver%set_lower_limits(low)
+            call solver%set_upper_limits(high)
+        end select
+        x = [0.0d0, 0.0d0]
+        call solver%solve(obj, x, fit_values, ib)
+        good = all(ieee_is_finite(x)) .and. all(ieee_is_finite(fit_values))
+        good = good .and. all(x >= low) .and. all(x <= high)
+        good = good .and. maxval(abs(x - [1.0d0, 4.0d0 / 3.0d0])) < 1.0d-5
+        if (.not.good) print *, "AD active-bound least-squares test failed:", x, fit_values
+        rst = good .and. rst
+
+        low(1) = 1.0d0
+        select type (solver)
+        type is (constrained_least_squares_solver)
+            call solver%set_lower_limits(low)
+        end select
+        x = [10.0d0, -10.0d0]
+        call solver%solve(obj, x, fit_values, ib)
+        good = all(ieee_is_finite(x)) .and. all(ieee_is_finite(fit_values))
+        good = good .and. all(x >= low) .and. all(x <= high)
+        good = good .and. maxval(abs(x - [1.0d0, 4.0d0 / 3.0d0])) < 1.0d-5
+        if (.not.good) print *, "AD fixed-bound least-squares test failed:", x, fit_values
+        rst = good .and. rst
+    end function
+
+    function test_vector_solvers_ad() result(rst)
+        class(equation_solver), allocatable :: solver
+        type(vecfcn_helper) :: obj
+        type(iteration_behavior) :: ib
+        procedure(vector_function), pointer :: auto_fcn
+        procedure(jacobianfcn), pointer :: user_jac
+        real(real64), dimension(2) :: x, values, exact, root
+        real(real64), dimension(2,3) :: starts
+        integer :: which, start, jac_mode
+        logical :: rst, good
+
+        rst = .true.
+        auto_fcn => vector_ad_system
+        starts(:,1) = [0.5d0, 1.0d0]
+        starts(:,2) = [8.0d0, 6.0d0]
+        starts(:,3) = [-4.0d0, -2.0d0]
+        root = [sqrt(20.5d0), sqrt(13.5d0)]
+        call obj%set_auto_fcn(auto_fcn, 2, 2)
+        do which = 1, 6
+            call make_vector_solver(which, solver)
+            do jac_mode = 1, 2
+                nullify(user_jac)
+                if (jac_mode == 2) user_jac => vector_user_jacobian
+                call obj%set_jacobian(user_jac)
+                do start = 1, size(starts, 2)
+                    x = starts(:,start)
+                    vector_ad_calls = 0
+                    vector_jac_calls = 0
+                    call solver%solve(obj, x, values, ib, args = 1.0d0)
+                    call fcn1a(x, exact, args = 1.0d0)
+                    good = all(ieee_is_finite(x)) .and. all(ieee_is_finite(values))
+                    good = good .and. maxval(abs(abs(x) - root)) < 1.0d-5
+                    good = good .and. maxval(abs(exact)) < 1.0d-5
+                    good = good .and. maxval(abs(values - exact)) < 1.0d-10
+                    good = good .and. (ib%converge_on_fcn .or. ib%converge_on_chng &
+                        .or. ib%converge_on_zero_diff)
+                    good = good .and. ib%jacobian_count > 0 .and. ib%fcn_count > 1
+                    if (jac_mode == 1) then
+                        good = good .and. vector_jac_calls == 0
+                        good = good .and. vector_ad_calls == ib%fcn_count + 2 * ib%jacobian_count
+                    else
+                        good = good .and. vector_jac_calls == ib%jacobian_count
+                        good = good .and. vector_ad_calls == ib%fcn_count
+                    end if
+                    if (.not.good) then
+                        print *, "AD solver convergence failed:", which, jac_mode, start
+                        print *, "Solution/residual:", x, values
+                        print *, "Counts:", vector_ad_calls, vector_jac_calls, &
+                            ib%fcn_count, ib%jacobian_count
+                    end if
+                    rst = good .and. rst
+                end do
+            end do
+            nullify(user_jac)
+            call obj%set_jacobian(user_jac)
+            x = [5.0d0, 3.0d0]
+            vector_ad_calls = 0
+            call solver%solve(obj, x, values, ib)
+            good = all(ieee_is_finite(values)) .and. maxval(abs(values)) < 1.0d-12
+            good = good .and. maxval(abs(x - [5.0d0, 3.0d0])) < 1.0d-12
+            good = good .and. vector_ad_calls == ib%fcn_count + 2 * ib%jacobian_count
+            if (which <= 4) good = good .and. ib%jacobian_count == 0 .and. ib%converge_on_fcn
+            if (.not.good) print *, "AD exact-root test failed:", which
+            rst = good .and. rst
+        end do
+    end function
 end module

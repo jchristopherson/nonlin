@@ -24,6 +24,7 @@ module nonlin_multi_eqn_mult_var
     use iso_fortran_env
     use nonlin_types
     use nonlin_error_handling
+    use autodiff
     implicit none
     private
     public :: vecfcn
@@ -68,6 +69,11 @@ module nonlin_multi_eqn_mult_var
         !! ancillary operations that may be needed by the solver.
         procedure(vecfcn), private, pointer, nopass :: m_fcn => null()
             !! A pointer to the target vecfcn routine.
+        procedure(vector_function), private, pointer, nopass :: m_autofcn => null()
+            !! A pointer to an AD implementation of m_fcn that, if supplied, will be
+            !! used in lieu of m_fcn, and will trigger an AD calculation of the gradient
+            !! unless m_jac is supplied.  The pecking order is user-defined Jacobian
+            !! as primary, AD Jacobian secondary, and the fallback is FD.
         procedure(jacobianfcn), private, pointer, nopass :: m_jac => null()
             !! A pointer to the jacobian routine - null if no routine is 
             !! supplied.
@@ -75,8 +81,11 @@ module nonlin_multi_eqn_mult_var
             !! The number of functions in m_fcn.
         integer(int32), private :: m_nvar = 0
             !! The number of variables in m_fcn.
+        type(workspace), private :: m_workspace
+            !! The AD workspace.
     contains
         procedure, public :: set_fcn => vfh_set_fcn
+        procedure, public :: set_auto_fcn => vfh_set_auto_fcn
         procedure, public :: set_jacobian => vfh_set_jac
         procedure, public :: is_fcn_defined => vfh_is_fcn_defined
         procedure, public :: is_jacobian_defined => vfh_is_jac_defined
@@ -121,7 +130,7 @@ module nonlin_multi_eqn_mult_var
             import vecfcn_helper
             class(equation_solver), intent(inout) :: this
                 !! The [[equation_solver]]-based object.
-            class(vecfcn_helper), intent(in) :: fcn
+            class(vecfcn_helper), intent(inout) :: fcn
                 !! The [[vecfcn_helper]] object containing the equations to
                 !! solve.
             real(real64), intent(inout), dimension(:) :: x
@@ -162,6 +171,25 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
+    subroutine vfh_set_auto_fcn(this, fcn, nfcn, nvar)
+        !! Establishes a pointer to the AD-compatible routine containing the
+        !! function.  If utilized, this will allow for computation of the
+        !! gradient, for applicable solvers, via AD.  However, a user-defined
+        !! gradient does take precedence over an AD generated gradient.
+        class(vecfcn_helper), intent(inout) :: this
+            !! The [[vecfcn_helper]] object.
+        procedure(vector_function), intent(in), pointer :: fcn
+            !! The function pointer.
+        integer(int32), intent(in) :: nfcn
+            !! The number of functions.
+        integer(int32), intent(in) :: nvar
+            !! The number of variables.
+        this%m_autofcn => fcn
+        this%m_nfcn = nfcn
+        this%m_nvar = nvar
+    end subroutine
+
+! ------------------------------------------------------------------------------
     subroutine vfh_set_jac(this, jac)
         !! Establishes a pointer to the routine for computing the
         !! Jacobian matrix of the system of equations.  If no routine is
@@ -182,7 +210,7 @@ contains
             !! The [[vecfcn_helper]] object.
         logical :: x
             !! Returns true if the pointer has been assigned; else, false.
-        x = associated(this%m_fcn)
+        x = associated(this%m_fcn) .or. associated(this%m_autofcn)
     end function
 
 ! ------------------------------------------------------------------------------
@@ -201,7 +229,7 @@ contains
         !! Executes the routine containing the system of equations to
         !! solve.  No action is taken if the pointer to the subroutine has not
         !! been defined.
-        class(vecfcn_helper), intent(in) :: this
+        class(vecfcn_helper), intent(inout) :: this
             !! The [[vecfcn_helper]] object.
         real(real64), intent(in), dimension(:) :: x
             !! An N-element array containing the independent variables.
@@ -211,7 +239,15 @@ contains
         class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with
             !! the routine.
-        if (this%is_fcn_defined()) then
+        if (associated(this%m_autofcn)) then
+            if (.not.this%m_workspace%validate_size(size(x), size(f))) &
+                call this%m_workspace%resize(size(x), size(f))
+            this%m_workspace%xd(1:size(x))%x = x
+            this%m_workspace%xd(1:size(x))%dx = 0.0d0
+            call this%m_autofcn(this%m_workspace%xd(1:size(x)), &
+                this%m_workspace%fd(1:size(f)), args = args)
+            f = this%m_workspace%fd(1:size(f))%x
+        else if (associated(this%m_fcn)) then
             call this%m_fcn(x, f, args)
         end if
     end subroutine
@@ -219,9 +255,9 @@ contains
 ! ------------------------------------------------------------------------------
     subroutine vfh_jac_fcn(this, x, jac, fv, args)
         !! Executes the routine containing the Jacobian matrix if
-        !! supplied.  If not supplied, the Jacobian is computed via finite
-        !! differences.
-        class(vecfcn_helper), intent(in) :: this
+        !! supplied.  Otherwise, uses AD when an AD-compatible function is
+        !! registered, falling back to finite differences.
+        class(vecfcn_helper), intent(inout) :: this
             !! The [[vecfcn_helper]] object.
         real(real64), intent(inout), dimension(:) :: x
             !! An N-element array containing the independent variables defining 
@@ -263,6 +299,11 @@ contains
         if (associated(this%m_jac)) then
             ! Call the user-defined Jacobian routine
             call this%m_jac(x, jac, args)
+        else if (associated(this%m_autofcn)) then
+            ! Compute the Jacobian via AD
+            if (.not.this%m_workspace%validate_size(size(x), size(jac, 1))) &
+                call this%m_workspace%resize(size(x), size(jac, 1))
+            call jacobian(this%m_autofcn, x, jac, work = this%m_workspace, args = args)
         else
             ! Compute the Jacobian via finite differences
             if (present(fv)) then

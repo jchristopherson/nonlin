@@ -37,6 +37,7 @@ add_test(
     WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
     COMMAND $<TARGET_FILE:nonlin_test>
 )
+set_tests_properties(nonlin_test PROPERTIES TIMEOUT 30)
 
 if (${BUILD_SHARED_LIBS} AND WIN32)
     add_custom_command(

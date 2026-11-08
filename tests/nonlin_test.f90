@@ -43,6 +43,15 @@ program main
     rst = test_jacobian_2()
     if (.not.rst) overall = .false.
 
+    rst = test_vecfcn_ad()
+    if (.not.rst) overall = .false.
+
+    rst = test_vector_solvers_ad()
+    if (.not.rst) overall = .false.
+
+    rst = test_vector_solver_robustness()
+    if (.not.rst) overall = .false.
+
     rst = test_quasinewton_1()
     if (.not.rst) overall = .false.
 

@@ -79,9 +79,8 @@ module nonlin_multi_var
     contains
         procedure, public :: fcn => fnh_fcn
         procedure, public :: is_fcn_defined => fnh_is_fcn_defined
-        procedure, private :: fnh_set_fcn
-        procedure, private :: fnh_set_auto_fcn
-        generic, public :: set_fcn => fnh_set_fcn, fnh_set_auto_fcn
+        procedure, public :: set_fcn => fnh_set_fcn
+        procedure, public :: set_auto_fcn => fnh_set_auto_fcn
         procedure, public :: get_variable_count => fnh_get_nvar
         procedure, public :: set_gradient_fcn => fnh_set_grad
         procedure, public :: is_gradient_defined => fnh_is_grad_defined
@@ -190,7 +189,7 @@ contains
         !! gradient, for applicable solvers, via AD.  However, a user-defined
         !! gradient does take precedence over an AD generated gradient.
         class(fcnnvar_helper), intent(inout) :: this
-            !! The fcnnvar_helper object.
+            !! The [[fcnnvar_helper]] object.
         procedure(scalar_function), pointer, intent(in) :: fcn
             !! The function pointer.
         integer(int32), intent(in) :: nvar

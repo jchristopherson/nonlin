@@ -22,7 +22,7 @@
 !
 module nonlin_solve
     use iso_fortran_env
-    use ieee_arithmetic, only : ieee_is_nan, ieee_value, ieee_quiet_nan
+    use ieee_arithmetic, only : ieee_is_nan, ieee_is_finite, ieee_value, ieee_quiet_nan
     use nonlin_error_handling
     use nonlin_multi_eqn_mult_var
     use nonlin_single_var
@@ -192,7 +192,7 @@ contains
         !! - <a href="http://numerical.recipes/ target="_blank">Numerical Recipes</a>
         class(quasi_newton_solver), intent(inout) :: this
             !! The [[quasi_newton_solver]] object.
-        class(vecfcn_helper), intent(in) :: fcn
+        class(vecfcn_helper), intent(inout) :: fcn
             !! The [[vecfcn_helper]] object containing the equations to solve.
         real(real64), intent(inout), dimension(:) :: x
             !! On input, an N-element array containing an initial estimate to 
@@ -281,8 +281,13 @@ contains
 
         ! Test to see if the initial guess is a root
         call fcn%fcn(x, fvec, args)
-        f = half * dot_product(fvec, fvec)
         neval = neval + 1
+        flag = 0
+        if (.not.all(ieee_is_finite(x)) .or. .not.all(ieee_is_finite(fvec))) then
+            flag = 1
+            go to 900
+        end if
+        f = half * dot_product(fvec, fvec)
         test = zero
         do i = 1, neqn
             test = max(abs(fvec(i)), test)
@@ -299,6 +304,10 @@ contains
 
             ! Main Iteration Loop
             do
+                if (neval >= maxeval .or. iter >= maxeval) then
+                    flag = 1
+                    exit
+                end if
                 ! Update the iteration counter
                 iter = iter + 1
 
@@ -307,9 +316,18 @@ contains
                     ! Compute the Jacobian
                     call fcn%jacobian(x, b, fvec, args = args)
                     njac = njac + 1
+                    if (.not.all(ieee_is_finite(b)) .or. all(b == zero)) then
+                        flag = 1
+                        exit
+                    end if
 
                     ! Compute the QR factorization, and form Q & R
                     call qr_factor(b, q = q, r = r)
+
+                    if (any([(r(i,i) == zero, i = 1, nvar)])) then
+                        flag = 1
+                        exit
+                    end if
 
                     ! Reset the Jacobian iteration counter
                     jcount = 0
@@ -348,8 +366,17 @@ contains
                 ! Now we have R * DX = -Q**T * F, and since R is upper
                 ! triangular, the solution is readily computed.  The solution
                 ! will be stored in the first NVAR elements of DF
+                if (.not.all(ieee_is_finite(r)) .or. &
+                    any([(r(i,i) == zero, i = 1, nvar)])) then
+                    flag = 1
+                    exit
+                end if
                 df(1:nvar) = solve_triangular_system(.true., .false., .true., &
                     r, df(1:nvar))
+                if (.not.all(ieee_is_finite(df(1:nvar)))) then
+                    flag = 1
+                    exit
+                end if
 
                 ! Ensure the new solution estimate is heading in a sensible
                 ! direction.  If not, it is likely time to update the Jacobian
@@ -364,16 +391,12 @@ contains
 
                 ! Apply the line search if needed
                 if (this%get_use_line_search()) then
-                    ! Define the step length for the line search
-                    temp = dot_product(df(1:nvar), df(1:nvar))
-                    if (temp > stpmax) df(1:nvar) = df(1:nvar) * (stpmax / temp)
-
                     ! Apply the line search
                     call limit_search_vector(df(1:nvar), stpmax)
                     call ls%search(fcn, xold, dx, df(1:nvar), x, fvec, fold, &
                         f, lib, args = args)
                     neval = neval + lib%fcn_count
-                    if (ieee_is_nan(f)) then
+                    if (.not.ieee_is_finite(f)) then
                         ! The line search failed to locate an acceptable
                         ! point - force a Jacobian recalculation and retry
                         restart = .true.
@@ -388,6 +411,11 @@ contains
                     call fcn%fcn(x, fvec, args)
                     f = half * dot_product(fvec, fvec)
                     neval = neval + 1
+                end if
+
+                if (.not.all(ieee_is_finite(x)) .or. .not.all(ieee_is_finite(fvec))) then
+                    flag = 1
+                    exit
                 end if
 
                 ! Test for convergence
@@ -443,6 +471,7 @@ contains
             end do
         end if
 
+    900     continue
         ! Report out iteration statistics
         if (present(ib)) then
             ib%iter_count = iter
@@ -492,7 +521,7 @@ contains
         !! line search to solve N equations of N unknowns.
         class(newton_solver), intent(inout) :: this
             !! The [[newton_solver]] object.
-        class(vecfcn_helper), intent(in) :: fcn
+        class(vecfcn_helper), intent(inout) :: fcn
             !! The [[vecfcn_helper]] object containing the equations to solve.
         real(real64), intent(inout), dimension(:) :: x
             !! On input, an N-element array containing an initial estimate to 
@@ -573,12 +602,16 @@ contains
             xold(nvar), &
             jac(nvar, neqn) &
         )
-        call fcn%jacobian(x, jac, fv = fvec, args = args)
 
         ! Test to see if the initial guess is a root
         call fcn%fcn(x, fvec, args)
-        f = half * dot_product(fvec, fvec)
         neval = neval + 1
+        flag = 0
+        if (.not.all(ieee_is_finite(x)) .or. .not.all(ieee_is_finite(fvec))) then
+            flag = 1
+            go to 900
+        end if
+        f = half * dot_product(fvec, fvec)
         test = zero
         do i = 1, neqn
             test = max(abs(fvec(i)), test)
@@ -601,6 +634,10 @@ contains
                 ! Compute the Jacobian
                 call fcn%jacobian(x, jac, fvec, args = args)
                 njac = njac + 1
+                if (.not.all(ieee_is_finite(jac)) .or. all(jac == zero)) then
+                    flag = 1
+                    exit
+                end if
 
                 ! Compute the gradient
                 do i = 1, nvar
@@ -609,6 +646,10 @@ contains
 
                 ! Compute the LU factorization of the Jacobian
                 call lu_factor(jac, ipvt = ipvt, lu = lu)
+                if (.not.all(ieee_is_finite(lu)) .or. any(ipvt < 1) .or. any(ipvt > nvar)) then
+                    flag = 1
+                    exit
+                end if
 
                 ! Store previous iteration values
                 xold = x
@@ -616,19 +657,19 @@ contains
 
                 ! Solve the linear system of equations
                 dir = solve_lu(lu, ipvt, -fvec)
+                if (.not.all(ieee_is_finite(dir))) then
+                    flag = 1
+                    exit
+                end if
 
                 ! Apply the line search if needed
                 if (this%get_use_line_search()) then
-                    ! Define the step length for the line search
-                    temp = dot_product(dir, dir)
-                    if (temp > stpmax) dir = dir * (stpmax / temp)
-
                     ! Apply the line search
                     call limit_search_vector(dir, stpmax)
                     call ls%search(fcn, xold, grad, dir, x, fvec, &
                         fold, f, lib, args = args)
                     neval = neval + lib%fcn_count
-                    if (ieee_is_nan(f)) then
+                    if (.not.ieee_is_finite(f)) then
                         ! The line search failed to locate an acceptable point
                         flag = 1
                         exit
@@ -639,6 +680,11 @@ contains
                     call fcn%fcn(x, fvec, args)
                     f = half * dot_product(fvec, fvec)
                     neval = neval + 1
+                end if
+
+                if (.not.all(ieee_is_finite(x)) .or. .not.all(ieee_is_finite(fvec))) then
+                    flag = 1
+                    exit
                 end if
 
                 ! Check for convergence
@@ -668,6 +714,7 @@ contains
             end do
         end if
 
+    900     continue
         ! Report out iteration statistics
         if (present(ib)) then
             ib%iter_count = iter

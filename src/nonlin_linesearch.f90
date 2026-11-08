@@ -179,7 +179,7 @@ contains
         !! unconstrained minimization problems.
         class(line_search), intent(in) :: this
             !! The [[line_search]] object.
-        class(vecfcn_helper), intent(in) :: fcn
+        class(vecfcn_helper), intent(inout) :: fcn
             !! A [[vecfcn_helper]] object containing the system of equations.
         real(real64), intent(in), dimension(:) :: xold
             !! An N-element array defining the initial point, where N is the 

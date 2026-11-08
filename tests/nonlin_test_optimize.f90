@@ -348,7 +348,7 @@ contains
         logical :: check
 
         fcn => rosenbrock_ad
-        call obj%set_fcn(fcn, 2)
+        call obj%set_auto_fcn(fcn, 2)
         x = 0.0d0
         call solver%solve(obj, x, fout)
 
@@ -376,7 +376,7 @@ contains
         logical :: check
 
         fcn => rosenbrock_ad
-        call obj%set_fcn(fcn, 2)
+        call obj%set_auto_fcn(fcn, 2)
 
         x = 0.0d0
         call obj%gradient(x, g)

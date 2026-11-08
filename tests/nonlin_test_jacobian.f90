@@ -27,10 +27,14 @@ module nonlin_test_jacobian
     use iso_fortran_env
     use nonlin
     use fortran_test_helper
+    use autodiff, only : dual, vector_function, assignment(=), &
+        operator(+), operator(-), operator(*), operator(**)
     implicit none
     private
     public :: test_jacobian_1
     public :: test_jacobian_2
+    public :: test_vecfcn_ad
+    integer :: ad_calls = 0, user_jac_calls = 0
 
 contains
 ! ******************************************************************************
@@ -291,4 +295,105 @@ contains
     end function
 
 ! ------------------------------------------------------------------------------
+    subroutine ad_vector(x, f, args)
+        type(dual), intent(in), dimension(:) :: x
+        type(dual), intent(out), dimension(:) :: f
+        class(*), intent(in), optional :: args
+        real(real64) :: offset
+        integer :: row
+        offset = 0.0d0
+        if (present(args)) then
+            select type (args)
+            type is (real(real64))
+                offset = args
+            end select
+        end if
+        ad_calls = ad_calls + 1
+        do row = 1, size(f)
+            f(row) = x(1)**2 + real(row, real64) * x(size(x)) - offset
+        end do
+    end subroutine
+
+    subroutine counted_jacobian(x, jac, args)
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(out), dimension(:,:) :: jac
+        class(*), intent(in), optional :: args
+        integer :: row
+        user_jac_calls = user_jac_calls + 1
+        jac = 0.0d0
+        jac(:,1) = 2.0d0 * x(1)
+        do row = 1, size(jac, 1)
+            jac(row,size(x)) = jac(row,size(x)) + real(row, real64)
+        end do
+    end subroutine
+
+    function test_vecfcn_ad() result(rst)
+        type(vecfcn_helper) :: obj
+        procedure(vector_function), pointer :: auto_fcn
+        procedure(vecfcn), pointer :: real_fcn
+        procedure(jacobianfcn), pointer :: user_jac
+        real(real64), dimension(2) :: x, values, expected
+        real(real64), dimension(2,2) :: actual_jac, exact_jac
+        real(real64), dimension(1) :: small_x, small_f
+        real(real64), dimension(1,1) :: small_jac
+        real(real64), dimension(3) :: tall_f
+        real(real64), dimension(3,2) :: tall_jac
+        integer :: previous_calls
+        logical :: rst
+
+        rst = .true.
+        auto_fcn => ad_vector
+        real_fcn => fcn1
+        user_jac => counted_jacobian
+        call obj%set_auto_fcn(auto_fcn, 2, 2)
+        rst = obj%is_fcn_defined() .and. .not.obj%is_jacobian_defined()
+        x = [2.0d0, 3.0d0]
+        expected = [7.0d0, 10.0d0]
+        call obj%fcn(x, values)
+        rst = assert(values, expected, 1.0d-12) .and. rst
+        call obj%jacobian(x, actual_jac, args = 5.0d0)
+        call counted_jacobian(x, exact_jac)
+        rst = assert(actual_jac, exact_jac, 1.0d-12) .and. rst
+        rst = assert(x, [2.0d0, 3.0d0], 1.0d-12) .and. rst
+        call obj%fcn(x, values, args = 5.0d0)
+        rst = assert(values, expected - 5.0d0, 1.0d-12) .and. rst
+
+        call obj%set_fcn(real_fcn, 2, 2)
+        call obj%fcn(x, values)
+        rst = assert(values, expected, 1.0d-12) .and. rst
+        call obj%set_jacobian(user_jac)
+        previous_calls = ad_calls
+        user_jac_calls = 0
+        call obj%jacobian(x, actual_jac, fv = expected)
+        rst = assert(actual_jac, exact_jac, 1.0d-12) .and. rst
+        rst = ad_calls == previous_calls .and. user_jac_calls == 1 .and. rst
+        nullify(user_jac)
+        call obj%set_jacobian(user_jac)
+
+        call obj%set_auto_fcn(auto_fcn, 1, 1)
+        small_x = 2.0d0
+        call obj%fcn(small_x, small_f)
+        rst = assert(small_f, [6.0d0], 1.0d-12) .and. rst
+        call obj%jacobian(small_x, small_jac)
+        rst = abs(small_jac(1,1) - 5.0d0) < 1.0d-12 .and. rst
+        call obj%set_auto_fcn(auto_fcn, 3, 2)
+        call obj%fcn(x, tall_f)
+        rst = assert(tall_f, [7.0d0, 10.0d0, 13.0d0], 1.0d-12) .and. rst
+        call obj%jacobian(x, tall_jac)
+        rst = assert(tall_jac(:,1), [4.0d0, 4.0d0, 4.0d0], 1.0d-12) .and. rst
+        rst = assert(tall_jac(:,2), [1.0d0, 2.0d0, 3.0d0], 1.0d-12) .and. rst
+
+        nullify(auto_fcn)
+        call obj%set_auto_fcn(auto_fcn, 2, 2)
+        call obj%fcn(x, values)
+        call fcn1(x, expected)
+        rst = assert(values, expected, 1.0d-12) .and. rst
+        call obj%jacobian(x, actual_jac, fv = values)
+        call jac1(x, exact_jac)
+        rst = assert(actual_jac, exact_jac, 1.0d-4) .and. rst
+        nullify(real_fcn)
+        call obj%set_fcn(real_fcn, 2, 2)
+        rst = .not.obj%is_fcn_defined() .and. rst
+        if (.not.rst) print *, "Test Failed: vecfcn_helper AD handling"
+    end function
 end module
