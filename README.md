@@ -112,7 +112,7 @@ The installation includes libraries, Fortran module files, and CMake/pkg-config 
 
 ### FPM
 
-The supplied manifest declares the Fortran dependencies and OpenMP support. FPM downloads the Git dependencies and enables compiler-appropriate OpenMP flags automatically. NONLIN links against libraries named `blas` and `lapack`, and the current `linalg` dependency also links against `arpack`; install these first and make their library directories visible to the linker. A library-only build can succeed without these libraries, but linking tests or applications requires them.
+The supplied manifest declares the Fortran dependencies and OpenMP support. FPM downloads the Git dependencies and enables compiler-appropriate OpenMP flags automatically. NONLIN links against `blas` and `lapack`, and the current `linalg` dependency also links against `arpack`; install these first and make their library directories visible to the linker. A library-only build can succeed without these libraries, but linking tests or applications requires them.
 
 ```sh
 fpm build --profile release --build-dir build-fpm
