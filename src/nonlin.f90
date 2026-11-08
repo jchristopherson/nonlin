@@ -30,4 +30,5 @@ module nonlin
     use nonlin_optimize
     use nonlin_solve
     use nonlin_polynomials
+    use nonlin_simple
 end module
