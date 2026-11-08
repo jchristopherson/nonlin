@@ -30,6 +30,7 @@ program main
     use nonlin_test_poly
     use nonlin_test_optimize
     use nonlin_test_simple
+    use nonlin_test_iteration
 
     ! Local Variables
     logical :: rst, overall
@@ -193,6 +194,30 @@ program main
     if (.not.rst) overall = .false.
 
     rst = test_solve_quasi_newton_3()
+    if (.not.rst) overall = .false.
+
+    rst = test_iteration_brent()
+    if (.not.rst) overall = .false.
+
+    rst = test_iteration_newton_1var()
+    if (.not.rst) overall = .false.
+
+    rst = test_iteration_newton()
+    if (.not.rst) overall = .false.
+
+    rst = test_iteration_quasi_newton()
+    if (.not.rst) overall = .false.
+
+    rst = test_iteration_least_squares()
+    if (.not.rst) overall = .false.
+
+    rst = test_iteration_constrained_least_squares()
+    if (.not.rst) overall = .false.
+
+    rst = test_iteration_nelder_mead()
+    if (.not.rst) overall = .false.
+
+    rst = test_iteration_bfgs()
     if (.not.rst) overall = .false.
 
     ! End
