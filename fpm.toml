@@ -12,7 +12,7 @@ source-dir = "src"
 
 [dependencies]
 linalg = { git = "https://github.com/jchristopherson/linalg" }
-autodiff = { git = "https://github.com/jchristopherson/autodiff", branch = "main" }
+autodiff = { git = "https://github.com/jchristopherson/autodiff" }
 openmp = "*"
 
 [dev-dependencies]
