@@ -32,4 +32,5 @@ module nonlin
     use nonlin_polynomials
     use nonlin_simple
     use nonlin_continuation
+    use autodiff
 end module
