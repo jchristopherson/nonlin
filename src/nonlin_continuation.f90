@@ -24,13 +24,26 @@
 module nonlin_continuation
     use iso_fortran_env
     use ieee_arithmetic, only : ieee_is_finite, ieee_value, ieee_quiet_nan
-    use linalg, only : lu_factor, solve_lu
+    use lapack, only : dgelsy
     use nonlin_multi_eqn_mult_var
     use nonlin_error_handling
     use nonlin_types
     implicit none
     private
     public :: continuation_solver
+
+    type :: continuation_workspace
+        !! Scratch storage reused between solves with the same system size.
+        real(real64), allocatable :: x0(:), xbase(:), trial_x(:)
+        real(real64), allocatable :: residual(:), trial_residual(:), direction(:)
+        real(real64), allocatable :: z(:), tangent(:), predictor(:), candidate(:)
+        real(real64), allocatable :: corrector_base(:)
+        real(real64), allocatable :: jacobian(:,:), lambda_jacobian(:)
+        real(real64), allocatable :: augmented(:,:), rhs(:), delta(:)
+        real(real64), allocatable :: ls_matrix(:,:), ls_rhs(:), ls_work(:)
+        integer :: ls_lwork = 0
+        integer, allocatable :: pivots(:)
+    end type
 
     type, extends(equation_solver) :: continuation_solver
         !! Adaptive parameter continuation for square nonlinear systems.
@@ -51,10 +64,14 @@ module nonlin_continuation
             !! Maximum Newton corrections attempted at each lambda value.
         logical, private :: m_usePseudoArclength = .false.
             !! Select pseudo-arclength instead of fixed-lambda continuation.
+        type(continuation_workspace), private :: m_workspace
+            !! Reusable solve and pivoted-QR scratch storage.
     contains
         procedure, public :: solve => cs_solve
         procedure, private :: solve_fixed_lambda => cs_solve_fixed
         procedure, private :: solve_pseudo_arclength => cs_solve_pseudo
+        procedure, private :: ensure_workspace => cs_ensure_workspace
+        procedure, private :: solve_dgelsy => cs_solve_dgelsy
         procedure, public :: homotopy => cs_homotopy
         procedure, public :: homotopy_jacobian => cs_homotopy_jacobian
         procedure, public :: homotopy_lambda_derivative => cs_homotopy_lambda_derivative
@@ -69,6 +86,97 @@ module nonlin_continuation
     end type
 
 contains
+! ------------------------------------------------------------------------------
+    subroutine cs_ensure_workspace(this, n)
+        !! Allocate or resize solver-owned work arrays only when the problem
+        !! dimension changes. The extra slot accommodates lambda and the
+        !! augmented pseudo-arclength system.
+        class(continuation_solver), intent(inout), target :: this
+        integer, intent(in) :: n
+        integer :: nw, info, rank
+        real(real64) :: rank_tolerance, work_query(1)
+
+        nw = n + 1
+        if (allocated(this%m_workspace%x0)) then
+            if (size(this%m_workspace%x0) == n .and. &
+                size(this%m_workspace%z) == nw) return
+            deallocate(this%m_workspace%x0, this%m_workspace%xbase, &
+                this%m_workspace%trial_x, this%m_workspace%residual, &
+                this%m_workspace%trial_residual, this%m_workspace%direction, &
+                this%m_workspace%z, this%m_workspace%tangent, &
+                this%m_workspace%predictor, this%m_workspace%candidate, &
+                this%m_workspace%corrector_base, &
+                this%m_workspace%jacobian, this%m_workspace%lambda_jacobian, &
+                this%m_workspace%augmented, this%m_workspace%rhs, &
+                this%m_workspace%delta, this%m_workspace%ls_matrix, &
+                this%m_workspace%ls_rhs, this%m_workspace%ls_work, &
+                this%m_workspace%pivots)
+        end if
+
+        allocate(this%m_workspace%x0(n), this%m_workspace%xbase(n), &
+            this%m_workspace%trial_x(n), this%m_workspace%residual(n), &
+            this%m_workspace%trial_residual(n), this%m_workspace%direction(n))
+        allocate(this%m_workspace%z(nw), this%m_workspace%tangent(nw), &
+            this%m_workspace%predictor(nw), this%m_workspace%candidate(nw), &
+            this%m_workspace%corrector_base(nw))
+        allocate(this%m_workspace%jacobian(n,n), &
+            this%m_workspace%lambda_jacobian(n))
+        allocate(this%m_workspace%augmented(nw,nw), this%m_workspace%rhs(nw), &
+            this%m_workspace%delta(nw))
+        allocate(this%m_workspace%ls_matrix(nw,nw), &
+            this%m_workspace%ls_rhs(nw), this%m_workspace%pivots(nw))
+
+        ! Query the optimal DGELSY workspace once for the largest system used
+        ! by either mode, N+1 in the pseudo-arclength corrector.
+        this%m_workspace%ls_matrix = 0.0d0
+        this%m_workspace%ls_rhs = 0.0d0
+        this%m_workspace%pivots = 0
+        rank_tolerance = epsilon(1.0d0)
+        call dgelsy(nw, nw, 1, this%m_workspace%ls_matrix, nw, &
+            this%m_workspace%ls_rhs, nw, this%m_workspace%pivots, &
+            rank_tolerance, rank, work_query, -1, info)
+        if (info /= 0 .or. .not.ieee_is_finite(work_query(1))) &
+            error stop NL_CONVERGENCE_ERROR
+        this%m_workspace%ls_lwork = max(1, ceiling(work_query(1)))
+        allocate(this%m_workspace%ls_work(this%m_workspace%ls_lwork))
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    subroutine cs_solve_dgelsy(this, a, b, x, success)
+        !! Solve a square system using LAPACK DGELSY. Its complete orthogonal
+        !! factorization returns a minimum-norm solution for rank-deficient
+        !! systems; it cannot select a unique branch at a singular point.
+        class(continuation_solver), intent(inout), target :: this
+        real(real64), intent(in), dimension(:,:) :: a
+        real(real64), intent(in), dimension(:) :: b
+        real(real64), intent(out), dimension(:) :: x
+        logical, intent(out) :: success
+
+        integer :: n, rank, info
+        real(real64) :: rank_tolerance
+
+        n = size(b)
+        success = .false.
+        if (size(a,1) /= n .or. size(a,2) /= n .or. size(x) /= n) return
+        if (size(this%m_workspace%ls_matrix,1) < n) return
+
+        ! DGELSY interprets nonzero input pivot entries as pinned columns.
+        ! Clear them before every solve so all columns are eligible to pivot.
+        this%m_workspace%ls_matrix(1:n,1:n) = a
+        this%m_workspace%ls_rhs = 0.0d0
+        this%m_workspace%ls_rhs(1:n) = b
+        this%m_workspace%pivots(1:n) = 0
+        rank_tolerance = epsilon(1.0d0)
+        call dgelsy(n, n, 1, this%m_workspace%ls_matrix, &
+            size(this%m_workspace%ls_matrix,1), this%m_workspace%ls_rhs, &
+            size(this%m_workspace%ls_rhs), this%m_workspace%pivots, &
+            rank_tolerance, rank, this%m_workspace%ls_work, &
+            this%m_workspace%ls_lwork, info)
+        if (info /= 0) return
+        x = this%m_workspace%ls_rhs(1:n)
+        success = all(ieee_is_finite(x))
+    end subroutine
+
 ! ------------------------------------------------------------------------------
     subroutine cs_solve(this, fcn, x, fvec, ib, args)
         !! Dispatch to the selected continuation strategy.
@@ -92,7 +200,7 @@ contains
         !! Newton corrections. Failed corrections are retried with smaller 
         !! \(\lambda\) steps; successful steps allow the step size to grow 
         !! again.
-        class(continuation_solver), intent(inout) :: this
+        class(continuation_solver), intent(inout), target :: this
             !! The [[continuation_solver]] object.
         class(vecfcn_helper), intent(inout) :: fcn
             !! The [[vecfcn_helper]] object containing the equations to solve.
@@ -113,10 +221,10 @@ contains
         real(real64) :: lambda, target_lambda, step, alpha, residual_norm
         real(real64) :: trial_norm, ftol, nan
         logical :: corrected, accepted, reached_end
-        real(real64), allocatable :: x0(:), xbase(:), trial_x(:), residual(:)
-        real(real64), allocatable :: trial_residual(:), jac(:,:), direction(:)
-        real(real64), allocatable :: lu(:,:)
-        integer, allocatable :: pivots(:)
+        logical :: qr_success
+        type(continuation_workspace), pointer :: work
+        real(real64), pointer :: x0(:), xbase(:), trial_x(:), residual(:)
+        real(real64), pointer :: trial_residual(:), jac(:,:), direction(:)
 
         ! Initialize statistics before validating inputs.
         n = fcn%get_variable_count()
@@ -138,8 +246,15 @@ contains
         if (size(x) /= n) error stop 3
         if (size(fvec) /= n) error stop 4
 
-        allocate(x0(n), xbase(n), trial_x(n), residual(n), trial_residual(n), &
-            jac(n,n), direction(n))
+        call this%ensure_workspace(n)
+        work => this%m_workspace
+        x0 => work%x0
+        xbase => work%xbase
+        trial_x => work%trial_x
+        residual => work%residual
+        trial_residual => work%trial_residual
+        jac => work%jacobian
+        direction => work%direction
         x0 = x
         if (.not.all(ieee_is_finite(x0)) .or. maxeval <= 0) then
             fvec = ieee_value(0.0d0, ieee_quiet_nan)
@@ -175,11 +290,8 @@ contains
 
                 ! Solve J_H*dx=-H. A singular factorization fails this lambda
                 ! attempt and triggers a smaller continuation step.
-                call lu_factor(jac, ipvt = pivots, lu = lu)
-                if (.not.all(ieee_is_finite(lu))) exit
-                if (any(pivots < 1) .or. any(pivots > n)) exit
-                direction = solve_lu(lu, pivots, -residual)
-                if (.not.all(ieee_is_finite(direction))) exit
+                call this%solve_dgelsy(jac, -residual, direction, qr_success)
+                if (.not.qr_success) exit
 
                 ! Backtrack until the corrector reduces the homotopy residual.
                 accepted = .false.
@@ -250,7 +362,7 @@ contains
     subroutine cs_solve_pseudo(this, fcn, x, fvec, ib, args)
         !! Trace the solution curve using a tangent predictor and an augmented
         !! arclength corrector. Lambda is allowed to reverse direction at folds.
-        class(continuation_solver), intent(inout) :: this
+        class(continuation_solver), intent(inout), target :: this
         class(vecfcn_helper), intent(inout) :: fcn
         real(real64), intent(inout), dimension(:) :: x
         real(real64), intent(out), dimension(:) :: fvec
@@ -261,13 +373,15 @@ contains
         integer :: corrector_iteration, backtrack_iteration
         real(real64) :: ftol, xtol, ds, lambda_tol, lambda, ds_used
         real(real64) :: arc_error, merit, trial_merit, alpha, tangent_norm
+        real(real64) :: history_residual
         real(real64) :: lambda_new, nan
-        logical :: success, corrected, accepted, endpoint_step, endpoint_ok
-        real(real64), allocatable :: x0(:), z(:), tangent(:), predictor(:)
-        real(real64), allocatable :: candidate(:), residual(:), trial_residual(:)
-        real(real64), allocatable :: jac(:,:), lambda_jac(:), augmented(:,:)
-        real(real64), allocatable :: rhs(:), delta(:), lu(:,:)
-        integer, allocatable :: pivots(:)
+        logical :: success, corrected, accepted, endpoint_step, qr_success
+        type(continuation_workspace), pointer :: work
+        real(real64), pointer :: x0(:), z(:), tangent(:), predictor(:)
+        real(real64), pointer :: candidate(:), corrector_base(:), residual(:)
+        real(real64), pointer :: trial_residual(:)
+        real(real64), pointer :: jac(:,:), lambda_jac(:), augmented(:,:)
+        real(real64), pointer :: rhs(:), delta(:)
 
         n = fcn%get_variable_count()
         neval = 0
@@ -289,9 +403,21 @@ contains
         if (size(fvec) /= n) error stop 4
         if (.not.all(ieee_is_finite(x)) .or. maxeval <= 0) return
 
-        allocate(x0(n), z(n+1), tangent(n+1), predictor(n+1), candidate(n+1))
-        allocate(residual(n), trial_residual(n), jac(n,n), lambda_jac(n))
-        allocate(augmented(n+1,n+1), rhs(n+1), delta(n+1))
+        call this%ensure_workspace(n)
+        work => this%m_workspace
+        x0 => work%x0
+        z => work%z
+        tangent => work%tangent
+        predictor => work%predictor
+        candidate => work%candidate
+        corrector_base => work%corrector_base
+        residual => work%residual
+        trial_residual => work%trial_residual
+        jac => work%jacobian
+        lambda_jac => work%lambda_jacobian
+        augmented => work%augmented
+        rhs => work%rhs
+        delta => work%delta
         x0 = x
         lambda = 0.0d0
         ds = this%m_initialStep
@@ -300,12 +426,15 @@ contains
         ! The initial tangent is oriented toward increasing lambda. For the
         ! default homotopy, J_H is the identity at lambda=0.
         if (.not.get_derivatives(x, lambda, jac, lambda_jac)) go to 900
-        call lu_factor(jac, ipvt = pivots, lu = lu)
-        if (.not.all(ieee_is_finite(lu))) go to 900
-        if (any(pivots < 1) .or. any(pivots > n)) go to 900
-        delta(1:n) = solve_lu(lu, pivots, -lambda_jac)
-        delta(n+1) = 1.0d0
-        if (.not.all(ieee_is_finite(delta))) go to 900
+        augmented = 0.0d0
+        augmented(1:n,1:n) = jac
+        augmented(1:n,n+1) = lambda_jac
+        augmented(n+1,n+1) = 1.0d0
+        rhs = 0.0d0
+        rhs(1:n) = -lambda_jac
+        rhs(n+1) = 1.0d0
+        call this%solve_dgelsy(augmented, rhs, delta, qr_success)
+        if (.not.qr_success) go to 900
         tangent_norm = norm2(delta)
         if (tangent_norm <= tiny(tangent_norm)) go to 900
         tangent = delta / tangent_norm
@@ -347,17 +476,16 @@ contains
                 augmented(n+1,:) = tangent
                 rhs(1:n) = -residual
                 rhs(n+1) = -arc_error
-                call lu_factor(augmented, ipvt = pivots, lu = lu)
-                if (.not.all(ieee_is_finite(lu))) exit
-                if (any(pivots < 1) .or. any(pivots > n+1)) exit
-                delta = solve_lu(lu, pivots, rhs)
-                if (.not.all(ieee_is_finite(delta))) exit
+                call this%solve_dgelsy(augmented, rhs, delta, qr_success)
+                if (.not.qr_success) exit
 
                 accepted = .false.
                 alpha = 1.0d0
                 trial_merit = merit
+                history_residual = maxval(abs(residual))
+                corrector_base = candidate
                 do backtrack_iteration = 1, 12
-                    candidate = candidate + alpha * delta
+                    candidate = corrector_base + alpha * delta
                     if (.not.all(ieee_is_finite(candidate))) then
                         alpha = 0.5d0 * alpha
                         cycle
@@ -369,13 +497,14 @@ contains
                         arc_error**2)
                     if (ieee_is_finite(trial_merit) .and. trial_merit < merit) then
                         accepted = .true.
+                        history_residual = maxval(abs(trial_residual))
                         exit
                     end if
                     alpha = 0.5d0 * alpha
                 end do
                 niter = niter + 1
                 if (present(ib)) then
-                    call ib%log_iteration(trial_merit, nan, nan)
+                    call ib%log_iteration(history_residual, nan, nan)
                 end if
                 if (.not.accepted) exit
             end do
@@ -421,11 +550,9 @@ contains
                 augmented(n+1,:) = tangent
                 rhs = 0.0d0
                 rhs(n+1) = 1.0d0
-                call lu_factor(augmented, ipvt = pivots, lu = lu)
-                if (.not.all(ieee_is_finite(lu))) exit
-                if (any(pivots < 1) .or. any(pivots > n+1)) exit
-                tangent = solve_lu(lu, pivots, rhs)
-                if (.not.all(ieee_is_finite(tangent))) exit
+                call this%solve_dgelsy(augmented, rhs, delta, qr_success)
+                if (.not.qr_success) exit
+                tangent = delta
                 tangent_norm = norm2(tangent)
                 if (tangent_norm <= tiny(tangent_norm)) exit
                 tangent = tangent / tangent_norm
@@ -498,11 +625,8 @@ contains
             !! Homotopy residual.
         class(*), intent(in), optional :: args
             !! User arguments forwarded to F.
-        real(real64), allocatable :: f(:)
-
-        allocate(f(size(h)))
-        call fcn%fcn(x, f, args)
-        h = (1.0d0 - lambda) * (x - x0) + lambda * f
+        call fcn%fcn(x, h, args)
+        h = (1.0d0 - lambda) * (x - x0) + lambda * h
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -525,11 +649,8 @@ contains
         class(*), intent(in), optional :: args
             !! User arguments forwarded to F.
         integer :: i
-        real(real64), allocatable :: jac_f(:,:)
-
-        allocate(jac_f(size(jac,1), size(jac,2)))
-        call fcn%jacobian(x, jac_f, args = args)
-        jac = lambda * jac_f
+        call fcn%jacobian(x, jac, args = args)
+        jac = lambda * jac
         do i = 1, size(jac,1)
             jac(i,i) = jac(i,i) + 1.0d0 - lambda
         end do
@@ -547,11 +668,8 @@ contains
         real(real64), intent(in) :: lambda
         real(real64), intent(out), dimension(:) :: deriv
         class(*), intent(in), optional :: args
-        real(real64), allocatable :: fx(:)
-
-        allocate(fx(size(deriv)))
-        call fcn%fcn(x, fx, args)
-        deriv = fx - (x - x0)
+        call fcn%fcn(x, deriv, args)
+        deriv = deriv - (x - x0)
     end subroutine
 
 ! ------------------------------------------------------------------------------

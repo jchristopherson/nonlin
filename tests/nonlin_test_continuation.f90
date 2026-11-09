@@ -23,7 +23,7 @@
 ! nonlin_test_continuation.f90
 module nonlin_test_continuation
     use iso_fortran_env
-    use ieee_arithmetic, only : ieee_is_nan
+    use ieee_arithmetic, only : ieee_is_nan, ieee_is_finite
     use nonlin
     use autodiff, only : dual, vector_function, assignment(=), operator(-), &
         operator(*), operator(**)
@@ -34,6 +34,7 @@ module nonlin_test_continuation
     public :: test_continuation_evaluation_limit
     public :: test_continuation_fd_fallback
     public :: test_continuation_pseudo_arclength_fold
+    public :: test_continuation_rank_deficient_qr
 
     type, extends(continuation_solver) :: shifted_continuation_solver
         integer :: homotopy_calls = 0
@@ -81,6 +82,14 @@ contains
             end select
         end if
         f(1) = x(1)**2 - root_squared
+    end subroutine
+
+    subroutine rank_deficient_system(x, f, args)
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(out), dimension(:) :: f
+        class(*), intent(in), optional :: args
+        f(1) = x(1) + x(2) - 1.0d0
+        f(2) = 2.0d0 * x(1) + 2.0d0 * x(2) - 2.0d0
     end subroutine
 
     subroutine fold_target(x, f, args)
@@ -277,9 +286,32 @@ contains
         check = check .and. size(history%log_residual) == ib%iter_count
         check = check .and. size(history%log_step_change) == ib%iter_count
         check = check .and. size(history%log_gradient) == ib%iter_count
+        check = check .and. .not.any(ieee_is_nan(history%log_residual))
         if (.not.check) print *, &
             "Pseudo-arclength did not traverse the fold:", x, residual, &
             solver%minimum_lambda, solver%maximum_lambda, ib%fcn_count, &
             ib%jacobian_count, ib%iter_count
+    end function
+
+    function test_continuation_rank_deficient_qr() result(check)
+        type(vecfcn_helper) :: equations
+        type(continuation_solver) :: solver
+        type(iteration_behavior) :: ib
+        procedure(vecfcn), pointer :: fcn
+        real(real64) :: x(2), residual(2)
+        logical :: check
+
+        fcn => rank_deficient_system
+        call equations%set_fcn(fcn, 2, 2)
+        call solver%set_initial_step(0.25d0)
+        x = 0.0d0
+        call solver%solve(equations, x, residual, ib)
+
+        check = ib%converge_on_fcn .and. all(ieee_is_finite(x))
+        check = check .and. all(ieee_is_finite(residual))
+        check = check .and. abs(sum(x) - 1.0d0) < 1.0d-7
+        check = check .and. maxval(abs(residual)) < 1.0d-8
+        if (.not.check) print *, &
+            "Rank-deficient pivoted QR continuation failed:", x, residual
     end function
 end module

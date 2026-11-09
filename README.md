@@ -265,3 +265,21 @@ contains
 ```
 
 See [examples/nonlin_simple_bfgs_example.f90](examples/nonlin_simple_bfgs_example.f90) for the complete program and [examples/nonlin_bfgs_example.f90](examples/nonlin_bfgs_example.f90) for the configurable solver-object approach.
+
+## Example 6: Powell's Singular Function
+
+This four-equation system has the root `x = [0, 0, 0, 0]`. Its last two equations are squares, so their first derivatives vanish at the root. The root Jacobian has rank 2 rather than 4, making this a singular endpoint rather than a regular fold.
+
+```fortran
+type(vecfcn_helper) :: equations
+type(continuation_solver) :: solver
+procedure(vector_function), pointer :: fcn
+real(real64) :: x(4), residual(4)
+
+fcn => fcn_
+call equations%set_auto_fcn(fcn, 4, 4)
+x = 1.0d0
+call solver%solve(equations, x, residual)
+```
+
+The default fixed-parameter continuation succeeds on this example. Pseudo-arclength is not a suitable remedy here: at the endpoint, the augmented derivative `[J_F, H_lambda]` also loses row rank, so the solution path has no unique tangent for the pseudo-arclength corrector to follow. This differs from a regular fold, where `J_F` may be singular while the augmented derivative remains full row rank. See [examples/nonlin_continuation_example.f90](examples/nonlin_continuation_example.f90) for the full Powell system and convergence-history output.
