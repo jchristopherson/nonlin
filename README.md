@@ -21,6 +21,7 @@ Here, M is the number of residual equations and N is the number of unknowns. AD 
 | `newton_1var_solver` | One scalar root | Yes | First derivative | No | Root bracket | No |
 | `newton_solver` | Nonlinear system, M = N | Yes | Jacobian | Yes | No | AD and finite differences |
 | `quasi_newton_solver` | Nonlinear system, M = N | Yes | Jacobian | Yes | No | AD and finite differences |
+| `continuation_solver` | Nonlinear system, M = N | Yes | Jacobian | Yes | No | AD and finite differences |
 | `least_squares_solver` | Minimize sum of squared residuals, M >= N | Yes | Jacobian | Yes | No | AD and finite differences |
 | `constrained_least_squares_solver` | Minimize sum of squared residuals, M >= N | Yes | Jacobian | Yes | Variable box bounds | AD and finite differences |
 | `nelder_mead` | Scalar objective, N variables | Not needed | Not needed | Function values only | No | No |
@@ -47,6 +48,7 @@ These are local methods: starting points, smoothness, scaling, and tolerances af
 | `newton_1var_solver` | Safeguarded scalar Newton iteration within a root bracket; uses an analytic derivative or finite differences. | Use for smooth scalar equations when derivative information is reliable; prefer Brent when derivatives are unreliable or expensive. |
 | `newton_solver` | Solves the linearized square system using a freshly evaluated Jacobian each iteration; optional backtracking line search, enabled by default. | First choice for smooth square systems, especially with AD or an analytic Jacobian and a reasonable starting point. |
 | `quasi_newton_solver` | Broyden rank-one Jacobian updates with periodic/restarted Jacobian evaluations and optional backtracking, enabled by default. | Use when repeated Jacobian evaluations are costly. Tune `set_jacobian_interval`; prefer Newton when the approximation becomes unreliable. |
+| `continuation_solver` | Adaptive fixed-parameter continuation with damped Newton correction along $H(x,\lambda)=(1-\lambda)(x-x_0)+\lambda F(x)$. The default homotopy Jacobian uses the analytic, AD, or finite-difference Jacobian provided by `vecfcn_helper`. | Try when a useful initial point makes the homotopy path easier to follow than solving $F(x)=0$ directly. Reduce the step if corrections struggle. This is not pseudo-arclength continuation and may fail at folds or singular points. |
 | `least_squares_solver` | Levenberg-Marquardt method with damping and variable scaling. | First choice for unconstrained data fitting or overdetermined systems; also useful when a square system needs a least-squares approach. |
 | `constrained_least_squares_solver` | Bound-aware trust-region dogleg method with backtracking and projected-gradient steps at active bounds. | Use for residual minimization with lower/upper variable limits. Set bounds with `set_lower_limits` and `set_upper_limits`. |
 | `nelder_mead` | Derivative-free simplex search for a local minimum of a scalar objective. | Use for modest-dimensional problems when useful derivatives are unavailable; generally less efficient than gradient methods for smooth, larger problems. |
@@ -156,7 +158,7 @@ NONLIN offers simple wrapper functions and configurable solver objects:
 | API | Use it when | Trade-off |
 | --- | --- | --- |
 | Simple functions such as `solve_brent`, `solve_newton`, `solve_quasi_newton`, `solve_nelder_mead`, and `solve_bfgs` | You want a short call with default solver settings and an initial guess. Callback procedures are passed directly. | Less setup; solver controls, custom derivatives, and iteration statistics are not exposed by the wrapper. |
-| Solver objects such as `brent_solver`, `newton_solver`, `quasi_newton_solver`, `nelder_mead`, and `bfgs` | You need to configure tolerances, bounds/brackets, derivative callbacks, line search behavior, or inspect iteration statistics. | More setup; you provide helper objects and configure the solver explicitly. |
+| Solver objects such as `brent_solver`, `newton_solver`, `quasi_newton_solver`, `continuation_solver`, `nelder_mead`, and `bfgs` | You need to configure tolerances, bounds/brackets, derivative callbacks, line search behavior, continuation steps, or inspect iteration statistics. | More setup; you provide helper objects and configure the solver explicitly. |
 
 For example, the simple BFGS wrapper takes an AD-compatible objective and an initial guess:
 
@@ -172,7 +174,7 @@ call solver%set_fcn_tolerance(1.0d-10)
 call solver%solve(objective, x, value)
 ```
 
-The simple wrappers cover scalar root-finding (`solve_brent`, `solve_newton_1var`), square nonlinear systems (`solve_newton`, `solve_quasi_newton`), and unconstrained scalar-objective minimization (`solve_nelder_mead`, `solve_bfgs`). Use solver objects for least-squares problems or whenever you need more control or reporting.
+The simple wrappers cover scalar root-finding (`solve_brent`, `solve_newton_1var`), square nonlinear systems (`solve_newton`, `solve_quasi_newton`), and unconstrained scalar-objective minimization (`solve_nelder_mead`, `solve_bfgs`). Continuation has no simple wrapper: use `continuation_solver` when you need its path-following behavior and step controls. Use solver objects for least-squares problems or whenever you need more control or reporting.
 
 ## Example 1: Quasi-Newton System Solve
 
