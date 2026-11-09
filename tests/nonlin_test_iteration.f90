@@ -449,7 +449,7 @@ contains
 
         ! Exceed the initial capacity and verify that growth preserves prior
         ! records. Zero metrics map to negative infinity; missing metrics stay NaN.
-        ib = iteration_behavior(2)
+        call ib%initialize(2)
         call ib%log_iteration(100.0d0, 10.0d0, 1.0d0)
         call ib%log_iteration(0.0d0, 0.0d0, nan)
         do i = 3, 5
