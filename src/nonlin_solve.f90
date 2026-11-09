@@ -787,7 +787,7 @@ contains
         neval = 0
         iter = 0
         eps = epsilon(eps)
-        nan = ieee_value(nan, ieee_quiet_nan)
+        nan = ieee_value(0.0_real64, ieee_quiet_nan)
         ftol = this%get_fcn_tolerance()
         xtol = this%get_var_tolerance()
         maxeval = this%get_max_fcn_evals()

@@ -153,7 +153,7 @@ contains
             !! The size.
 
         real(real64) :: nan
-        nan = ieee_value(nan, ieee_quiet_nan)
+        nan = ieee_value(0.0_real64, ieee_quiet_nan)
 
         if (allocated(this%m_history%log_gradient)) deallocate(this%m_history%log_gradient)
         if (allocated(this%m_history%log_residual)) deallocate(this%m_history%log_residual)
