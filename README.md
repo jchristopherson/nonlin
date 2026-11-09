@@ -92,8 +92,6 @@ ctest --test-dir build-cmake --output-on-failure
 | `BUILD_SHARED_LIBS` | `OFF` (default) builds static libraries; `ON` builds shared libraries. |
 | `BUILD_TESTING` | Enable/disable the test executables and CTest registration. |
 | `BUILD_NONLIN_EXAMPLES` | Enable/disable example executables (default `OFF`). |
-| `CMAKE_PREFIX_PATH` | Search prefix for preinstalled dependency packages. |
-| `BLA_VENDOR` | Select a BLAS/LAPACK vendor through CMake's discovery, e.g. `OpenBLAS`. |
 
 For a library-only build, configure with `-DBUILD_TESTING=OFF -DBUILD_NONLIN_EXAMPLES=OFF`. To select a backend explicitly, add `-G Ninja` or, for MinGW Make, `-G "MinGW Makefiles"` to the configure command. Use a fresh build directory when changing compiler or generator.
 
@@ -157,7 +155,7 @@ NONLIN offers simple wrapper functions and configurable solver objects:
 
 | API | Use it when | Trade-off |
 | --- | --- | --- |
-| Simple functions such as `solve_brent`, `solve_newton`, `solve_quasi_newton`, `solve_nelder_mead`, and `solve_bfgs` | You want a short call with default solver settings and an initial guess. Callback procedures are passed directly. | Less setup; solver controls, custom derivatives, and iteration statistics are not exposed by the wrapper. |
+| Simple functions such as `solve_brent`, `solve_newton`, `solve_quasi_newton`, `solve_nelder_mead`, `solve_continuation`, `solve_continuation_pseudo_arclength`, and `solve_bfgs` | You want a short call with default solver settings and an initial guess. Callback procedures are passed directly. | Less setup; solver controls, custom derivatives, and iteration statistics are not exposed by the wrapper. |
 | Solver objects such as `brent_solver`, `newton_solver`, `quasi_newton_solver`, `continuation_solver`, `nelder_mead`, and `bfgs` | You need to configure tolerances, bounds/brackets, derivative callbacks, line search behavior, continuation steps, or inspect iteration statistics. | More setup; you provide helper objects and configure the solver explicitly. |
 
 For example, the simple BFGS wrapper takes an AD-compatible objective and an initial guess:
@@ -174,7 +172,7 @@ call solver%set_fcn_tolerance(1.0d-10)
 call solver%solve(objective, x, value)
 ```
 
-The simple wrappers cover scalar root-finding (`solve_brent`, `solve_newton_1var`), square nonlinear systems (`solve_newton`, `solve_quasi_newton`), and unconstrained scalar-objective minimization (`solve_nelder_mead`, `solve_bfgs`). Continuation has no simple wrapper: use `continuation_solver` when you need path following. Fixed-parameter mode is the default; call `set_use_pseudo_arclength(.true.)` to select the augmented tangent predictor-corrector. `set_initial_step` controls the lambda increment in fixed mode and the arclength increment in pseudo-arclength mode. For custom paths, override `homotopy`, `homotopy_jacobian`, and `homotopy_lambda_derivative` consistently. Use solver objects for least-squares problems or whenever you need more control or reporting.
+The simple wrappers cover scalar root-finding (`solve_brent`, `solve_newton_1var`), square nonlinear systems (`solve_newton`, `solve_quasi_newton`), and unconstrained scalar-objective minimization (`solve_nelder_mead`, `solve_bfgs`).  Use solver objects for least-squares problems or whenever you need more control or reporting.
 
 ## Example 1: Quasi-Newton System Solve
 
@@ -282,4 +280,4 @@ x = 1.0d0
 call solver%solve(equations, x, residual)
 ```
 
-The default fixed-parameter continuation succeeds on this example. Pseudo-arclength is not a suitable remedy here: at the endpoint, the augmented derivative `[J_F, H_lambda]` also loses row rank, so the solution path has no unique tangent for the pseudo-arclength corrector to follow. This differs from a regular fold, where `J_F` may be singular while the augmented derivative remains full row rank. See [examples/nonlin_continuation_example.f90](examples/nonlin_continuation_example.f90) for the full Powell system and convergence-history output.
+The default fixed-parameter continuation succeeds on this example. Pseudo-arclength is not a suitable solver here: at the endpoint, the augmented derivative `[J_F, H_lambda]` also loses row rank, so the solution path has no unique tangent for the pseudo-arclength corrector to follow. This differs from a regular fold, where `J_F` may be singular while the augmented derivative remains full row rank. See [examples/nonlin_continuation_example.f90](examples/nonlin_continuation_example.f90) for the full Powell system and convergence-history output.
