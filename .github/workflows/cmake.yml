@@ -103,6 +103,9 @@ jobs:
           if [ "${{ runner.os }}" = "Windows" ]; then
             CMAKE_OPTIONS+=( -G "MinGW Makefiles" )
           fi
+          if [ "${{ matrix.compiler }}" = "intel" ]; then
+            CMAKE_OPTIONS+=( -DCMAKE_Fortran_FLAGS="-g -traceback" )
+          fi
           cmake "${CMAKE_OPTIONS[@]}"
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
