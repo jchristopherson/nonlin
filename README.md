@@ -281,3 +281,28 @@ call solver%solve(equations, x, residual)
 ```
 
 The default fixed-parameter continuation succeeds on this example. Pseudo-arclength is not a suitable solver here: at the endpoint, the augmented derivative `[J_F, H_lambda]` also loses row rank, so the solution path has no unique tangent for the pseudo-arclength corrector to follow. This differs from a regular fold, where `J_F` may be singular while the augmented derivative remains full row rank. See [examples/nonlin_continuation_example.f90](examples/nonlin_continuation_example.f90) for the full Powell system and convergence-history output.
+
+## References
+
+### Algorithm References
+
+- E. L. Allgower and K. Georg, *Numerical Continuation Methods*, Springer, 1990. [DOI: 10.1007/978-3-642-61257-2](https://doi.org/10.1007/978-3-642-61257-2). General reference for parameter and pseudo-arclength continuation.
+- C. G. Broyden, "A class of methods for solving nonlinear simultaneous equations," *Mathematics of Computation*, 19(92), 577-593, 1965. [AMS article](https://www.ams.org/journals/mcom/1965-19-092/S0025-5718-1965-0198670-6/S0025-5718-1965-0198670-6.pdf).
+- R. P. Brent, "An algorithm with guaranteed convergence for finding a zero of a function," *The Computer Journal*, 14(4), 422-425, 1971. [DOI: 10.1093/comjnl/14.4.422](https://doi.org/10.1093/comjnl/14.4.422).
+- T. F. Coleman and Y. Li, "An interior trust region approach for nonlinear minimization subject to bounds," *SIAM Journal on Optimization*, 6(2), 418-445, 1996. [DOI: 10.1137/0806023](https://doi.org/10.1137/0806023).
+- F. Gao and L. Han, "Implementing the Nelder-Mead simplex algorithm with adaptive parameters," *Computational Optimization and Applications*, 51, 259-277, 2012. [DOI: 10.1007/s10589-010-9329-3](https://doi.org/10.1007/s10589-010-9329-3).
+- J. J. Moré, "The Levenberg-Marquardt algorithm: implementation and theory," in *Numerical Analysis*, Lecture Notes in Mathematics, vol. 630, 1978. [DOI: 10.1007/BFb0067700](https://doi.org/10.1007/BFb0067700).
+- J. J. Moré, B. S. Garbow, and K. E. Hillstrom, *User Guide for MINPACK-1*, Argonne National Laboratory Report ANL-80-74, 1980. Background for the unconstrained least-squares implementation.
+- J. A. Nelder and R. Mead, "A simplex method for function minimization," *The Computer Journal*, 7(4), 308-313, 1965. [DOI: 10.1093/comjnl/7.4.308](https://doi.org/10.1093/comjnl/7.4.308).
+- M. J. D. Powell, "A hybrid method for nonlinear equations," in *Numerical Methods for Nonlinear Algebraic Equations*, P. Rabinowitz, ed., Gordon and Breach, 1970, pp. 87-114. Background for dogleg-based trust-region methods.
+- J. Nocedal and S. J. Wright, *Numerical Optimization*, 2nd ed., Springer, 2006. [DOI: 10.1007/978-0-387-40065-5](https://doi.org/10.1007/978-0-387-40065-5). General reference for BFGS, line searches, and nonlinear optimization.
+
+### Online Resources Cited in the API Documentation
+
+- [Brent's method notes](https://maths-people.anu.edu.au/~brent/pub/pub011.html) and [Brent's method overview](https://en.wikipedia.org/wiki/Brent%27s_method).
+- [Broyden's method](https://en.wikipedia.org/wiki/Broyden%27s_method), [BFGS](https://en.wikipedia.org/wiki/Broyden-Fletcher-Goldfarb-Shanno_algorithm), and [quasi-Newton methods](https://en.wikipedia.org/wiki/Quasi-Newton_method).
+- [Backtracking line search](https://en.wikipedia.org/wiki/Backtracking_line_search), [Oxford lecture notes](https://people.maths.ox.ac.uk/hauser/hauser_lecture2.pdf), and [Wolfram line-search tutorial](https://reference.wolfram.com/language/tutorial/UnconstrainedOptimizationLineSearchMethods.html).
+- [Nelder-Mead overview](https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method) and [NLopt algorithm notes](https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/).
+- [BFGS minFunc documentation](https://www.cs.ubc.ca/~schmidtm/Software/minFunc.html) and [Numerical Recipes](https://numerical.recipes/).
+- [Companion matrix](https://en.wikipedia.org/wiki/Companion_matrix) overview and [MathWorld reference](https://mathworld.wolfram.com/CompanionMatrix.html).
+- [Backtracking line-search discussion](https://scicomp.stackexchange.com/questions/26330/backtracking-armijo-line-search-algorithm), [nonlinear optimization discussion](https://scicomp.stackexchange.com/questions/14787/fortran-library-for-minimization-or-maximization-of-functions-optimization-prob), and [NCSU Center for Theoretical and Computational Mathematics](https://ctk.math.ncsu.edu/).
