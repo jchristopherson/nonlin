@@ -148,7 +148,7 @@ contains
         x0 = x
         if (.not.all(ieee_is_finite(x0)) .or. maxeval <= 0) then
             fvec = ieee_value(0.0d0, ieee_quiet_nan)
-            go to 900
+            return
         end if
 
         lambda = 0.0d0
@@ -236,7 +236,6 @@ contains
             fvec = ieee_value(0.0d0, ieee_quiet_nan)
         end if
 
-900     continue
         if (present(ib)) then
             ib%iter_count = niter
             ib%fcn_count = neval
@@ -294,7 +293,7 @@ contains
         if (n /= fcn%get_equation_count()) error stop NL_INVALID_INPUT_ERROR
         if (size(x) /= n) error stop 3
         if (size(fvec) /= n) error stop 4
-        if (.not.all(ieee_is_finite(x)) .or. maxeval <= 0) go to 900
+        if (.not.all(ieee_is_finite(x)) .or. maxeval <= 0) return
 
         allocate(x0(n), z(n+1), tangent(n+1), predictor(n+1), candidate(n+1))
         allocate(residual(n), trial_residual(n), jac(n,n), lambda_jac(n))

@@ -570,13 +570,7 @@ contains
         gtol = this%get_gradient_tolerance()
         maxeval = this%get_max_fcn_evals()
         if (present(ib)) then
-            ib%iter_count = iter
-            ib%fcn_count = neval
-            ib%jacobian_count = njac
-            ib%gradient_count = 0
-            ib%converge_on_fcn = fcnvrg
-            ib%converge_on_chng = xcnvrg
-            ib%converge_on_zero_diff = gcnvrg
+            ib = iteration_behavior(maxeval)
         end if
         if (this%get_use_line_search()) then
             if (.not.this%is_line_search_defined()) &
@@ -688,6 +682,9 @@ contains
                 end if
 
                 ! Check for convergence
+                if (present(ib)) then
+                    call ib%log_iteration(norm2(fvec), norm2(dir), norm2(grad))
+                end if
                 call test_convergence(x, xold, fvec, grad, .true., xtol, &
                     ftol, gtol, check, xcnvrg, fcnvrg, gcnvrg, xnorm, fnorm)
                 if (check) then
