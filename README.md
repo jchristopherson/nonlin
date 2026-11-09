@@ -149,265 +149,117 @@ For reproducible builds, add a `rev` specifying the NONLIN commit you have valid
 | [autodiff](https://github.com/jchristopherson/autodiff) | Forward-mode automatic differentiation. |
 | [fortran_test_helper](https://github.com/jchristopherson/fortran_test_helper) | Test assertions; required only for testing. |
 
-## Example 1
+## Choosing an API
 
-This example solves a set of two equations of two unknowns using a Quasi-Newton type solver.  In this example, the solver is left to compute the derivatives numerically.
+NONLIN offers simple wrapper functions and configurable solver objects:
+
+| API | Use it when | Trade-off |
+| --- | --- | --- |
+| Simple functions such as `solve_brent`, `solve_newton`, `solve_quasi_newton`, `solve_nelder_mead`, and `solve_bfgs` | You want a short call with default solver settings and an initial guess. Callback procedures are passed directly. | Less setup; solver controls, custom derivatives, and iteration statistics are not exposed by the wrapper. |
+| Solver objects such as `brent_solver`, `newton_solver`, `quasi_newton_solver`, `nelder_mead`, and `bfgs` | You need to configure tolerances, bounds/brackets, derivative callbacks, line search behavior, or inspect iteration statistics. | More setup; you provide helper objects and configure the solver explicitly. |
+
+For example, the simple BFGS wrapper takes an AD-compatible objective and an initial guess:
 
 ```fortran
-program  example
-    use iso_fortran_env
-    use nonlin
-    implicit none
+x = solve_bfgs(rosenbrock, initial_guess)
+```
 
-    ! Local Variables
-    type(vecfcn_helper) :: obj
-    procedure(vecfcn), pointer :: fcn
-    type(iteration_behavior) :: ib
-    type(quasi_newton_solver) :: solver
-    real(real64) :: x(2), f(2)
+The solver-object API makes setup and controls explicit:
 
-    ! Locate the routine containing the equations to solve
-    fcn => fcns
-    call obj%set_fcn(fcn, 2, 2)
+```fortran
+call objective%set_fcn(fcn, 2)
+call solver%set_fcn_tolerance(1.0d-10)
+call solver%solve(objective, x, value)
+```
 
-    ! Define an initial guess
-    x = 1.0d0 ! Equivalent to x = [1.0d0, 1.0d0]
+The simple wrappers cover scalar root-finding (`solve_brent`, `solve_newton_1var`), square nonlinear systems (`solve_newton`, `solve_quasi_newton`), and unconstrained scalar-objective minimization (`solve_nelder_mead`, `solve_bfgs`). Use solver objects for least-squares problems or whenever you need more control or reporting.
 
-    ! Defining solver parameters.  This step is optional as the defaults are
-    ! typically sufficient; however, this is being done for illustration 
-    ! purposes.
-    !
-    ! Establish how many iterations are allowed to pass before the solver
-    ! forces a re-evaluation of the Jacobian matrix.  Notice, the solver may
-    ! choose to re-evaluate the Jacobian sooner than this, but that is 
-    ! dependent upon the behavior of the problem.
-    call solver%set_jacobian_interval(20)
+## Example 1: Quasi-Newton System Solve
 
-    ! Establish convergence criteria.  Again, this step is optional as the
-    ! defaults are typically sufficient; however, this is being done for
-    ! illustration purposes.
-    call solver%set_fcn_tolerance(1.0d-8)
-    call solver%set_var_tolerance(1.0d-12)
-    call solver%set_gradient_tolerance(1.0d-12)
+Solve two equations in two unknowns. This version estimates the Jacobian numerically; configure the solver or provide derivatives with `vecfcn_helper` when needed.
 
-    ! Solve
-    call solver%solve(obj, x, f, ib)
+```fortran
+type(vecfcn_helper) :: equations
+type(quasi_newton_solver) :: solver
+procedure(vecfcn), pointer :: fcn
+real(real64) :: x(2), residual(2)
 
-    ! Display the output
-    print '(A,F7.5,A,F7.5,A)', "Solution: (", x(1), ", ", x(2), ")"
-    print '(A,E9.3,A,E9.3,A)', "Residual: (", f(1), ", ", f(2), ")"
-    print '(A,I0)', "Iterations: ", ib%iter_count
-    print '(A,I0)', "Function Evaluations: ", ib%fcn_count
-    print '(A,I0)', "Jacobian Evaluations: ", ib%jacobian_count
+fcn => misc_2fcn
+call equations%set_fcn(fcn, 2, 2)
+x = 1.0d0
+call solver%solve(equations, x, residual)
+```
+
+The unknowns converge to `(5, 3)`. See [examples/nonlin_quasi_newton_example.f90](examples/nonlin_quasi_newton_example.f90) for the full program.
+
+## Example 2: Polynomial Fit with Least Squares
+
+Fit a cubic model to 21 measured data points by minimizing the residual vector over four coefficients. Least squares is available through the solver-object API.
+
+```fortran
+type(vecfcn_helper) :: residuals
+type(least_squares_solver) :: solver
+procedure(vecfcn), pointer :: fcn
+real(real64) :: coefficients(4), residual(21)
+
+fcn => lsq_poly_fit_fcn
+call residuals%set_fcn(fcn, 21, 4)
+coefficients = 1.0d0
+call solver%solve(residuals, coefficients, residual)
+```
+
+Source: [examples/nonlin_least_squares_example.f90](examples/nonlin_least_squares_example.f90).
+
+## Example 3: Polynomial Utilities
+
+Use the `polynomial` type for direct polynomial fitting without configuring a nonlinear solver. `x_data` and `y_data` are the sampled points.
+
+```fortran
+type(polynomial) :: p
+
+call p%fit(x_data, y_data, 3)
+y_fit = p%evaluate(x_data)
+```
+
+Source: [examples/nonlin_poly_fit_example.f90](examples/nonlin_poly_fit_example.f90).
+
+## Example 4: Nelder-Mead Minimization
+
+Minimize the Rosenbrock objective without derivatives:
+
+```fortran
+type(fcnnvar_helper) :: objective
+type(nelder_mead) :: solver
+procedure(fcnnvar), pointer :: fcn
+real(real64) :: x(2), value
+
+fcn => rosenbrock
+call objective%set_fcn(fcn, 2)
+x = [0.0d0, 0.0d0]
+call solver%solve(objective, x, value)
+```
+
+Source: [examples/nonlin_nm_opt_example.f90](examples/nonlin_nm_opt_example.f90).
+
+## Example 5: Simple API with BFGS
+
+The convenience wrapper minimizes a smooth objective with default solver settings. Its callback accepts dual numbers, allowing NONLIN to obtain gradients by AD without a procedure pointer or a helper object.
+
+```fortran
+use nonlin
+use autodiff, only : dual
+
+real(real64) :: x(2), initial_guess(2)
+initial_guess = [0.0d0, 0.0d0]
+x = solve_bfgs(rosenbrock, initial_guess)
 
 contains
-    ! Define the routine containing the equations to solve.  The equations are:
-    ! x**2 + y**2 = 34
-    ! x**2 - 2 * y**2 = 7
-    subroutine fcns(x, f, args)
-        real(real64), intent(in), dimension(:) :: x
-        real(real64), intent(out), dimension(:) :: f
-        class(*), intent(in), optional :: args
-        f(1) = x(1)**2 + x(2)**2 - 34.0d0
-        f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
-    end subroutine
-end program
-```
-
-The above program produces the following output.
-
-```text
-Solution: (5.00000, 3.00000)
-Residual: (0.323E-11, 0.705E-11)
-Iterations: 11
-Function Evaluations: 15
-Jacobian Evaluations: 1
-```
-
-## Example 2
-
-This example uses a least-squares approach to determine the coefficients of a polynomial that best fits a set of data.
-
-```fortran
-program example
-    use iso_fortran_env
-    use nonlin
-    implicit none
-
-    ! Local Variables
-    type(vecfcn_helper) :: obj
-    procedure(vecfcn), pointer :: fcn
-    type(least_squares_solver) :: solver
-    real(real64) :: x(4), f(21) ! There are 4 coefficients and 21 data points
-
-    ! Locate the routine containing the equations to solve
-    fcn => fcns
-    call obj%set_fcn(fcn, 21, 4)
-
-    ! Define an initial guess
-    x = 1.0d0 ! Equivalent to x = [1.0d0, 1.0d0, 1.0d0, 1.0d0]
-
-    ! Solve
-    call solver%solve(obj, x, f)
-
-    ! Display the output
-    print '(A,F12.10)', "c0: ", x(4)
-    print '(A,F12.10)', "c1: ", x(3)
-    print '(A,F12.10)', "c2: ", x(2)
-    print '(A,F12.10)', "c3: ", x(1)
-    print '(A,F7.5)', "Max Residual: ", maxval(abs(f))
-
-contains
-    ! The function containing the data to fit
-    subroutine fcns(x, f, args)
-        ! Arguments
-        real(real64), intent(in), dimension(:) :: x  ! Contains the coefficients
-        real(real64), intent(out), dimension(:) :: f
-        class(*), intent(in), optional :: args
-
-        ! Local Variables
-        real(real64), dimension(21) :: xp, yp
-
-        ! Data to fit (21 data points)
-        xp = [0.0d0, 0.1d0, 0.2d0, 0.3d0, 0.4d0, 0.5d0, 0.6d0, 0.7d0, 0.8d0, &
-            0.9d0, 1.0d0, 1.1d0, 1.2d0, 1.3d0, 1.4d0, 1.5d0, 1.6d0, 1.7d0, &
-            1.8d0, 1.9d0, 2.0d0]
-        yp = [1.216737514d0, 1.250032542d0, 1.305579195d0, 1.040182335d0, &
-            1.751867738d0, 1.109716707d0, 2.018141531d0, 1.992418729d0, &
-            1.807916923d0, 2.078806005d0, 2.698801324d0, 2.644662712d0, &
-            3.412756702d0, 4.406137221d0, 4.567156645d0, 4.999550779d0, &
-            5.652854194d0, 6.784320119d0, 8.307936836d0, 8.395126494d0, &
-            10.30252404d0]
-
-        ! We'll apply a cubic polynomial model to this data:
-        ! y = c3 * x**3 + c2 * x**2 + c1 * x + c0
-        f = x(1) * xp**3 + x(2) * xp**2 + x(3) * xp + x(4) - yp
-
-        ! For reference, the data was generated by adding random errors to
-        ! the following polynomial: y = x**3 - 0.3 * x**2 + 1.2 * x + 0.3
-    end subroutine
-end program
-```
-
-The above program produces the following output.
-
-```text
-c0: 1.1866142244
-c1: 0.4466134462
-c2: -.1223202909
-c3: 1.0647627571
-Max Residual: 0.50636
-```
-
-The following graph illustrates the fit.
-![Cubic polynomial fit to the example data](images/Curve_Fit_Example_1.png?raw=true)
-
-## Example 3
-
-This example utilizes the polynomial type to fit a polynomial to the data set utilized in Example 2.
-
-```fortran
-program example
-    use iso_fortran_env
-    use nonlin
-    implicit none
-
-    ! Local Variables
-    integer :: i
-    real(real64), dimension(21) :: xp, yp, yf, yc, err
-    real(real64) :: res
-    type(polynomial) :: p
-
-    ! Data to fit
-    xp = [0.0d0, 0.1d0, 0.2d0, 0.3d0, 0.4d0, 0.5d0, 0.6d0, 0.7d0, 0.8d0, &
-        0.9d0, 1.0d0, 1.1d0, 1.2d0, 1.3d0, 1.4d0, 1.5d0, 1.6d0, 1.7d0, &
-        1.8d0, 1.9d0, 2.0d0]
-    yp = [1.216737514d0, 1.250032542d0, 1.305579195d0, 1.040182335d0, &
-        1.751867738d0, 1.109716707d0, 2.018141531d0, 1.992418729d0, &
-        1.807916923d0, 2.078806005d0, 2.698801324d0, 2.644662712d0, &
-        3.412756702d0, 4.406137221d0, 4.567156645d0, 4.999550779d0, &
-        5.652854194d0, 6.784320119d0, 8.307936836d0, 8.395126494d0, &
-        10.30252404d0]
-
-    ! Create a copy of yp as it will be overwritten in the fit command
-    yc = yp
-
-    ! Fit the polynomial
-    call p%fit(xp, yp, 3)
-
-    ! Evaluate the polynomial at xp, and then determine the residual
-    yf = p%evaluate(xp)
-    err = abs(yf - yc)
-    res = maxval(err)
-
-    ! Print out the coefficients
-    print '(A,I0,A,F12.10)', ("c", i - 1, " = ", p%get(i), i = 1, 4)
-    print '(A,F7.5)', "Max Residual: ", res
-end program
-```
-
-The above program yields the following coefficients.
-
-```text
-c0 = 1.1866141861
-c1 = 0.4466136311
-c2 = -.1223204989
-c3 = 1.0647628218
-Max Residual: 0.50636
-```
-
-Notice, as expected, the results are very similar to the output of Example 2.
-
-## Example 4
-
-This example uses the Nelder-Mead simplex method to find the minimum of the Rosenbrock function.
-
-```fortran
-program example
-    use iso_fortran_env
-    use nonlin
-    implicit none
-
-    ! Local Variables
-    type(nelder_mead) :: solver
-    type(fcnnvar_helper) :: obj
-    procedure(fcnnvar), pointer :: fcn
-    real(real64) :: x(2), fout
-    type(iteration_behavior) :: ib
-
-    ! Initialization
-    fcn => rosenbrock
-    call obj%set_fcn(fcn, 2)
-
-    ! Define an initial guess - the solution is (1, 1)
-    call random_number(x)
-
-    ! Call the solver
-    call solver%solve(obj, x, fout, ib)
-
-     ! Display the output
-     print '(A,F7.5,A,F7.5,A)', "Minimum: (", x(1), ", ", x(2), ")"
-     print '(A,E9.3)', "Function Value: ", fout
-     print '(A,I0)', "Iterations: ", ib%iter_count
-     print '(A,I0)', "Function Evaluations: ", ib%fcn_count
-contains
-    ! Rosenbrock's Function
     function rosenbrock(x, args) result(f)
-        real(real64), intent(in), dimension(:) :: x
+        type(dual), intent(in), dimension(:) :: x
         class(*), intent(in), optional :: args
-        real(real64) :: f
+        type(dual) :: f
         f = 1.0d2 * (x(2) - x(1)**2)**2 + (x(1) - 1.0d0)**2
     end function
-end program
 ```
 
-The above program produces the following output:
-
-```text
-Minimum: (1.00000, 1.00000)
-Function Value: 0.121E-12
-Iterations: 52
-Function Evaluations: 101
-```
-
-Notice, the convergence tolerance was set to its default value (1e-12).
+See [examples/nonlin_simple_bfgs_example.f90](examples/nonlin_simple_bfgs_example.f90) for the complete program and [examples/nonlin_bfgs_example.f90](examples/nonlin_bfgs_example.f90) for the configurable solver-object approach.

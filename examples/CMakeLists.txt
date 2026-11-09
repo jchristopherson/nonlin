@@ -30,6 +30,9 @@ target_link_libraries(brent_example nonlin)
 add_executable(bfgs_example nonlin_bfgs_example.f90 example_problems.f90)
 target_link_libraries(bfgs_example nonlin)
 
+add_executable(simple_bfgs_example nonlin_simple_bfgs_example.f90)
+target_link_libraries(simple_bfgs_example nonlin)
+
 # 1D Newton Example
 add_executable(newton_1d_example nonlin_newton1d_example.f90 example_problems.f90)
 target_link_libraries(newton_1d_example nonlin)
