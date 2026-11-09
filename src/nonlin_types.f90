@@ -245,11 +245,6 @@ contains
 
         integer :: n
 
-        if (.not.this%is_history_allocated()) then
-            allocate(rst%log_gradient(0), rst%log_residual(0), rst%log_step_change(0))
-            return
-        end if
-
         if (this%m_history_count == 0) then
             allocate(rst%log_gradient(0), rst%log_residual(0), rst%log_step_change(0))
         else
