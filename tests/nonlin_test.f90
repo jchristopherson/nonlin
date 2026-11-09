@@ -239,6 +239,9 @@ program main
     rst = test_continuation_evaluation_limit()
     if (.not.rst) overall = .false.
 
+    rst = test_continuation_pseudo_arclength_fold()
+    if (.not.rst) overall = .false.
+
     ! End
     if (.not.overall) stop -1
 end program

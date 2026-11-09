@@ -33,6 +33,7 @@ module nonlin_test_continuation
     public :: test_continuation_custom_homotopy
     public :: test_continuation_evaluation_limit
     public :: test_continuation_fd_fallback
+    public :: test_continuation_pseudo_arclength_fold
 
     type, extends(continuation_solver) :: shifted_continuation_solver
         integer :: homotopy_calls = 0
@@ -40,6 +41,15 @@ module nonlin_test_continuation
     contains
         procedure :: homotopy => shifted_homotopy
         procedure :: homotopy_jacobian => shifted_homotopy_jacobian
+    end type
+
+    type, extends(continuation_solver) :: fold_continuation_solver
+        real(real64) :: minimum_lambda = huge(1.0d0)
+        real(real64) :: maximum_lambda = -huge(1.0d0)
+    contains
+        procedure :: homotopy => fold_homotopy
+        procedure :: homotopy_jacobian => fold_homotopy_jacobian
+        procedure :: homotopy_lambda_derivative => fold_lambda_derivative
     end type
 
 contains
@@ -71,6 +81,53 @@ contains
             end select
         end if
         f(1) = x(1)**2 - root_squared
+    end subroutine
+
+    subroutine fold_target(x, f, args)
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(out), dimension(:) :: f
+        class(*), intent(in), optional :: args
+        real(real64) :: p
+        p = x(1) * (x(1) - 1.0d0) * (x(1) - 2.0d0)
+        f(1) = 1.0d0 - p
+    end subroutine
+
+    subroutine fold_homotopy(this, fcn, x, x0, lambda, h, args)
+        class(fold_continuation_solver), intent(inout) :: this
+        class(vecfcn_helper), intent(inout) :: fcn
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(in), dimension(:) :: x0
+        real(real64), intent(in) :: lambda
+        real(real64), intent(out), dimension(:) :: h
+        class(*), intent(in), optional :: args
+        real(real64) :: p
+
+        this%minimum_lambda = min(this%minimum_lambda, lambda)
+        this%maximum_lambda = max(this%maximum_lambda, lambda)
+        p = x(1) * (x(1) - 1.0d0) * (x(1) - 2.0d0)
+        h(1) = lambda - p
+    end subroutine
+
+    subroutine fold_homotopy_jacobian(this, fcn, x, x0, lambda, jac, args)
+        class(fold_continuation_solver), intent(inout) :: this
+        class(vecfcn_helper), intent(inout) :: fcn
+        real(real64), intent(inout), dimension(:) :: x
+        real(real64), intent(in), dimension(:) :: x0
+        real(real64), intent(in) :: lambda
+        real(real64), intent(out), dimension(:,:) :: jac
+        class(*), intent(in), optional :: args
+        jac(1,1) = -(3.0d0 * x(1)**2 - 6.0d0 * x(1) + 2.0d0)
+    end subroutine
+
+    subroutine fold_lambda_derivative(this, fcn, x, x0, lambda, deriv, args)
+        class(fold_continuation_solver), intent(inout) :: this
+        class(vecfcn_helper), intent(inout) :: fcn
+        real(real64), intent(in), dimension(:) :: x
+        real(real64), intent(in), dimension(:) :: x0
+        real(real64), intent(in) :: lambda
+        real(real64), intent(out), dimension(:) :: deriv
+        class(*), intent(in), optional :: args
+        deriv = 1.0d0
     end subroutine
 
     subroutine shifted_homotopy(this, fcn, x, x0, lambda, h, args)
@@ -186,5 +243,33 @@ contains
         check = all(ieee_is_nan(residual)) .and. .not.ib%converge_on_fcn
         check = check .and. ib%fcn_count == 1
         if (.not.check) print *, "Continuation evaluation limit handling failed."
+    end function
+
+    function test_continuation_pseudo_arclength_fold() result(check)
+        type(vecfcn_helper) :: equations
+        type(fold_continuation_solver) :: solver
+        type(iteration_behavior) :: ib
+        procedure(vecfcn), pointer :: fcn
+        real(real64) :: x(1), residual(1)
+        logical :: check
+
+        fcn => fold_target
+        call equations%set_fcn(fcn, 1, 1)
+        call solver%set_use_pseudo_arclength(.true.)
+        call solver%set_initial_step(0.06d0)
+        call solver%set_max_fcn_evals(2000)
+        call solver%set_max_corrector_iterations(16)
+        x = 0.0d0
+        call solver%solve(equations, x, residual, ib)
+
+        check = ib%converge_on_fcn .and. abs(residual(1)) < 1.0d-8
+        check = check .and. x(1) > 2.0d0 .and. x(1) < 2.5d0
+        check = check .and. solver%minimum_lambda < 0.0d0
+        check = check .and. solver%maximum_lambda > 0.38d0
+        check = check .and. ib%fcn_count > 0 .and. ib%jacobian_count > 0
+        if (.not.check) print *, &
+            "Pseudo-arclength did not traverse the fold:", x, residual, &
+            solver%minimum_lambda, solver%maximum_lambda, ib%fcn_count, &
+            ib%jacobian_count, ib%iter_count
     end function
 end module
