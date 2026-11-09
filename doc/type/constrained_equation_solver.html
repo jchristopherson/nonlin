@@ -74,7 +74,7 @@
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip"
                  data-bs-placement="bottom" data-html="true"
-                 title="<p> 4.2% of total for derived types.</p>Including implementation: 327 statements,  9.3% of total for derived types.">10 statements</a>
+                 title="<p> 3.6% of total for derived types.</p>Including implementation: 324 statements,  7.9% of total for derived types.">10 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -134,20 +134,20 @@
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_fcn_tolerance">get_fcn_tolerance</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_gradient_tolerance">get_gradient_tolerance</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_lower_limits">get_lower_limits</a>
-            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_max_fcn_evals~3">get_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_print_status~2">get_print_status</a>
+            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_max_fcn_evals">get_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_print_status">get_print_status</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_step_scaling_factor">get_step_scaling_factor</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_upper_limits">get_upper_limits</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_var_tolerance">get_var_tolerance</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_fcn_tolerance">set_fcn_tolerance</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_gradient_tolerance">set_gradient_tolerance</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_lower_limits">set_lower_limits</a>
-            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_max_fcn_evals~3">set_max_fcn_evals</a>
-            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_print_status~2">set_print_status</a>
+            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_max_fcn_evals">set_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_print_status">set_print_status</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_step_scaling_factor">set_step_scaling_factor</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_upper_limits">set_upper_limits</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_var_tolerance">set_var_tolerance</a>
-            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-solve~4">solve</a>
+            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-solve~3">solve</a>
         </div>
       </div>
     </div>
@@ -421,7 +421,7 @@ tolerance.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_max_fcn_evals~3"></span>
+      <span class="anchor" id="boundprocedure-get_max_fcn_evals"></span>
       <h3>
           procedure, public ::
   <strong>get_max_fcn_evals</strong> => es_get_max_eval
@@ -480,7 +480,7 @@ a single solve.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_print_status~2"></span>
+      <span class="anchor" id="boundprocedure-get_print_status"></span>
       <h3>
           procedure, public ::
   <strong>get_print_status</strong> => es_get_print_status
@@ -922,7 +922,7 @@ factor itself is used.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_max_fcn_evals~3"></span>
+      <span class="anchor" id="boundprocedure-set_max_fcn_evals"></span>
       <h3>
           procedure, public ::
   <strong>set_max_fcn_evals</strong> => es_set_max_eval
@@ -991,7 +991,7 @@ a single solve.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_print_status~2"></span>
+      <span class="anchor" id="boundprocedure-set_print_status"></span>
       <h3>
           procedure, public ::
   <strong>set_print_status</strong> => es_set_print_status
@@ -1269,7 +1269,7 @@ factor itself is used.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-solve~4"></span>
+      <span class="anchor" id="boundprocedure-solve~3"></span>
       <h3>
           procedure, public ::
   <strong>solve</strong> => lss_solve
@@ -1368,7 +1368,7 @@ indicate a failure to converge.</p>
               <span class="anchor" ></span>
               type(<a href='iteration_behavior.html'>iteration_behavior</a>),
             </td>
-<td></td>
+<td>intent(out),</td>
               <td>optional</td>            <td>
               
             </td>
@@ -1422,7 +1422,7 @@ the routine.</p>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-11-07 20:15              </p>
+ on 2026-11-09 08:25              </p>
           </div>
         </div>
         <br>

@@ -154,7 +154,7 @@ module nonlin_multi_eqn_mult_var
                 !! An M-element array that, on output, will contain the values 
                 !! of each equation as evaluated at the variable values given 
                 !! in x.
-            type(iteration_behavior), optional :: ib
+            type(iteration_behavior), intent(out), optional :: ib
                 !! An optional output, that if provided, allows the caller to 
                 !! obtain iteration performance statistics.
             class(*), intent(in), optional :: args

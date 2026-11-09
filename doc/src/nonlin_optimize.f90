@@ -176,7 +176,7 @@ contains
         logical :: buildSimplex, fcnvrg
         integer :: i, ihi, ilo, ihi2, ndim, npts, flag, neval, iter, &
             maxeval
-        real(real64) :: ftol, rtol, ftry, fsave, fval, swp
+        real(real64) :: ftol, rtol, ftry, fsave, fval, swp, nan
         real(real64), allocatable, dimension(:) :: f, pcent, pmin, work
 
         ! Initialization
@@ -188,14 +188,9 @@ contains
         iter = 0
         neval = 0
         fcnvrg = .false.
+        nan = ieee_value(nan, ieee_quiet_nan)
         if (present(ib)) then
-            ib%iter_count = iter
-            ib%fcn_count = neval
-            ib%jacobian_count = 0
-            ib%gradient_count = 0
-            ib%converge_on_fcn = fcnvrg
-            ib%converge_on_chng = .false.
-            ib%converge_on_zero_diff = .false.
+            ib = iteration_behavior(maxeval)
         end if
 
         ! Input Check
@@ -279,6 +274,9 @@ contains
             ! extreme function values of the simplex (highest and lowest valued
             ! points).
             rtol = abs(f(ihi) - f(ilo))
+            if (present(ib)) then
+                call ib%log_iteration(rtol, nan, nan)
+            end if
             if (rtol < ftol) then
                 swp = f(1)
                 f(1) = f(ilo)
@@ -630,13 +628,7 @@ contains
         xcnvrg = .false.
         gcnvrg = .false.
         if (present(ib)) then
-            ib%iter_count = iter
-            ib%fcn_count = neval
-            ib%jacobian_count = 0
-            ib%gradient_count = ngrad
-            ib%converge_on_fcn = .false.
-            ib%converge_on_chng = xcnvrg
-            ib%converge_on_zero_diff = gcnvrg
+            ib = iteration_behavior(maxeval)
         end if
         if (this%get_use_line_search()) then
             if (.not.this%is_line_search_defined()) &
@@ -721,13 +713,20 @@ contains
                     temp = abs(dx(i)) / max(abs(x(i)), one)
                     xtest = max(temp, xtest)
                 end do
+
+                ! Test for convergence on the gradient
+                gtest = norm2(g)
+
+                ! Update the iteration log
+                if (present(ib)) then
+                    call ib%log_iteration(abs(fp), xtest, gtest)
+                end if
+
                 if (xtest < xtol) then
                     xcnvrg = .true.
                     exit
                 end if
 
-                ! Test for convergence on the gradient
-                gtest = norm2(g)
                 if (gtest < gtol) then
                     gcnvrg = .true.
                     exit

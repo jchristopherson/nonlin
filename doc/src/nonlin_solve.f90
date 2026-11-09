@@ -204,7 +204,7 @@ contains
             !! If the iteration process does not converge, each element is
             !! returned as NaN, and, if supplied, ib will indicate a
             !! failure to converge.
-        type(iteration_behavior), optional :: ib
+        type(iteration_behavior), intent(out), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
         class(*), intent(in), optional :: args
@@ -244,13 +244,7 @@ contains
         gtol = this%get_gradient_tolerance()
         maxeval = this%get_max_fcn_evals()
         if (present(ib)) then
-            ib%iter_count = iter
-            ib%fcn_count = neval
-            ib%jacobian_count = njac
-            ib%gradient_count = 0
-            ib%converge_on_fcn = fcnvrg
-            ib%converge_on_chng = xcnvrg
-            ib%converge_on_zero_diff = gcnvrg
+            ib = iteration_behavior(maxeval)
         end if
         if (this%get_use_line_search()) then
             if (.not.this%is_line_search_defined()) &
@@ -427,6 +421,9 @@ contains
                     call test_convergence(x, xold, fvec, dx, .false., xtol, &
                         ftol, gtol, check, xcnvrg, fcnvrg, gcnvrg, xnorm, fnorm)
                 end if
+                if (present(ib)) then
+                    call ib%log_iteration(fnorm, xnorm, norm2(dx))
+                end if
                 if (.not.check) then
                     ! The solution did not converge, figure out why
                     if (gcnvrg) then
@@ -533,7 +530,7 @@ contains
             !! If the iteration process does not converge, each element is
             !! returned as NaN, and, if supplied, ib will indicate a
             !! failure to converge.
-        type(iteration_behavior), optional :: ib
+        type(iteration_behavior), intent(out), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
         class(*), intent(in), optional :: args
@@ -570,13 +567,7 @@ contains
         gtol = this%get_gradient_tolerance()
         maxeval = this%get_max_fcn_evals()
         if (present(ib)) then
-            ib%iter_count = iter
-            ib%fcn_count = neval
-            ib%jacobian_count = njac
-            ib%gradient_count = 0
-            ib%converge_on_fcn = fcnvrg
-            ib%converge_on_chng = xcnvrg
-            ib%converge_on_zero_diff = gcnvrg
+            ib = iteration_behavior(maxeval)
         end if
         if (this%get_use_line_search()) then
             if (.not.this%is_line_search_defined()) &
@@ -690,6 +681,9 @@ contains
                 ! Check for convergence
                 call test_convergence(x, xold, fvec, grad, .true., xtol, &
                     ftol, gtol, check, xcnvrg, fcnvrg, gcnvrg, xnorm, fnorm)
+                if (present(ib)) then
+                    call ib%log_iteration(fnorm, xnorm, norm2(grad))
+                end if
                 if (check) then
                     ! The solution has converged
                     exit
@@ -782,7 +776,7 @@ contains
         logical :: fcnvrg, xcnvrg
         integer :: neval, maxeval, flag, iter
         real(real64) :: ftol, xtol, a, b, c, fa, fb, fc, p, q, r, s, xm, e, d, &
-            mn1, mn2, eps, tol1, temp
+            mn1, mn2, eps, tol1, temp, nan
 
         ! Initialization
         fcnvrg = .false.
@@ -793,18 +787,13 @@ contains
         neval = 0
         iter = 0
         eps = epsilon(eps)
+        nan = ieee_value(nan, ieee_quiet_nan)
         ftol = this%get_fcn_tolerance()
         xtol = this%get_var_tolerance()
         maxeval = this%get_max_fcn_evals()
         if (present(f)) f = zero
         if (present(ib)) then
-            ib%iter_count = iter
-            ib%fcn_count = neval
-            ib%jacobian_count = 0
-            ib%gradient_count = 0
-            ib%converge_on_fcn = fcnvrg
-            ib%converge_on_chng = xcnvrg
-            ib%converge_on_zero_diff = .false.
+            ib = iteration_behavior(maxeval)
         end if
 
         ! Input Check
@@ -841,6 +830,9 @@ contains
             ! Convergence Check
             tol1 = two * eps * abs(b) + half * xtol
             xm = half * (c - b)
+            if (present(ib)) then
+                call ib%log_iteration(abs(fb), abs(xm), nan)
+            end if
             if (abs(fb) < ftol) then
                 x = b
                 fcnvrg = .true.
@@ -985,13 +977,7 @@ contains
         maxeval = this%get_max_fcn_evals()
         if (present(f)) f = zero
         if (present(ib)) then
-            ib%iter_count = iter
-            ib%fcn_count = neval
-            ib%jacobian_count = ndiff
-            ib%gradient_count = 0
-            ib%converge_on_fcn = fcnvrg
-            ib%converge_on_chng = xcnvrg
-            ib%converge_on_zero_diff = dcnvrg
+            ib = iteration_behavior(maxeval)
         end if
         x1 = min(lim%x1, lim%x2)
         x2 = max(lim%x1, lim%x2)
@@ -1078,6 +1064,9 @@ contains
             ndiff = ndiff + 1
 
             ! Check for convergence
+            if (present(ib)) then
+                call ib%log_iteration(abs(ff), abs(dx), abs(df))
+            end if
             if (abs(ff) < ftol) then
                 fcnvrg = .true.
                 exit
