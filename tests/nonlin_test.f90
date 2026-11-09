@@ -31,6 +31,7 @@ program main
     use nonlin_test_optimize
     use nonlin_test_simple
     use nonlin_test_iteration
+    use nonlin_test_continuation
 
     ! Local Variables
     logical :: rst, overall
@@ -224,6 +225,18 @@ program main
     if (.not.rst) overall = .false.
 
     rst = test_iteration_bfgs()
+    if (.not.rst) overall = .false.
+
+    rst = test_continuation_default()
+    if (.not.rst) overall = .false.
+
+    rst = test_continuation_custom_homotopy()
+    if (.not.rst) overall = .false.
+
+    rst = test_continuation_fd_fallback()
+    if (.not.rst) overall = .false.
+
+    rst = test_continuation_evaluation_limit()
     if (.not.rst) overall = .false.
 
     ! End

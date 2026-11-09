@@ -31,4 +31,5 @@ module nonlin
     use nonlin_solve
     use nonlin_polynomials
     use nonlin_simple
+    use nonlin_continuation
 end module

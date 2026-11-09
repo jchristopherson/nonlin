@@ -7,6 +7,7 @@ set(nonlin_test_sources
     nonlin_test_optimize.f90
     nonlin_test_simple.f90
     nonlin_test_iteration.f90
+    nonlin_test_continuation.f90
     powell_badly_scaled.f90
 )
 

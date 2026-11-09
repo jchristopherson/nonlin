@@ -204,7 +204,7 @@ contains
             !! If the iteration process does not converge, each element is
             !! returned as NaN, and, if supplied, ib will indicate a
             !! failure to converge.
-        type(iteration_behavior), optional :: ib
+        type(iteration_behavior), intent(out), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
         class(*), intent(in), optional :: args
@@ -533,7 +533,7 @@ contains
             !! If the iteration process does not converge, each element is
             !! returned as NaN, and, if supplied, ib will indicate a
             !! failure to converge.
-        type(iteration_behavior), optional :: ib
+        type(iteration_behavior), intent(out), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
         class(*), intent(in), optional :: args
