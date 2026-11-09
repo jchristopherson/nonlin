@@ -188,7 +188,7 @@ contains
         iter = 0
         neval = 0
         fcnvrg = .false.
-        nan = ieee_value(nan, ieee_quiet_nan)
+        nan = ieee_value(0.0_real64, ieee_quiet_nan)
         if (present(ib)) then
             ib = iteration_behavior(maxeval)
         end if

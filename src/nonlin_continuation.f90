@@ -234,7 +234,7 @@ contains
         reached_end = .false.
         maxeval = this%get_max_fcn_evals()
         ftol = this%get_fcn_tolerance()
-        nan = ieee_value(nan, ieee_quiet_nan)
+        nan = ieee_value(0.0_real64, ieee_quiet_nan)
         if (present(ib)) then
             ib = iteration_behavior(maxeval)
         end if
@@ -392,7 +392,7 @@ contains
         maxeval = this%get_max_fcn_evals()
         ftol = this%get_fcn_tolerance()
         xtol = this%get_var_tolerance()
-        nan = ieee_value(nan, ieee_quiet_nan)
+        nan = ieee_value(0.0_real64, ieee_quiet_nan)
         if (present(ib)) then
             ib = iteration_behavior(maxeval)
         end if
