@@ -376,23 +376,35 @@ contains
             epsmch = epsilon(epsmch)
             eps = sqrt(epsmch)
 
+            if (nt == 1) then
+                do j = 1, n
+                    temp = this%m_xjwork(j,1)
+                    h = eps * abs(temp)
+                    if (h == zero) h = eps
+                    this%m_xjwork(j,1) = temp + h
+                    call this%fcn(this%m_xjwork(:,1), this%m_jwork(:,1), args = args)
+                    this%m_xjwork(j,1) = temp
+                    jac(:,j) = (this%m_jwork(:,1) - this%m_fwork) / h
+                end do
+            else
 !$omp parallel num_threads(nt) default(shared) private(j, tid, h, temp)
-            tid = 1
-!$          tid = omp_get_thread_num() + 1
+                tid = 1
+!$              tid = omp_get_thread_num() + 1
 
-            ! Compute the Jacobian - each thread has it's own workspace column
+                ! Compute the Jacobian - each thread has it's own workspace column
 !$omp do schedule(static)
-            do j = 1, n
-                temp = this%m_xjwork(j,tid)
-                h = eps * abs(temp)
-                if (h == zero) h = eps
-                this%m_xjwork(j,tid) = temp + h
-                call this%fcn(this%m_xjwork(:,tid), this%m_jwork(:,tid), args = args)
-                this%m_xjwork(j,tid) = temp
-                jac(:,j) = (this%m_jwork(:,tid) - this%m_fwork) / h
-            end do
+                do j = 1, n
+                    temp = this%m_xjwork(j,tid)
+                    h = eps * abs(temp)
+                    if (h == zero) h = eps
+                    this%m_xjwork(j,tid) = temp + h
+                    call this%fcn(this%m_xjwork(:,tid), this%m_jwork(:,tid), args = args)
+                    this%m_xjwork(j,tid) = temp
+                    jac(:,j) = (this%m_jwork(:,tid) - this%m_fwork) / h
+                end do
 !$omp end do
 !$omp end parallel
+            end if
         end if
     end subroutine
 
