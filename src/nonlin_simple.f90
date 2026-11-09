@@ -1,3 +1,27 @@
+! MIT License
+!
+! Copyright (c) 2017-2026 Jason Christopherson
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+!
+! nonlin_simple.f90
+
 module nonlin_simple
     use iso_fortran_env
     use nonlin_single_var, only : fcn1var_helper, fcn1var
@@ -105,7 +129,7 @@ function solve_newton(fcn, xo, args) result(x)
     procedure(vector_function), pointer :: fptr
     real(real64), allocatable, dimension(:) :: f
 
-    nvar = size(x)
+    nvar = size(xo)
     neqn = nvar
     allocate(x(nvar), source = xo)
     allocate(f(neqn))
@@ -144,7 +168,7 @@ function solve_quasi_newton(fcn, xo, args) result(x)
     procedure(vector_function), pointer :: fptr
     real(real64), allocatable, dimension(:) :: f
 
-    nvar = size(x)
+    nvar = size(xo)
     neqn = nvar
     allocate(x(nvar), source = xo)
     allocate(f(neqn))
@@ -183,6 +207,7 @@ function solve_nelder_mead(fcn, xo, args) result(x)
 
     nvar = size(xo)
     allocate(x(nvar), source = xo)
+    fptr => fcn_
     call eqn%set_auto_fcn(fptr, nvar)
     call solver%solve(eqn, x, args = args)
 
@@ -218,6 +243,7 @@ function solve_bfgs(fcn, xo, args) result(x)
 
     nvar = size(xo)
     allocate(x(nvar), source = xo)
+    fptr => fcn_
     call eqn%set_auto_fcn(fptr, nvar)
     call solver%solve(eqn, x, args = args)
 

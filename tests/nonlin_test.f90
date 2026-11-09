@@ -196,6 +196,12 @@ program main
     rst = test_solve_quasi_newton_3()
     if (.not.rst) overall = .false.
 
+    rst = test_solve_nelder_mead()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_bfgs()
+    if (.not.rst) overall = .false.
+
     rst = test_iteration_brent()
     if (.not.rst) overall = .false.
 
