@@ -111,7 +111,7 @@ contains
         integer :: n, neval, njac, niter, maxeval
         integer :: corrector_iteration, backtrack_iteration
         real(real64) :: lambda, target_lambda, step, alpha, residual_norm
-        real(real64) :: trial_norm, ftol
+        real(real64) :: trial_norm, ftol, nan
         logical :: corrected, accepted, reached_end
         real(real64), allocatable :: x0(:), xbase(:), trial_x(:), residual(:)
         real(real64), allocatable :: trial_residual(:), jac(:,:), direction(:)
@@ -126,14 +126,9 @@ contains
         reached_end = .false.
         maxeval = this%get_max_fcn_evals()
         ftol = this%get_fcn_tolerance()
+        nan = ieee_value(nan, ieee_quiet_nan)
         if (present(ib)) then
-            ib%iter_count = 0
-            ib%fcn_count = 0
-            ib%jacobian_count = 0
-            ib%gradient_count = 0
-            ib%converge_on_fcn = .false.
-            ib%converge_on_chng = .false.
-            ib%converge_on_zero_diff = .false.
+            ib = iteration_behavior(maxeval)
         end if
 
         ! This continuation method follows a square system from the supplied
@@ -211,6 +206,9 @@ contains
                     alpha = 0.5d0 * alpha
                 end do
                 niter = niter + 1
+                if (present(ib)) then
+                    call ib%log_iteration(trial_norm, nan, nan)
+                end if
                 if (.not.accepted) exit
                 if (maxval(abs(residual)) <= ftol) then
                     corrected = .true.
@@ -262,7 +260,7 @@ contains
         integer :: corrector_iteration, backtrack_iteration
         real(real64) :: ftol, xtol, ds, lambda_tol, lambda, ds_used
         real(real64) :: arc_error, merit, trial_merit, alpha, tangent_norm
-        real(real64) :: lambda_new
+        real(real64) :: lambda_new, nan
         logical :: success, corrected, accepted, endpoint_step, endpoint_ok
         real(real64), allocatable :: x0(:), z(:), tangent(:), predictor(:)
         real(real64), allocatable :: candidate(:), residual(:), trial_residual(:)
@@ -279,14 +277,9 @@ contains
         maxeval = this%get_max_fcn_evals()
         ftol = this%get_fcn_tolerance()
         xtol = this%get_var_tolerance()
+        nan = ieee_value(nan, ieee_quiet_nan)
         if (present(ib)) then
-            ib%iter_count = 0
-            ib%fcn_count = 0
-            ib%jacobian_count = 0
-            ib%gradient_count = 0
-            ib%converge_on_fcn = .false.
-            ib%converge_on_chng = .false.
-            ib%converge_on_zero_diff = .false.
+            ib = iteration_behavior(maxeval)
         end if
 
         if (.not.fcn%is_fcn_defined()) error stop NL_UNDEFINED_FUNCTION_ERROR
@@ -379,6 +372,9 @@ contains
                     alpha = 0.5d0 * alpha
                 end do
                 niter = niter + 1
+                if (present(ib)) then
+                    call ib%log_iteration(trial_merit, nan, nan)
+                end if
                 if (.not.accepted) exit
             end do
 

@@ -200,13 +200,7 @@ contains
         maxeval = this%get_max_fcn_evals()
         eps = epsilon(eps)
         if (present(ib)) then
-            ib%iter_count = iter
-            ib%fcn_count = neval
-            ib%jacobian_count = njac
-            ib%converge_on_fcn = fcnvrg
-            ib%converge_on_chng = xcnvrg
-            ib%converge_on_zero_diff = gcnvrg
-            ib%gradient_count = 0
+            ib = iteration_behavior(maxeval)
         end if
 
         ! Input Check
@@ -387,6 +381,9 @@ contains
                 end if ! LINE 290
 
                 ! Tests for convergence
+                if (present(ib)) then
+                    call ib%log_iteration(fnorm1, delta, gnorm)
+                end if
                 if (abs(actred) <= ftol .and. prered <= ftol .and. &
                     half * ratio <= one) fcnvrg = .true.
                 if (delta <= xtol * xnorm) xcnvrg = .true.
@@ -1034,13 +1031,7 @@ contains
         xu = this%get_upper_limits()
 
         if (present(ib)) then
-            ib%iter_count = iter
-            ib%fcn_count = neval
-            ib%jacobian_count = njac
-            ib%converge_on_fcn = fcnvrg
-            ib%converge_on_chng = xcnvrg
-            ib%converge_on_zero_diff = gcnvrg
-            ib%gradient_count = 0
+            ib = iteration_behavior(maxeval)
         end if
 
         ! Input Check
@@ -1184,6 +1175,9 @@ contains
             end if
 
             ! Test for convergence
+            if (present(ib)) then
+                call ib%log_iteration(fnewnorm, xnorm, gnorm)
+            end if
             if (xnorm <= xtol) then
                 converged = .true.
                 xcnvrg = .true.
