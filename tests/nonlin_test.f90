@@ -197,6 +197,12 @@ program main
     rst = test_solve_quasi_newton_3()
     if (.not.rst) overall = .false.
 
+    rst = test_solve_continuation()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_continuation_pseudo_arclength()
+    if (.not.rst) overall = .false.
+
     rst = test_solve_nelder_mead()
     if (.not.rst) overall = .false.
 

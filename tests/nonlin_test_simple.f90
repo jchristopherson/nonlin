@@ -41,6 +41,8 @@ module nonlin_test_simple
     public :: test_solve_quasi_newton_1
     public :: test_solve_quasi_newton_2
     public :: test_solve_quasi_newton_3
+    public :: test_solve_continuation
+    public :: test_solve_continuation_pseudo_arclength
     public :: test_solve_nelder_mead
     public :: test_solve_bfgs
 contains
@@ -341,6 +343,39 @@ contains
             print *, "Test Failed: solve_newton Test 3.  Expected: ", exact, &
                 ", Found: ", x
         end if
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_solve_continuation() result(check)
+        real(real64), allocatable :: x(:)
+        real(real64), dimension(2) :: xo, exact
+        real(real64) :: a
+        logical :: check
+
+        a = 3.0d0
+        xo = [5.0d0, 2.0d0]
+        exact = [sqrt(27.25d0), sqrt(6.75d0)]
+        x = solve_continuation(ad_system_1, xo, args = a)
+
+        check = size(x) == size(exact) .and. all_close(x, exact, 1.0d-6)
+        if (.not.check) print *, &
+            "Test Failed: solve_continuation. Expected:", exact, "Found:", x
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_solve_continuation_pseudo_arclength() result(check)
+        real(real64), allocatable :: x(:)
+        real(real64), dimension(3) :: xo, exact
+        logical :: check
+
+        xo = [2.0d0, 2.0d0, 2.0d0]
+        exact = sqrt([1.0d0, 2.0d0, 3.0d0])
+        x = solve_continuation_pseudo_arclength(ad_diagonal_system, xo)
+
+        check = size(x) == size(exact) .and. all_close(x, exact, 1.0d-6)
+        if (.not.check) print *, &
+            "Test Failed: solve_continuation_pseudo_arclength. Expected:", &
+            exact, "Found:", x
     end function
 
 ! ******************************************************************************
