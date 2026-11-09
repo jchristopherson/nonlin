@@ -227,6 +227,9 @@ program main
     rst = test_iteration_bfgs()
     if (.not.rst) overall = .false.
 
+    rst = test_convergence_history_storage()
+    if (.not.rst) overall = .false.
+
     rst = test_continuation_default()
     if (.not.rst) overall = .false.
 

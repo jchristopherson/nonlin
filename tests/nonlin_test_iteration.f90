@@ -28,6 +28,8 @@
 ! or gradient.
 module nonlin_test_iteration
     use iso_fortran_env
+    use ieee_arithmetic, only : ieee_is_nan, ieee_is_finite, ieee_is_negative, &
+        ieee_value, ieee_quiet_nan
     use nonlin
     implicit none
     private
@@ -39,6 +41,7 @@ module nonlin_test_iteration
     public :: test_iteration_constrained_least_squares
     public :: test_iteration_nelder_mead
     public :: test_iteration_bfgs
+    public :: test_convergence_history_storage
 
     ! Number of times each user routine has been called since the last reset
     integer, save :: n_fcn = 0
@@ -122,8 +125,19 @@ contains
         type(iteration_behavior), intent(in) :: ib
         integer, intent(in) :: nfcn, njac, ngrad
         logical :: ok
+        type(convergence_history) :: history
+
+        history = ib%get_convergence_history()
         ok = ib%fcn_count == nfcn .and. ib%jacobian_count == njac .and. &
             ib%gradient_count == ngrad .and. ib%iter_count >= 1
+        ok = ok .and. allocated(history%log_residual) .and. &
+            allocated(history%log_step_change) .and. allocated(history%log_gradient)
+        if (ok) then
+            ok = size(history%log_residual) > 0
+            ok = ok .and. size(history%log_residual) == size(history%log_step_change)
+            ok = ok .and. size(history%log_residual) == size(history%log_gradient)
+            ok = ok .and. .not.any(ieee_is_nan(history%log_residual))
+        end if
     end function
 
     subroutine report(name, ib)
@@ -412,6 +426,61 @@ contains
             call report("BFGS", ib)
             print *, "  solution: ", x
         end if
+    end function
+
+! ------------------------------------------------------------------------------
+    function test_convergence_history_storage() result(check)
+        type(iteration_behavior) :: ib
+        type(convergence_history) :: history, copy
+        real(real64) :: nan
+        integer :: i
+        logical :: check
+
+        nan = ieee_value(0.0d0, ieee_quiet_nan)
+        check = .true.
+
+        ! History access before initialization should safely return empty arrays.
+        history = ib%get_convergence_history()
+        check = allocated(history%log_residual) .and. &
+            allocated(history%log_step_change) .and. allocated(history%log_gradient)
+        check = check .and. size(history%log_residual) == 0
+        check = check .and. size(history%log_step_change) == 0
+        check = check .and. size(history%log_gradient) == 0
+
+        ! Exceed the initial capacity and verify that growth preserves prior
+        ! records. Zero metrics map to negative infinity; missing metrics stay NaN.
+        ib = iteration_behavior(2)
+        call ib%log_iteration(100.0d0, 10.0d0, 1.0d0)
+        call ib%log_iteration(0.0d0, 0.0d0, nan)
+        do i = 3, 5
+            call ib%log_iteration(real(i, real64), real(i, real64), real(i, real64))
+        end do
+        history = ib%get_convergence_history()
+        check = check .and. size(history%log_residual) == 5
+        check = check .and. all(shape(history%log_residual) == [5])
+        check = check .and. abs(history%log_residual(1) - 2.0d0) < 1.0d-12
+        check = check .and. abs(history%log_step_change(1) - 1.0d0) < 1.0d-12
+        check = check .and. abs(history%log_gradient(1)) < 1.0d-12
+        check = check .and. ieee_is_negative(history%log_residual(2)) .and. &
+            .not.ieee_is_finite(history%log_residual(2))
+        check = check .and. ieee_is_negative(history%log_step_change(2)) .and. &
+            .not.ieee_is_finite(history%log_step_change(2))
+        check = check .and. ieee_is_nan(history%log_gradient(2))
+
+        ! The getter returns an independent snapshot rather than exposing the
+        ! solver's private backing arrays.
+        history%log_residual(1) = -99.0d0
+        copy = ib%get_convergence_history()
+        check = check .and. abs(copy%log_residual(1) - 2.0d0) < 1.0d-12
+
+        ! Explicit initialization resets the record count and reallocates.
+        call ib%initialize(1)
+        history = ib%get_convergence_history()
+        check = check .and. size(history%log_residual) == 0
+        call ib%log_iteration(1.0d0, 1.0d0, 1.0d0)
+        history = ib%get_convergence_history()
+        check = check .and. size(history%log_residual) == 1
+        if (.not.check) print *, "Convergence history storage test failed."
     end function
 
 ! ------------------------------------------------------------------------------

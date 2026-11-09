@@ -184,6 +184,7 @@ contains
                 ! Backtrack until the corrector reduces the homotopy residual.
                 accepted = .false.
                 alpha = 1.0d0
+                trial_norm = residual_norm
                 do backtrack_iteration = 1, 12
                     if (neval >= maxeval) exit
                     trial_x = x + alpha * direction
@@ -354,6 +355,7 @@ contains
 
                 accepted = .false.
                 alpha = 1.0d0
+                trial_merit = merit
                 do backtrack_iteration = 1, 12
                     candidate = candidate + alpha * delta
                     if (.not.all(ieee_is_finite(candidate))) then

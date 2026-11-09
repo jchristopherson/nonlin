@@ -171,6 +171,7 @@ contains
         type(vecfcn_helper) :: equations
         type(continuation_solver) :: solver
         type(iteration_behavior) :: ib
+        type(convergence_history) :: history
         procedure(vector_function), pointer :: fcn
         real(real64) :: x(1), residual(1), target
         logical :: check
@@ -180,11 +181,15 @@ contains
         target = 2.0d0
         x = 1.0d0
         call solver%solve(equations, x, residual, ib, args = target)
+        history = ib%get_convergence_history()
 
         check = abs(x(1) - sqrt(target)) < 1.0d-7
         check = check .and. abs(residual(1)) < 1.0d-8
         check = check .and. ib%converge_on_fcn
         check = check .and. ib%jacobian_count > 0 .and. ib%fcn_count > 0
+        check = check .and. size(history%log_residual) == ib%iter_count
+        check = check .and. size(history%log_step_change) == ib%iter_count
+        check = check .and. size(history%log_gradient) == ib%iter_count
         if (.not.check) print *, "Continuation default path failed:", x, residual
     end function
 
@@ -249,6 +254,7 @@ contains
         type(vecfcn_helper) :: equations
         type(fold_continuation_solver) :: solver
         type(iteration_behavior) :: ib
+        type(convergence_history) :: history
         procedure(vecfcn), pointer :: fcn
         real(real64) :: x(1), residual(1)
         logical :: check
@@ -261,12 +267,16 @@ contains
         call solver%set_max_corrector_iterations(16)
         x = 0.0d0
         call solver%solve(equations, x, residual, ib)
+        history = ib%get_convergence_history()
 
         check = ib%converge_on_fcn .and. abs(residual(1)) < 1.0d-8
         check = check .and. x(1) > 2.0d0 .and. x(1) < 2.5d0
         check = check .and. solver%minimum_lambda < 0.0d0
         check = check .and. solver%maximum_lambda > 0.38d0
         check = check .and. ib%fcn_count > 0 .and. ib%jacobian_count > 0
+        check = check .and. size(history%log_residual) == ib%iter_count
+        check = check .and. size(history%log_step_change) == ib%iter_count
+        check = check .and. size(history%log_gradient) == ib%iter_count
         if (.not.check) print *, &
             "Pseudo-arclength did not traverse the fold:", x, residual, &
             solver%minimum_lambda, solver%maximum_lambda, ib%fcn_count, &
