@@ -158,12 +158,12 @@ contains
         if (allocated(this%m_history%log_gradient)) deallocate(this%m_history%log_gradient)
         if (allocated(this%m_history%log_residual)) deallocate(this%m_history%log_residual)
         if (allocated(this%m_history%log_step_change)) deallocate(this%m_history%log_step_change)
-        allocate( &
-            this%m_history%log_gradient(n), &
-            this%m_history%log_residual(n), &
-            this%m_history%log_step_change(n), &
-            source = nan &
-        )
+        allocate(this%m_history%log_gradient(n))
+        allocate(this%m_history%log_residual(n))
+        allocate(this%m_history%log_step_change(n))
+        this%m_history%log_gradient = nan
+        this%m_history%log_residual = nan
+        this%m_history%log_step_change = nan
     end subroutine
 
 ! ------------------------------------------------------------------------------
@@ -190,7 +190,7 @@ contains
         !! Reallocates storage for the history buffers.
         class(iteration_behavior), intent(inout) :: this
             !! The [[iteration_behavior]] object.
-        integer :: new_size
+        integer, intent(in) :: new_size
             !! The new size of the storage arrays.
 
         integer :: n

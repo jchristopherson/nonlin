@@ -190,7 +190,7 @@ contains
         fcnvrg = .false.
         nan = ieee_value(0.0_real64, ieee_quiet_nan)
         if (present(ib)) then
-            ib = iteration_behavior(maxeval)
+            call ib%initialize(maxeval)
         end if
 
         ! Input Check
@@ -628,7 +628,7 @@ contains
         xcnvrg = .false.
         gcnvrg = .false.
         if (present(ib)) then
-            ib = iteration_behavior(maxeval)
+            call ib%initialize(maxeval)
         end if
         if (this%get_use_line_search()) then
             if (.not.this%is_line_search_defined()) &

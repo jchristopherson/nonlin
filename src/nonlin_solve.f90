@@ -244,7 +244,7 @@ contains
         gtol = this%get_gradient_tolerance()
         maxeval = this%get_max_fcn_evals()
         if (present(ib)) then
-            ib = iteration_behavior(maxeval)
+            call ib%initialize(maxeval)
         end if
         if (this%get_use_line_search()) then
             if (.not.this%is_line_search_defined()) &
@@ -567,7 +567,7 @@ contains
         gtol = this%get_gradient_tolerance()
         maxeval = this%get_max_fcn_evals()
         if (present(ib)) then
-            ib = iteration_behavior(maxeval)
+            call ib%initialize(maxeval)
         end if
         if (this%get_use_line_search()) then
             if (.not.this%is_line_search_defined()) &
@@ -793,7 +793,7 @@ contains
         maxeval = this%get_max_fcn_evals()
         if (present(f)) f = zero
         if (present(ib)) then
-            ib = iteration_behavior(maxeval)
+            call ib%initialize(maxeval)
         end if
 
         ! Input Check
@@ -977,7 +977,7 @@ contains
         maxeval = this%get_max_fcn_evals()
         if (present(f)) f = zero
         if (present(ib)) then
-            ib = iteration_behavior(maxeval)
+            call ib%initialize(maxeval)
         end if
         x1 = min(lim%x1, lim%x2)
         x2 = max(lim%x1, lim%x2)

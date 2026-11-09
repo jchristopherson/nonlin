@@ -236,7 +236,7 @@ contains
         ftol = this%get_fcn_tolerance()
         nan = ieee_value(0.0_real64, ieee_quiet_nan)
         if (present(ib)) then
-            ib = iteration_behavior(maxeval)
+            call ib%initialize(maxeval)
         end if
 
         ! This continuation method follows a square system from the supplied
@@ -394,7 +394,7 @@ contains
         xtol = this%get_var_tolerance()
         nan = ieee_value(0.0_real64, ieee_quiet_nan)
         if (present(ib)) then
-            ib = iteration_behavior(maxeval)
+            call ib%initialize(maxeval)
         end if
 
         if (.not.fcn%is_fcn_defined()) error stop NL_UNDEFINED_FUNCTION_ERROR
