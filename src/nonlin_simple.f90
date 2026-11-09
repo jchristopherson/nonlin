@@ -5,13 +5,16 @@ module nonlin_simple
     use nonlin_multi_var
     use nonlin_types
     use nonlin_solve
-    use autodiff, only : scalar_function, vector_function
+    use nonlin_optimize
+    use autodiff, only : dual, scalar_function, vector_function
     implicit none
     private
     public :: solve_brent
     public :: solve_newton_1var
     public :: solve_newton
     public :: solve_quasi_newton
+    public :: solve_nelder_mead
+    public :: solve_bfgs
 
 contains
 ! ------------------------------------------------------------------------------
@@ -20,7 +23,7 @@ function solve_brent(fcn, bracket, args) result(x)
     !! \(f(x) = 0\).  For more control over the solver it is recommended to
     !! utilize the [[brent_solver]] type.  This function is a convenience
     !! wrapper around this solver.
-    procedure(fcn1var), intent(in), pointer :: fcn
+    procedure(fcn1var) :: fcn
         !! The function.
     type(value_pair), intent(in) :: bracket
         !! An initial estimate that brackets the solution.
@@ -32,8 +35,19 @@ function solve_brent(fcn, bracket, args) result(x)
 
     type(fcn1var_helper) :: eqn
     type(brent_solver) :: solver
-    call eqn%set_fcn(fcn)
+    procedure(fcn1var), pointer :: fptr
+
+    fptr => fcn_
+    call eqn%set_fcn(fptr)
     call solver%solve(eqn, x, bracket, args = args)
+
+contains
+    function fcn_(x_, args_) result(f_)
+        real(real64), intent(in) :: x_
+        class(*), intent(in), optional :: args_
+        real(real64) :: f_
+        f_ = fcn(x_, args_)
+    end function
 end function
 
 ! ------------------------------------------------------------------------------
@@ -42,7 +56,7 @@ function solve_newton_1var(fcn, bracket, args) result(x)
     !! \(f(x) = 0\).  For more control over the solver it is recommended to
     !! utilize the [[newton_1var_solver]] type.  This function is a convenience
     !! wrapper around this solver.
-    procedure(fcn1var), intent(in), pointer :: fcn
+    procedure(fcn1var) :: fcn
         !! The function.
     type(value_pair), intent(in) :: bracket
         !! An initial estimate that brackets the solution.
@@ -54,8 +68,19 @@ function solve_newton_1var(fcn, bracket, args) result(x)
 
     type(fcn1var_helper) :: eqn
     type(newton_1var_solver) :: solver
-    call eqn%set_fcn(fcn)
+    procedure(fcn1var), pointer :: fptr
+
+    fptr => fcn_
+    call eqn%set_fcn(fptr)
     call solver%solve(eqn, x, bracket, args = args)
+
+contains
+    function fcn_(x_, args_) result(f_)
+        real(real64), intent(in) :: x_
+        class(*), intent(in), optional :: args_
+        real(real64) :: f_
+        f_ = fcn(x_, args_)
+    end function
 end function
 
 ! ------------------------------------------------------------------------------
@@ -64,7 +89,7 @@ function solve_newton(fcn, xo, args) result(x)
     !! For more control over the solver it is recommended to utilize the 
     !! [[newton_solver]] type.  This function is a convenience wrapper around 
     !! this solver.
-    procedure(vector_function), intent(in), pointer :: fcn
+    procedure(vector_function) :: fcn
         !! The function.
     real(real64), intent(in), dimension(:) :: xo
         !! An N-element array containing an initial guess at the solution.
@@ -77,14 +102,24 @@ function solve_newton(fcn, xo, args) result(x)
     integer :: nvar, neqn
     type(vecfcn_helper) :: eqns
     type(newton_solver) :: solver
+    procedure(vector_function), pointer :: fptr
     real(real64), allocatable, dimension(:) :: f
 
     nvar = size(x)
     neqn = nvar
     allocate(x(nvar), source = xo)
     allocate(f(neqn))
-    call eqns%set_auto_fcn(fcn, neqn, nvar)
+    fptr => fcn_
+    call eqns%set_auto_fcn(fptr, neqn, nvar)
     call solver%solve(eqns, x, f, args = args)
+
+contains
+    subroutine fcn_(x_, f_, args_)
+        type(dual), intent(in), dimension(:) :: x_
+        type(dual), intent(out), dimension(:) :: f_
+        class(*), intent(in), optional :: args_
+        call fcn(x_, f_, args_)
+    end subroutine
 end function
 
 ! ------------------------------------------------------------------------------
@@ -93,7 +128,7 @@ function solve_quasi_newton(fcn, xo, args) result(x)
     !! unknowns.  For more control over the solver it is recommended to utilize
     !! the [[quasi_newton_solver]] type.  This function is a convenience wrapper 
     !! around this solver.
-    procedure(vector_function), intent(in), pointer :: fcn
+    procedure(vector_function) :: fcn
         !! The function.
     real(real64), intent(in), dimension(:) :: xo
         !! An N-element array containing an initial guess at the solution.
@@ -106,35 +141,94 @@ function solve_quasi_newton(fcn, xo, args) result(x)
     integer :: nvar, neqn
     type(vecfcn_helper) :: eqns
     type(quasi_newton_solver) :: solver
+    procedure(vector_function), pointer :: fptr
     real(real64), allocatable, dimension(:) :: f
 
     nvar = size(x)
     neqn = nvar
     allocate(x(nvar), source = xo)
     allocate(f(neqn))
-    call eqns%set_auto_fcn(fcn, neqn, nvar)
-    call solver%solve(eqns, x, f, args = args)
+    fptr => fcn_
+    call eqns%set_auto_fcn(fptr, neqn, nvar)
+    call solver%solve(eqns, x, f, args = args) 
+contains
+    subroutine fcn_(x_, f_, args_)
+        type(dual), intent(in), dimension(:) :: x_
+        type(dual), intent(out), dimension(:) :: f_
+        class(*), intent(in), optional :: args_
+        call fcn(x_, f_, args_)
+    end subroutine
 end function
 
 ! ------------------------------------------------------------------------------
+function solve_nelder_mead(fcn, xo, args) result(x)
+    !! Utilizes the Nelder-Mead method for minimizing a function of N variables.
+    !! For more control over the solver it is recommended to utilize the 
+    !! [[nelder_mead]] type.  This function is a convenience wrapper around 
+    !! this solver.
+    procedure(scalar_function) :: fcn
+        !! The function.
+    real(real64), intent(in), dimension(:) :: xo
+        !! An N-element array containing an initial guess at the solution.
+    class(*), intent(in), optional :: args
+        !! An optional object that can be used to pass information to fcn.
+    real(real64), allocatable, dimension(:) :: x
+        !! An N-element array containing the values of \(x\) that minimize 
+        !! \(f(x)\) within the default solver tolerances.
+
+    integer :: nvar
+    procedure(scalar_function), pointer :: fptr
+    type(fcnnvar_helper) :: eqn
+    type(nelder_mead) :: solver
+
+    nvar = size(xo)
+    allocate(x(nvar), source = xo)
+    call eqn%set_auto_fcn(fptr, nvar)
+    call solver%solve(eqn, x, args = args)
+
+contains
+    function fcn_(x_, args_) result(f_)
+        type(dual), intent(in), dimension(:) :: x_
+        class(*), intent(in), optional :: args_
+        type(dual) :: f_
+        f_ = fcn(x_, args_)
+    end function
+end function
 
 ! ------------------------------------------------------------------------------
+function solve_bfgs(fcn, xo, args) result(x)
+    !! Utilizes the BFGS method for minimizing a function of N variables.
+    !! For more control over the solver it is recommended to utilize the 
+    !! [[bfgs]] type.  This function is a convenience wrapper around 
+    !! this solver.
+    procedure(scalar_function) :: fcn
+        !! The function.
+    real(real64), intent(in), dimension(:) :: xo
+        !! An N-element array containing an initial guess at the solution.
+    class(*), intent(in), optional :: args
+        !! An optional object that can be used to pass information to fcn.
+    real(real64), allocatable, dimension(:) :: x
+        !! An N-element array containing the values of \(x\) that minimize 
+        !! \(f(x)\) within the default solver tolerances.
 
-! ------------------------------------------------------------------------------
+    integer :: nvar
+    procedure(scalar_function), pointer :: fptr
+    type(fcnnvar_helper) :: eqn
+    type(bfgs) :: solver
 
-! ------------------------------------------------------------------------------
+    nvar = size(xo)
+    allocate(x(nvar), source = xo)
+    call eqn%set_auto_fcn(fptr, nvar)
+    call solver%solve(eqn, x, args = args)
 
-! ------------------------------------------------------------------------------
-
-! ------------------------------------------------------------------------------
-
-! ------------------------------------------------------------------------------
-
-! ------------------------------------------------------------------------------
-
-! ------------------------------------------------------------------------------
-
-! ------------------------------------------------------------------------------
+contains
+    function fcn_(x_, args_) result(f_)
+        type(dual), intent(in), dimension(:) :: x_
+        class(*), intent(in), optional :: args_
+        type(dual) :: f_
+        f_ = fcn(x_, args_)
+    end function
+end function
 
 ! ------------------------------------------------------------------------------
 end module
