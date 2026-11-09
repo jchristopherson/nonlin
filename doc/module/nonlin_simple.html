@@ -74,7 +74,7 @@
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip"
                  data-bs-placement="bottom" data-html="true"
-                 title=" 3.5% of total for modules and submodules.">151 statements</a>
+                 title=" 4.6% of total for modules and submodules.">205 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -125,6 +125,8 @@
         <div class="list-group list-group-flush">
             <a class="list-group-item" href="../module/nonlin_simple.html#proc-solve_bfgs">solve_bfgs</a>
             <a class="list-group-item" href="../module/nonlin_simple.html#proc-solve_brent">solve_brent</a>
+            <a class="list-group-item" href="../module/nonlin_simple.html#proc-solve_continuation">solve_continuation</a>
+            <a class="list-group-item" href="../module/nonlin_simple.html#proc-solve_continuation_pseudo_arclength">solve_continuation_pseudo_arclength</a>
             <a class="list-group-item" href="../module/nonlin_simple.html#proc-solve_nelder_mead">solve_nelder_mead</a>
             <a class="list-group-item" href="../module/nonlin_simple.html#proc-solve_newton">solve_newton</a>
             <a class="list-group-item" href="../module/nonlin_simple.html#proc-solve_newton_1var">solve_newton_1var</a>
@@ -155,14 +157,15 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <ul class="list-inline">
+                  <li class="list-inline-item"><a href='nonlin_optimize.html'>nonlin_optimize</a></li>
+                  <li class="list-inline-item"><a href='nonlin_continuation.html'>nonlin_continuation</a></li>
+                  <li class="list-inline-item"><a href='nonlin_multi_var.html'>nonlin_multi_var</a></li>
                   <li class="list-inline-item">autodiff</li>
                   <li class="list-inline-item"><a href='http://fortranwiki.org/fortran/show/iso_fortran_env'>iso_fortran_env</a></li>
-                  <li class="list-inline-item"><a href='nonlin_optimize.html'>nonlin_optimize</a></li>
-                  <li class="list-inline-item"><a href='nonlin_multi_eqn_mult_var.html'>nonlin_multi_eqn_mult_var</a></li>
-                  <li class="list-inline-item"><a href='nonlin_multi_var.html'>nonlin_multi_var</a></li>
+                  <li class="list-inline-item"><a href='nonlin_single_var.html'>nonlin_single_var</a></li>
                   <li class="list-inline-item"><a href='nonlin_types.html'>nonlin_types</a></li>
                   <li class="list-inline-item"><a href='nonlin_solve.html'>nonlin_solve</a></li>
-                  <li class="list-inline-item"><a href='nonlin_single_var.html'>nonlin_single_var</a></li>
+                  <li class="list-inline-item"><a href='nonlin_multi_eqn_mult_var.html'>nonlin_multi_eqn_mult_var</a></li>
               </ul>
             </li>
         </ul>
@@ -203,7 +206,7 @@ this solver.</p>
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-fcn~10"></span>
+              <span class="anchor" id="variable-fcn~9"></span>
               procedure(scalar_function)
             </td>
 <td></td>
@@ -233,7 +236,7 @@ this solver.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-args~11"></span>
+              <span class="anchor" id="variable-args~10"></span>
               class(*),
             </td>
 <td>intent(in),</td>
@@ -282,7 +285,7 @@ wrapper around this solver.</p>
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-fcn~5"></span>
+              <span class="anchor" id="variable-fcn~4"></span>
               procedure(<a href='..\interface\fcn1var.html'>fcn1var</a>)
             </td>
 <td></td>
@@ -312,7 +315,7 @@ wrapper around this solver.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-args~6"></span>
+              <span class="anchor" id="variable-args~5"></span>
               class(*),
             </td>
 <td>intent(in),</td>
@@ -334,6 +337,164 @@ wrapper around this solver.</p>
     </h4>
     <p>The value of <script type="math/tex">x</script> that satisfies <script type="math/tex">f(x) = 0</script> within the default
 solver tolerances.</p>
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-solve_continuation"></span> <h3>public  function <a href='..\proc\solve_continuation.html'>solve_continuation</a>(fcn, xo, args) result(x)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Utilizes a continuation solver to solve a system of N equations and N 
+unknowns.  For more control over the solver it is recommended to utilize
+the <a href="..\type\continuation_solver.html">continuation_solver</a> type.  This function is a convenience wrapper 
+around this solver.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-fcn~10"></span>
+              procedure(vector_function)
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>fcn</strong></td>
+            <td>
+<p>The function.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-xo~5"></span>
+              real(kind=real64),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              dimension(:)
+            </td>
+            <td>::</td>
+            <td><strong>xo</strong></td>
+            <td>
+<p>An N-element array containing an initial guess at the solution.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-args~11"></span>
+              class(*),
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>args</strong></td>
+            <td>
+<p>An optional object that can be used to pass information to fcn.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>real(kind=real64), allocatable, dimension(:)</small>
+    </h4>
+    <p>An N-element array containing the values of <script type="math/tex">x</script> that satisfies 
+<script type="math/tex">f(x) = 0</script> within the default solver tolerances.</p>
+
+    </div>
+  </div>
+
+              <div class="card">
+    <div class="card-header codesum"><span class="anchor" id="proc-solve_continuation_pseudo_arclength"></span> <h3>public  function <a href='..\proc\solve_continuation_pseudo_arclength.html'>solve_continuation_pseudo_arclength</a>(fcn, xo, args) result(x)  
+</h3></div>
+    <div class="card-body">
+          
+  <p>Utilizes a pseudo-arclength continuation solver to solve a system of N 
+equations and N unknowns.  For more control over the solver it is 
+recommended to utilize the <a href="..\type\continuation_solver.html">continuation_solver</a> type.  This function 
+is a convenience wrapper around this solver.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-fcn~11"></span>
+              procedure(vector_function)
+            </td>
+<td></td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>fcn</strong></td>
+            <td>
+<p>The function.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-xo~6"></span>
+              real(kind=real64),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              dimension(:)
+            </td>
+            <td>::</td>
+            <td><strong>xo</strong></td>
+            <td>
+<p>An N-element array containing an initial guess at the solution.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-args~12"></span>
+              class(*),
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>args</strong></td>
+            <td>
+<p>An optional object that can be used to pass information to fcn.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>real(kind=real64), allocatable, dimension(:)</small>
+    </h4>
+    <p>An N-element array containing the values of <script type="math/tex">x</script> that satisfies 
+<script type="math/tex">f(x) = 0</script> within the default solver tolerances.</p>
 
     </div>
   </div>
@@ -361,7 +522,7 @@ this solver.</p>
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-fcn~9"></span>
+              <span class="anchor" id="variable-fcn~8"></span>
               procedure(scalar_function)
             </td>
 <td></td>
@@ -391,7 +552,7 @@ this solver.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-args~10"></span>
+              <span class="anchor" id="variable-args~9"></span>
               class(*),
             </td>
 <td>intent(in),</td>
@@ -440,7 +601,7 @@ this solver.</p>
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-fcn~7"></span>
+              <span class="anchor" id="variable-fcn~6"></span>
               procedure(vector_function)
             </td>
 <td></td>
@@ -470,7 +631,7 @@ this solver.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-args~8"></span>
+              <span class="anchor" id="variable-args~7"></span>
               class(*),
             </td>
 <td>intent(in),</td>
@@ -519,7 +680,7 @@ wrapper around this solver.</p>
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-fcn~6"></span>
+              <span class="anchor" id="variable-fcn~5"></span>
               procedure(<a href='..\interface\fcn1var.html'>fcn1var</a>)
             </td>
 <td></td>
@@ -549,7 +710,7 @@ wrapper around this solver.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-args~7"></span>
+              <span class="anchor" id="variable-args~6"></span>
               class(*),
             </td>
 <td>intent(in),</td>
@@ -598,7 +759,7 @@ around this solver.</p>
     <tbody>
         <tr>
             <td>
-              <span class="anchor" id="variable-fcn~8"></span>
+              <span class="anchor" id="variable-fcn~7"></span>
               procedure(vector_function)
             </td>
 <td></td>
@@ -628,7 +789,7 @@ around this solver.</p>
         </tr>
         <tr>
             <td>
-              <span class="anchor" id="variable-args~9"></span>
+              <span class="anchor" id="variable-args~8"></span>
               class(*),
             </td>
 <td>intent(in),</td>
@@ -675,7 +836,7 @@ around this solver.</p>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-11-09 08:25              </p>
+ on 2026-11-09 14:44              </p>
           </div>
         </div>
         <br>

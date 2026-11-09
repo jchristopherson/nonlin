@@ -30,6 +30,7 @@ module nonlin_simple
     use nonlin_types
     use nonlin_solve
     use nonlin_optimize
+    use nonlin_continuation
     use autodiff, only : dual, scalar_function, vector_function
     implicit none
     private
@@ -39,6 +40,8 @@ module nonlin_simple
     public :: solve_quasi_newton
     public :: solve_nelder_mead
     public :: solve_bfgs
+    public :: solve_continuation
+    public :: solve_continuation_pseudo_arclength
 
 contains
 ! ------------------------------------------------------------------------------
@@ -254,6 +257,83 @@ contains
         type(dual) :: f_
         f_ = fcn(x_, args_)
     end function
+end function
+
+! ------------------------------------------------------------------------------
+function solve_continuation(fcn, xo, args) result(x)
+    !! Utilizes a continuation solver to solve a system of N equations and N 
+    !! unknowns.  For more control over the solver it is recommended to utilize
+    !! the [[continuation_solver]] type.  This function is a convenience wrapper 
+    !! around this solver.
+    procedure(vector_function) :: fcn
+        !! The function.
+    real(real64), intent(in), dimension(:) :: xo
+        !! An N-element array containing an initial guess at the solution.
+    class(*), intent(in), optional :: args
+        !! An optional object that can be used to pass information to fcn.
+    real(real64), allocatable, dimension(:) :: x
+        !! An N-element array containing the values of \(x\) that satisfies 
+        !! \(f(x) = 0\) within the default solver tolerances.
+
+    integer :: nvar, neqn
+    type(vecfcn_helper) :: eqns
+    type(continuation_solver) :: solver
+    procedure(vector_function), pointer :: fptr
+    real(real64), allocatable, dimension(:) :: f
+
+    nvar = size(xo)
+    neqn = nvar
+    allocate(x(nvar), source = xo)
+    allocate(f(neqn))
+    fptr => fcn_
+    call eqns%set_auto_fcn(fptr, neqn, nvar)
+    call solver%solve(eqns, x, f, args = args) 
+contains
+    subroutine fcn_(x_, f_, args_)
+        type(dual), intent(in), dimension(:) :: x_
+        type(dual), intent(out), dimension(:) :: f_
+        class(*), intent(in), optional :: args_
+        call fcn(x_, f_, args_)
+    end subroutine
+end function
+
+! ------------------------------------------------------------------------------
+function solve_continuation_pseudo_arclength(fcn, xo, args) result(x)
+    !! Utilizes a pseudo-arclength continuation solver to solve a system of N 
+    !! equations and N unknowns.  For more control over the solver it is 
+    !! recommended to utilize the [[continuation_solver]] type.  This function 
+    !! is a convenience wrapper around this solver.
+    procedure(vector_function) :: fcn
+        !! The function.
+    real(real64), intent(in), dimension(:) :: xo
+        !! An N-element array containing an initial guess at the solution.
+    class(*), intent(in), optional :: args
+        !! An optional object that can be used to pass information to fcn.
+    real(real64), allocatable, dimension(:) :: x
+        !! An N-element array containing the values of \(x\) that satisfies 
+        !! \(f(x) = 0\) within the default solver tolerances.
+
+    integer :: nvar, neqn
+    type(vecfcn_helper) :: eqns
+    type(continuation_solver) :: solver
+    procedure(vector_function), pointer :: fptr
+    real(real64), allocatable, dimension(:) :: f
+
+    nvar = size(xo)
+    neqn = nvar
+    allocate(x(nvar), source = xo)
+    allocate(f(neqn))
+    fptr => fcn_
+    call eqns%set_auto_fcn(fptr, neqn, nvar)
+    call solver%set_use_pseudo_arclength(.true.)
+    call solver%solve(eqns, x, f, args = args) 
+contains
+    subroutine fcn_(x_, f_, args_)
+        type(dual), intent(in), dimension(:) :: x_
+        type(dual), intent(out), dimension(:) :: f_
+        class(*), intent(in), optional :: args_
+        call fcn(x_, f_, args_)
+    end subroutine
 end function
 
 ! ------------------------------------------------------------------------------
