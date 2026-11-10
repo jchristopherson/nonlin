@@ -140,8 +140,8 @@ program main
     rst = test_least_squares_4()
     if (.not.rst) overall = .false.
 
-    ! rst = test_brent_2()
-    ! if (.not.rst) overall = .false.
+    rst = test_brent_2()
+    if (.not.rst) overall = .false.
 
     ! rst = test_newton_1var_1()
     ! if (.not.rst) overall = .false.
