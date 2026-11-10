@@ -8,11 +8,6 @@ project(
 set(CMAKE_Fortran_STANDARD 2018)
 set(CMAKE_Fortran_STANDARD_REQUIRED TRUE)
 
-if (CMAKE_Fortran_COMPILER_ID MATCHES "Intel|IntelLLVM")
-  add_compile_options($<$<COMPILE_LANGUAGE:Fortran>:-g>)
-  add_compile_options($<$<COMPILE_LANGUAGE:Fortran>:-traceback>)
-endif()
-
 # Confgiure everything
 add_subdirectory(configure)
 
