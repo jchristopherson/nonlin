@@ -167,11 +167,11 @@ program main
     rst = test_constrained_least_squares_bounds()
     if (.not.rst) overall = .false.
 
-    rst = test_solve_brent_1()
-    if (.not.rst) overall = .false.
-
-    ! rst = test_solve_brent_2()
+    ! rst = test_solve_brent_1()
     ! if (.not.rst) overall = .false.
+
+    rst = test_solve_brent_2()
+    if (.not.rst) overall = .false.
 
     ! rst = test_solve_newton_1var_1()
     ! if (.not.rst) overall = .false.
