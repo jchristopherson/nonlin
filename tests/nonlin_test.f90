@@ -143,11 +143,11 @@ program main
     rst = test_brent_2()
     if (.not.rst) overall = .false.
 
-    ! rst = test_newton_1var_1()
-    ! if (.not.rst) overall = .false.
+    rst = test_newton_1var_1()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_newton_1var_2()
-    ! if (.not.rst) overall = .false.
+    rst = test_newton_1var_2()
+    if (.not.rst) overall = .false.
 
     ! rst = test_scalar_solver_edge_cases()
     ! if (.not.rst) overall = .false.
