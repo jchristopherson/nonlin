@@ -30,4 +30,7 @@ module nonlin
     use nonlin_optimize
     use nonlin_solve
     use nonlin_polynomials
+    use nonlin_simple
+    use nonlin_continuation
+    use autodiff
 end module

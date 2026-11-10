@@ -74,7 +74,7 @@
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip"
                  data-bs-placement="bottom" data-html="true"
-                 title="<p> 4.4% of total for derived types.</p>Including implementation: 313 statements,  9.3% of total for derived types.">10 statements</a>
+                 title="<p> 3.6% of total for derived types.</p>Including implementation: 324 statements,  7.8% of total for derived types.">10 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -138,7 +138,7 @@
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_print_status~2">get_print_status</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_step_scaling_factor">get_step_scaling_factor</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_upper_limits">get_upper_limits</a>
-            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_var_tolerance~3">get_var_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-get_var_tolerance~2">get_var_tolerance</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_fcn_tolerance~2">set_fcn_tolerance</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_gradient_tolerance">set_gradient_tolerance</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_lower_limits">set_lower_limits</a>
@@ -146,8 +146,8 @@
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_print_status~2">set_print_status</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_step_scaling_factor">set_step_scaling_factor</a>
             <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_upper_limits">set_upper_limits</a>
-            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_var_tolerance~3">set_var_tolerance</a>
-            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-solve~9">solve</a>
+            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-set_var_tolerance~2">set_var_tolerance</a>
+            <a class="list-group-item" href="../type/constrained_equation_solver.html#boundprocedure-solve~10">solve</a>
         </div>
       </div>
     </div>
@@ -468,7 +468,7 @@ a single solve.</p>
 
     <h4>
     Return Value
-    <small>integer(kind=int32)</small>
+    <small>integer</small>
     </h4>
     <p>The maximum number of function evaluations.</p>
 
@@ -660,7 +660,7 @@ factor itself is used.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_var_tolerance~3"></span>
+      <span class="anchor" id="boundprocedure-get_var_tolerance~2"></span>
       <h3>
           procedure, public ::
   <strong>get_var_tolerance</strong> => es_get_var_tol
@@ -967,7 +967,7 @@ a single solve.</p>
         <tr>
             <td>
               <span class="anchor" ></span>
-              integer(kind=int32),
+              integer,
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -1201,7 +1201,7 @@ factor itself is used.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_var_tolerance~3"></span>
+      <span class="anchor" id="boundprocedure-set_var_tolerance~2"></span>
       <h3>
           procedure, public ::
   <strong>set_var_tolerance</strong> => es_set_var_tol
@@ -1269,7 +1269,7 @@ factor itself is used.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-solve~9"></span>
+      <span class="anchor" id="boundprocedure-solve~10"></span>
       <h3>
           procedure, public ::
   <strong>solve</strong> => lss_solve
@@ -1317,7 +1317,7 @@ routine LMDIF.</p>
               <span class="anchor" ></span>
               class(<a href='vecfcn_helper.html'>vecfcn_helper</a>),
             </td>
-<td>intent(in)</td>
+<td>intent(inout)</td>
               <td></td>            <td>
               
             </td>
@@ -1368,7 +1368,7 @@ indicate a failure to converge.</p>
               <span class="anchor" ></span>
               type(<a href='iteration_behavior.html'>iteration_behavior</a>),
             </td>
-<td></td>
+<td>intent(out),</td>
               <td>optional</td>            <td>
               
             </td>
@@ -1384,7 +1384,7 @@ obtain iteration performance statistics.</p>
               <span class="anchor" ></span>
               class(*),
             </td>
-<td>intent(inout),</td>
+<td>intent(in),</td>
               <td>optional</td>            <td>
               
             </td>
@@ -1422,7 +1422,7 @@ the routine.</p>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-09-03 20:38              </p>
+ on 2026-11-09 14:44              </p>
           </div>
         </div>
         <br>

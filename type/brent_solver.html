@@ -74,7 +74,7 @@
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip"
                  data-bs-placement="bottom" data-html="true"
-                 title="<p> 1.8% of total for derived types.</p>Including implementation: 188 statements,  5.6% of total for derived types.">4 statements</a>
+                 title="<p> 1.4% of total for derived types.</p>Including implementation: 186 statements,  4.5% of total for derived types.">4 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -132,15 +132,15 @@
         <div class="list-group list-group-flush">
             <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-get_diff_tolerance">get_diff_tolerance</a>
             <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-get_fcn_tolerance">get_fcn_tolerance</a>
-            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-get_max_fcn_evals~2">get_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-get_max_fcn_evals">get_max_fcn_evals</a>
             <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-get_print_status">get_print_status</a>
-            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-get_var_tolerance~2">get_var_tolerance</a>
+            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-get_var_tolerance">get_var_tolerance</a>
             <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-set_diff_tolerance">set_diff_tolerance</a>
             <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-set_fcn_tolerance">set_fcn_tolerance</a>
-            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-set_max_fcn_evals~2">set_max_fcn_evals</a>
+            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-set_max_fcn_evals">set_max_fcn_evals</a>
             <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-set_print_status">set_print_status</a>
-            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-set_var_tolerance~2">set_var_tolerance</a>
-            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-solve~5">solve</a>
+            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-set_var_tolerance">set_var_tolerance</a>
+            <a class="list-group-item" href="../type/brent_solver.html#boundprocedure-solve~6">solve</a>
         </div>
       </div>
     </div>
@@ -287,7 +287,7 @@ tolerance.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_max_fcn_evals~2"></span>
+      <span class="anchor" id="boundprocedure-get_max_fcn_evals"></span>
       <h3>
           procedure, public ::
   <strong>get_max_fcn_evals</strong> => es1_get_max_eval
@@ -334,7 +334,7 @@ a single solve.</p>
 
     <h4>
     Return Value
-    <small>integer(kind=int32)</small>
+    <small>integer</small>
     </h4>
     <p>The maximum number of function evaluations.</p>
 
@@ -405,7 +405,7 @@ printed.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_var_tolerance~2"></span>
+      <span class="anchor" id="boundprocedure-get_var_tolerance"></span>
       <h3>
           procedure, public ::
   <strong>get_var_tolerance</strong> => es1_get_var_tol
@@ -600,7 +600,7 @@ tolerance.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_max_fcn_evals~2"></span>
+      <span class="anchor" id="boundprocedure-set_max_fcn_evals"></span>
       <h3>
           procedure, public ::
   <strong>set_max_fcn_evals</strong> => es1_set_max_eval
@@ -645,7 +645,7 @@ a single solve.</p>
         <tr>
             <td>
               <span class="anchor" ></span>
-              integer(kind=int32),
+              integer,
             </td>
 <td>intent(in)</td>
               <td></td>            <td>
@@ -738,7 +738,7 @@ printed.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_var_tolerance~2"></span>
+      <span class="anchor" id="boundprocedure-set_var_tolerance"></span>
       <h3>
           procedure, public ::
   <strong>set_var_tolerance</strong> => es1_set_var_tol
@@ -806,7 +806,7 @@ printed.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-solve~5"></span>
+      <span class="anchor" id="boundprocedure-solve~6"></span>
       <h3>
           procedure, public ::
   <strong>solve</strong> => brent_solve
@@ -948,7 +948,7 @@ obtain iteration performance statistics.</p>
               <span class="anchor" ></span>
               class(*),
             </td>
-<td>intent(inout),</td>
+<td>intent(in),</td>
               <td>optional</td>            <td>
               
             </td>
@@ -985,7 +985,7 @@ obtain iteration performance statistics.</p>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-09-03 20:38              </p>
+ on 2026-11-09 14:44              </p>
           </div>
         </div>
         <br>

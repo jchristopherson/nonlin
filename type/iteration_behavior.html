@@ -74,7 +74,7 @@
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip"
                  data-bs-placement="bottom" data-html="true"
-                 title="<p> 3.9% of total for derived types.</p>Including implementation: 9 statements,  0.3% of total for derived types.">9 statements</a>
+                 title="<p> 7.8% of total for derived types.</p>Including implementation: 101 statements,  2.4% of total for derived types.">22 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -126,6 +126,18 @@
     </div>
 
   
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#cons-0"
+         aria-expanded="false" aria-controls="cons-0">
+         <h4 class="card-header bg-primary text-white">Constructor</h4>
+      </a>
+      <div id="cons-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../type/iteration_behavior.html#interface-iteration_behavior">iteration_behavior</a>
+        </div>
+      </div>
+    </div>
+
   
   
   
@@ -139,8 +151,20 @@
   
   
   
-  
-  
+      <div class="card mb-4">
+      <a data-bs-toggle="collapse" href="#boundprocs-0"
+         aria-expanded="false" aria-controls="boundprocs-0">
+         <h4 class="card-header bg-primary text-white">Type-Bound Procedures</h4>
+      </a>
+      <div id="boundprocs-0" class="collapse">
+        <div class="list-group list-group-flush">
+            <a class="list-group-item" href="../type/iteration_behavior.html#boundprocedure-get_convergence_history">get_convergence_history</a>
+            <a class="list-group-item" href="../type/iteration_behavior.html#boundprocedure-initialize~2">initialize</a>
+            <a class="list-group-item" href="../type/iteration_behavior.html#boundprocedure-log_iteration">log_iteration</a>
+        </div>
+      </div>
+    </div>
+
   
   
 
@@ -226,7 +250,7 @@ else, false.</p>
         <tr>
             <td>
               <span class="anchor" id="variable-fcn_count"></span>
-              integer(kind=int32),
+              integer,
             </td>
               <td>public</td>
             <td>
@@ -243,7 +267,7 @@ else, false.</p>
         <tr>
             <td>
               <span class="anchor" id="variable-gradient_count"></span>
-              integer(kind=int32),
+              integer,
             </td>
               <td>public</td>
             <td>
@@ -260,7 +284,7 @@ else, false.</p>
         <tr>
             <td>
               <span class="anchor" id="variable-iter_count"></span>
-              integer(kind=int32),
+              integer,
             </td>
               <td>public</td>
             <td>
@@ -277,7 +301,7 @@ else, false.</p>
         <tr>
             <td>
               <span class="anchor" id="variable-jacobian_count"></span>
-              integer(kind=int32),
+              integer,
             </td>
               <td>public</td>
             <td>
@@ -297,8 +321,299 @@ else, false.</p>
     </section>
     <br>
     
+      <section>
+        <h2>Constructor</h2>
+            <div class="card">
+    <div class="card-header bg-light codesum">
+      <span class="anchor" id="interface-iteration_behavior"></span>
+      <h3>public        interface <a href='..\interface\iteration_behavior.html'>iteration_behavior</a> 
+      </h3>
+    </div>
+    <ul class="list-group">
+          <li class="list-group-item">
+                <h3>
+    private  function ib_constructor(max_iters) result(rst)  
+
+    </h3>
+  <p>Initializes the <a href="..\type\iteration_behavior.html">iteration_behavior</a> object.  All fields are set
+such that all counters are zero and all convergence flags are false.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" id="variable-max_iters~2"></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>max_iters</strong></td>
+            <td>
+                <p>The maximum number of iterations the solver is allowed to take.
+An NL_INVALID_INPUT_ERROR is thrown if this value is less than
+one.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>type(<a href='iteration_behavior.html'>iteration_behavior</a>)</small>
+    </h4>
+    <p>The <a href="..\type\iteration_behavior.html">iteration_behavior</a> object.</p>
+
+          </li>
+    </ul>
+  </div>
+
+      </section>
+      <br>
 
 
+      <section>
+        <h2>Type-Bound Procedures</h2>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-get_convergence_history"></span>
+      <h3>
+          procedure, public ::
+  <strong>get_convergence_history</strong> => ib_get_history
+        
+      </h3>
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
+    private pure function ib_get_history(this) result(rst)  
+</h3>
+
+  <p>Gets the convergence history.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='iteration_behavior.html'>iteration_behavior</a>),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+                <p>The <a href="..\type\iteration_behavior.html">iteration_behavior</a> object.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>type(<a href='convergence_history.html'>convergence_history</a>)</small>
+    </h4>
+    <p>The <a href="..\type\convergence_history.html">convergence_history</a> object containing convergence 
+tracking information.</p>
+
+        </li>
+    </ul>
+  </div>
+
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-initialize~2"></span>
+      <h3>
+          procedure, public ::
+  <strong>initialize</strong> => ib_init
+        
+      </h3>
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
+    private  subroutine ib_init(this, max_iters)  
+</h3>
+
+  <p>Initializes the <a href="..\type\iteration_behavior.html">iteration_behavior</a> object.  All fields are reset
+such that all counters are zero and all convergence flags are false.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='iteration_behavior.html'>iteration_behavior</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+                <p>The <a href="..\type\iteration_behavior.html">iteration_behavior</a> object.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              integer,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>max_iters</strong></td>
+            <td>
+                <p>The maximum number of iterations the solver is allowed to take.
+An NL_INVALID_INPUT_ERROR is thrown if this value is less than
+one.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+        </li>
+    </ul>
+  </div>
+
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-log_iteration"></span>
+      <h3>
+          procedure, public ::
+  <strong>log_iteration</strong> => ib_log_iteration
+        
+      </h3>
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
+    private  subroutine ib_log_iteration(this, resid, dx, grad)  
+</h3>
+
+  <p>Registers an iteration given the appropriate metrics.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='iteration_behavior.html'>iteration_behavior</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+                <p>The <a href="..\type\iteration_behavior.html">iteration_behavior</a> object.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>resid</strong></td>
+            <td>
+                <p>The residual value.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>dx</strong></td>
+            <td>
+                <p>The norm of the solution direction vector.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>grad</strong></td>
+            <td>
+                <p>The norm of the gradient vector.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+        </li>
+    </ul>
+  </div>
+
+          </div>
+      </section>
 
     
     </div>
@@ -316,7 +631,7 @@ else, false.</p>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-09-03 20:38              </p>
+ on 2026-11-09 14:44              </p>
           </div>
         </div>
         <br>
