@@ -74,7 +74,7 @@
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip"
                  data-bs-placement="bottom" data-html="true"
-                 title=" 0.5% of total for source files.">18 statements</a>
+                 title=" 0.4% of total for source files.">18 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -151,46 +151,68 @@
 
       <section>
         <h2><span class="anchor" id="src"></span>Source Code</h2>
-        <div class="hl codehilite"><pre><span></span><a id="ln-1" name="ln-1" href="#ln-1"></a><span class="k">module </span><span class="n">nonlin_error_handling</span>
-<a id="ln-2" name="ln-2" href="#ln-2"></a><span class="w">    </span><span class="k">use </span><span class="n">iso_fortran_env</span>
-<a id="ln-3" name="ln-3" href="#ln-3"></a><span class="w">    </span><span class="k">use </span><span class="n">linalg_errors</span><span class="p">,</span><span class="w"> </span><span class="k">only</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">LA_OUT_OF_MEMORY_ERROR</span><span class="p">,</span><span class="w"> </span><span class="n">LA_CONVERGENCE_ERROR</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
-<a id="ln-4" name="ln-4" href="#ln-4"></a><span class="w">        </span><span class="n">LA_INVALID_OPERATION_ERROR</span>
-<a id="ln-5" name="ln-5" href="#ln-5"></a><span class="w">    </span><span class="k">implicit none</span>
-<a id="ln-6" name="ln-6" href="#ln-6"></a>
-<a id="ln-7" name="ln-7" href="#ln-7"></a><span class="c">! ******************************************************************************</span>
-<a id="ln-8" name="ln-8" href="#ln-8"></a><span class="c">! ERROR FLAGS</span>
-<a id="ln-9" name="ln-9" href="#ln-9"></a><span class="c">! ------------------------------------------------------------------------------</span>
-<a id="ln-10" name="ln-10" href="#ln-10"></a><span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">int32</span><span class="p">),</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_NO_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
-<a id="ln-11" name="ln-11" href="#ln-11"></a><span class="w">        </span><span class="c">!! A flag denoting no error.</span>
-<a id="ln-12" name="ln-12" href="#ln-12"></a><span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">int32</span><span class="p">),</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_INVALID_INPUT_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">201</span>
-<a id="ln-13" name="ln-13" href="#ln-13"></a><span class="w">        </span><span class="c">!! An error flag denoting an invalid input.</span>
-<a id="ln-14" name="ln-14" href="#ln-14"></a><span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">int32</span><span class="p">),</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_ARRAY_SIZE_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">202</span>
-<a id="ln-15" name="ln-15" href="#ln-15"></a><span class="w">        </span><span class="c">!! An error flag denoting an improperly sized array.</span>
-<a id="ln-16" name="ln-16" href="#ln-16"></a><span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">int32</span><span class="p">),</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_OUT_OF_MEMORY_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LA_OUT_OF_MEMORY_ERROR</span>
-<a id="ln-17" name="ln-17" href="#ln-17"></a><span class="w">        </span><span class="c">!! An error denoting that there is insufficient memory available.</span>
-<a id="ln-18" name="ln-18" href="#ln-18"></a><span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">int32</span><span class="p">),</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_INVALID_OPERATION_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">&amp;</span>
-<a id="ln-19" name="ln-19" href="#ln-19"></a><span class="w">        </span><span class="n">LA_INVALID_OPERATION_ERROR</span>
-<a id="ln-20" name="ln-20" href="#ln-20"></a><span class="w">        </span><span class="c">!! An error resulting from an invalid operation.</span>
-<a id="ln-21" name="ln-21" href="#ln-21"></a><span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">int32</span><span class="p">),</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_CONVERGENCE_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LA_CONVERGENCE_ERROR</span>
-<a id="ln-22" name="ln-22" href="#ln-22"></a><span class="w">        </span><span class="c">!! An error resulting from a lack of convergence.</span>
-<a id="ln-23" name="ln-23" href="#ln-23"></a><span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">int32</span><span class="p">),</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_DIVERGENT_BEHAVIOR_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">206</span>
-<a id="ln-24" name="ln-24" href="#ln-24"></a><span class="w">        </span><span class="c">!! An error resulting from a divergent condition.</span>
-<a id="ln-25" name="ln-25" href="#ln-25"></a><span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">int32</span><span class="p">),</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_SPURIOUS_CONVERGENCE_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">207</span>
-<a id="ln-26" name="ln-26" href="#ln-26"></a><span class="w">        </span><span class="c">!! An error indicating a possible spurious convergence condition.</span>
-<a id="ln-27" name="ln-27" href="#ln-27"></a><span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">int32</span><span class="p">),</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_TOLERANCE_TOO_SMALL_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">208</span>
-<a id="ln-28" name="ln-28" href="#ln-28"></a><span class="w">        </span><span class="c">!! An error indicating the user-requested tolerance is too small to be</span>
-<a id="ln-29" name="ln-29" href="#ln-29"></a><span class="w">        </span><span class="c">!! practical for the problem at hand.</span>
-<a id="ln-30" name="ln-30" href="#ln-30"></a><span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">int32</span><span class="p">),</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_INDEX_OUT_OF_RANGE_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">209</span>
-<a id="ln-31" name="ln-31" href="#ln-31"></a><span class="w">        </span><span class="c">!! An error flag denoting an array index is out of range.</span>
-<a id="ln-32" name="ln-32" href="#ln-32"></a><span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">int32</span><span class="p">),</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_DIVIDE_BY_ZERO_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">210</span>
-<a id="ln-33" name="ln-33" href="#ln-33"></a><span class="w">        </span><span class="c">!! An error flag denoting a division by zero error.</span>
-<a id="ln-34" name="ln-34" href="#ln-34"></a><span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">int32</span><span class="p">),</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_UNDEFINED_FUNCTION_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">211</span>
-<a id="ln-35" name="ln-35" href="#ln-35"></a><span class="w">        </span><span class="c">!! An error flag denoting that the routine containing the function to</span>
-<a id="ln-36" name="ln-36" href="#ln-36"></a><span class="w">        </span><span class="c">!! solve has not been properly defined.</span>
-<a id="ln-37" name="ln-37" href="#ln-37"></a><span class="w">    </span><span class="kt">integer</span><span class="p">(</span><span class="n">int32</span><span class="p">),</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_UNDERDEFINED_PROBLEM_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">212</span>
-<a id="ln-38" name="ln-38" href="#ln-38"></a><span class="w">        </span><span class="c">!! An error flag denoting an underdefined problem error.</span>
-<a id="ln-39" name="ln-39" href="#ln-39"></a>
-<a id="ln-40" name="ln-40" href="#ln-40"></a><span class="k">end module</span>
+        <div class="hl codehilite"><pre><span></span><a id="ln-1" name="ln-1" href="#ln-1"></a><span class="c">! MIT License</span>
+<a id="ln-2" name="ln-2" href="#ln-2"></a><span class="c">!</span>
+<a id="ln-3" name="ln-3" href="#ln-3"></a><span class="c">! Copyright (c) 2017-2026 Jason Christopherson</span>
+<a id="ln-4" name="ln-4" href="#ln-4"></a><span class="c">!</span>
+<a id="ln-5" name="ln-5" href="#ln-5"></a><span class="c">! Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<a id="ln-6" name="ln-6" href="#ln-6"></a><span class="c">! of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<a id="ln-7" name="ln-7" href="#ln-7"></a><span class="c">! in the Software without restriction, including without limitation the rights</span>
+<a id="ln-8" name="ln-8" href="#ln-8"></a><span class="c">! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<a id="ln-9" name="ln-9" href="#ln-9"></a><span class="c">! copies of the Software, and to permit persons to whom the Software is</span>
+<a id="ln-10" name="ln-10" href="#ln-10"></a><span class="c">! furnished to do so, subject to the following conditions:</span>
+<a id="ln-11" name="ln-11" href="#ln-11"></a><span class="c">!</span>
+<a id="ln-12" name="ln-12" href="#ln-12"></a><span class="c">! The above copyright notice and this permission notice shall be included in all</span>
+<a id="ln-13" name="ln-13" href="#ln-13"></a><span class="c">! copies or substantial portions of the Software.</span>
+<a id="ln-14" name="ln-14" href="#ln-14"></a><span class="c">!</span>
+<a id="ln-15" name="ln-15" href="#ln-15"></a><span class="c">! THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<a id="ln-16" name="ln-16" href="#ln-16"></a><span class="c">! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<a id="ln-17" name="ln-17" href="#ln-17"></a><span class="c">! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<a id="ln-18" name="ln-18" href="#ln-18"></a><span class="c">! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<a id="ln-19" name="ln-19" href="#ln-19"></a><span class="c">! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<a id="ln-20" name="ln-20" href="#ln-20"></a><span class="c">! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span>
+<a id="ln-21" name="ln-21" href="#ln-21"></a><span class="c">! SOFTWARE.</span>
+<a id="ln-22" name="ln-22" href="#ln-22"></a><span class="c">!</span>
+<a id="ln-23" name="ln-23" href="#ln-23"></a><span class="k">module </span><span class="n">nonlin_error_handling</span>
+<a id="ln-24" name="ln-24" href="#ln-24"></a><span class="w">    </span><span class="k">use </span><span class="n">iso_fortran_env</span>
+<a id="ln-25" name="ln-25" href="#ln-25"></a><span class="w">    </span><span class="k">use </span><span class="n">linalg_errors</span><span class="p">,</span><span class="w"> </span><span class="k">only</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">LA_OUT_OF_MEMORY_ERROR</span><span class="p">,</span><span class="w"> </span><span class="n">LA_CONVERGENCE_ERROR</span><span class="p">,</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-26" name="ln-26" href="#ln-26"></a><span class="w">        </span><span class="n">LA_INVALID_OPERATION_ERROR</span>
+<a id="ln-27" name="ln-27" href="#ln-27"></a><span class="w">    </span><span class="k">implicit none</span>
+<a id="ln-28" name="ln-28" href="#ln-28"></a>
+<a id="ln-29" name="ln-29" href="#ln-29"></a><span class="c">! ******************************************************************************</span>
+<a id="ln-30" name="ln-30" href="#ln-30"></a><span class="c">! ERROR FLAGS</span>
+<a id="ln-31" name="ln-31" href="#ln-31"></a><span class="c">! ------------------------------------------------------------------------------</span>
+<a id="ln-32" name="ln-32" href="#ln-32"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_NO_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+<a id="ln-33" name="ln-33" href="#ln-33"></a><span class="w">        </span><span class="c">!! A flag denoting no error.</span>
+<a id="ln-34" name="ln-34" href="#ln-34"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_INVALID_INPUT_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">201</span>
+<a id="ln-35" name="ln-35" href="#ln-35"></a><span class="w">        </span><span class="c">!! An error flag denoting an invalid input.</span>
+<a id="ln-36" name="ln-36" href="#ln-36"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_ARRAY_SIZE_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">202</span>
+<a id="ln-37" name="ln-37" href="#ln-37"></a><span class="w">        </span><span class="c">!! An error flag denoting an improperly sized array.</span>
+<a id="ln-38" name="ln-38" href="#ln-38"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_OUT_OF_MEMORY_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LA_OUT_OF_MEMORY_ERROR</span>
+<a id="ln-39" name="ln-39" href="#ln-39"></a><span class="w">        </span><span class="c">!! An error denoting that there is insufficient memory available.</span>
+<a id="ln-40" name="ln-40" href="#ln-40"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_INVALID_OPERATION_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">&amp;</span>
+<a id="ln-41" name="ln-41" href="#ln-41"></a><span class="w">        </span><span class="n">LA_INVALID_OPERATION_ERROR</span>
+<a id="ln-42" name="ln-42" href="#ln-42"></a><span class="w">        </span><span class="c">!! An error resulting from an invalid operation.</span>
+<a id="ln-43" name="ln-43" href="#ln-43"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_CONVERGENCE_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LA_CONVERGENCE_ERROR</span>
+<a id="ln-44" name="ln-44" href="#ln-44"></a><span class="w">        </span><span class="c">!! An error resulting from a lack of convergence.</span>
+<a id="ln-45" name="ln-45" href="#ln-45"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_DIVERGENT_BEHAVIOR_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">206</span>
+<a id="ln-46" name="ln-46" href="#ln-46"></a><span class="w">        </span><span class="c">!! An error resulting from a divergent condition.</span>
+<a id="ln-47" name="ln-47" href="#ln-47"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_SPURIOUS_CONVERGENCE_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">207</span>
+<a id="ln-48" name="ln-48" href="#ln-48"></a><span class="w">        </span><span class="c">!! An error indicating a possible spurious convergence condition.</span>
+<a id="ln-49" name="ln-49" href="#ln-49"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_TOLERANCE_TOO_SMALL_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">208</span>
+<a id="ln-50" name="ln-50" href="#ln-50"></a><span class="w">        </span><span class="c">!! An error indicating the user-requested tolerance is too small to be</span>
+<a id="ln-51" name="ln-51" href="#ln-51"></a><span class="w">        </span><span class="c">!! practical for the problem at hand.</span>
+<a id="ln-52" name="ln-52" href="#ln-52"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_INDEX_OUT_OF_RANGE_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">209</span>
+<a id="ln-53" name="ln-53" href="#ln-53"></a><span class="w">        </span><span class="c">!! An error flag denoting an array index is out of range.</span>
+<a id="ln-54" name="ln-54" href="#ln-54"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_DIVIDE_BY_ZERO_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">210</span>
+<a id="ln-55" name="ln-55" href="#ln-55"></a><span class="w">        </span><span class="c">!! An error flag denoting a division by zero error.</span>
+<a id="ln-56" name="ln-56" href="#ln-56"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_UNDEFINED_FUNCTION_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">211</span>
+<a id="ln-57" name="ln-57" href="#ln-57"></a><span class="w">        </span><span class="c">!! An error flag denoting that the routine containing the function to</span>
+<a id="ln-58" name="ln-58" href="#ln-58"></a><span class="w">        </span><span class="c">!! solve has not been properly defined.</span>
+<a id="ln-59" name="ln-59" href="#ln-59"></a><span class="w">    </span><span class="kt">integer</span><span class="p">,</span><span class="w"> </span><span class="k">parameter</span><span class="w"> </span><span class="kd">::</span><span class="w"> </span><span class="n">NL_UNDERDEFINED_PROBLEM_ERROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">212</span>
+<a id="ln-60" name="ln-60" href="#ln-60"></a><span class="w">        </span><span class="c">!! An error flag denoting an underdefined problem error.</span>
+<a id="ln-61" name="ln-61" href="#ln-61"></a>
+<a id="ln-62" name="ln-62" href="#ln-62"></a><span class="k">end module</span>
 </pre></div>
 
       </section>
@@ -209,7 +231,7 @@
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-09-03 20:38              </p>
+ on 2026-11-09 14:44              </p>
           </div>
         </div>
         <br>

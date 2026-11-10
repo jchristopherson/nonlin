@@ -31,7 +31,7 @@ program example
     type(polynomial) :: f
     real(real64) :: coeffs(4)
     complex(real64), allocatable :: rts(:)
-    integer(int32) :: i
+    integer :: i
 
     ! Define the polynomial (x**3 - 2 * x - 1)
     coeffs = [-1.0d0, -2.0d0, 0.0d0, 1.0d0]

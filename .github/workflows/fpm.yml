@@ -112,12 +112,16 @@ jobs:
       - name: Show compiler version
         shell: bash
         env:
+          MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
           FC: ${{ runner.os == 'Windows' && 'gfortran' || steps.setup-fortran.outputs.fc }}
           CC: ${{ runner.os == 'Windows' && 'gcc' || steps.setup-fortran.outputs.cc }}
         run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            export PATH="$MSYS2_LOCATION/mingw64/bin:$PATH"
+          fi
           "$FC" --version
 
-      - name: Install BLAS/LAPACK (Linux)
+      - name: Install BLAS/LAPACK/ARPACK (Linux)
         if: runner.os == 'Linux'
         shell: bash
         run: |
@@ -129,20 +133,6 @@ jobs:
         with:
           fpm-version: 'v0.10.1'
 
-      - name: Correct linalg QRUPDATE workspace declaration (Intel)
-        if: matrix.compiler == 'intel'
-        shell: bash
-        run: |
-          fpm update
-          python3 - <<'PY'
-          from pathlib import Path
-          path = Path("build/dependencies/linalg/src/qrupdate/zchinx.f")
-          old = "      double complex R(ldr,*),u(*),rw(*)"
-          new = "      double complex R(ldr,*),u(*)\n      double precision rw(*)"
-          assert old in path.read_text()
-          path.write_text(path.read_text().replace(old, new))
-          PY
-
       - name: Build NONLIN
         shell: bash
         env:
@@ -150,8 +140,12 @@ jobs:
           CC: ${{ runner.os == 'Windows' && 'gcc' || steps.setup-fortran.outputs.cc }}
           FPM_FC: ${{ runner.os == 'Windows' && 'gfortran' || steps.setup-fortran.outputs.fc }}
           FPM_CC: ${{ runner.os == 'Windows' && 'gcc' || steps.setup-fortran.outputs.cc }}
+          MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
           SHARED: ${{ matrix.shared }}
         run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            export PATH="$MSYS2_LOCATION/mingw64/bin:$PATH"
+          fi
           FLAGS=""
           if [[ "$SHARED" == "true" ]]; then
             if [[ "$RUNNER_OS" == "Windows" ]]; then
@@ -173,8 +167,12 @@ jobs:
           CC: ${{ runner.os == 'Windows' && 'gcc' || steps.setup-fortran.outputs.cc }}
           FPM_FC: ${{ runner.os == 'Windows' && 'gfortran' || steps.setup-fortran.outputs.fc }}
           FPM_CC: ${{ runner.os == 'Windows' && 'gcc' || steps.setup-fortran.outputs.cc }}
+          MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
           SHARED: ${{ matrix.shared }}
         run: |
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            export PATH="$MSYS2_LOCATION/mingw64/bin:$PATH"
+          fi
           FLAGS=""
           if [[ "$SHARED" == "true" ]]; then
             if [[ "$RUNNER_OS" == "Windows" ]]; then

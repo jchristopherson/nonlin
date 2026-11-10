@@ -86,7 +86,6 @@ jobs:
             C:/msys64/usr/bin/pacman.exe -S --noconfirm mingw-w64-x86_64-blas mingw-w64-x86_64-lapack
             echo "MSYS2_MINGW_BIN=/c/msys64/mingw64/bin" >> "$GITHUB_ENV"
             echo "LIBRARY_PATH=C:/msys64/mingw64/lib" >> "$GITHUB_ENV"
-            echo "CMAKE_LIBRARY_PATH=C:/msys64/mingw64/lib" >> "$GITHUB_ENV"
           fi
 
       - name: Configure CMake
@@ -103,6 +102,9 @@ jobs:
           )
           if [ "${{ runner.os }}" = "Windows" ]; then
             CMAKE_OPTIONS+=( -G "MinGW Makefiles" )
+          fi
+          if [ "${{ matrix.compiler }}" = "intel" ]; then
+            CMAKE_OPTIONS+=( -DCMAKE_Fortran_FLAGS="-g -traceback" )
           fi
           cmake "${CMAKE_OPTIONS[@]}"
         env:
@@ -154,6 +156,10 @@ jobs:
           if [ "${{ runner.os }}" = "Windows" ]; then
             INSTALL_PREFIX="${GITHUB_WORKSPACE//\\//}/install"
             CMAKE_OPTIONS+=( -G "MinGW Makefiles" )
+            CMAKE_OPTIONS+=(
+              -DBLAS_LIBRARIES="C:/msys64/mingw64/lib/libblas.dll.a"
+              -DLAPACK_LIBRARIES="C:/msys64/mingw64/lib/liblapack.dll.a;C:/msys64/mingw64/lib/libblas.dll.a"
+            )
           else
             INSTALL_PREFIX="${{ github.workspace }}/install"
           fi

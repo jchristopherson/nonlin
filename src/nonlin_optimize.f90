@@ -112,9 +112,9 @@ module nonlin_optimize
 
     interface
         subroutine DSYMV(uplo, n, alpha, a, lda, x, incx, beta, y, incy)
-            use iso_fortran_env, only : int32, real64
+            use iso_fortran_env, only : real64
             character, intent(in) :: uplo
-            integer(int32), intent(in) :: n, lda, incx, incy
+            integer, intent(in) :: n, lda, incx, incy
             real(real64), intent(in) :: alpha, beta, a(lda,*), x(*)
             real(real64), intent(inout) :: y(*)
         end subroutine
@@ -149,7 +149,7 @@ contains
         !! - <a href="http://numerical.recipes/ target="_blank">Numerical Recipes</a>
         class(nelder_mead), intent(inout) :: this
             !! The [[nelder_mead]] object.
-        class(fcnnvar_helper), intent(in) :: fcn
+        class(fcnnvar_helper), intent(inout) :: fcn
             !! The [[fcnnvar_helper]] object containing the equation to 
             !! optimize.
         real(real64), intent(inout), dimension(:) :: x
@@ -163,7 +163,7 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with fcn.
 
         ! Parameters
@@ -174,9 +174,9 @@ contains
 
         ! Local Variables
         logical :: buildSimplex, fcnvrg
-        integer(int32) :: i, ihi, ilo, ihi2, ndim, npts, flag, neval, iter, &
+        integer :: i, ihi, ilo, ihi2, ndim, npts, flag, neval, iter, &
             maxeval
-        real(real64) :: ftol, rtol, ftry, fsave, fval, swp
+        real(real64) :: ftol, rtol, ftry, fsave, fval, swp, nan
         real(real64), allocatable, dimension(:) :: f, pcent, pmin, work
 
         ! Initialization
@@ -188,14 +188,9 @@ contains
         iter = 0
         neval = 0
         fcnvrg = .false.
+        nan = ieee_value(0.0_real64, ieee_quiet_nan)
         if (present(ib)) then
-            ib%iter_count = iter
-            ib%fcn_count = neval
-            ib%jacobian_count = 0
-            ib%gradient_count = 0
-            ib%converge_on_fcn = fcnvrg
-            ib%converge_on_chng = .false.
-            ib%converge_on_zero_diff = .false.
+            call ib%initialize(maxeval)
         end if
 
         ! Input Check
@@ -279,6 +274,9 @@ contains
             ! extreme function values of the simplex (highest and lowest valued
             ! points).
             rtol = abs(f(ihi) - f(ilo))
+            if (present(ib)) then
+                call ib%log_iteration(rtol, nan, nan)
+            end if
             if (rtol < ftol) then
                 swp = f(1)
                 f(1) = f(ilo)
@@ -374,22 +372,22 @@ contains
         !! estimate, the current high point is replaced with the new estimate.
         class(nelder_mead), intent(inout) :: this
             !! The [[nelder_mead]] object.
-        class(fcnnvar_helper), intent(in) :: fcn
+        class(fcnnvar_helper), intent(inout) :: fcn
             !! The function to evaluate.
         real(real64), intent(inout), dimension(:) :: y
             !! An array containing the function values at each vertex.
         real(real64), intent(inout), dimension(:) :: pcent
             !! An array containing the centroid of vertex position information.
-        integer(int32), intent(in) :: ihi
+        integer, intent(in) :: ihi
             !! The index of the largest magnitude vertex.
         real(real64), intent(in) :: fac
             !! A scaling factor.
-        integer(int32), intent(inout) :: neval
+        integer, intent(inout) :: neval
             !! The number of function evaluations.
         real(real64), intent(out), dimension(:) :: work
             !! An N-element workspace array where N is the number of dimensions
             !! of the problem.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with
             !! the routine.
         real(real64) :: ytry
@@ -399,7 +397,7 @@ contains
         real(real64), parameter :: one = 1.0d0
 
         ! Local Variables
-        integer(int32) :: i, ndim
+        integer :: i, ndim
         real(real64) :: fac1, fac2
 
         ! Initialization
@@ -433,7 +431,7 @@ contains
         real(real64), allocatable, dimension(:,:) :: p
             !! The N-by-(N+1) matrix containing the simplex.  Each vertex of 
             !! the simplex is stored as its own column of this matrix.
-        integer(int32) :: m, n
+        integer :: m, n
         if (allocated(this%m_simplex)) then
             m = size(this%m_simplex, 1)
             n = size(this%m_simplex, 2)
@@ -453,7 +451,7 @@ contains
         real(real64), dimension(:,:) :: x
             !! The simplex matrix.  Each column of the matrix must contain the
             !! coordinates of each vertex of the simplex.
-        integer(int32) :: m, n
+        integer :: m, n
         m = size(x, 1)
         n = size(x, 2)
         if (allocated(this%m_simplex)) then
@@ -586,7 +584,7 @@ contains
         !! for finding a minimum value of the specified function.
         class(bfgs), intent(inout) :: this
             !! The [[bfgs]] object.
-        class(fcnnvar_helper), intent(in) :: fcn
+        class(fcnnvar_helper), intent(inout) :: fcn
             !! The [[fcnnvar_helper]] object containing the equation to 
             !! optimize.
         real(real64), intent(inout), dimension(:) :: x
@@ -600,7 +598,7 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with fcn.
 
         ! Parameters
@@ -612,7 +610,7 @@ contains
 
         ! Local Variables
         logical :: xcnvrg, gcnvrg
-        integer(int32) :: i, n, maxeval, neval, ngrad, flag, iter
+        integer :: i, n, maxeval, neval, ngrad, flag, iter
         real(real64) :: xtol, gtol, fp, stpmax, fret, xtest, gtest, temp, ydx
         real(real64), allocatable, dimension(:) :: g, dx, u, v, y, gold, xnew, bdx
         real(real64), allocatable, dimension(:,:) :: b, r
@@ -630,13 +628,7 @@ contains
         xcnvrg = .false.
         gcnvrg = .false.
         if (present(ib)) then
-            ib%iter_count = iter
-            ib%fcn_count = neval
-            ib%jacobian_count = 0
-            ib%gradient_count = ngrad
-            ib%converge_on_fcn = .false.
-            ib%converge_on_chng = xcnvrg
-            ib%converge_on_zero_diff = gcnvrg
+            call ib%initialize(maxeval)
         end if
         if (this%get_use_line_search()) then
             if (.not.this%is_line_search_defined()) &
@@ -721,13 +713,20 @@ contains
                     temp = abs(dx(i)) / max(abs(x(i)), one)
                     xtest = max(temp, xtest)
                 end do
+
+                ! Test for convergence on the gradient
+                gtest = norm2(g)
+
+                ! Update the iteration log
+                if (present(ib)) then
+                    call ib%log_iteration(abs(fp), xtest, gtest)
+                end if
+
                 if (xtest < xtol) then
                     xcnvrg = .true.
                     exit
                 end if
 
-                ! Test for convergence on the gradient
-                gtest = norm2(g)
                 if (gtest < gtol) then
                     gcnvrg = .true.
                     exit

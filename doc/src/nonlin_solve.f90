@@ -22,7 +22,7 @@
 !
 module nonlin_solve
     use iso_fortran_env
-    use ieee_arithmetic, only : ieee_is_nan, ieee_value, ieee_quiet_nan
+    use ieee_arithmetic, only : ieee_is_nan, ieee_is_finite, ieee_value, ieee_quiet_nan
     use nonlin_error_handling
     use nonlin_multi_eqn_mult_var
     use nonlin_single_var
@@ -71,7 +71,7 @@ module nonlin_solve
         !! with the rank-one Jacobian correction
         !! $$ B_{k+1} = B_k + \frac{(y_k - B_k s_k)s_k^T}{s_k^T s_k} $$
         !! where \(y_k = F(x_{k+1}) - F(x_k)\). 
-        integer(int32), private :: m_jDelta = 5
+        integer, private :: m_jDelta = 5
             !! The number of iterations that may pass between Jacobian
             !! calculation.
     contains
@@ -192,7 +192,7 @@ contains
         !! - <a href="http://numerical.recipes/ target="_blank">Numerical Recipes</a>
         class(quasi_newton_solver), intent(inout) :: this
             !! The [[quasi_newton_solver]] object.
-        class(vecfcn_helper), intent(in) :: fcn
+        class(vecfcn_helper), intent(inout) :: fcn
             !! The [[vecfcn_helper]] object containing the equations to solve.
         real(real64), intent(inout), dimension(:) :: x
             !! On input, an N-element array containing an initial estimate to 
@@ -204,10 +204,10 @@ contains
             !! If the iteration process does not converge, each element is
             !! returned as NaN, and, if supplied, ib will indicate a
             !! failure to converge.
-        type(iteration_behavior), optional :: ib
+        type(iteration_behavior), intent(out), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with
             !! fcn.
 
@@ -219,7 +219,7 @@ contains
 
         ! Local Variables
         logical :: restart, xcnvrg, fcnvrg, gcnvrg, check
-        integer(int32) :: i, neqn, nvar, flag, neval, iter, &
+        integer :: i, neqn, nvar, flag, neval, iter, &
             maxeval, jcount, njac
         real(real64), allocatable, dimension(:) :: dx, df, fvold, &
             xold, s
@@ -244,13 +244,7 @@ contains
         gtol = this%get_gradient_tolerance()
         maxeval = this%get_max_fcn_evals()
         if (present(ib)) then
-            ib%iter_count = iter
-            ib%fcn_count = neval
-            ib%jacobian_count = njac
-            ib%gradient_count = 0
-            ib%converge_on_fcn = fcnvrg
-            ib%converge_on_chng = xcnvrg
-            ib%converge_on_zero_diff = gcnvrg
+            ib = iteration_behavior(maxeval)
         end if
         if (this%get_use_line_search()) then
             if (.not.this%is_line_search_defined()) &
@@ -281,8 +275,13 @@ contains
 
         ! Test to see if the initial guess is a root
         call fcn%fcn(x, fvec, args)
-        f = half * dot_product(fvec, fvec)
         neval = neval + 1
+        flag = 0
+        if (.not.all(ieee_is_finite(x)) .or. .not.all(ieee_is_finite(fvec))) then
+            flag = 1
+            go to 900
+        end if
+        f = half * dot_product(fvec, fvec)
         test = zero
         do i = 1, neqn
             test = max(abs(fvec(i)), test)
@@ -299,6 +298,10 @@ contains
 
             ! Main Iteration Loop
             do
+                if (neval >= maxeval .or. iter >= maxeval) then
+                    flag = 1
+                    exit
+                end if
                 ! Update the iteration counter
                 iter = iter + 1
 
@@ -307,9 +310,18 @@ contains
                     ! Compute the Jacobian
                     call fcn%jacobian(x, b, fvec, args = args)
                     njac = njac + 1
+                    if (.not.all(ieee_is_finite(b)) .or. all(b == zero)) then
+                        flag = 1
+                        exit
+                    end if
 
                     ! Compute the QR factorization, and form Q & R
                     call qr_factor(b, q = q, r = r)
+
+                    if (any([(r(i,i) == zero, i = 1, nvar)])) then
+                        flag = 1
+                        exit
+                    end if
 
                     ! Reset the Jacobian iteration counter
                     jcount = 0
@@ -348,8 +360,17 @@ contains
                 ! Now we have R * DX = -Q**T * F, and since R is upper
                 ! triangular, the solution is readily computed.  The solution
                 ! will be stored in the first NVAR elements of DF
+                if (.not.all(ieee_is_finite(r)) .or. &
+                    any([(r(i,i) == zero, i = 1, nvar)])) then
+                    flag = 1
+                    exit
+                end if
                 df(1:nvar) = solve_triangular_system(.true., .false., .true., &
                     r, df(1:nvar))
+                if (.not.all(ieee_is_finite(df(1:nvar)))) then
+                    flag = 1
+                    exit
+                end if
 
                 ! Ensure the new solution estimate is heading in a sensible
                 ! direction.  If not, it is likely time to update the Jacobian
@@ -364,16 +385,12 @@ contains
 
                 ! Apply the line search if needed
                 if (this%get_use_line_search()) then
-                    ! Define the step length for the line search
-                    temp = dot_product(df(1:nvar), df(1:nvar))
-                    if (temp > stpmax) df(1:nvar) = df(1:nvar) * (stpmax / temp)
-
                     ! Apply the line search
                     call limit_search_vector(df(1:nvar), stpmax)
                     call ls%search(fcn, xold, dx, df(1:nvar), x, fvec, fold, &
                         f, lib, args = args)
                     neval = neval + lib%fcn_count
-                    if (ieee_is_nan(f)) then
+                    if (.not.ieee_is_finite(f)) then
                         ! The line search failed to locate an acceptable
                         ! point - force a Jacobian recalculation and retry
                         restart = .true.
@@ -390,6 +407,11 @@ contains
                     neval = neval + 1
                 end if
 
+                if (.not.all(ieee_is_finite(x)) .or. .not.all(ieee_is_finite(fvec))) then
+                    flag = 1
+                    exit
+                end if
+
                 ! Test for convergence
                 if (lib%converge_on_zero_diff .and. &
                         this%get_use_line_search()) then
@@ -398,6 +420,9 @@ contains
                 else
                     call test_convergence(x, xold, fvec, dx, .false., xtol, &
                         ftol, gtol, check, xcnvrg, fcnvrg, gcnvrg, xnorm, fnorm)
+                end if
+                if (present(ib)) then
+                    call ib%log_iteration(fnorm, xnorm, norm2(dx))
                 end if
                 if (.not.check) then
                     ! The solution did not converge, figure out why
@@ -443,6 +468,7 @@ contains
             end do
         end if
 
+    900     continue
         ! Report out iteration statistics
         if (present(ib)) then
             ib%iter_count = iter
@@ -468,7 +494,7 @@ contains
         !! recalculation of the Jacobian matrix.
         class(quasi_newton_solver), intent(in) :: this
             !! The [[quasi_newton_solver]] object.
-        integer(int32) :: n
+        integer :: n
             !! The number of iterations.
         n = this%m_jDelta
     end function
@@ -479,7 +505,7 @@ contains
         !! recalculation of the Jacobian matrix.
         class(quasi_newton_solver), intent(inout) :: this
             !! The [[quasi_newton_solver]] object.
-        integer(int32), intent(in) :: n
+        integer, intent(in) :: n
             !! The number of iterations.
         this%m_jDelta = n
     end subroutine
@@ -492,7 +518,7 @@ contains
         !! line search to solve N equations of N unknowns.
         class(newton_solver), intent(inout) :: this
             !! The [[newton_solver]] object.
-        class(vecfcn_helper), intent(in) :: fcn
+        class(vecfcn_helper), intent(inout) :: fcn
             !! The [[vecfcn_helper]] object containing the equations to solve.
         real(real64), intent(inout), dimension(:) :: x
             !! On input, an N-element array containing an initial estimate to 
@@ -504,10 +530,10 @@ contains
             !! If the iteration process does not converge, each element is
             !! returned as NaN, and, if supplied, ib will indicate a
             !! failure to converge.
-        type(iteration_behavior), optional :: ib
+        type(iteration_behavior), intent(out), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with fcn.
 
         ! Parameters
@@ -519,8 +545,8 @@ contains
 
         ! Local Variables
         logical :: check, xcnvrg, fcnvrg, gcnvrg
-        integer(int32) :: i, neqn, nvar, flag, neval, iter, maxeval, njac
-        integer(int32), allocatable, dimension(:) :: ipvt
+        integer :: i, neqn, nvar, flag, neval, iter, maxeval, njac
+        integer, allocatable, dimension(:) :: ipvt
         real(real64), allocatable, dimension(:) :: dir, grad, xold
         real(real64), allocatable, dimension(:,:) :: jac, lu
         real(real64) :: ftol, xtol, gtol, f, fold, stpmax, xnorm, fnorm, temp, test
@@ -541,13 +567,7 @@ contains
         gtol = this%get_gradient_tolerance()
         maxeval = this%get_max_fcn_evals()
         if (present(ib)) then
-            ib%iter_count = iter
-            ib%fcn_count = neval
-            ib%jacobian_count = njac
-            ib%gradient_count = 0
-            ib%converge_on_fcn = fcnvrg
-            ib%converge_on_chng = xcnvrg
-            ib%converge_on_zero_diff = gcnvrg
+            ib = iteration_behavior(maxeval)
         end if
         if (this%get_use_line_search()) then
             if (.not.this%is_line_search_defined()) &
@@ -573,12 +593,16 @@ contains
             xold(nvar), &
             jac(nvar, neqn) &
         )
-        call fcn%jacobian(x, jac, fv = fvec, args = args)
 
         ! Test to see if the initial guess is a root
         call fcn%fcn(x, fvec, args)
-        f = half * dot_product(fvec, fvec)
         neval = neval + 1
+        flag = 0
+        if (.not.all(ieee_is_finite(x)) .or. .not.all(ieee_is_finite(fvec))) then
+            flag = 1
+            go to 900
+        end if
+        f = half * dot_product(fvec, fvec)
         test = zero
         do i = 1, neqn
             test = max(abs(fvec(i)), test)
@@ -601,6 +625,10 @@ contains
                 ! Compute the Jacobian
                 call fcn%jacobian(x, jac, fvec, args = args)
                 njac = njac + 1
+                if (.not.all(ieee_is_finite(jac)) .or. all(jac == zero)) then
+                    flag = 1
+                    exit
+                end if
 
                 ! Compute the gradient
                 do i = 1, nvar
@@ -609,6 +637,10 @@ contains
 
                 ! Compute the LU factorization of the Jacobian
                 call lu_factor(jac, ipvt = ipvt, lu = lu)
+                if (.not.all(ieee_is_finite(lu)) .or. any(ipvt < 1) .or. any(ipvt > nvar)) then
+                    flag = 1
+                    exit
+                end if
 
                 ! Store previous iteration values
                 xold = x
@@ -616,19 +648,19 @@ contains
 
                 ! Solve the linear system of equations
                 dir = solve_lu(lu, ipvt, -fvec)
+                if (.not.all(ieee_is_finite(dir))) then
+                    flag = 1
+                    exit
+                end if
 
                 ! Apply the line search if needed
                 if (this%get_use_line_search()) then
-                    ! Define the step length for the line search
-                    temp = dot_product(dir, dir)
-                    if (temp > stpmax) dir = dir * (stpmax / temp)
-
                     ! Apply the line search
                     call limit_search_vector(dir, stpmax)
                     call ls%search(fcn, xold, grad, dir, x, fvec, &
                         fold, f, lib, args = args)
                     neval = neval + lib%fcn_count
-                    if (ieee_is_nan(f)) then
+                    if (.not.ieee_is_finite(f)) then
                         ! The line search failed to locate an acceptable point
                         flag = 1
                         exit
@@ -641,9 +673,17 @@ contains
                     neval = neval + 1
                 end if
 
+                if (.not.all(ieee_is_finite(x)) .or. .not.all(ieee_is_finite(fvec))) then
+                    flag = 1
+                    exit
+                end if
+
                 ! Check for convergence
                 call test_convergence(x, xold, fvec, grad, .true., xtol, &
                     ftol, gtol, check, xcnvrg, fcnvrg, gcnvrg, xnorm, fnorm)
+                if (present(ib)) then
+                    call ib%log_iteration(fnorm, xnorm, norm2(grad))
+                end if
                 if (check) then
                     ! The solution has converged
                     exit
@@ -668,6 +708,7 @@ contains
             end do
         end if
 
+    900     continue
         ! Report out iteration statistics
         if (present(ib)) then
             ib%iter_count = iter
@@ -721,7 +762,7 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with fcn.
 
         ! Parameters
@@ -733,9 +774,9 @@ contains
 
         ! Local Variables
         logical :: fcnvrg, xcnvrg
-        integer(int32) :: neval, maxeval, flag, iter
+        integer :: neval, maxeval, flag, iter
         real(real64) :: ftol, xtol, a, b, c, fa, fb, fc, p, q, r, s, xm, e, d, &
-            mn1, mn2, eps, tol1, temp
+            mn1, mn2, eps, tol1, temp, nan
 
         ! Initialization
         fcnvrg = .false.
@@ -746,18 +787,13 @@ contains
         neval = 0
         iter = 0
         eps = epsilon(eps)
+        nan = ieee_value(nan, ieee_quiet_nan)
         ftol = this%get_fcn_tolerance()
         xtol = this%get_var_tolerance()
         maxeval = this%get_max_fcn_evals()
         if (present(f)) f = zero
         if (present(ib)) then
-            ib%iter_count = iter
-            ib%fcn_count = neval
-            ib%jacobian_count = 0
-            ib%gradient_count = 0
-            ib%converge_on_fcn = fcnvrg
-            ib%converge_on_chng = xcnvrg
-            ib%converge_on_zero_diff = .false.
+            ib = iteration_behavior(maxeval)
         end if
 
         ! Input Check
@@ -794,6 +830,9 @@ contains
             ! Convergence Check
             tol1 = two * eps * abs(b) + half * xtol
             xm = half * (c - b)
+            if (present(ib)) then
+                call ib%log_iteration(abs(fb), abs(xm), nan)
+            end if
             if (abs(fb) < ftol) then
                 x = b
                 fcnvrg = .true.
@@ -911,7 +950,7 @@ contains
         type(iteration_behavior), optional :: ib
             !! An optional output, that if provided, allows the caller to 
             !! obtain iteration performance statistics.
-        class(*), intent(inout), optional :: args
+        class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with fcn.
 
         ! Parameters
@@ -921,7 +960,7 @@ contains
 
         ! Local Variables
         logical :: fcnvrg, xcnvrg, dcnvrg
-        integer(int32) :: neval, ndiff, maxeval, flag, iter
+        integer :: neval, ndiff, maxeval, flag, iter
         real(real64) :: ftol, xtol, dtol, xh, xl, fh, fl, x1, x2, eps, dxold, &
             dx, df, temp, ff
 
@@ -938,13 +977,7 @@ contains
         maxeval = this%get_max_fcn_evals()
         if (present(f)) f = zero
         if (present(ib)) then
-            ib%iter_count = iter
-            ib%fcn_count = neval
-            ib%jacobian_count = ndiff
-            ib%gradient_count = 0
-            ib%converge_on_fcn = fcnvrg
-            ib%converge_on_chng = xcnvrg
-            ib%converge_on_zero_diff = dcnvrg
+            ib = iteration_behavior(maxeval)
         end if
         x1 = min(lim%x1, lim%x2)
         x2 = max(lim%x1, lim%x2)
@@ -1031,6 +1064,9 @@ contains
             ndiff = ndiff + 1
 
             ! Check for convergence
+            if (present(ib)) then
+                call ib%log_iteration(abs(ff), abs(dx), abs(df))
+            end if
             if (abs(ff) < ftol) then
                 fcnvrg = .true.
                 exit

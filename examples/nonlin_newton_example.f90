@@ -29,11 +29,13 @@ program example
     implicit none
 
     ! Local Variables
+    integer :: i
     type(vecfcn_helper) :: obj
     procedure(vecfcn), pointer :: fcn
     type(newton_solver) :: solver
     real(real64) :: x(2), f(2)
     type(iteration_behavior) :: tracking
+    type(convergence_history) :: history
 
     ! Assign a pointer to the subroutine containing the equations to solve
     fcn => misc_2fcn
@@ -65,9 +67,20 @@ program example
     print 103, "Converge on Change in Variable: ", tracking%converge_on_chng
     print 103, "Converge on Zero Slope Gradient Vector: ", tracking%converge_on_zero_diff
 
+    ! Display the convergence history results
+    history = tracking%get_convergence_history()
+    print *, ""
+    print 104, "Iteration", achar(9), "Resid", achar(9), "dX", achar(9), "g"
+    do i = 1, size(history%log_gradient)
+        print 105, achar(9), i, achar(9), history%log_residual(i), achar(9), &
+            history%log_step_change(i), achar(9), history%log_gradient(i)
+    end do
+
     ! Formatting
 100 format(A, F7.5, A, F7.5, A)
 101 format(A, E9.3, A, E9.3, A)
 102 format(A, I0)
 103 format(A, L1)
+104 format(A, A, A, A, A, A, A)
+105 format(A, I0, A, F0.3, A, F0.3, A, F0.3)
 end program

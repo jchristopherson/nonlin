@@ -100,14 +100,14 @@ contains
         !! Initializes the polynomial instance.
         class(polynomial), intent(inout) :: this
             !! The [[polynomial]] object.
-        integer(int32), intent(in) :: order
+        integer, intent(in) :: order
             !! The order of the polynomial (must be >= 0).
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
 
         ! Local Variables
-        integer(int32) :: n
+        integer :: n
 
         ! Initialization
         n = order + 1
@@ -135,7 +135,7 @@ contains
             !! c(n) * x**n-1.
 
         ! Local Variables
-        integer(int32) :: i, n
+        integer :: i, n
 
         ! Initialization
         n = size(c)
@@ -154,7 +154,7 @@ contains
         !! Returns the order of the polynomial object.
         class(polynomial), intent(in) :: this
             !! The [[polynomial]] object.
-        integer(int32) :: n
+        integer :: n
             !! The order of the polynomial.  Returns -1 in the event no
             !! polynomial coefficients have been defined.
         if (.not.allocated(this%m_coeffs)) then
@@ -175,14 +175,14 @@ contains
         real(real64), intent(inout), dimension(:) :: y
             !! On input, an N-element array containing the dependent variable 
             !! data points.  On output, the contents are overwritten.
-        integer(int32), intent(in) :: order
+        integer, intent(in) :: order
             !! The order of the polynomial (must be >= 1).
 
         ! Parameters
         real(real64), parameter :: one = 1.0d0
 
         ! Local Variables
-        integer(int32):: j, n, ncols, flag
+        integer:: j, n, ncols, flag
         real(real64), pointer, dimension(:,:) :: a
 
         ! Initialization
@@ -232,14 +232,14 @@ contains
         real(real64), intent(inout), dimension(:) :: y
             !! On input, an N-element array containing the dependent
             !! variable data points.  On output, the contents are overwritten.
-        integer(int32), intent(in) :: order
+        integer, intent(in) :: order
             !! The order of the polynomial (must be >= 1).
 
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
 
         ! Local Variables
-        integer(int32):: j, n, ncols, flag
+        integer:: j, n, ncols, flag
         real(real64), pointer, dimension(:,:) :: a
 
         ! Initialization
@@ -288,7 +288,7 @@ contains
         real(real64), parameter :: zero = 0.0d0
 
         ! Local Variables
-        integer(int32) :: j, order, n
+        integer :: j, order, n
 
         ! Initialization
         order = this%order()
@@ -322,7 +322,7 @@ contains
         complex(real64), parameter :: zero = (0.0d0, 0.0d0)
 
         ! Local Variables
-        integer(int32) :: j, order, n
+        integer :: j, order, n
 
         ! Initialization
         order = this%order()
@@ -363,7 +363,7 @@ contains
         real(real64), parameter :: one = 1.0d0
 
         ! Local Variables
-        integer(int32) :: i, n
+        integer :: i, n
 
         ! Process
         n = this%order()
@@ -385,7 +385,7 @@ contains
             !! The roots of the polynomial.
 
         ! Local Variables
-        integer(int32) :: n
+        integer :: n
         real(real64), allocatable, dimension(:,:) :: c
 
         ! Initialization
@@ -409,7 +409,7 @@ contains
         !! c(3) * x**2 + ... c(n) * x**n-1.
         class(polynomial), intent(in) :: this
             !! The [[polynomial]] object.
-        integer(int32), intent(in) :: ind
+        integer, intent(in) :: ind
             !! The polynomial coefficient index.
         real(real64) :: c
             !! The requested coefficient.
@@ -452,7 +452,7 @@ contains
         !! c(3) * x**2 + ... c(n) * x**n-1.
         class(polynomial), intent(inout) :: this
             !! The [[polynomial]] object.
-        integer(int32), intent(in) :: ind
+        integer, intent(in) :: ind
             !! The polynomial coefficient index.
         real(real64), intent(in) :: c
             !! The polynomial coefficient.
@@ -481,7 +481,7 @@ contains
             !! The item to copy.
 
         ! Local Variables
-        integer(int32) :: i, ord
+        integer :: i, ord
 
         ! Process
         ord = y%order()
@@ -500,7 +500,7 @@ contains
             !! The value to assign.
 
         ! Local Variables
-        integer(int32) :: i, ord
+        integer :: i, ord
 
         ! Process
         ord = x%order()
@@ -530,7 +530,7 @@ contains
             !! The resulting polynomial.
 
         ! Local Variables
-        integer(int32) :: i, max_ord, x_ord, y_ord
+        integer :: i, max_ord, x_ord, y_ord
 
         ! Initialization
         x_ord = x%order()
@@ -585,7 +585,7 @@ contains
             !! The resulting polynomial.
 
         ! Local Variables
-        integer(int32) :: i, max_ord, x_ord, y_ord
+        integer :: i, max_ord, x_ord, y_ord
 
         ! Initialization
         x_ord = x%order()
@@ -640,7 +640,7 @@ contains
             !! The resulting polynomial.
 
         ! Local Variables
-        integer(int32) :: i, j, m, n
+        integer :: i, j, m, n
         real(real64) :: val
 
         ! Initialization
@@ -668,7 +668,7 @@ contains
             !! The resulting polynomial.
 
         ! Local Variables
-        integer(int32) :: i, ord
+        integer :: i, ord
 
         ! Process
         ord = x%order()
@@ -689,7 +689,7 @@ contains
             !! The resulting polynomial.
 
         ! Local Variables
-        integer(int32) :: i, ord
+        integer :: i, ord
 
         ! Process
         ord = y%order()
@@ -716,7 +716,7 @@ contains
         real(real64), parameter :: zero = 0.0d0
 
         ! Local Variables
-        integer(int32) :: i, j, n, m, q_order, r_order, last_nonzero
+        integer :: i, j, n, m, q_order, r_order, last_nonzero
         real(real64) :: coeff, lead
         real(real64), allocatable, dimension(:) :: num_coeffs
         real(real64), allocatable, dimension(:) :: den_coeffs
@@ -803,7 +803,7 @@ contains
 ! ------------------------------------------------------------------------------
     function poly_init_1(order) result(rst)
         !! Initializes a new [[polynomial]] instance.
-        integer(int32), intent(in) :: order
+        integer, intent(in) :: order
             !! The order of the polynomial (must be >= 0).
         type(polynomial) :: rst
             !! The new [[polynomial]] object.

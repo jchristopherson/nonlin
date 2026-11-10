@@ -38,7 +38,7 @@ contains
     !! @param[in] fnorm The residual.
     subroutine print_status(iter, nfeval, njaceval, xnorm, fnorm)
         ! Arguments
-        integer(int32), intent(in) :: iter, nfeval, njaceval
+        integer, intent(in) :: iter, nfeval, njaceval
         real(real64), intent(in) :: xnorm, fnorm
 
         ! Process
@@ -96,7 +96,7 @@ contains
         real(real64), parameter :: half = 0.5d0
 
         ! Local Variables
-        integer(int32) :: i, nvar, neqn
+        integer :: i, nvar, neqn
         real(real64) :: test, dxmax, fc, den
 
         ! Initialization

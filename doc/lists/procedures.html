@@ -93,6 +93,12 @@
                  <td></td>
                </tr>
 			   <tr>
+                 <td><a href='..\interface\iteration_behavior.html'>iteration_behavior</a></td>
+                 <td><a href='..\module\nonlin_types.html'>nonlin_types</a></td>
+                 <td>Interface</td>
+                 <td></td>
+               </tr>
+			   <tr>
                  <td><a href='..\interface\jacobianfcn.html'>jacobianfcn</a></td>
                  <td><a href='..\module\nonlin_multi_eqn_mult_var.html'>nonlin_multi_eqn_mult_var</a></td>
                  <td>Interface</td>
@@ -154,6 +160,78 @@ vector.</p></td>
                  <td><p>@brief Prints the iteration status.</p><a href="../proc/print_status.html" class="pull-right"><emph>Read more&hellip;</emph></a></td>
                </tr>
 			   <tr>
+                 <td><a href='..\proc\solve_bfgs.html'>solve_bfgs</a></td>
+                 <td><a href='..\module\nonlin_simple.html'>nonlin_simple</a></td>
+                 <td>Function</td>
+                 <td><p>Utilizes the BFGS method for minimizing a function of N variables.
+For more control over the solver it is recommended to utilize the 
+<a href="..\type\bfgs.html">bfgs</a> type.  This function is a convenience wrapper around 
+this solver.</p></td>
+               </tr>
+			   <tr>
+                 <td><a href='..\proc\solve_brent.html'>solve_brent</a></td>
+                 <td><a href='..\module\nonlin_simple.html'>nonlin_simple</a></td>
+                 <td>Function</td>
+                 <td><p>Utilizes Brent's method to solve a scalar equation of the form 
+<script type="math/tex">f(x) = 0</script>.  For more control over the solver it is recommended to
+utilize the <a href="..\type\brent_solver.html">brent_solver</a> type.  This function is a convenience
+wrapper around this solver.</p></td>
+               </tr>
+			   <tr>
+                 <td><a href='..\proc\solve_continuation.html'>solve_continuation</a></td>
+                 <td><a href='..\module\nonlin_simple.html'>nonlin_simple</a></td>
+                 <td>Function</td>
+                 <td><p>Utilizes a continuation solver to solve a system of N equations and N 
+unknowns.  For more control over the solver it is recommended to utilize
+the <a href="..\type\continuation_solver.html">continuation_solver</a> type.  This function is a convenience wrapper 
+around this solver.</p></td>
+               </tr>
+			   <tr>
+                 <td><a href='..\proc\solve_continuation_pseudo_arclength.html'>solve_continuation_pseudo_arclength</a></td>
+                 <td><a href='..\module\nonlin_simple.html'>nonlin_simple</a></td>
+                 <td>Function</td>
+                 <td><p>Utilizes a pseudo-arclength continuation solver to solve a system of N 
+equations and N unknowns.  For more control over the solver it is 
+recommended to utilize the <a href="..\type\continuation_solver.html">continuation_solver</a> type.  This function 
+is a convenience wrapper around this solver.</p></td>
+               </tr>
+			   <tr>
+                 <td><a href='..\proc\solve_nelder_mead.html'>solve_nelder_mead</a></td>
+                 <td><a href='..\module\nonlin_simple.html'>nonlin_simple</a></td>
+                 <td>Function</td>
+                 <td><p>Utilizes the Nelder-Mead method for minimizing a function of N variables.
+For more control over the solver it is recommended to utilize the 
+<a href="..\type\nelder_mead.html">nelder_mead</a> type.  This function is a convenience wrapper around 
+this solver.</p></td>
+               </tr>
+			   <tr>
+                 <td><a href='..\proc\solve_newton.html'>solve_newton</a></td>
+                 <td><a href='..\module\nonlin_simple.html'>nonlin_simple</a></td>
+                 <td>Function</td>
+                 <td><p>Utilizes Newton's method to solve a system of N equations and N unknowns.
+For more control over the solver it is recommended to utilize the 
+<a href="..\type\newton_solver.html">newton_solver</a> type.  This function is a convenience wrapper around 
+this solver.</p></td>
+               </tr>
+			   <tr>
+                 <td><a href='..\proc\solve_newton_1var.html'>solve_newton_1var</a></td>
+                 <td><a href='..\module\nonlin_simple.html'>nonlin_simple</a></td>
+                 <td>Function</td>
+                 <td><p>Utilizes Newton's method to solve a scalar equation of the form 
+<script type="math/tex">f(x) = 0</script>.  For more control over the solver it is recommended to
+utilize the <a href="..\type\newton_1var_solver.html">newton_1var_solver</a> type.  This function is a convenience
+wrapper around this solver.</p></td>
+               </tr>
+			   <tr>
+                 <td><a href='..\proc\solve_quasi_newton.html'>solve_quasi_newton</a></td>
+                 <td><a href='..\module\nonlin_simple.html'>nonlin_simple</a></td>
+                 <td>Function</td>
+                 <td><p>Utilizes a Quasi-Newton method to solve a system of N equations and N 
+unknowns.  For more control over the solver it is recommended to utilize
+the <a href="..\type\quasi_newton_solver.html">quasi_newton_solver</a> type.  This function is a convenience wrapper 
+around this solver.</p></td>
+               </tr>
+			   <tr>
                  <td><a href='..\proc\test_convergence.html'>test_convergence</a></td>
                  <td><a href='..\module\nonlin_helper.html'>nonlin_helper</a></td>
                  <td>Subroutine</td>
@@ -181,7 +259,7 @@ vector.</p></td>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-09-03 20:38              </p>
+ on 2026-11-09 14:44              </p>
           </div>
         </div>
         <br>

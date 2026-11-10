@@ -27,7 +27,7 @@ contains
 ! f(x) = sin(x) / x, solution: x = x * pi for n = 1, 2, 3, ...
 function sinx_div_x(x, args) result(f)
     real(real64), intent(in) :: x
-    class(*), intent(inout), optional :: args
+    class(*), intent(in), optional :: args
     real(real64) :: f
     f = sin(x) / x
 end function
@@ -38,7 +38,7 @@ end function
 ! The minimum is at x = 3, y = 0.5, and f(3, 0.5) = 0
 function beale(x, args) result(f)
     real(real64), intent(in), dimension(:) :: x
-    class(*), intent(inout), optional :: args
+    class(*), intent(in), optional :: args
     real(real64) :: f
     f = (1.5d0 - x(1) + x(1) * x(2))**2 + &
         (2.25d0 - x(1) + x(1) * x(2)**2)**2 + &
@@ -49,7 +49,7 @@ end function
 subroutine bealegrad(x, g, args)
     real(real64), intent(in), dimension(:) :: x
     real(real64), intent(out), dimension(:) :: g
-    class(*), intent(inout), optional :: args
+    class(*), intent(in), optional :: args
 
     g(1) = 2.0d0 * (x(2)**3 - 1.0d0) * (x(1) * x(2)**3 - x(1) + 2.625d0) + &
         2.0d0 * (x(2)**2 - 1.0d0) * (x(1) * x(2)**2 - x(1) + 2.25d0) + &
@@ -70,7 +70,7 @@ end subroutine
 subroutine powell_bad(x, f, args)
     real(real64), intent(in), dimension(:) :: x
     real(real64), intent(out), dimension(:) :: f
-    class(*), intent(inout), optional :: args
+    class(*), intent(in), optional :: args
     f(1) = 1.0d4 * x(1) * x(2) - 1.0d0
     f(2) = exp(-x(1)) + exp(-x(2)) - 1.0001d0
 end subroutine
@@ -81,7 +81,7 @@ end subroutine
 subroutine misc_2fcn(x, f, args)
     real(real64), intent(in), dimension(:) :: x
     real(real64), intent(out), dimension(:) :: f
-    class(*), intent(inout), optional :: args
+    class(*), intent(in), optional :: args
     f(1) = x(1)**2 + x(2)**2 - 34.0d0
     f(2) = x(1)**2 - 2.0d0 * x(2)**2 - 7.0d0
 end subroutine
@@ -93,7 +93,7 @@ end subroutine
 subroutine misc_2fcn_01(x, f, args)
     real(real64), intent(in), dimension(:) :: x
     real(real64), intent(out), dimension(:) :: f
-    class(*), intent(inout), optional :: args
+    class(*), intent(in), optional :: args
     f(1) = 2.0d0 * x(1) - x(2) - exp(-x(1))
     f(2) = -x(1) + 2.0d0 * x(2) - exp(-x(2))
 end subroutine
@@ -105,7 +105,7 @@ end subroutine
 subroutine misc_2fcn_01_jac(x, jac, args)
     real(real64), intent(in), dimension(:) :: x
     real(real64), intent(out), dimension(:,:) :: jac
-    class(*), intent(inout), optional :: args
+    class(*), intent(in), optional :: args
     jac(1,1) = exp(-x(1)) + 2.0d0
     jac(2,1) = -1.0d0
     jac(1,2) = -1.0d0
@@ -116,7 +116,7 @@ end subroutine
 ! f(x) = x**3 - 2 * x - 1
 function fcn_1var(x, args) result(f)
     real(real64), intent(in) :: x
-    class(*), intent(inout), optional :: args
+    class(*), intent(in), optional :: args
     real(real64) :: f
     f = x**3 - 2.0d0 * x - 1.0d0
 end function
@@ -125,7 +125,7 @@ end function
 ! Rosenbrock's Function
 function rosenbrock(x, args) result(f)
     real(real64), intent(in), dimension(:) :: x
-    class(*), intent(inout), optional :: args
+    class(*), intent(in), optional :: args
     real(real64) :: f
     f = 1.0d2 * (x(2) - x(1)**2)**2 + (x(1) - 1.0d0)**2
 end function
@@ -136,7 +136,7 @@ subroutine lsq_poly_fit_fcn(x, f, args)
     ! Arguments
     real(real64), intent(in), dimension(:) :: x  ! Contains the coefficients
     real(real64), intent(out), dimension(:) :: f
-    class(*), intent(inout), optional :: args
+    class(*), intent(in), optional :: args
 
     ! Local Variables
     real(real64), dimension(21) :: xp, yp

@@ -31,7 +31,7 @@ contains
 subroutine powell_badly_scaled(x, f, args)
     real(real64), intent(in), dimension(:) :: x
     real(real64), intent(out), dimension(:) :: f
-    class(*), intent(inout), optional :: args
+    class(*), intent(in), optional :: args
     f(1) = 1.0d4 * x(1) * x(2) - 1.0d0
     f(2) = exp(-x(1)) + exp(-x(2)) - 1.0001d0
 end subroutine
@@ -40,7 +40,7 @@ end subroutine
 subroutine powell_badly_scaled_jacobian(x, j, args)
     real(real64), intent(in), dimension(:) :: x
     real(real64), intent(out), dimension(:,:) :: j
-    class(*), intent(inout), optional :: args
+    class(*), intent(in), optional :: args
     j(1,1) = 1.0d4 * x(2)
     j(2,1) = -exp(-x(1))
     j(1,2) = 1.0d4 * x(1)

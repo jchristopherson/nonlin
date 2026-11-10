@@ -28,7 +28,7 @@ program example
     implicit none
 
     ! Local Variables
-    integer(int32) :: i
+    integer :: i
     real(real64), dimension(21) :: xp, yp, yf, yc, err
     real(real64) :: res
     type(polynomial) :: p

@@ -29,18 +29,37 @@ program main
     use nonlin_test_solve
     use nonlin_test_poly
     use nonlin_test_optimize
+    use nonlin_test_simple
+    use nonlin_test_iteration
+    use nonlin_test_continuation
 
     ! Local Variables
     logical :: rst, overall
+    character(32) :: test_name
 
     ! Initialization
     overall = .true.
+    call get_command_argument(1, test_name)
+    if (test_name == "jacobian_threads") then
+        rst = test_jacobian_threads()
+        if (.not.rst) stop -1
+        stop
+    end if
 
     ! Tests
     rst = test_jacobian_1()
     if (.not.rst) overall = .false.
 
     rst = test_jacobian_2()
+    if (.not.rst) overall = .false.
+
+    rst = test_vecfcn_ad()
+    if (.not.rst) overall = .false.
+
+    rst = test_vector_solvers_ad()
+    if (.not.rst) overall = .false.
+
+    rst = test_vector_solver_robustness()
     if (.not.rst) overall = .false.
 
     rst = test_quasinewton_1()
@@ -91,6 +110,9 @@ program main
     rst = test_nelder_mead_3()
     if (.not.rst) overall = .false.
 
+    rst = test_nelder_mead_ad()
+    if (.not.rst) overall = .false.
+
     rst = test_bfgs_1()
     if (.not.rst) overall = .false.
 
@@ -98,6 +120,9 @@ program main
     if (.not.rst) overall = .false.
 
     rst = test_bfgs_3()
+    if (.not.rst) overall = .false.
+
+    rst = test_bfgs_ad()
     if (.not.rst) overall = .false.
 
     rst = test_newton_3()
@@ -124,6 +149,9 @@ program main
     rst = test_newton_1var_2()
     if (.not.rst) overall = .false.
 
+    rst = test_scalar_solver_edge_cases()
+    if (.not.rst) overall = .false.
+
     rst = test_constrained_least_squares_1()
     if (.not.rst) overall = .false.
 
@@ -137,6 +165,93 @@ program main
     if (.not.rst) overall = .false.
 
     rst = test_constrained_least_squares_bounds()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_brent_1()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_brent_2()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_newton_1var_1()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_newton_1var_2()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_newton_1()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_newton_2()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_newton_3()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_quasi_newton_1()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_quasi_newton_2()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_quasi_newton_3()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_continuation()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_continuation_pseudo_arclength()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_nelder_mead()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_bfgs()
+    if (.not.rst) overall = .false.
+
+    rst = test_iteration_brent()
+    if (.not.rst) overall = .false.
+
+    rst = test_iteration_newton_1var()
+    if (.not.rst) overall = .false.
+
+    rst = test_iteration_newton()
+    if (.not.rst) overall = .false.
+
+    rst = test_iteration_quasi_newton()
+    if (.not.rst) overall = .false.
+
+    rst = test_iteration_least_squares()
+    if (.not.rst) overall = .false.
+
+    rst = test_iteration_constrained_least_squares()
+    if (.not.rst) overall = .false.
+
+    rst = test_iteration_nelder_mead()
+    if (.not.rst) overall = .false.
+
+    rst = test_iteration_bfgs()
+    if (.not.rst) overall = .false.
+
+    rst = test_convergence_history_storage()
+    if (.not.rst) overall = .false.
+
+    rst = test_continuation_default()
+    if (.not.rst) overall = .false.
+
+    rst = test_continuation_custom_homotopy()
+    if (.not.rst) overall = .false.
+
+    rst = test_continuation_fd_fallback()
+    if (.not.rst) overall = .false.
+
+    rst = test_continuation_evaluation_limit()
+    if (.not.rst) overall = .false.
+
+    rst = test_continuation_pseudo_arclength_fold()
+    if (.not.rst) overall = .false.
+
+    rst = test_continuation_rank_deficient_qr()
     if (.not.rst) overall = .false.
 
     ! End
