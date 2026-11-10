@@ -167,47 +167,47 @@ program main
     rst = test_constrained_least_squares_bounds()
     if (.not.rst) overall = .false.
 
-    ! rst = test_solve_brent_1()
-    ! if (.not.rst) overall = .false.
+    rst = test_solve_brent_1()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_solve_brent_2()
-    ! if (.not.rst) overall = .false.
+    rst = test_solve_brent_2()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_solve_newton_1var_1()
-    ! if (.not.rst) overall = .false.
+    rst = test_solve_newton_1var_1()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_solve_newton_1var_2()
-    ! if (.not.rst) overall = .false.
+    rst = test_solve_newton_1var_2()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_solve_newton_1()
-    ! if (.not.rst) overall = .false.
+    rst = test_solve_newton_1()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_solve_newton_2()
-    ! if (.not.rst) overall = .false.
+    rst = test_solve_newton_2()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_solve_newton_3()
-    ! if (.not.rst) overall = .false.
+    rst = test_solve_newton_3()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_solve_quasi_newton_1()
-    ! if (.not.rst) overall = .false.
+    rst = test_solve_quasi_newton_1()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_solve_quasi_newton_2()
-    ! if (.not.rst) overall = .false.
+    rst = test_solve_quasi_newton_2()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_solve_quasi_newton_3()
-    ! if (.not.rst) overall = .false.
+    rst = test_solve_quasi_newton_3()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_solve_continuation()
-    ! if (.not.rst) overall = .false.
+    rst = test_solve_continuation()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_solve_continuation_pseudo_arclength()
-    ! if (.not.rst) overall = .false.
+    rst = test_solve_continuation_pseudo_arclength()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_solve_nelder_mead()
-    ! if (.not.rst) overall = .false.
+    rst = test_solve_nelder_mead()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_solve_bfgs()
-    ! if (.not.rst) overall = .false.
+    rst = test_solve_bfgs()
+    if (.not.rst) overall = .false.
 
     rst = test_iteration_brent()
     if (.not.rst) overall = .false.
