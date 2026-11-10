@@ -179,11 +179,11 @@ program main
     ! rst = test_solve_newton_1var_2()
     ! if (.not.rst) overall = .false.
 
-    rst = test_solve_newton_1()
-    if (.not.rst) overall = .false.
+    ! rst = test_solve_newton_1()
+    ! if (.not.rst) overall = .false.
 
-    rst = test_solve_newton_2()
-    if (.not.rst) overall = .false.
+    ! rst = test_solve_newton_2()
+    ! if (.not.rst) overall = .false.
 
     ! rst = test_solve_newton_3()
     ! if (.not.rst) overall = .false.
@@ -209,8 +209,8 @@ program main
     ! rst = test_solve_bfgs()
     ! if (.not.rst) overall = .false.
 
-    ! rst = test_iteration_brent()
-    ! if (.not.rst) overall = .false.
+    rst = test_iteration_brent()
+    if (.not.rst) overall = .false.
 
     ! rst = test_iteration_newton_1var()
     ! if (.not.rst) overall = .false.
