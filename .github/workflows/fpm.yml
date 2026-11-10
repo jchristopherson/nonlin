@@ -36,11 +36,11 @@ jobs:
             shared: true
           - os: windows-latest
             compiler: gcc
-            version: '15'
+            version: 'msys2'
             shared: false
           - os: windows-latest
             compiler: gcc
-            version: '15'
+            version: 'msys2'
             shared: true
 
     steps:
@@ -48,6 +48,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Fortran toolchain
+        if: runner.os != 'Windows'
         uses: fortran-lang/setup-fortran@v1
         id: setup-fortran
         with:
@@ -71,6 +72,7 @@ jobs:
           msystem: MINGW64
           update: true
           install: >-
+            mingw-w64-x86_64-gcc-fortran
             mingw-w64-x86_64-openblas
             mingw-w64-x86_64-arpack
 
