@@ -209,29 +209,17 @@ contains
         ! Process
         if (this%is_derivative_defined()) then
             ! Use the user-defined routine to compute the derivative
-            if (present(args)) then
-                df = this%m_diff(x, args)
-            else
-                df = this%m_diff(x)
-            end if
+            df = this%m_diff(x, args)
         else
             ! Compute the derivative via a forward difference
             h = eps * abs(x)
             if (h < epsmch) h = eps
             temp = x + h
-            if (present(args)) then
-                f1 = this%fcn(temp, args)
-            else
-                f1 = this%fcn(temp)
-            end if
+            f1 = this%fcn(temp, args)
             if (present(f)) then
                 f0 = f
             else
-                if (present(args)) then
-                    f0 = this%fcn(x, args)
-                else
-                    f0 = this%fcn(x)
-                end if
+                f0 = this%fcn(x, args)
             end if
             df = (f1 - f0) / h
         end if
