@@ -146,72 +146,95 @@ program main
 
     print *, "Starting third test group"
     flush(6)
+    print *, "Running test_brent_2"
     rst = test_brent_2()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_newton_1var_1"
     rst = test_newton_1var_1()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_newton_1var_2"
     rst = test_newton_1var_2()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_scalar_solver_edge_cases"
     rst = test_scalar_solver_edge_cases()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_constrained_least_squares_1"
     rst = test_constrained_least_squares_1()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_constrained_least_squares_2"
     rst = test_constrained_least_squares_2()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_constrained_least_squares_3"
     rst = test_constrained_least_squares_3()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_constrained_least_squares_4"
     rst = test_constrained_least_squares_4()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_constrained_least_squares_bounds"
     rst = test_constrained_least_squares_bounds()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_solve_brent_1"
     rst = test_solve_brent_1()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_solve_brent_2"
     rst = test_solve_brent_2()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_solve_newton_1var_1"
     rst = test_solve_newton_1var_1()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_solve_newton_1var_2"
     rst = test_solve_newton_1var_2()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_solve_newton_1"
     rst = test_solve_newton_1()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_solve_newton_2"
     rst = test_solve_newton_2()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_solve_newton_3"
     rst = test_solve_newton_3()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_solve_quasi_newton_1"
     rst = test_solve_quasi_newton_1()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_solve_quasi_newton_2"
     rst = test_solve_quasi_newton_2()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_solve_quasi_newton_3"
     rst = test_solve_quasi_newton_3()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_solve_continuation"
     rst = test_solve_continuation()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_solve_continuation_pseudo_arclength"
     rst = test_solve_continuation_pseudo_arclength()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_solve_nelder_mead"
     rst = test_solve_nelder_mead()
     if (.not.rst) overall = .false.
 
+    print *, "Running test_solve_bfgs"
     rst = test_solve_bfgs()
     if (.not.rst) overall = .false.
 
