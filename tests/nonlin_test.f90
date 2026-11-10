@@ -152,8 +152,8 @@ program main
     rst = test_scalar_solver_edge_cases()
     if (.not.rst) overall = .false.
 
-    ! rst = test_constrained_least_squares_1()
-    ! if (.not.rst) overall = .false.
+    rst = test_constrained_least_squares_1()
+    if (.not.rst) overall = .false.
 
     ! rst = test_constrained_least_squares_2()
     ! if (.not.rst) overall = .false.
