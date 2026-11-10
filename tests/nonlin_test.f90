@@ -47,8 +47,6 @@ program main
     end if
 
     ! Tests
-    print *, "Starting first test group"
-    flush(6)
     rst = test_jacobian_1()
     if (.not.rst) overall = .false.
 
@@ -103,8 +101,6 @@ program main
     rst = test_poly_divide()
     if (.not.rst) overall = .false.
 
-    print *, "Starting second test group"
-    flush(6)
     rst = test_nelder_mead_1()
     if (.not.rst) overall = .false.
 
@@ -144,8 +140,6 @@ program main
     rst = test_least_squares_4()
     if (.not.rst) overall = .false.
 
-    print *, "Starting third test group"
-    flush(6)
     rst = test_brent_2()
     if (.not.rst) overall = .false.
 
@@ -215,8 +209,6 @@ program main
     rst = test_solve_bfgs()
     if (.not.rst) overall = .false.
 
-    print *, "Starting fourth test group"
-    flush(6)
     rst = test_iteration_brent()
     if (.not.rst) overall = .false.
 
@@ -241,8 +233,6 @@ program main
     rst = test_iteration_bfgs()
     if (.not.rst) overall = .false.
 
-    print *, "Starting fifth test group"
-    flush(6)
     rst = test_convergence_history_storage()
     if (.not.rst) overall = .false.
 

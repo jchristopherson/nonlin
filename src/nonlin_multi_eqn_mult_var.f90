@@ -361,7 +361,7 @@ contains
             end if
             
             ! Store the variables in the workspace
-            do concurrent (j = 1:n)
+            do j = 1, n
                 this%m_xjwork(j,:) = x(j)
             end do
 
