@@ -135,7 +135,11 @@ contains
         real(real64) :: f
             !! The value of the function.
         if (associated(this%m_fcn)) then
-            f = this%m_fcn(x, args)
+            if (present(args)) then
+                f = this%m_fcn(x, args)
+            else
+                f = this%m_fcn(x)
+            end if
         end if
     end function
 
@@ -205,17 +209,29 @@ contains
         ! Process
         if (this%is_derivative_defined()) then
             ! Use the user-defined routine to compute the derivative
-            df = this%m_diff(x, args)
+            if (present(args)) then
+                df = this%m_diff(x, args)
+            else
+                df = this%m_diff(x)
+            end if
         else
             ! Compute the derivative via a forward difference
             h = eps * abs(x)
             if (h < epsmch) h = eps
             temp = x + h
-            f1 = this%fcn(temp, args)
+            if (present(args)) then
+                f1 = this%fcn(temp, args)
+            else
+                f1 = this%fcn(temp)
+            end if
             if (present(f)) then
                 f0 = f
             else
-                f0 = this%fcn(x, args)
+                if (present(args)) then
+                    f0 = this%fcn(x, args)
+                else
+                    f0 = this%fcn(x)
+                end if
             end if
             df = (f1 - f0) / h
         end if

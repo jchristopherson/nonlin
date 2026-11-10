@@ -806,6 +806,7 @@ contains
         type(fcn1var_helper) :: obj
         procedure(fcn1var), pointer :: fcn
         real(real64) :: x, f, a
+        class(*), allocatable :: args
         type(value_pair) :: limits
         logical :: check
 
@@ -816,6 +817,7 @@ contains
         ! Initialization
         check = .true.
         a = 2.0d0
+        allocate(args, source = a)
         fcn => f1var_1a
         call obj%set_fcn(fcn)
 
@@ -824,7 +826,7 @@ contains
         limits%x2 = 5.0d0
 
         ! Compute the solution
-        call solver%solve(obj, x, limits, f, args = a)
+        call solver%solve(obj, x, limits, f, args = args)
 
         ! The solution on this interval should be: pi
         if (abs(x - pi) > tol) then
@@ -975,6 +977,7 @@ contains
         type(fcn1var_helper) :: obj
         procedure(fcn1var), pointer :: fcn
         real(real64) :: x, f, a
+        class(*), allocatable :: args
         type(value_pair) :: limits
         logical :: check
 
@@ -985,6 +988,7 @@ contains
         ! Initialization
         check = .true.
         a = 2.0d0
+        allocate(args, source = a)
         fcn => f1var_1a
         call obj%set_fcn(fcn)
 
@@ -993,7 +997,7 @@ contains
         limits%x2 = 5.0d0
 
         ! Compute the solution
-        call solver%solve(obj, x, limits, f, args = a)
+        call solver%solve(obj, x, limits, f, args = args)
 
         ! The solution on this interval should be: pi
         if (abs(x - pi) > tol) then
@@ -1016,6 +1020,7 @@ contains
         type(value_pair) :: limits
         type(iteration_behavior) :: ib
         real(real64) :: x, f, scale
+        class(*), allocatable :: args
         logical :: check
 
         check = .true.
@@ -1042,13 +1047,14 @@ contains
         fcn => f1var_1a
         call obj%set_fcn(fcn)
         scale = 1.0d-20
+        allocate(args, source = scale)
         limits%x1 = 1.5d0
         limits%x2 = 5.0d0
         call brent%set_fcn_tolerance(1.0d-30)
         call newton%set_fcn_tolerance(1.0d-30)
         call newton%set_diff_tolerance(1.0d-30)
 
-        call brent%solve(obj, x, limits, f, ib, args = scale)
+        call brent%solve(obj, x, limits, f, ib, args = args)
         if (abs(x - 3.141592653589793d0) > 1.0d-6 .or. &
                 abs(f) > 1.0d-30 .or. &
                 .not.(ib%converge_on_fcn .or. ib%converge_on_chng)) then
@@ -1056,7 +1062,7 @@ contains
             print *, "Test Failed: Brent solver was not robust to a small function scale."
         end if
 
-        call newton%solve(obj, x, limits, f, ib, args = scale)
+        call newton%solve(obj, x, limits, f, ib, args = args)
         if (abs(x - 3.141592653589793d0) > 1.0d-6 .or. &
                 abs(f) > 1.0d-30 .or. &
                 .not.(ib%converge_on_fcn .or. ib%converge_on_chng)) then
