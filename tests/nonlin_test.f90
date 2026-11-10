@@ -212,47 +212,47 @@ program main
     rst = test_iteration_brent()
     if (.not.rst) overall = .false.
 
-    ! rst = test_iteration_newton_1var()
-    ! if (.not.rst) overall = .false.
+    rst = test_iteration_newton_1var()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_iteration_newton()
-    ! if (.not.rst) overall = .false.
+    rst = test_iteration_newton()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_iteration_quasi_newton()
-    ! if (.not.rst) overall = .false.
+    rst = test_iteration_quasi_newton()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_iteration_least_squares()
-    ! if (.not.rst) overall = .false.
+    rst = test_iteration_least_squares()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_iteration_constrained_least_squares()
-    ! if (.not.rst) overall = .false.
+    rst = test_iteration_constrained_least_squares()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_iteration_nelder_mead()
-    ! if (.not.rst) overall = .false.
+    rst = test_iteration_nelder_mead()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_iteration_bfgs()
-    ! if (.not.rst) overall = .false.
+    rst = test_iteration_bfgs()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_convergence_history_storage()
-    ! if (.not.rst) overall = .false.
+    rst = test_convergence_history_storage()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_continuation_default()
-    ! if (.not.rst) overall = .false.
+    rst = test_continuation_default()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_continuation_custom_homotopy()
-    ! if (.not.rst) overall = .false.
+    rst = test_continuation_custom_homotopy()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_continuation_fd_fallback()
-    ! if (.not.rst) overall = .false.
+    rst = test_continuation_fd_fallback()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_continuation_evaluation_limit()
-    ! if (.not.rst) overall = .false.
+    rst = test_continuation_evaluation_limit()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_continuation_pseudo_arclength_fold()
-    ! if (.not.rst) overall = .false.
+    rst = test_continuation_pseudo_arclength_fold()
+    if (.not.rst) overall = .false.
 
-    ! rst = test_continuation_rank_deficient_qr()
-    ! if (.not.rst) overall = .false.
+    rst = test_continuation_rank_deficient_qr()
+    if (.not.rst) overall = .false.
 
     ! End
     if (.not.overall) stop -1
