@@ -173,17 +173,17 @@ program main
     ! rst = test_solve_brent_2()
     ! if (.not.rst) overall = .false.
 
-    rst = test_solve_newton_1var_1()
-    if (.not.rst) overall = .false.
-
-    rst = test_solve_newton_1var_2()
-    if (.not.rst) overall = .false.
-
-    ! rst = test_solve_newton_1()
+    ! rst = test_solve_newton_1var_1()
     ! if (.not.rst) overall = .false.
 
-    ! rst = test_solve_newton_2()
+    ! rst = test_solve_newton_1var_2()
     ! if (.not.rst) overall = .false.
+
+    rst = test_solve_newton_1()
+    if (.not.rst) overall = .false.
+
+    rst = test_solve_newton_2()
+    if (.not.rst) overall = .false.
 
     ! rst = test_solve_newton_3()
     ! if (.not.rst) overall = .false.
