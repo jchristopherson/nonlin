@@ -82,6 +82,7 @@ module nonlin_linesearch
         procedure, public :: get_distance_factor => ls_get_dist
         procedure, public :: set_distance_factor => ls_set_dist
         procedure, public :: search_newton => ls_search_newton
+        procedure, public :: search_directional => ls_search_directional
         generic, public :: search => ls_search_mimo, ls_search_miso
 
         procedure :: ls_search_mimo
@@ -278,14 +279,55 @@ contains
     end subroutine
 
 ! ------------------------------------------------------------------------------
+    subroutine ls_search_directional(this, fcn, xold, dir, slope, x, fvec, &
+            fold, fx, ib, args)
+        !! Backtracking for the residual merit function 1/2 F**T F with a
+        !! caller-supplied directional derivative. For a direction p, SLOPE
+        !! must be F(xold)**T J(xold) p, which need not require the gradient
+        !! or the full Jacobian. Unlike [[ls_search_newton]], this also supports
+        !! inexact Newton and other directions when their true slope is known.
+        !! The caller is responsible for ensuring SLOPE and FOLD correspond to
+        !! FCN, XOLD, DIR, and ARGS; their consistency is not checked.
+        class(line_search), intent(in) :: this
+            !! The [[line_search]] object.
+        class(vecfcn_helper), intent(inout) :: fcn
+            !! The residual function.
+        real(real64), intent(in) :: xold(:), dir(:), slope
+            !! Initial point, search direction, and its finite merit slope.
+        real(real64), intent(out) :: x(:), fvec(:)
+            !! Returned point and residual.
+        real(real64), intent(in), optional :: fold
+            !! Finite nonnegative merit at XOLD; if omitted, the residual is
+            !! evaluated there. Invalid inputs trigger NL_INVALID_INPUT_ERROR.
+        real(real64), intent(out), optional :: fx
+            !! Returned merit, or NaN if the search fails.
+        type(iteration_behavior), optional :: ib
+            !! Optional iteration and function-evaluation statistics.
+        class(*), intent(in), optional :: args
+            !! Optional arguments forwarded to the residual callback.
+
+        if (.not.ieee_is_finite(slope)) error stop NL_INVALID_INPUT_ERROR
+        if (.not.all(ieee_is_finite(xold)) .or. &
+            .not.all(ieee_is_finite(dir))) error stop NL_INVALID_INPUT_ERROR
+        if (all(dir == 0.0d0) .and. slope < 0.0d0) error stop NL_INVALID_INPUT_ERROR
+        if (present(fold)) then
+            if (.not.ieee_is_finite(fold)) error stop NL_INVALID_INPUT_ERROR
+            if (fold < 0.0d0) error stop NL_INVALID_INPUT_ERROR
+        end if
+        call ls_search_mimo_core(this, fcn, xold, dir, x, fvec, &
+            step_scale = 1.0d0, slope_value = slope, fold = fold, fx = fx, &
+            ib = ib, args = args)
+    end subroutine
+
+! ------------------------------------------------------------------------------
     subroutine ls_search_mimo_core(this, fcn, xold, dir, x, fvec, step_scale, &
-            grad, fold, fx, ib, args)
+            grad, fold, fx, ib, args, slope_value)
         class(line_search), intent(in) :: this
         class(vecfcn_helper), intent(inout) :: fcn
         real(real64), intent(in) :: xold(:), dir(:)
         real(real64), intent(out) :: x(:), fvec(:)
         real(real64), intent(in) :: step_scale
-        real(real64), intent(in), optional :: grad(:), fold
+        real(real64), intent(in), optional :: grad(:), fold, slope_value
         real(real64), intent(out), optional :: fx
         type(iteration_behavior), optional :: ib
         class(*), intent(in), optional :: args
@@ -355,7 +397,10 @@ contains
         end if
 
         ! Compute the slope parameter
-        if (present(grad)) then
+        if (present(slope_value)) then
+            if (.not.ieee_is_finite(fo)) error stop NL_INVALID_OPERATION_ERROR
+            slope = slope_value
+        else if (present(grad)) then
             slope = dot_product(grad, dir)
         else
             if (.not.ieee_is_finite(fo)) error stop NL_INVALID_OPERATION_ERROR
@@ -395,6 +440,10 @@ contains
             f = p5 * dot_product(fvec, fvec)
             neval = neval + 1
             niter = niter + 1
+            if (.not.ieee_is_finite(f) .or. .not.all(ieee_is_finite(fvec))) then
+                flag = 1
+                exit
+            end if
 
             ! Check the step
             if (alam < alamin) then
@@ -406,6 +455,10 @@ contains
                 if (norm2(x - xold) == zero) then
                     ! The line search fully backtracked
                     failed = .true.
+                end if
+                if (neval >= maxeval) then
+                    flag = 1
+                    exit
                 end if
                 x = xold
                 call fcn%fcn(x, fvec, args)

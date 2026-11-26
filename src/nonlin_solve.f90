@@ -595,7 +595,7 @@ contains
         )
 
         ! Test to see if the initial guess is a root
-        call fcn%fcn(x, fvec, args)
+        call fcn%fcn(x, fvec, args = args)
         neval = neval + 1
         flag = 0
         if (.not.all(ieee_is_finite(x)) .or. .not.all(ieee_is_finite(fvec))) then
@@ -668,7 +668,7 @@ contains
                 else
                     ! No line search - just update the solution estimate
                     x = x + dir
-                    call fcn%fcn(x, fvec, args)
+                    call fcn%fcn(x, fvec, args = args)
                     f = half * dot_product(fvec, fvec)
                     neval = neval + 1
                 end if

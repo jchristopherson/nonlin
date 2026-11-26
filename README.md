@@ -40,6 +40,8 @@ The library also provides polynomial evaluation, fitting, arithmetic, and root c
 
 For a manually computed **exact Newton** direction `p` satisfying `J(xold)*p = -F(xold)`, `line_search%search_newton` performs residual-norm backtracking without a gradient. Pass `dir = p`, or pass an already shortened `dir = beta*p` together with `step_scale = beta` in `(0, 1]`; the routine does not rescale `dir`. An optional `fold` supplies `0.5*dot_product(F(xold), F(xold))` to avoid reevaluating the initial residual. Check for a root before calling. The caller must ensure the Newton-step and `fold` assumptions hold; do not use this shortcut for inexact Newton–Krylov or quasi-Newton directions.
 
+For an inexact direction with a known merit directional derivative `dot_product(F(xold), J(xold)*p)`, use `line_search%search_directional` instead; it does not require the full gradient.
+
 ## Available Solvers
 
 These are local methods: starting points, smoothness, scaling, and tolerances affect convergence. For least squares, convergence can occur at a nonzero residual; inspect both the returned residual/objective and `iteration_behavior` rather than treating every stopping flag as an exact root.

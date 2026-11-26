@@ -65,6 +65,35 @@ add_test(
     COMMAND $<TARGET_FILE:nonlin_test> newton_line_search
 )
 set_tests_properties(nonlin_newton_line_search PROPERTIES TIMEOUT 30)
+add_executable(nonlin_test_sparse_solver nonlin_test_sparse_solver.f90)
+target_link_libraries(nonlin_test_sparse_solver nonlin)
+foreach(case root nonlinear no_line_search backtrack linear large_sparse reuse optional_arguments scaled ill_conditioned
+    large_residual zero_jacobian nonfinite_jacobian nonfinite_residual nonfinite_initial
+    nonfinite_trial singular unallocated_jacobian wrong_jacobian_shape malformed_jacobian
+    max_evaluations backtrack_budget)
+    add_test(
+        NAME nonlin_sparse_solver_${case}
+        WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND $<TARGET_FILE:nonlin_test_sparse_solver> ${case}
+    )
+    set_tests_properties(nonlin_sparse_solver_${case} PROPERTIES TIMEOUT 30)
+endforeach()
+foreach(case_error missing_fcn:211 sparse_disabled:107 missing_jacobian:211
+    nonsquare:201 empty:201 bad_x:202 bad_f:202 bad_budget:201 bad_search_budget:201)
+    string(REPLACE ":" ";" case_parts "${case_error}")
+    list(GET case_parts 0 case)
+    list(GET case_parts 1 expected)
+    add_test(
+        NAME nonlin_sparse_solver_${case}
+        WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND}
+            "-DTEST_EXECUTABLE=$<TARGET_FILE:nonlin_test_sparse_solver>"
+            "-DTEST_ARGUMENT=${case}"
+            "-DEXPECTED_ERROR=${expected}"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/check_error_stop.cmake"
+    )
+    set_tests_properties(nonlin_sparse_solver_${case} PROPERTIES TIMEOUT 30)
+endforeach()
 foreach(mode invalid_scale nan_scale invalid_fold zero_direction)
     add_test(
         NAME nonlin_newton_${mode}
@@ -88,6 +117,14 @@ set_tests_properties(nonlin_jacobian_threads PROPERTIES
 )
 
 if (${BUILD_SHARED_LIBS} AND WIN32)
+    add_custom_command(
+        TARGET nonlin_test_sparse_solver
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        $<TARGET_RUNTIME_DLLS:nonlin_test_sparse_solver>
+        $<TARGET_FILE_DIR:nonlin_test_sparse_solver>
+        COMMAND_EXPAND_LISTS
+    )
     add_custom_command(
         TARGET nonlin_test
         POST_BUILD

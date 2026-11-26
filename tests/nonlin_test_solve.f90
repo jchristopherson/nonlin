@@ -132,6 +132,22 @@ contains
             print *, "Scaled exact Newton search used the wrong slope"
             return
         end if
+        call ls%search_directional(fcn, xold, dir, dot_product(grad, dir), &
+            x, fvec, fold, fx, newton_ib, args = 1.0d0)
+        if (newton_ib%iter_count /= general_ib%iter_count .or. &
+            maxval(abs(x - xref)) > 1.0d-12 .or. &
+            maxval(abs(fvec - fref)) > 1.0d-12 .or. &
+            abs(fx - fxref) > 1.0d-12) then
+            print *, "Directional-slope search differs from gradient search"
+            return
+        end if
+        dir = [0.2d0]
+        call ls%search_directional(fcn, xold, dir, dot_product(grad, dir), &
+            x, fvec, fold, fx, newton_ib, args = 1.0d0)
+        if (newton_ib%iter_count /= 1 .or. abs(x(1) - 0.3d0) > 1.0d-12) then
+            print *, "Directional search did not use the supplied inexact slope"
+            return
+        end if
 
         call ls%set_scaling_factor(0.1d0)
         xold = [3.0d0]
