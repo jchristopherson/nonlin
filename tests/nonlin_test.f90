@@ -45,8 +45,36 @@ program main
         if (.not.rst) stop -1
         stop
     end if
+    if (test_name == "sparse_jacobian") then
+        rst = test_sparse_jacobian()
+        if (.not.rst) stop -1
+        stop
+    end if
+    if (test_name == "sparse_missing_enabled") then
+        call test_sparse_jacobian_missing(.true.)
+    end if
+    if (test_name == "sparse_missing_disabled") then
+        call test_sparse_jacobian_missing(.false.)
+    end if
+    if (test_name == "newton_line_search") then
+        rst = test_newton_line_search()
+        if (.not.rst) stop -1
+        stop
+    end if
+    if (test_name == "newton_invalid_scale" .or. &
+        test_name == "newton_nan_scale" .or. &
+        test_name == "newton_invalid_fold" .or. &
+        test_name == "newton_zero_direction") then
+        call test_newton_line_search_invalid(test_name)
+    end if
 
     ! Tests
+    rst = test_newton_line_search()
+    if (.not.rst) overall = .false.
+
+    rst = test_sparse_jacobian()
+    if (.not.rst) overall = .false.
+
     rst = test_jacobian_1()
     if (.not.rst) overall = .false.
 

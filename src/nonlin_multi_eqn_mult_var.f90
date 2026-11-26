@@ -25,10 +25,12 @@ module nonlin_multi_eqn_mult_var
     use nonlin_types
     use nonlin_error_handling
     use autodiff
+    use linalg, only : csr_matrix
     implicit none
     private
     public :: vecfcn
     public :: jacobianfcn
+    public :: sparsejacobianfcn
     public :: vecfcn_helper
     public :: equation_solver
     public :: nonlin_solver
@@ -55,6 +57,20 @@ module nonlin_multi_eqn_mult_var
                 !! An N-element array containing the independent variables.
             real(real64), intent(out), dimension(:,:) :: jac
                 !! An M-by-N matrix where the Jacobian will be written.
+            class(*), intent(in), optional :: args
+                !! An optional argument to allow the user to communicate with
+                !! the routine.
+        end subroutine
+
+        subroutine sparsejacobianfcn(x, jac, args)
+            !! Describes a routine capable of computing a sparse Jacobian
+            !! matrix of M functions of N unknowns.
+            use, intrinsic :: iso_fortran_env, only : real64
+            use linalg, only : csr_matrix
+            real(real64), intent(in), dimension(:) :: x
+                !! An N-element array containing the independent variables.
+            type(csr_matrix), intent(out) :: jac
+                !! An M-by-N sparse matrix where the Jacobian will be written.
             class(*), intent(in), optional :: args
                 !! An optional argument to allow the user to communicate with
                 !! the routine.
@@ -94,6 +110,12 @@ module nonlin_multi_eqn_mult_var
             !! available per thread.
         real(real64), allocatable, dimension(:) :: m_fwork
             !! A function evaluation workspace array.
+        logical, private :: m_useSparse = .false.
+            !! True if the sparse matrix channels should be utilized; else,
+            !! false.
+        procedure(sparsejacobianfcn), private, pointer, nopass :: m_sjac => null()
+            !! A pointer to the sparse matrix Jacobian routine - null if no
+            !! routine is supplied.
     contains
         procedure, public :: set_fcn => vfh_set_fcn
         procedure, public :: set_auto_fcn => vfh_set_auto_fcn
@@ -106,6 +128,11 @@ module nonlin_multi_eqn_mult_var
         procedure, public :: get_variable_count => vfh_get_nvar
         procedure, public :: get_thread_count => vfh_get_nthreads
         procedure, public :: set_thread_count => vfh_set_nthreads
+        procedure, public :: get_use_sparse => vfh_get_use_sparse
+        procedure, public :: set_use_sparse => vfh_set_use_sparse
+        procedure, public :: set_sparse_jacobian => vfh_set_sparse_jac
+        procedure, public :: is_sparse_jacobian_defined => vfh_is_sparse_jac_defined
+        procedure, public :: sparse_jacobian => vfh_sparse_jac
     end type
 
     type, abstract :: equation_solver
@@ -450,6 +477,80 @@ contains
         integer, intent(in) :: n
             !! The maximum allowed number of threads.
         this%m_threads = max(1, n)
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    pure function vfh_get_use_sparse(this) result(rst)
+        !! Gets a value determining if the sparse matrix routines should be
+        !! utilized.
+        class(vecfcn_helper), intent(in) :: this
+            !! The [[vecfcn_helper]] object.
+        logical :: rst
+            !! True if the sparse matrix routines should be used; else, false
+            !! to utilize dense routines.
+        rst = this%m_useSparse
+    end function
+
+! --------------------
+    subroutine vfh_set_use_sparse(this, x)
+        !! Sets a value determining if the sparse matrix routines should be
+        !! utilized.
+        class(vecfcn_helper), intent(inout) :: this
+            !! The [[vecfcn_helper]] object.
+        logical, intent(in) :: x
+            !! True if the sparse matrix routines should be used; else, false
+            !! to utilize dense routines.
+        this%m_useSparse = x
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    subroutine vfh_set_sparse_jac(this, jac)
+        !! Establishes a pointer to the routine for computing a sparse Jacobian
+        !! matrix of the system of equations.  If no routine is defined, the
+        !! Jacobian matrix will be calculated numerically by finite differences
+        !! or AD as a dense Jacobian.  Calling this routine also calls 
+        !! `set_use_sparse` and sets the flag to true if `jac` is defined; 
+        !! else `set_user_sparse` will be set to false if `jac` is false.
+        class(vecfcn_helper), intent(inout) :: this
+            !! The [[vecfcn_helper]] object.
+        procedure(sparsejacobianfcn), intent(in), pointer :: jac
+            !! The Jacobian routine.
+        this%m_sjac => jac
+        call this%set_use_sparse(associated(jac))
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    function vfh_is_sparse_jac_defined(this) result(rst)
+        !! Gets a value determining if the sparse Jacobian routine has been
+        !! defined.
+        class(vecfcn_helper), intent(in) :: this
+            !! The [[vecfcn_helper]] object.
+        logical :: rst
+            !! True if the routine has been defined; else, false.
+        rst = associated(this%m_sjac)
+    end function
+
+! ------------------------------------------------------------------------------
+    subroutine vfh_sparse_jac(this, x, jac, args)
+        !! Executes the routine containing the sparse Jacobian matrix.  If
+        !! no routine is defined an error stop condition occurrs.
+        class(vecfcn_helper), intent(inout) :: this
+            !! The [[vecfcn_helper]] object.
+        real(real64), intent(in), dimension(:) :: x
+            !! An N-element array containing the independent variables defining
+            !! the point about which the derivatives will be calculated.
+        type(csr_matrix), intent(out) :: jac
+            !! The M-by-N sparse Jacobian matrix.
+        class(*), intent(in), optional :: args
+            !! An optional argument to allow the user to communicate with
+            !! the routine.
+
+        ! Verify the user has defined a routine to compute the sparse matrix
+        if (.not.this%is_sparse_jacobian_defined()) &
+            error stop NL_UNDEFINED_FUNCTION_ERROR
+
+        ! Call the user routine
+        call this%m_sjac(x, jac, args = args)
     end subroutine
 
 ! ******************************************************************************

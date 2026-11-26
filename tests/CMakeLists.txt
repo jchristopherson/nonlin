@@ -42,6 +42,42 @@ add_test(
 )
 set_tests_properties(nonlin_test PROPERTIES TIMEOUT 30)
 add_test(
+    NAME nonlin_sparse_jacobian
+    WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+    COMMAND $<TARGET_FILE:nonlin_test> sparse_jacobian
+)
+set_tests_properties(nonlin_sparse_jacobian PROPERTIES TIMEOUT 30)
+foreach(mode enabled disabled)
+    add_test(
+        NAME nonlin_sparse_missing_${mode}
+        WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND}
+            "-DTEST_EXECUTABLE=$<TARGET_FILE:nonlin_test>"
+            "-DTEST_ARGUMENT=sparse_missing_${mode}"
+            "-DEXPECTED_ERROR=211"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/check_error_stop.cmake"
+    )
+    set_tests_properties(nonlin_sparse_missing_${mode} PROPERTIES TIMEOUT 30)
+endforeach()
+add_test(
+    NAME nonlin_newton_line_search
+    WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+    COMMAND $<TARGET_FILE:nonlin_test> newton_line_search
+)
+set_tests_properties(nonlin_newton_line_search PROPERTIES TIMEOUT 30)
+foreach(mode invalid_scale nan_scale invalid_fold zero_direction)
+    add_test(
+        NAME nonlin_newton_${mode}
+        WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND}
+            "-DTEST_EXECUTABLE=$<TARGET_FILE:nonlin_test>"
+            "-DTEST_ARGUMENT=newton_${mode}"
+            "-DEXPECTED_ERROR=201"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/check_error_stop.cmake"
+    )
+    set_tests_properties(nonlin_newton_${mode} PROPERTIES TIMEOUT 30)
+endforeach()
+add_test(
     NAME nonlin_jacobian_threads
     WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
     COMMAND $<TARGET_FILE:nonlin_test> jacobian_threads

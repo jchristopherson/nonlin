@@ -29,7 +29,7 @@ module nonlin_linesearch
     use nonlin_types
     use nonlin_multi_eqn_mult_var
     use nonlin_multi_var
-    use ieee_arithmetic, only : ieee_value, ieee_quiet_nan
+    use ieee_arithmetic, only : ieee_value, ieee_quiet_nan, ieee_is_finite
     implicit none
     private
     public :: line_search
@@ -81,6 +81,7 @@ module nonlin_linesearch
         procedure, public :: set_scaling_factor => ls_set_scale
         procedure, public :: get_distance_factor => ls_get_dist
         procedure, public :: set_distance_factor => ls_set_dist
+        procedure, public :: search_newton => ls_search_newton
         generic, public :: search => ls_search_mimo, ls_search_miso
 
         procedure :: ls_search_mimo
@@ -211,6 +212,84 @@ contains
         class(*), intent(in), optional :: args
             !! An optional argument to allow the user to communicate with fcn.
 
+        call ls_search_mimo_core(this, fcn, xold, dir, x, fvec, &
+            step_scale = 1.0d0, grad = grad, fold = fold, fx = fx, &
+            ib = ib, args = args)
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    subroutine ls_search_newton(this, fcn, xold, dir, x, fvec, fold, fx, &
+            ib, args, step_scale)
+        !! Backtracking line search specifically for an exact Newton direction
+        !! for F(x) = 0, using the merit function phi(x) = 1/2 F(x)**T F(x).
+        !!
+        !! The caller must compute an exact Newton step p satisfying
+        !! J(xold) p = -F(xold). DIR must be p, or STEP_SCALE * p if the step
+        !! has already been uniformly shortened. The initial directional
+        !! derivative is then -STEP_SCALE * F(xold)**T F(xold), so neither the
+        !! Jacobian nor the gradient is needed by this routine. This identity
+        !! is not generally valid for inexact Newton, Newton-Krylov,
+        !! quasi-Newton, or otherwise modified directions; use the general
+        !! gradient-based search for those cases.
+        !!
+        !! The exact-step assumption and any supplied FOLD are the caller's
+        !! responsibility and are not verified. Check for a root before
+        !! calling: a zero merit value has no negative search slope.
+        class(line_search), intent(in) :: this
+            !! The [[line_search]] object.
+        class(vecfcn_helper), intent(inout) :: fcn
+            !! The residual function F.
+        real(real64), intent(in), dimension(:) :: xold
+            !! The N-element point at which the Newton step was computed.
+        real(real64), intent(in), dimension(:) :: dir
+            !! The N-element Newton step, already scaled by STEP_SCALE if used.
+        real(real64), intent(out), dimension(:) :: x
+            !! The point returned by the line search.
+        real(real64), intent(out), dimension(:) :: fvec
+            !! The residual evaluated at the returned point.
+        real(real64), intent(in), optional :: fold
+            !! The finite, nonnegative merit value at XOLD. If omitted, F is
+            !! evaluated there. It must correspond to FCN and ARGS at XOLD.
+        real(real64), intent(out), optional :: fx
+            !! The merit value at X, or NaN if the search fails.
+        type(iteration_behavior), optional :: ib
+            !! Optional iteration and function-evaluation statistics.
+        class(*), intent(in), optional :: args
+            !! Optional arguments forwarded to the residual callback.
+        real(real64), intent(in), optional :: step_scale
+            !! Uniform scaling already applied to the exact Newton step:
+            !! finite and in (0, 1], default 1. This routine does not rescale
+            !! DIR. Invalid inputs trigger NL_INVALID_INPUT_ERROR.
+
+        real(real64) :: scale
+
+        scale = 1.0d0
+        if (present(step_scale)) scale = step_scale
+        if (.not.ieee_is_finite(scale)) error stop NL_INVALID_INPUT_ERROR
+        if (scale <= 0.0d0 .or. scale > 1.0d0) error stop NL_INVALID_INPUT_ERROR
+        if (.not.all(ieee_is_finite(xold)) .or. &
+            .not.all(ieee_is_finite(dir))) error stop NL_INVALID_INPUT_ERROR
+        if (present(fold)) then
+            if (.not.ieee_is_finite(fold)) error stop NL_INVALID_INPUT_ERROR
+            if (fold < 0.0d0) error stop NL_INVALID_INPUT_ERROR
+        end if
+        call ls_search_mimo_core(this, fcn, xold, dir, x, fvec, &
+            fold = fold, fx = fx, ib = ib, args = args, step_scale = scale)
+    end subroutine
+
+! ------------------------------------------------------------------------------
+    subroutine ls_search_mimo_core(this, fcn, xold, dir, x, fvec, step_scale, &
+            grad, fold, fx, ib, args)
+        class(line_search), intent(in) :: this
+        class(vecfcn_helper), intent(inout) :: fcn
+        real(real64), intent(in) :: xold(:), dir(:)
+        real(real64), intent(out) :: x(:), fvec(:)
+        real(real64), intent(in) :: step_scale
+        real(real64), intent(in), optional :: grad(:), fold
+        real(real64), intent(out), optional :: fx
+        type(iteration_behavior), optional :: ib
+        class(*), intent(in), optional :: args
+
         ! Parameters
         real(real64), parameter :: zero = 0.0d0
         real(real64), parameter :: p5 = 0.5d0
@@ -250,14 +329,18 @@ contains
         flag = 0
         if (size(xold) /= n) then
             flag = 3
-        else if (size(grad) /= n) then
-            flag = 4
-        else if (size(dir) /= n) then
-            flag = 5
-        else if (size(x) /= n) then
-            flag = 6
-        else if (size(fvec) /= m) then
-            flag = 7
+        end if
+        if (flag == 0 .and. present(grad)) then
+            if (size(grad) /= n) flag = 4
+        end if
+        if (flag == 0) then
+            if (size(dir) /= n) then
+                flag = 5
+            else if (size(x) /= n) then
+                flag = 6
+            else if (size(fvec) /= m) then
+                flag = 7
+            end if
         end if
         if (flag /= 0) error stop flag
 
@@ -272,7 +355,14 @@ contains
         end if
 
         ! Compute the slope parameter
-        slope = dot_product(grad, dir)
+        if (present(grad)) then
+            slope = dot_product(grad, dir)
+        else
+            if (.not.ieee_is_finite(fo)) error stop NL_INVALID_OPERATION_ERROR
+            if (all(dir == zero) .and. fo > zero) error stop NL_INVALID_INPUT_ERROR
+            slope = -two * (step_scale * fo)
+            if (.not.ieee_is_finite(slope)) error stop NL_INVALID_OPERATION_ERROR
+        end if
         if (slope >= zero) then
             ! ERROR: The slope should not be pointing uphill - invalid
             ! direction.  Return the unchanged point so x and fvec are
@@ -318,6 +408,9 @@ contains
                     failed = .true.
                 end if
                 x = xold
+                call fcn%fcn(x, fvec, args)
+                f = p5 * dot_product(fvec, fvec)
+                neval = neval + 1
                 xcnvrg = .true.
                 exit
             else if (f <= fo + alpha * alam * slope) then

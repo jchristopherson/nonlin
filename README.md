@@ -38,6 +38,8 @@ The library also provides polynomial evaluation, fitting, arithmetic, and root c
 - Vector Jacobian evaluation is serial by default. Set `obj%set_thread_count(n)` to request OpenMP workers for AD or finite-difference columns. This does not parallelize entire solver iterations or automatically parallelize user-supplied Jacobians.
 - Multi-threaded callbacks must be thread-safe. Do not evaluate the same helper concurrently from separate callers; its workspaces are mutable. More threads are not necessarily faster for small or inexpensive problems.
 
+For a manually computed **exact Newton** direction `p` satisfying `J(xold)*p = -F(xold)`, `line_search%search_newton` performs residual-norm backtracking without a gradient. Pass `dir = p`, or pass an already shortened `dir = beta*p` together with `step_scale = beta` in `(0, 1]`; the routine does not rescale `dir`. An optional `fold` supplies `0.5*dot_product(F(xold), F(xold))` to avoid reevaluating the initial residual. Check for a root before calling. The caller must ensure the Newton-step and `fold` assumptions hold; do not use this shortcut for inexact Newton–Krylov or quasi-Newton directions.
+
 ## Available Solvers
 
 These are local methods: starting points, smoothness, scaling, and tolerances affect convergence. For least squares, convergence can occur at a nonzero residual; inspect both the returned residual/objective and `iteration_behavior` rather than treating every stopping flag as an exact root.
