@@ -31,7 +31,7 @@ module nonlin_simple
     use nonlin_solve
     use nonlin_optimize
     use nonlin_continuation
-    use autodiff, only : dual, scalar_function, vector_function
+    use autodiff, only : scalar_function, vector_function
     implicit none
     private
     public :: solve_brent
@@ -64,17 +64,10 @@ function solve_brent(fcn, bracket, args) result(x)
     type(brent_solver) :: solver
     procedure(fcn1var), pointer :: fptr
 
-    fptr => fcn_
+    fptr => fcn
     call eqn%set_fcn(fptr)
     call solver%solve(eqn, x, bracket, args = args)
 
-contains
-    function fcn_(x_, args_) result(f_)
-        real(real64), intent(in) :: x_
-        class(*), intent(in), optional :: args_
-        real(real64) :: f_
-        f_ = fcn(x_, args_)
-    end function
 end function
 
 ! ------------------------------------------------------------------------------
@@ -97,17 +90,10 @@ function solve_newton_1var(fcn, bracket, args) result(x)
     type(newton_1var_solver) :: solver
     procedure(fcn1var), pointer :: fptr
 
-    fptr => fcn_
+    fptr => fcn
     call eqn%set_fcn(fptr)
     call solver%solve(eqn, x, bracket, args = args)
 
-contains
-    function fcn_(x_, args_) result(f_)
-        real(real64), intent(in) :: x_
-        class(*), intent(in), optional :: args_
-        real(real64) :: f_
-        f_ = fcn(x_, args_)
-    end function
 end function
 
 ! ------------------------------------------------------------------------------
@@ -136,17 +122,10 @@ function solve_newton(fcn, xo, args) result(x)
     neqn = nvar
     allocate(x(nvar), source = xo)
     allocate(f(neqn))
-    fptr => fcn_
+    fptr => fcn
     call eqns%set_auto_fcn(fptr, neqn, nvar)
     call solver%solve(eqns, x, f, args = args)
 
-contains
-    subroutine fcn_(x_, f_, args_)
-        type(dual), intent(in), dimension(:) :: x_
-        type(dual), intent(out), dimension(:) :: f_
-        class(*), intent(in), optional :: args_
-        call fcn(x_, f_, args_)
-    end subroutine
 end function
 
 ! ------------------------------------------------------------------------------
@@ -175,16 +154,9 @@ function solve_quasi_newton(fcn, xo, args) result(x)
     neqn = nvar
     allocate(x(nvar), source = xo)
     allocate(f(neqn))
-    fptr => fcn_
+    fptr => fcn
     call eqns%set_auto_fcn(fptr, neqn, nvar)
     call solver%solve(eqns, x, f, args = args) 
-contains
-    subroutine fcn_(x_, f_, args_)
-        type(dual), intent(in), dimension(:) :: x_
-        type(dual), intent(out), dimension(:) :: f_
-        class(*), intent(in), optional :: args_
-        call fcn(x_, f_, args_)
-    end subroutine
 end function
 
 ! ------------------------------------------------------------------------------
@@ -210,17 +182,10 @@ function solve_nelder_mead(fcn, xo, args) result(x)
 
     nvar = size(xo)
     allocate(x(nvar), source = xo)
-    fptr => fcn_
+    fptr => fcn
     call eqn%set_auto_fcn(fptr, nvar)
     call solver%solve(eqn, x, args = args)
 
-contains
-    function fcn_(x_, args_) result(f_)
-        type(dual), intent(in), dimension(:) :: x_
-        class(*), intent(in), optional :: args_
-        type(dual) :: f_
-        f_ = fcn(x_, args_)
-    end function
 end function
 
 ! ------------------------------------------------------------------------------
@@ -246,17 +211,10 @@ function solve_bfgs(fcn, xo, args) result(x)
 
     nvar = size(xo)
     allocate(x(nvar), source = xo)
-    fptr => fcn_
+    fptr => fcn
     call eqn%set_auto_fcn(fptr, nvar)
     call solver%solve(eqn, x, args = args)
 
-contains
-    function fcn_(x_, args_) result(f_)
-        type(dual), intent(in), dimension(:) :: x_
-        class(*), intent(in), optional :: args_
-        type(dual) :: f_
-        f_ = fcn(x_, args_)
-    end function
 end function
 
 ! ------------------------------------------------------------------------------
@@ -285,16 +243,9 @@ function solve_continuation(fcn, xo, args) result(x)
     neqn = nvar
     allocate(x(nvar), source = xo)
     allocate(f(neqn))
-    fptr => fcn_
+    fptr => fcn
     call eqns%set_auto_fcn(fptr, neqn, nvar)
     call solver%solve(eqns, x, f, args = args) 
-contains
-    subroutine fcn_(x_, f_, args_)
-        type(dual), intent(in), dimension(:) :: x_
-        type(dual), intent(out), dimension(:) :: f_
-        class(*), intent(in), optional :: args_
-        call fcn(x_, f_, args_)
-    end subroutine
 end function
 
 ! ------------------------------------------------------------------------------
@@ -323,17 +274,10 @@ function solve_continuation_pseudo_arclength(fcn, xo, args) result(x)
     neqn = nvar
     allocate(x(nvar), source = xo)
     allocate(f(neqn))
-    fptr => fcn_
+    fptr => fcn
     call eqns%set_auto_fcn(fptr, neqn, nvar)
     call solver%set_use_pseudo_arclength(.true.)
     call solver%solve(eqns, x, f, args = args) 
-contains
-    subroutine fcn_(x_, f_, args_)
-        type(dual), intent(in), dimension(:) :: x_
-        type(dual), intent(out), dimension(:) :: f_
-        class(*), intent(in), optional :: args_
-        call fcn(x_, f_, args_)
-    end subroutine
 end function
 
 ! ------------------------------------------------------------------------------

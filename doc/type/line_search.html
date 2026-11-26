@@ -74,7 +74,7 @@
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip"
                  data-bs-placement="bottom" data-html="true"
-                 title="<p> 5.3% of total for derived types.</p>Including implementation: 274 statements,  6.6% of total for derived types.">15 statements</a>
+                 title="<p> 5.7% of total for derived types.</p>Including implementation: 215 statements,  4.9% of total for derived types.">17 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -136,6 +136,8 @@
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-ls_search_mimo">ls_search_mimo</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-ls_search_miso">ls_search_miso</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-search">search</a>
+            <a class="list-group-item" href="../type/line_search.html#boundprocedure-search_directional">search_directional</a>
+            <a class="list-group-item" href="../type/line_search.html#boundprocedure-search_newton">search_newton</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-set_distance_factor">set_distance_factor</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-set_max_fcn_evals~2">set_max_fcn_evals</a>
             <a class="list-group-item" href="../type/line_search.html#boundprocedure-set_scaling_factor">set_scaling_factor</a>
@@ -1177,6 +1179,434 @@ obtain iteration performance statistics.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-search_directional"></span>
+      <h3>
+          procedure, public ::
+  <strong>search_directional</strong> => ls_search_directional
+        
+      </h3>
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
+    private  subroutine ls_search_directional(this, fcn, xold, dir, slope, x, fvec, fold, fx, ib, args)  
+</h3>
+
+  <p>Backtracking for the residual merit function 1/2 F<strong>T F with a
+caller-supplied directional derivative. For a direction p, SLOPE
+must be F(xold)</strong>T J(xold) p, which need not require the gradient
+or the full Jacobian. Unlike <a>ls_search_newton</a>, this also supports
+inexact Newton and other directions when their true slope is known.
+The caller is responsible for ensuring SLOPE and FOLD correspond to
+FCN, XOLD, DIR, and ARGS; their consistency is not checked.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='line_search.html'>line_search</a>),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+                <p>The <a href="..\type\line_search.html">line_search</a> object.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='vecfcn_helper.html'>vecfcn_helper</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>fcn</strong></td>
+            <td>
+                <p>The residual function.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>xold</strong>(:)</td>
+            <td>
+                <p>Initial point, search direction, and its finite merit slope.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>dir</strong>(:)</td>
+            <td>
+                <p>Initial point, search direction, and its finite merit slope.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>slope</strong></td>
+            <td>
+                <p>Initial point, search direction, and its finite merit slope.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>x</strong>(:)</td>
+            <td>
+                <p>Returned point and residual.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>fvec</strong>(:)</td>
+            <td>
+                <p>Returned point and residual.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>fold</strong></td>
+            <td>
+                <p>Finite nonnegative merit at XOLD; if omitted, the residual is
+evaluated there. Invalid inputs trigger NL_INVALID_INPUT_ERROR.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(out),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>fx</strong></td>
+            <td>
+                <p>Returned merit, or NaN if the search fails.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              type(<a href='iteration_behavior.html'>iteration_behavior</a>),
+            </td>
+<td></td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>ib</strong></td>
+            <td>
+                <p>Optional iteration and function-evaluation statistics.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(*),
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>args</strong></td>
+            <td>
+                <p>Optional arguments forwarded to the residual callback.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+        </li>
+    </ul>
+  </div>
+
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-search_newton"></span>
+      <h3>
+          procedure, public ::
+  <strong>search_newton</strong> => ls_search_newton
+        
+      </h3>
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
+    private  subroutine ls_search_newton(this, fcn, xold, dir, x, fvec, fold, fx, ib, args, step_scale)  
+</h3>
+
+  <p>Backtracking line search specifically for an exact Newton direction
+for F(x) = 0, using the merit function phi(x) = 1/2 F(x)**T F(x).</p>
+<p>The caller must compute an exact Newton step p satisfying
+J(xold) p = -F(xold). DIR must be p, or STEP_SCALE * p if the step
+has already been uniformly shortened. The initial directional
+derivative is then -STEP_SCALE * F(xold)**T F(xold), so neither the
+Jacobian nor the gradient is needed by this routine. This identity
+is not generally valid for inexact Newton, Newton-Krylov,
+quasi-Newton, or otherwise modified directions; use the general
+gradient-based search for those cases.</p>
+<p>The exact-step assumption and any supplied FOLD are the caller's
+responsibility and are not verified. Check for a root before
+calling: a zero merit value has no negative search slope.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='line_search.html'>line_search</a>),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+                <p>The <a href="..\type\line_search.html">line_search</a> object.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='vecfcn_helper.html'>vecfcn_helper</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>fcn</strong></td>
+            <td>
+                <p>The residual function F.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              dimension(:)
+            </td>
+            <td>::</td>
+            <td><strong>xold</strong></td>
+            <td>
+                <p>The N-element point at which the Newton step was computed.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              dimension(:)
+            </td>
+            <td>::</td>
+            <td><strong>dir</strong></td>
+            <td>
+                <p>The N-element Newton step, already scaled by STEP_SCALE if used.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(out),</td>
+              <td></td>            <td>
+              dimension(:)
+            </td>
+            <td>::</td>
+            <td><strong>x</strong></td>
+            <td>
+                <p>The point returned by the line search.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(out),</td>
+              <td></td>            <td>
+              dimension(:)
+            </td>
+            <td>::</td>
+            <td><strong>fvec</strong></td>
+            <td>
+                <p>The residual evaluated at the returned point.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>fold</strong></td>
+            <td>
+                <p>The finite, nonnegative merit value at XOLD. If omitted, F is
+evaluated there. It must correspond to FCN and ARGS at XOLD.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(out),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>fx</strong></td>
+            <td>
+                <p>The merit value at X, or NaN if the search fails.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              type(<a href='iteration_behavior.html'>iteration_behavior</a>),
+            </td>
+<td></td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>ib</strong></td>
+            <td>
+                <p>Optional iteration and function-evaluation statistics.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(*),
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>args</strong></td>
+            <td>
+                <p>Optional arguments forwarded to the residual callback.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>step_scale</strong></td>
+            <td>
+                <p>Uniform scaling already applied to the exact Newton step:
+finite and in (0, 1], default 1. This routine does not rescale
+DIR. Invalid inputs trigger NL_INVALID_INPUT_ERROR.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+        </li>
+    </ul>
+  </div>
+
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
       <span class="anchor" id="boundprocedure-set_distance_factor"></span>
       <h3>
           procedure, public ::
@@ -1404,7 +1834,7 @@ and <script type="math/tex">\lambda</script> is the scaling factor.</p>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-11-09 14:44              </p>
+ on 2026-11-26 06:53              </p>
           </div>
         </div>
         <br>
