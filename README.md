@@ -20,6 +20,7 @@ Here, M is the number of residual equations and N is the number of unknowns. AD 
 | `brent_solver` | One scalar root | Not needed | Not needed | No | Root bracket | No |
 | `newton_1var_solver` | One scalar root | Yes | First derivative | No | Root bracket | No |
 | `newton_solver` | Nonlinear system, M = N | Yes | Jacobian | Yes | No | AD and finite differences |
+| `sparse_newton_solver` | Sparse nonlinear system, M = N | No | CSR Jacobian required | Residual only | No | User callback |
 | `quasi_newton_solver` | Nonlinear system, M = N | Yes | Jacobian | Yes | No | AD and finite differences |
 | `continuation_solver` | Nonlinear system, M = N | Yes | Jacobian | Yes | No | AD and finite differences |
 | `least_squares_solver` | Minimize sum of squared residuals, M >= N | Yes | Jacobian | Yes | No | AD and finite differences |
@@ -34,9 +35,13 @@ The library also provides polynomial evaluation, fitting, arithmetic, and root c
 - Vector solvers use `vecfcn_helper`: register a real-valued callback with `set_fcn`, an AD-compatible callback with `set_auto_fcn`, and an optional analytic Jacobian with `set_jacobian`.
 - Scalar-objective optimizers use `fcnnvar_helper`: register callbacks with `set_fcn` or `set_auto_fcn`, and an optional analytic gradient with `set_gradient_fcn`.
 - Scalar root solvers use `fcn1var_helper`; `set_diff` supplies an optional analytic first derivative for Newton's method.
-- Analytic Jacobians/gradients take priority over AD; finite differences are the fallback. For function values, `vecfcn_helper` prefers the AD callback, while `fcnnvar_helper` prefers the ordinary callback if both are registered. Register only the AD callback for AD-only scalar-objective evaluation; when supplying both callbacks, ensure they describe the same function.
+- For dense Jacobians and gradients, analytic derivatives take priority over AD; finite differences are the fallback. The sparse Newton solver instead requires a user-supplied CSR Jacobian. For function values, `vecfcn_helper` prefers the AD callback, while `fcnnvar_helper` prefers the ordinary callback if both are registered. Register only the AD callback for AD-only scalar-objective evaluation; when supplying both callbacks, ensure they describe the same function.
 - Vector Jacobian evaluation is serial by default. Set `obj%set_thread_count(n)` to request OpenMP workers for AD or finite-difference columns. This does not parallelize entire solver iterations or automatically parallelize user-supplied Jacobians.
 - Multi-threaded callbacks must be thread-safe. Do not evaluate the same helper concurrently from separate callers; its workspaces are mutable. More threads are not necessarily faster for small or inexpensive problems.
+
+For a manually computed **exact Newton** direction `p` satisfying `J(xold)*p = -F(xold)`, `line_search%search_newton` performs residual-norm backtracking without a gradient. Pass `dir = p`, or pass an already shortened `dir = beta*p` together with `step_scale = beta` in `(0, 1]`; the routine does not rescale `dir`. An optional `fold` supplies `0.5*dot_product(F(xold), F(xold))` to avoid reevaluating the initial residual. Check for a root before calling. The caller must ensure the Newton-step and `fold` assumptions hold; do not use this shortcut for inexact Newton–Krylov or quasi-Newton directions.
+
+For an inexact direction with a known merit directional derivative `dot_product(F(xold), J(xold)*p)`, use `line_search%search_directional` instead; it does not require the full gradient.
 
 ## Available Solvers
 
@@ -47,6 +52,7 @@ These are local methods: starting points, smoothness, scaling, and tolerances af
 | `brent_solver` | Bracket-preserving combination of bisection, secant steps, and inverse quadratic interpolation; no derivative required. | First choice for a continuous scalar function with a known sign-changing bracket. |
 | `newton_1var_solver` | Safeguarded scalar Newton iteration within a root bracket; uses an analytic derivative or finite differences. | Use for smooth scalar equations when derivative information is reliable; prefer Brent when derivatives are unreliable or expensive. |
 | `newton_solver` | Solves the linearized square system using a freshly evaluated Jacobian each iteration; optional backtracking line search, enabled by default. | First choice for smooth square systems, especially with AD or an analytic Jacobian and a reasonable starting point. |
+| `sparse_newton_solver` | Evaluates a user-supplied CSR Jacobian and solves each Newton system with ILUT-preconditioned GMRES; optional backtracking line search, enabled by default. | Use for square systems with a sparse Jacobian that can be assembled by the application. Convergence depends on scaling and the effectiveness of ILUT. |
 | `quasi_newton_solver` | Broyden rank-one Jacobian updates with periodic/restarted Jacobian evaluations and optional backtracking, enabled by default. | Use when repeated Jacobian evaluations are costly. Tune `set_jacobian_interval`; prefer Newton when the approximation becomes unreliable. |
 | `continuation_solver` | Selectable fixed-parameter or pseudo-arclength continuation with a damped Newton corrector. The default homotopy is $H(x,\lambda)=(1-\lambda)(x-x_0)+\lambda F(x)$; its derivatives use `vecfcn_helper`. | Use fixed-parameter mode for well-behaved paths. Enable pseudo-arclength with `set_use_pseudo_arclength(.true.)` to follow regular folds where lambda reverses direction. It does not guarantee passage through singular branch points or selection of a desired branch. |
 | `least_squares_solver` | Levenberg-Marquardt method with damping and variable scaling. | First choice for unconstrained data fitting or overdetermined systems; also useful when a square system needs a least-squares approach. |
@@ -137,7 +143,7 @@ To use NONLIN in another FPM project, add this to that project's manifest:
 nonlin = { git = "https://github.com/jchristopherson/nonlin" }
 ```
 
-For reproducible builds, add a `rev` specifying the NONLIN commit you have validated. If your own source directly imports `autodiff`, declare it as a direct dependency too. The application still needs compatible BLAS/LAPACK/ARPACK libraries available to its linker.
+For reproducible builds, add a `rev` specifying the NONLIN commit you have validated. If your own source directly imports `autodiff` or `linalg`, declare it as a direct dependency too. The application still needs compatible BLAS/LAPACK/ARPACK libraries available to its linker.
 
 ## External Libraries
 
@@ -173,6 +179,63 @@ call solver%solve(objective, x, value)
 ```
 
 The simple wrappers cover scalar root-finding (`solve_brent`, `solve_newton_1var`), square nonlinear systems (`solve_newton`, `solve_quasi_newton`), and unconstrained scalar-objective minimization (`solve_nelder_mead`, `solve_bfgs`).  Use solver objects for least-squares problems or whenever you need more control or reporting.
+
+## Sparse Newton Solver
+
+`sparse_newton_solver` solves nonempty square systems `F(x) = 0` using an assembled CSR Jacobian. Import it from `nonlin_sparse_solve`; it is not re-exported by `nonlin`. Register the residual and a `sparsejacobianfcn` callback on a `vecfcn_helper`. Calling `set_sparse_jacobian` with an associated procedure pointer enables sparse mode. Dense AD and finite-difference Jacobians are not converted to CSR for this solver.
+
+The callback must return a valid `linalg` `csr_matrix`: one-based row pointers and column indices, no duplicate columns within a row, and finite values. For example:
+
+```fortran
+program sparse_example
+    use iso_fortran_env, only : real64
+    use ieee_arithmetic, only : ieee_is_finite
+    use nonlin, only : vecfcn_helper, vecfcn, sparsejacobianfcn, iteration_behavior
+    use nonlin_sparse_solve, only : sparse_newton_solver
+    use linalg, only : csr_matrix, create_empty_csr_matrix
+    implicit none
+
+    type(vecfcn_helper) :: equations
+    type(sparse_newton_solver) :: solver
+    type(iteration_behavior) :: info
+    procedure(vecfcn), pointer :: residual
+    procedure(sparsejacobianfcn), pointer :: jacobian
+    real(real64) :: x(2), f(2)
+
+    residual => residual_fcn
+    jacobian => jacobian_fcn
+    call equations%set_fcn(residual, 2, 2)
+    call equations%set_sparse_jacobian(jacobian)
+    x = 1.0d0
+    call solver%solve(equations, x, f, info)
+
+    if (.not.all(ieee_is_finite(f)) .or. .not.info%converge_on_fcn) &
+        error stop "Sparse Newton did not converge on the residual"
+    print *, x  ! Approximately [2, 3].
+
+contains
+    subroutine residual_fcn(x, f, args)
+        real(real64), intent(in) :: x(:)
+        real(real64), intent(out) :: f(:)
+        class(*), intent(in), optional :: args
+        f = [x(1)**2 - 4.0d0, x(2)**2 - 9.0d0]
+    end subroutine
+
+    subroutine jacobian_fcn(x, jac, args)
+        real(real64), intent(in) :: x(:)
+        type(csr_matrix), intent(out) :: jac
+        class(*), intent(in), optional :: args
+        jac = create_empty_csr_matrix(2, 2, 2)
+        jac%row_indices = [1, 2, 3]
+        jac%column_indices = [1, 2]
+        jac%values = 2.0d0 * x
+    end subroutine
+end program
+```
+
+The solver rebuilds an ILUT preconditioner at each iteration and uses GMRES for the linear correction; it is not matrix-free. Its current linear tolerance and iteration budget are fixed internally. The line search uses `F**T*(J*p)`, appropriate for the inexact GMRES step. Use `set_use_line_search`, `set_fcn_tolerance`, `set_var_tolerance`, and `set_max_fcn_evals` to configure the nonlinear solve.
+
+Inspect both the residual and `iteration_behavior`: convergence on a small change in `x` does not necessarily mean a small residual. Factorization, linear-solve, nonfinite-value, and evaluation-budget failures return NaN residuals. Invalid setup, such as a missing callback or non-square system, terminates with an error. Finite residuals whose squared norm overflows are reported as a failure; scale the problem when necessary.
 
 ## Example 1: Quasi-Newton System Solve
 

@@ -17,6 +17,7 @@ set(NONLIN_SOURCES
     ${dir}/nonlin_polynomials.f90
     ${dir}/nonlin_simple.f90
     ${dir}/nonlin_continuation.f90
+    ${dir}/nonlin_sparse_solve.f90
 )
 set(NONLIN_SOURCES ${NONLIN_SOURCES} PARENT_SCOPE)
 

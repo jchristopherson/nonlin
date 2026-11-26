@@ -74,7 +74,7 @@
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip"
                  data-bs-placement="bottom" data-html="true"
-                 title="11.8% of total for source files.">519 statements</a>
+                 title="11.0% of total for source files.">519 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -387,9 +387,9 @@
 <a id="ln-234" name="ln-234" href="#ln-234"></a><span class="w">        </span><span class="n">reached_end</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">.</span><span class="n">false</span><span class="p">.</span>
 <a id="ln-235" name="ln-235" href="#ln-235"></a><span class="w">        </span><span class="n">maxeval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">get_max_fcn_evals</span><span class="p">()</span>
 <a id="ln-236" name="ln-236" href="#ln-236"></a><span class="w">        </span><span class="n">ftol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">get_fcn_tolerance</span><span class="p">()</span>
-<a id="ln-237" name="ln-237" href="#ln-237"></a><span class="w">        </span><span class="n">nan</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ieee_value</span><span class="p">(</span><span class="n">nan</span><span class="p">,</span><span class="w"> </span><span class="n">ieee_quiet_nan</span><span class="p">)</span>
+<a id="ln-237" name="ln-237" href="#ln-237"></a><span class="w">        </span><span class="n">nan</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ieee_value</span><span class="p">(</span><span class="mf">0.0_real64</span><span class="p">,</span><span class="w"> </span><span class="n">ieee_quiet_nan</span><span class="p">)</span>
 <a id="ln-238" name="ln-238" href="#ln-238"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">ib</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
-<a id="ln-239" name="ln-239" href="#ln-239"></a><span class="k">            </span><span class="n">ib</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iteration_behavior</span><span class="p">(</span><span class="n">maxeval</span><span class="p">)</span>
+<a id="ln-239" name="ln-239" href="#ln-239"></a><span class="k">            call </span><span class="n">ib</span><span class="p">%</span><span class="n">initialize</span><span class="p">(</span><span class="n">maxeval</span><span class="p">)</span>
 <a id="ln-240" name="ln-240" href="#ln-240"></a><span class="w">        </span><span class="k">end if</span>
 <a id="ln-241" name="ln-241" href="#ln-241"></a>
 <a id="ln-242" name="ln-242" href="#ln-242"></a><span class="w">        </span><span class="c">! This continuation method follows a square system from the supplied</span>
@@ -545,9 +545,9 @@
 <a id="ln-392" name="ln-392" href="#ln-392"></a><span class="w">        </span><span class="n">maxeval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">get_max_fcn_evals</span><span class="p">()</span>
 <a id="ln-393" name="ln-393" href="#ln-393"></a><span class="w">        </span><span class="n">ftol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">get_fcn_tolerance</span><span class="p">()</span>
 <a id="ln-394" name="ln-394" href="#ln-394"></a><span class="w">        </span><span class="n">xtol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">this</span><span class="p">%</span><span class="n">get_var_tolerance</span><span class="p">()</span>
-<a id="ln-395" name="ln-395" href="#ln-395"></a><span class="w">        </span><span class="n">nan</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ieee_value</span><span class="p">(</span><span class="n">nan</span><span class="p">,</span><span class="w"> </span><span class="n">ieee_quiet_nan</span><span class="p">)</span>
+<a id="ln-395" name="ln-395" href="#ln-395"></a><span class="w">        </span><span class="n">nan</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ieee_value</span><span class="p">(</span><span class="mf">0.0_real64</span><span class="p">,</span><span class="w"> </span><span class="n">ieee_quiet_nan</span><span class="p">)</span>
 <a id="ln-396" name="ln-396" href="#ln-396"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nb">present</span><span class="p">(</span><span class="n">ib</span><span class="p">))</span><span class="w"> </span><span class="k">then</span>
-<a id="ln-397" name="ln-397" href="#ln-397"></a><span class="k">            </span><span class="n">ib</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">iteration_behavior</span><span class="p">(</span><span class="n">maxeval</span><span class="p">)</span>
+<a id="ln-397" name="ln-397" href="#ln-397"></a><span class="k">            call </span><span class="n">ib</span><span class="p">%</span><span class="n">initialize</span><span class="p">(</span><span class="n">maxeval</span><span class="p">)</span>
 <a id="ln-398" name="ln-398" href="#ln-398"></a><span class="w">        </span><span class="k">end if</span>
 <a id="ln-399" name="ln-399" href="#ln-399"></a>
 <a id="ln-400" name="ln-400" href="#ln-400"></a><span class="k">        if</span><span class="w"> </span><span class="p">(.</span><span class="nb">not</span><span class="p">.</span><span class="n">fcn</span><span class="p">%</span><span class="n">is_fcn_defined</span><span class="p">())</span><span class="w"> </span><span class="k">error stop </span><span class="n">NL_UNDEFINED_FUNCTION_ERROR</span>
@@ -922,7 +922,7 @@
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-11-09 14:44              </p>
+ on 2026-11-26 06:53              </p>
           </div>
         </div>
         <br>

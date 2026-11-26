@@ -200,7 +200,7 @@ contains
         maxeval = this%get_max_fcn_evals()
         eps = epsilon(eps)
         if (present(ib)) then
-            ib = iteration_behavior(maxeval)
+            call ib%initialize(maxeval)
         end if
 
         ! Input Check
@@ -1031,7 +1031,7 @@ contains
         xu = this%get_upper_limits()
 
         if (present(ib)) then
-            ib = iteration_behavior(maxeval)
+            call ib%initialize(maxeval)
         end if
 
         ! Input Check

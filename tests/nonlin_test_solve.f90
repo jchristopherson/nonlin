@@ -54,8 +54,175 @@ module nonlin_test_solve
     public :: test_constrained_least_squares_bounds
     public :: test_vector_solvers_ad
     public :: test_vector_solver_robustness
+    public :: test_newton_line_search
+    public :: test_newton_line_search_invalid
     integer :: vector_ad_calls = 0, vector_jac_calls = 0
+    integer :: newton_line_search_calls = 0
 contains
+    subroutine newton_line_search_fcn(x, f, args)
+        real(real64), intent(in) :: x(:)
+        real(real64), intent(out) :: f(:)
+        class(*), intent(in), optional :: args
+        real(real64) :: target
+
+        target = 1.0d0
+        if (present(args)) then
+            select type (args)
+            type is (real(real64))
+                target = args
+            end select
+        end if
+        newton_line_search_calls = newton_line_search_calls + 1
+        f(1) = x(1)**2 - target
+    end subroutine
+
+    function test_newton_line_search() result(rst)
+        type(line_search) :: ls
+        type(vecfcn_helper) :: fcn
+        type(iteration_behavior) :: general_ib, newton_ib
+        procedure(vecfcn), pointer :: callback
+        real(real64) :: xold(1), dir(1), grad(1), x(1), xref(1), &
+            fvec(1), fref(1), fx, fxref, fold, beta
+        logical :: rst
+        integer :: calls
+
+        rst = .false.
+        callback => newton_line_search_fcn
+        call fcn%set_fcn(callback, 1, 1)
+        call ls%set_scaling_factor(0.5d0)
+        xold = [0.1d0]
+        dir = [4.95d0]
+        grad = [-0.198d0]
+
+        newton_line_search_calls = 0
+        call ls%search(fcn, xold, grad, dir, xref, fref, fx = fxref, &
+            ib = general_ib, args = 1.0d0)
+        if (general_ib%iter_count <= 1 .or. &
+            general_ib%fcn_count /= newton_line_search_calls) then
+            print *, "General line search did not backtrack as expected"
+            return
+        end if
+        newton_line_search_calls = 0
+        call ls%search_newton(fcn, xold, dir, x, fvec, fx = fx, &
+            ib = newton_ib, args = 1.0d0)
+        if (newton_ib%fcn_count /= newton_line_search_calls .or. &
+            newton_ib%iter_count /= general_ib%iter_count .or. &
+            newton_ib%fcn_count /= general_ib%fcn_count .or. &
+            maxval(abs(x - xref)) > 1.0d-12 .or. &
+            maxval(abs(fvec - fref)) > 1.0d-12 .or. &
+            abs(fx - fxref) > 1.0d-12) then
+            print *, "Exact Newton backtracking differs from general search"
+            return
+        end if
+
+        beta = 0.1d0
+        dir = beta * dir
+        fold = 0.5d0 * (xold(1)**2 - 1.0d0)**2
+        call ls%search(fcn, xold, grad, dir, xref, fref, fold, fxref, &
+            general_ib, args = 1.0d0)
+        newton_line_search_calls = 0
+        call ls%search_newton(fcn, xold, dir, x, fvec, fold, fx, &
+            newton_ib, args = 1.0d0, step_scale = beta)
+        if (newton_ib%iter_count /= 1 .or. newton_ib%fcn_count /= 1 .or. &
+            newton_line_search_calls /= 1 .or. &
+            abs(x(1) - 0.595d0) > 1.0d-12 .or. &
+            maxval(abs(x - xref)) > 1.0d-12 .or. &
+            maxval(abs(fvec - fref)) > 1.0d-12 .or. &
+            abs(fx - fxref) > 1.0d-12) then
+            print *, "Scaled exact Newton search used the wrong slope"
+            return
+        end if
+        call ls%search_directional(fcn, xold, dir, dot_product(grad, dir), &
+            x, fvec, fold, fx, newton_ib, args = 1.0d0)
+        if (newton_ib%iter_count /= general_ib%iter_count .or. &
+            maxval(abs(x - xref)) > 1.0d-12 .or. &
+            maxval(abs(fvec - fref)) > 1.0d-12 .or. &
+            abs(fx - fxref) > 1.0d-12) then
+            print *, "Directional-slope search differs from gradient search"
+            return
+        end if
+        dir = [0.2d0]
+        call ls%search_directional(fcn, xold, dir, dot_product(grad, dir), &
+            x, fvec, fold, fx, newton_ib, args = 1.0d0)
+        if (newton_ib%iter_count /= 1 .or. abs(x(1) - 0.3d0) > 1.0d-12) then
+            print *, "Directional search did not use the supplied inexact slope"
+            return
+        end if
+
+        call ls%set_scaling_factor(0.1d0)
+        xold = [3.0d0]
+        dir = [-5.0d0 / 6.0d0]
+        newton_line_search_calls = 0
+        call ls%search_newton(fcn, xold, dir, x, fvec, fx = fx, &
+            ib = newton_ib, args = 4.0d0)
+        if (abs(x(1) - 13.0d0 / 6.0d0) > 1.0d-12 .or. &
+            abs(fvec(1) - 25.0d0 / 36.0d0) > 1.0d-12 .or. &
+            newton_ib%fcn_count /= 2 .or. newton_line_search_calls /= 2) then
+            print *, "Newton search did not forward residual arguments"
+            return
+        end if
+        dir = [-4.0d0 / 3.0d0]
+        call ls%search_newton(fcn, xold, dir, x, fvec)
+        if (abs(x(1) - 5.0d0 / 3.0d0) > 1.0d-12 .or. &
+            abs(fvec(1) - 16.0d0 / 9.0d0) > 1.0d-12) then
+            print *, "Newton search failed with optional arguments omitted"
+            return
+        end if
+
+        xold = [2.0d0]
+        beta = epsilon(1.0d0)
+        dir = [-0.75d0 * beta]
+        fold = 4.5d0
+        newton_line_search_calls = 0
+        call ls%search_newton(fcn, xold, dir, x, fvec, fold, fx, &
+            newton_ib, step_scale = beta)
+        calls = newton_line_search_calls
+        if (x(1) /= xold(1) .or. fvec(1) /= 3.0d0 .or. fx /= fold .or. &
+            .not.newton_ib%converge_on_chng .or. newton_ib%fcn_count /= calls) then
+            print *, "Backtracked Newton search returned inconsistent outputs"
+            return
+        end if
+
+        xold = [1.0d0]
+        dir = [0.0d0]
+        call ls%search_newton(fcn, xold, dir, x, fvec, fold = 0.0d0, &
+            fx = fx, ib = newton_ib)
+        if (.not.ieee_is_nan(fx) .or. x(1) /= xold(1) .or. fvec(1) /= 0.0d0) then
+            print *, "Zero-merit Newton search did not report its zero slope"
+            return
+        end if
+        rst = .true.
+    end function
+
+    subroutine test_newton_line_search_invalid(which)
+        character(*), intent(in) :: which
+        type(line_search) :: ls
+        type(vecfcn_helper) :: fcn
+        procedure(vecfcn), pointer :: callback
+        real(real64) :: xold(1), dir(1), x(1), fvec(1), fold, scale
+
+        callback => newton_line_search_fcn
+        call fcn%set_fcn(callback, 1, 1)
+        xold = [2.0d0]
+        dir = [-0.75d0]
+        fold = 4.5d0
+        scale = 1.0d0
+        select case (which)
+        case ("newton_invalid_scale")
+            scale = 0.0d0
+        case ("newton_nan_scale")
+            scale = ieee_value(scale, ieee_quiet_nan)
+        case ("newton_invalid_fold")
+            fold = -1.0d0
+        case ("newton_zero_direction")
+            dir = 0.0d0
+        end select
+        call ls%search_newton(fcn, xold, dir, x, fvec, fold = fold, &
+            step_scale = scale)
+        print *, "Invalid exact Newton line search unexpectedly returned"
+        stop 1
+    end subroutine
+
 ! ******************************************************************************
 ! TEST FUNCTIONS
 ! ------------------------------------------------------------------------------

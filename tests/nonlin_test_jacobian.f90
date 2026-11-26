@@ -27,6 +27,8 @@ module nonlin_test_jacobian
     use iso_fortran_env
     use nonlin
     use fortran_test_helper
+    use linalg, only : csr_matrix, create_empty_csr_matrix, csr_to_dense, &
+        sparse_size => size
     use autodiff, only : dual, vector_function, assignment(=), &
         operator(+), operator(-), operator(*), operator(**)
     use omp_lib, only : omp_get_thread_num, omp_get_num_threads, &
@@ -37,10 +39,136 @@ module nonlin_test_jacobian
     public :: test_jacobian_2
     public :: test_vecfcn_ad
     public :: test_jacobian_threads
+    public :: test_sparse_jacobian
+    public :: test_sparse_jacobian_missing
     integer :: ad_calls = 0, user_jac_calls = 0
     integer, dimension(8) :: thread_calls = 0, thread_teams = 0
 
 contains
+    subroutine sparse_test_fcn(x, f, args)
+        real(real64), intent(in) :: x(:)
+        real(real64), intent(out) :: f(:)
+        class(*), intent(in), optional :: args
+        real(real64) :: scale
+
+        scale = 1.0d0
+        if (present(args)) then
+            select type (args)
+            type is (real(real64))
+                scale = args
+            end select
+        end if
+        f = [x(1)**2, scale * x(1) * x(2), x(2)**3]
+    end subroutine
+
+    subroutine sparse_test_jacobian(x, jac, args)
+        real(real64), intent(in) :: x(:)
+        type(csr_matrix), intent(out) :: jac
+        class(*), intent(in), optional :: args
+        real(real64) :: scale
+
+        scale = 1.0d0
+        if (present(args)) then
+            select type (args)
+            type is (real(real64))
+                scale = args
+            end select
+        end if
+        jac = create_empty_csr_matrix(3, 2, 4)
+        jac%row_indices = [1, 2, 4, 5]
+        jac%column_indices = [1, 1, 2, 2]
+        jac%values = [2.0d0 * x(1), scale * x(2), &
+            scale * x(1), 3.0d0 * x(2)**2]
+    end subroutine
+
+    function test_sparse_jacobian() result(rst)
+        type(vecfcn_helper) :: obj
+        type(csr_matrix) :: jac
+        procedure(vecfcn), pointer :: fcn
+        procedure(sparse_test_jacobian), pointer :: callback
+        real(real64) :: x(2), exact(3, 2), numerical(3, 2)
+        logical :: rst
+
+        rst = .false.
+        if (obj%get_use_sparse() .or. obj%is_sparse_jacobian_defined()) then
+            print *, "Sparse Jacobian unexpectedly enabled initially"
+            return
+        end if
+
+        fcn => sparse_test_fcn
+        call obj%set_fcn(fcn, 3, 2)
+        callback => sparse_test_jacobian
+        call obj%set_sparse_jacobian(callback)
+        if (.not.obj%get_use_sparse() .or. .not.obj%is_sparse_jacobian_defined()) then
+            print *, "Sparse Jacobian registration failed"
+            return
+        end if
+
+        x = [2.0d0, 3.0d0]
+        call obj%sparse_jacobian(x, jac, args = 4.0d0)
+        exact = reshape([4.0d0, 12.0d0, 0.0d0, &
+            0.0d0, 8.0d0, 27.0d0], [3, 2])
+        if (sparse_size(jac, 1) /= 3 .or. sparse_size(jac, 2) /= 2) then
+            print *, "Sparse Jacobian has incorrect dimensions"
+            return
+        end if
+        if (.not.assert(csr_to_dense(jac), exact, 1.0d-12)) then
+            print *, "Sparse Jacobian or forwarded arguments are incorrect"
+            return
+        end if
+        call obj%jacobian(x, numerical, args = 4.0d0)
+        if (.not.assert(csr_to_dense(jac), numerical, 1.0d-5)) then
+            print *, "Sparse Jacobian differs from finite differences"
+            return
+        end if
+        if (size(jac%values) /= 4) then
+            print *, "Sparse Jacobian has an incorrect nonzero count"
+            return
+        end if
+        if (any(jac%row_indices /= [1, 2, 4, 5]) .or. &
+            any(jac%column_indices /= [1, 1, 2, 2])) then
+            print *, "Sparse Jacobian has incorrect CSR indices"
+            return
+        end if
+
+        x = [1.0d0, 2.0d0]
+        call obj%sparse_jacobian(x, jac)
+        exact = reshape([2.0d0, 2.0d0, 0.0d0, &
+            0.0d0, 1.0d0, 12.0d0], [3, 2])
+        if (.not.assert(csr_to_dense(jac), exact, 1.0d-12)) then
+            print *, "Sparse Jacobian reevaluation without arguments failed"
+            return
+        end if
+
+        call obj%set_use_sparse(.false.)
+        call obj%sparse_jacobian(x, jac)
+        if (.not.assert(csr_to_dense(jac), exact, 1.0d-12)) then
+            print *, "Registered sparse Jacobian unavailable with sparse mode disabled"
+            return
+        end if
+
+        nullify(callback)
+        call obj%set_sparse_jacobian(callback)
+        if (obj%get_use_sparse() .or. obj%is_sparse_jacobian_defined()) then
+            print *, "Clearing the sparse Jacobian failed"
+            return
+        end if
+        rst = .true.
+    end function
+
+    subroutine test_sparse_jacobian_missing(enable_sparse)
+        logical, intent(in) :: enable_sparse
+        type(vecfcn_helper) :: obj
+        type(csr_matrix) :: jac
+        real(real64) :: x(2)
+
+        x = 0.0d0
+        call obj%set_use_sparse(enable_sparse)
+        call obj%sparse_jacobian(x, jac)
+        print *, "Missing sparse Jacobian unexpectedly returned"
+        stop 1
+    end subroutine
+
 ! ******************************************************************************
 ! FUNCTIONS:
 ! ------------------------------------------------------------------------------

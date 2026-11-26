@@ -135,7 +135,11 @@ contains
         real(real64) :: f
             !! The value of the function.
         if (associated(this%m_fcn)) then
-            f = this%m_fcn(x, args)
+            if (present(args)) then
+                f = this%m_fcn(x, args)
+            else
+                f = this%m_fcn(x)
+            end if
         end if
     end function
 
