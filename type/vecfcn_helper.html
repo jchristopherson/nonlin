@@ -74,7 +74,7 @@
             <li class="list-inline-item" id="statements"><i class="fa fa-list-ol"></i>
               <a data-bs-toggle="tooltip"
                  data-bs-placement="bottom" data-html="true"
-                 title="<p> 8.5% of total for derived types.</p>Including implementation: 168 statements,  4.1% of total for derived types.">24 statements</a>
+                 title="<p>10.3% of total for derived types.</p>Including implementation: 216 statements,  4.9% of total for derived types.">31 statements</a>
             </li>
 
             <li class="list-inline-item" id="source-file">
@@ -143,17 +143,22 @@
       </a>
       <div id="boundprocs-0" class="collapse">
         <div class="list-group list-group-flush">
-            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-fcn~20">fcn</a>
+            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-fcn~23">fcn</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-get_equation_count">get_equation_count</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-get_thread_count">get_thread_count</a>
-            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-get_variable_count">get_variable_count</a>
+            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-get_use_sparse">get_use_sparse</a>
+            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-get_variable_count~2">get_variable_count</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-is_fcn_defined~2">is_fcn_defined</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-is_jacobian_defined">is_jacobian_defined</a>
+            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-is_sparse_jacobian_defined">is_sparse_jacobian_defined</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-jacobian~2">jacobian</a>
-            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-set_auto_fcn">set_auto_fcn</a>
+            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-set_auto_fcn~2">set_auto_fcn</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-set_fcn~2">set_fcn</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-set_jacobian">set_jacobian</a>
+            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-set_sparse_jacobian">set_sparse_jacobian</a>
             <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-set_thread_count">set_thread_count</a>
+            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-set_use_sparse">set_use_sparse</a>
+            <a class="list-group-item" href="../type/vecfcn_helper.html#boundprocedure-sparse_jacobian">sparse_jacobian</a>
         </div>
       </div>
     </div>
@@ -254,7 +259,7 @@ available per thread.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-fcn~20"></span>
+      <span class="anchor" id="boundprocedure-fcn~23"></span>
       <h3>
           procedure, public ::
   <strong>fcn</strong> => vfh_fcn
@@ -473,7 +478,67 @@ Jacobian matrix.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-get_variable_count"></span>
+      <span class="anchor" id="boundprocedure-get_use_sparse"></span>
+      <h3>
+          procedure, public ::
+  <strong>get_use_sparse</strong> => vfh_get_use_sparse
+        
+      </h3>
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
+    private pure function vfh_get_use_sparse(this) result(rst)  
+</h3>
+
+  <p>Gets a value determining if the sparse matrix routines should be
+utilized.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='vecfcn_helper.html'>vecfcn_helper</a>),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+                <p>The <a href="..\type\vecfcn_helper.html">vecfcn_helper</a> object.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>logical</small>
+    </h4>
+    <p>True if the sparse matrix routines should be used; else, false
+to utilize dense routines.</p>
+
+        </li>
+    </ul>
+  </div>
+
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-get_variable_count~2"></span>
       <h3>
           procedure, public ::
   <strong>get_variable_count</strong> => vfh_get_nvar
@@ -649,6 +714,65 @@ defined.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-is_sparse_jacobian_defined"></span>
+      <h3>
+          procedure, public ::
+  <strong>is_sparse_jacobian_defined</strong> => vfh_is_sparse_jac_defined
+        
+      </h3>
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
+    private  function vfh_is_sparse_jac_defined(this) result(rst)  
+</h3>
+
+  <p>Gets a value determining if the sparse Jacobian routine has been
+defined.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='vecfcn_helper.html'>vecfcn_helper</a>),
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+                <p>The <a href="..\type\vecfcn_helper.html">vecfcn_helper</a> object.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+    <h4>
+    Return Value
+    <small>logical</small>
+    </h4>
+    <p>True if the routine has been defined; else, false.</p>
+
+        </li>
+    </ul>
+  </div>
+
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
       <span class="anchor" id="boundprocedure-jacobian~2"></span>
       <h3>
           procedure, public ::
@@ -768,7 +892,7 @@ the routine.</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
-      <span class="anchor" id="boundprocedure-set_auto_fcn"></span>
+      <span class="anchor" id="boundprocedure-set_auto_fcn~2"></span>
       <h3>
           procedure, public ::
   <strong>set_auto_fcn</strong> => vfh_set_auto_fcn
@@ -1039,6 +1163,79 @@ the default state).</p>
           <div class="row">
               <div class="card mt-3">
     <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-set_sparse_jacobian"></span>
+      <h3>
+          procedure, public ::
+  <strong>set_sparse_jacobian</strong> => vfh_set_sparse_jac
+        
+      </h3>
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
+    private  subroutine vfh_set_sparse_jac(this, jac)  
+</h3>
+
+  <p>Establishes a pointer to the routine for computing a sparse Jacobian
+matrix of the system of equations.  If no routine is defined, the
+Jacobian matrix will be calculated numerically by finite differences
+or AD as a dense Jacobian.  Calling this routine also calls 
+<code>set_use_sparse</code> and sets the flag to true if <code>jac</code> is defined; 
+else <code>set_user_sparse</code> will be set to false if <code>jac</code> is false.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='vecfcn_helper.html'>vecfcn_helper</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+                <p>The <a href="..\type\vecfcn_helper.html">vecfcn_helper</a> object.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              procedure(<a href='..\interface\sparsejacobianfcn.html'>sparsejacobianfcn</a>),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              pointer
+            </td>
+            <td>::</td>
+            <td><strong>jac</strong></td>
+            <td>
+                <p>The Jacobian routine.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+        </li>
+    </ul>
+  </div>
+
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
       <span class="anchor" id="boundprocedure-set_thread_count"></span>
       <h3>
           procedure, public ::
@@ -1107,6 +1304,177 @@ Do not evaluate the same helper concurrently from separate callers.</p>
   </div>
 
           </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-set_use_sparse"></span>
+      <h3>
+          procedure, public ::
+  <strong>set_use_sparse</strong> => vfh_set_use_sparse
+        
+      </h3>
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
+    private  subroutine vfh_set_use_sparse(this, x)  
+</h3>
+
+  <p>Sets a value determining if the sparse matrix routines should be
+utilized.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='vecfcn_helper.html'>vecfcn_helper</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+                <p>The <a href="..\type\vecfcn_helper.html">vecfcn_helper</a> object.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              logical,
+            </td>
+<td>intent(in)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>x</strong></td>
+            <td>
+                <p>True if the sparse matrix routines should be used; else, false
+to utilize dense routines.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+        </li>
+    </ul>
+  </div>
+
+          </div>
+          <div class="row">
+              <div class="card mt-3">
+    <div class="card-header codesum">
+      <span class="anchor" id="boundprocedure-sparse_jacobian"></span>
+      <h3>
+          procedure, public ::
+  <strong>sparse_jacobian</strong> => vfh_sparse_jac
+        
+      </h3>
+    </div>
+    <ul class="list-group">
+        <li class="list-group-item">
+                  <h3>
+    private  subroutine vfh_sparse_jac(this, x, jac, args)  
+</h3>
+
+  <p>Executes the routine containing the sparse Jacobian matrix.  If
+no routine is defined an error stop condition occurrs.</p>
+
+  <h4>Arguments</h4>
+      <table class="table table-striped varlist">
+    <thead>
+      <tr>
+        <th scope="col">Type</th>
+<th scope="col">Intent</th><th scope="col">Optional</th>        <th scope="col">Attributes</th>
+        <th scope="col"></th>
+        <th scope="col">Name</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(<a href='vecfcn_helper.html'>vecfcn_helper</a>),
+            </td>
+<td>intent(inout)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>this</strong></td>
+            <td>
+                <p>The <a href="..\type\vecfcn_helper.html">vecfcn_helper</a> object.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              real(kind=real64),
+            </td>
+<td>intent(in),</td>
+              <td></td>            <td>
+              dimension(:)
+            </td>
+            <td>::</td>
+            <td><strong>x</strong></td>
+            <td>
+                <p>An N-element array containing the independent variables defining
+the point about which the derivatives will be calculated.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              type(csr_matrix),
+            </td>
+<td>intent(out)</td>
+              <td></td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>jac</strong></td>
+            <td>
+                <p>The M-by-N sparse Jacobian matrix.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+              <span class="anchor" ></span>
+              class(*),
+            </td>
+<td>intent(in),</td>
+              <td>optional</td>            <td>
+              
+            </td>
+            <td>::</td>
+            <td><strong>args</strong></td>
+            <td>
+                <p>An optional argument to allow the user to communicate with
+the routine.</p>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+        </li>
+    </ul>
+  </div>
+
+          </div>
       </section>
 
     
@@ -1125,7 +1493,7 @@ Do not evaluate the same helper concurrently from separate callers.</p>
             <p class="text-end">
               Documentation generated by
               <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
- on 2026-11-09 14:44              </p>
+ on 2026-11-26 06:53              </p>
           </div>
         </div>
         <br>

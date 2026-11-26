@@ -244,7 +244,7 @@ contains
         gtol = this%get_gradient_tolerance()
         maxeval = this%get_max_fcn_evals()
         if (present(ib)) then
-            ib = iteration_behavior(maxeval)
+            call ib%initialize(maxeval)
         end if
         if (this%get_use_line_search()) then
             if (.not.this%is_line_search_defined()) &
@@ -567,7 +567,7 @@ contains
         gtol = this%get_gradient_tolerance()
         maxeval = this%get_max_fcn_evals()
         if (present(ib)) then
-            ib = iteration_behavior(maxeval)
+            call ib%initialize(maxeval)
         end if
         if (this%get_use_line_search()) then
             if (.not.this%is_line_search_defined()) &
@@ -595,7 +595,7 @@ contains
         )
 
         ! Test to see if the initial guess is a root
-        call fcn%fcn(x, fvec, args)
+        call fcn%fcn(x, fvec, args = args)
         neval = neval + 1
         flag = 0
         if (.not.all(ieee_is_finite(x)) .or. .not.all(ieee_is_finite(fvec))) then
@@ -668,7 +668,7 @@ contains
                 else
                     ! No line search - just update the solution estimate
                     x = x + dir
-                    call fcn%fcn(x, fvec, args)
+                    call fcn%fcn(x, fvec, args = args)
                     f = half * dot_product(fvec, fvec)
                     neval = neval + 1
                 end if
@@ -787,13 +787,13 @@ contains
         neval = 0
         iter = 0
         eps = epsilon(eps)
-        nan = ieee_value(nan, ieee_quiet_nan)
+        nan = ieee_value(0.0_real64, ieee_quiet_nan)
         ftol = this%get_fcn_tolerance()
         xtol = this%get_var_tolerance()
         maxeval = this%get_max_fcn_evals()
         if (present(f)) f = zero
         if (present(ib)) then
-            ib = iteration_behavior(maxeval)
+            call ib%initialize(maxeval)
         end if
 
         ! Input Check
@@ -977,7 +977,7 @@ contains
         maxeval = this%get_max_fcn_evals()
         if (present(f)) f = zero
         if (present(ib)) then
-            ib = iteration_behavior(maxeval)
+            call ib%initialize(maxeval)
         end if
         x1 = min(lim%x1, lim%x2)
         x2 = max(lim%x1, lim%x2)
