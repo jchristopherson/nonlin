@@ -32,5 +32,6 @@ module nonlin
     use nonlin_polynomials
     use nonlin_simple
     use nonlin_continuation
+    use nonlin_sparse_solve
     use autodiff
 end module
